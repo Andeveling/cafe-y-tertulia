@@ -67,6 +67,11 @@
 			"skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
 			"computedHash": "4a02bd01030d5ed6a5040c0382b9f56fbf02c7c8b8fd68aa1bcc55628963f760"
 		},
+		"nextjs-16": {
+			"source": "/home/andresp/Projects/personal/cafe-y-tertulia/skills",
+			"sourceType": "local",
+			"computedHash": "46bec90e2c99b4ca02feec770b62800d4eba5e06139fd8b893bb90b64d1e0cb1"
+		},
 		"prototype": {
 			"source": "mattpocock/skills",
 			"sourceType": "github",

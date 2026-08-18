@@ -1,0 +1,10 @@
+{
+	"permissions": {
+		"allow": [
+			"Shell(ls -la docs/agents/ 2>&1; echo \"---\"; git remote -v | head -2; echo \"---\"; gh auth status 2>&1 | head -5)",
+			"mcp__engram__mem_search"
+		],
+		"deny": [],
+		"defaultMode": "default"
+	}
+}
