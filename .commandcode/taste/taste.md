@@ -9,3 +9,4 @@
 ## Workflow
 
 - When a framework/library changes or breaks (e.g., Next.js renaming middleware), expects the assistant to read the official docs first — including the local docs bundled in `node_modules` — before migrating code. Confidence: 0.7
+- Uses Biome as the project linter (not ESLint); expects the assistant to run it and fix every reported issue — including tooling config problems such as enabling `tailwindDirectives` in `biome.json` for Tailwind v4 CSS — until lint passes clean, rather than just reporting the problems. Confidence: 0.75
