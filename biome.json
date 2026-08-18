@@ -57,7 +57,11 @@
 			"!next-env.d.ts"
 		]
 	},
-	"javascript": { "formatter": { "quoteStyle": "double" }, "globals": [] },
+	"javascript": {
+		"formatter": { "quoteStyle": "double" },
+		"globals": []
+	},
+	"css": { "parser": { "tailwindDirectives": true } },
 	"overrides": [
 		{
 			"includes": ["**/*.{js,jsx,mjs,ts,tsx,mts,cts}"],
