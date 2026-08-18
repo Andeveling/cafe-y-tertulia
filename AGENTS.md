@@ -10,3 +10,18 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Skills
 shadcn con base UI - .agents/skills/shadcn/SKILL.md
+para estructurar el proyecto - .agents/skills/nextjs-16/SKILL.md
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues (`Andeveling/cafe-y-tertulia`), accessed via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage roles mapped to `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
