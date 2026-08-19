@@ -65,13 +65,17 @@ create policy "invitations_insert_padrino" on public.invitations
     and invited_by = auth.uid()
   );
 
--- Invitations: the padrino can update (resend / mark expired) their own
--- pending invitations.
+-- Invitations: the padrino can mark their own pending invitations as expired
+-- (e.g. when re-inviting). They cannot forge an acceptance — only the invitee
+-- can do that (invitations_update_invitee).
 create policy "invitations_update_padrino" on public.invitations
   for update
   to authenticated
   using (invited_by = auth.uid())
-  with check (invited_by = auth.uid());
+  with check (
+    invited_by = auth.uid()
+    and status = 'expired'
+  );
 
 -- Invitations: the invitee marks their own invitation as accepted when they
 -- complete the sign-up. The email match is safe because the invitee owns that
@@ -85,13 +89,16 @@ create policy "invitations_update_invitee" on public.invitations
     and status = 'accepted'
   );
 
--- Members: every member of the club can read the roster (horizontal club).
--- Replaces the more restrictive "members_select_own" policy from the
--- materials migration once this branch lands.
+-- Members: every active member can read the roster (horizontal club), and
+-- each member can always read their own row (needed to check their own status
+-- at sign-in, e.g. invited / left).
 create policy "members_select_any_member" on public.members
   for select
   to authenticated
-  using (public.is_active_member(auth.uid()));
+  using (
+    public.is_active_member(auth.uid())
+    or id = auth.uid()
+  );
 
 -- Data API access. New public tables are not auto-exposed, so grant
 -- explicitly. RLS still governs row visibility. (members grants come from the

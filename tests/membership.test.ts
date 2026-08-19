@@ -124,7 +124,7 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 				email,
 				invited_by: padrino.id,
 				status: "pending",
-				expires_at: new Date(Date.now() + 86_400_000).toISOString(),
+				expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
 			})
 			.select()
 			.single();
@@ -132,12 +132,11 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 		expect(invRow).not.toBeNull();
 		expect(invRow!.invited_by).toBe(padrino.id);
 		expect(invRow!.status).toBe("pending");
-		// Independent source of truth: exactly 24h between created_at and
-		// expires_at (SPEC §2.14 "24h").
+		// The expiry is 24h after creation, per the spec (SPEC §2.14 "24h").
 		const durationMs =
 			new Date(invRow!.expires_at).getTime() -
 			new Date(invRow!.created_at).getTime();
-		expect(durationMs).toBeCloseTo(86_400_000, -3);
+		expect(durationMs).toBeCloseTo(24 * 60 * 60 * 1000, -3);
 	});
 
 	it("activates the invited member and marks the invitation accepted", async () => {
@@ -232,11 +231,12 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 		expect(stillThere?.id).toBe(user.id);
 	});
 
-	it("blocks a member who left from signing in again", async () => {
+	it("keeps a left member's auth account (the app blocks their sign-in)", async () => {
 		const email = uniqueEmail("leftlogin");
 		await createMember(email, "leftlogin-password-123", "left");
 
-		// Auth succeeds but the app must not let them in.
+		// Auth still resolves for the left member; the app-level gate lives in
+		// the signIn server action (actions.ts), not in Auth itself.
 		const anon = createClient<Database>(URL, ANON_KEY);
 		const { data: sess } = await anon.auth.signInWithPassword({
 			email,
@@ -267,6 +267,42 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 		});
 		expect(error).not.toBeNull();
 		expect(error?.message).toContain("row-level security");
+	});
+
+	it("lets the padrino mark an invitation expired but not forge acceptance", async () => {
+		// Set up a pending invitation owned by the padrino.
+		const { data: inv } = await admin
+			.from("invitations")
+			.insert({
+				email: uniqueEmail("padrinoinv"),
+				invited_by: padrino.id,
+				status: "pending",
+				expires_at: new Date(Date.now() + 86400000).toISOString(),
+			})
+			.select()
+			.single();
+		expect(inv).not.toBeNull();
+
+		const anon = createClient<Database>(URL, ANON_KEY);
+		const { data: sess } = await anon.auth.signInWithPassword({
+			email: padrino.email,
+			password: padrino.password,
+		});
+		expect(sess.user).toBeDefined();
+
+		// Forging an acceptance is blocked by the policy (only the invitee can).
+		const { error: forgeErr } = await anon
+			.from("invitations")
+			.update({ status: "accepted" })
+			.eq("id", inv!.id);
+		expect(forgeErr).not.toBeNull();
+
+		// Marking their own invitation expired is allowed.
+		const { error: expErr } = await anon
+			.from("invitations")
+			.update({ status: "expired" })
+			.eq("id", inv!.id);
+		expect(expErr).toBeNull();
 	});
 
 	it("hides login errors (anti-enumeration): unknown email == wrong password", async () => {

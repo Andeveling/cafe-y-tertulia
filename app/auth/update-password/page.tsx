@@ -1,14 +1,51 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { updatePassword } from "@/lib/memberships/actions";
+import { createClient as createBrowserClient } from "@/lib/supabase/client";
 
-export default async function UpdatePasswordPage({
-	searchParams,
-}: {
-	searchParams: Promise<{ error?: string }>;
-}) {
-	const params = await searchParams;
+export default function UpdatePasswordPage() {
+	const router = useRouter();
+	const supabase = createBrowserClient();
+	const [ready, setReady] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		// The recovery link lands here with the session in the URL fragment
+		// (#access_token=...&type=recovery). The browser client picks it up and
+		// emits PASSWORD_RECOVERY; once that happens the session is usable.
+		const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+			if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+				setReady(true);
+			}
+		});
+		return () => sub.subscription.unsubscribe();
+	}, [supabase]);
+
+	async function handleSubmit(formData: FormData) {
+		const password = String(formData.get("password") ?? "");
+
+		if (password.length < 6) {
+			setError("La contraseña debe tener al menos 6 caracteres.");
+			return;
+		}
+
+		// updateUser with the browser session captured from the recovery link.
+		const { error: updateError } = await supabase.auth.updateUser({ password });
+
+		if (updateError) {
+			setError(
+				"El enlace ya no es válido o expiró. Pedí uno nuevo desde el inicio de sesión.",
+			);
+			return;
+		}
+
+		router.push("/auth/login?password_updated=1");
+		router.refresh();
+	}
 
 	return (
 		<div className="flex min-h-full flex-1 flex-col items-center justify-center px-4">
@@ -22,16 +59,16 @@ export default async function UpdatePasswordPage({
 					</p>
 				</div>
 
-				{params.error === "invalid" && (
+				{error && (
 					<div
 						role="alert"
 						className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
 					>
-						La contraseña debe tener al menos 6 caracteres.
+						{error}
 					</div>
 				)}
 
-				<form action={updatePassword} className="space-y-4">
+				<form action={handleSubmit} className="space-y-4">
 					<Field>
 						<FieldLabel htmlFor="password">Contraseña nueva</FieldLabel>
 						<FieldContent>
@@ -43,13 +80,20 @@ export default async function UpdatePasswordPage({
 								required
 								minLength={6}
 								placeholder="Mínimo 6 caracteres"
+								disabled={!ready}
 							/>
 						</FieldContent>
 					</Field>
-					<Button type="submit" className="w-full">
+					<Button type="submit" className="w-full" disabled={!ready}>
 						Cambiar contraseña
 					</Button>
 				</form>
+
+				{!ready && (
+					<p className="text-center text-xs text-muted-foreground">
+						Cargando el enlace de recuperación…
+					</p>
+				)}
 			</div>
 		</div>
 	);

@@ -27,8 +27,8 @@ function isValidEmail(email: string): boolean {
  * The caller must be the padrino and an active member — enforced here and by
  * RLS. Creates the auth user via inviteUserByEmail (which emails the invite
  * link in Spanish), the members row with status 'invited', and the
- * invitations record with a 24h expiry. A member who left (baja) can be
- * re-invited and rejoins as 'invited' again.
+ * invitations record with a 24h expiry. A member who left (baja) is not
+ * re-invited in the MVP.
  */
 export async function inviteMember(input: {
 	email: string;

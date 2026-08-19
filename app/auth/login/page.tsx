@@ -8,7 +8,7 @@ import { getCurrentMember } from "@/lib/memberships/current-member";
 export default async function LoginPage({
 	searchParams,
 }: {
-	searchParams: Promise<{ error?: string; email?: string; left?: string }>;
+	searchParams: Promise<{ error?: string; email?: string }>;
 }) {
 	const params = await searchParams;
 	const { member } = await getCurrentMember();
@@ -37,12 +37,22 @@ export default async function LoginPage({
 					</div>
 				)}
 
-				{params.left === "1" && (
+				{params.error === "left" && (
 					<div
 						role="status"
 						className="rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground"
 					>
 						Te diste de baja. Tus aportes quedan como memoria del club.
+					</div>
+				)}
+
+				{params.error === "pending" && (
+					<div
+						role="status"
+						className="rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground"
+					>
+						Todavía no activaste tu membresía. Revisá el enlace de invitación
+						que recibiste por email.
 					</div>
 				)}
 

@@ -28,17 +28,20 @@ export async function signIn(formData: FormData) {
 		redirect(`/auth/login?error=invalid&email=${encodeURIComponent(email)}`);
 	}
 
-	// A member who left (baja) keeps their contributions but cannot sign in
-	// again (SPEC §2.1: "left: aportes permanecen como memoria del club").
+	// Only members with an active membership can use the app (SPEC §2.1,
+	// ADR 0005). A member who left (baja) keeps their contributions but cannot
+	// sign in; an invited member must first accept the invitation.
 	const { data: member } = await supabase
 		.from("members")
 		.select("status")
 		.eq("id", data.user.id)
-		.single();
+		.maybeSingle();
 
-	if (member?.status === "left") {
+	if (!member || member.status !== "active") {
 		await supabase.auth.signOut();
-		redirect("/auth/login?left=1");
+		redirect(
+			`/auth/login?error=${member?.status === "left" ? "left" : "pending"}`,
+		);
 	}
 
 	redirect("/");
@@ -113,7 +116,7 @@ export async function leaveClub() {
 	}
 
 	await supabase.auth.signOut();
-	redirect("/auth/login?left=1");
+	redirect("/auth/login?error=left");
 }
 
 export async function requestPasswordReset(formData: FormData) {
@@ -133,21 +136,4 @@ export async function requestPasswordReset(formData: FormData) {
 	});
 
 	redirect("/auth/reset?sent=1");
-}
-
-export async function updatePassword(formData: FormData) {
-	const supabase = await createServerClient();
-	const password = String(formData.get("password") ?? "");
-
-	if (password.length < 6) {
-		redirect("/auth/update-password?error=invalid");
-	}
-
-	const { error } = await supabase.auth.updateUser({ password });
-
-	if (error) {
-		redirect("/auth/update-password?error=invalid");
-	}
-
-	redirect("/auth/login?password_updated=1");
 }
