@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Café y Tertulia",
-	description: "La mesa digital del club de lectura y conversación.",
+	title: "Café y Tertulias",
+	description: "Club de lectura y conversación.",
 };
 
 export default function RootLayout({
