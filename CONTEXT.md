@@ -109,11 +109,11 @@ Período de actividad del club (inicialmente un mes) con fecha de inicio y fin, 
 _Avoid_: Ciclo, ronda, liga
 
 **Rating**:
-Valoración agregada de un Material: promedio y número de votos, derivada de los Votos. Nunca expone votos individuales.
+Valoración agregada de un Material: promedio y número de votos, derivada de los Votos de todas sus Sesiones; también existe el agregado por Sesión. Nunca expone votos individuales.
 _Avoid_: Calificación, puntaje, nota
 
 **Voto**:
-Calificación anónima de 1 a 5 estrellas que un Miembro da a un Material en una Sesión. Modificable mientras la Sesión está activa; se congela al cerrarla.
+Calificación anónima de 1 a 5 estrellas que un Participante da al Material de la Sesión. Voluntario y modificable mientras la Sesión está activa; al cerrarla se congela y el voto individual se descarta: solo persiste su aporte al agregado.
 _Avoid_: Estrella, valoración individual
 
 **Histórico**:
