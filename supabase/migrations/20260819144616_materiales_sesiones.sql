@@ -73,6 +73,8 @@ create index sessions_status_idx on public.sessions (status);
 -- ============================================================
 
 -- Helpers: membresía activa (ADR 0005) — la cerradura se refuerza en la capa de datos.
+-- `security definer` a propósito: la comprobación no debe depender de las policies
+-- de `members` (si mañana se restringe el self-select, `is_member()` sigue firme).
 
 create function public.is_member()
 returns boolean
@@ -97,17 +99,13 @@ alter table public.sessions enable row level security;
 
 -- members: cada miembro ve su propia fila; nadie más (la lista de miembros
 -- se expone por la capa de datos cuando haga falta, no por tabla).
+-- Sin UPDATE propio: la transición invited → active es server-side (ADR 0005);
+-- permitir al miembro editar su fila permitiría auto-promoverse.
 
 create policy "members_select_own" on public.members
 	for select
 	to authenticated
 	using ((select auth.uid()) = id);
-
-create policy "members_update_own" on public.members
-	for update
-	to authenticated
-	using ((select auth.uid()) = id)
-	with check ((select auth.uid()) = id);
 
 -- materials: los Miembros activos leen y crean; el club avanza el pipeline.
 -- Sin borrado en el MVP: el ticket #14 pide crear y editar (AC5), no eliminar.
@@ -160,6 +158,41 @@ create policy "sessions_update_member" on public.sessions
 	to authenticated
 	using (public.is_member())
 	with check (public.is_member());
+
+-- ============================================================
+-- Pipeline forward-only (defensa en profundidad, SPEC §3 / ticket #14 AC3)
+-- ============================================================
+-- El avance de estados lo decide el club/moderador y es de un solo sentido.
+-- RLS garantiza "solo Miembros"; este trigger garantiza "solo hacia adelante",
+-- aunque alguien llame a la API directamente saltándose la capa de la app.
+
+create function public.materials_status_forward_only()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+	if new.status is distinct from old.status
+		and (
+			(old.status = 'proposed' and new.status <> 'selected')
+			or (old.status = 'selected' and new.status <> 'in_progress')
+			or (old.status = 'in_progress' and new.status <> 'finished')
+			or old.status = 'finished'
+		)
+	then
+		raise exception 'El pipeline de materiales avanza solo hacia adelante: % → %',
+			old.status, new.status
+			using errcode = 'P0001';
+	end if;
+	return new;
+end;
+$$;
+
+create trigger materials_status_forward_only
+	before update of status on public.materials
+	for each row
+	execute function public.materials_status_forward_only();
 
 -- ============================================================
 -- Data API: exponer tablas a authenticated (el anon no accede a nada del club)
