@@ -201,12 +201,19 @@ Entidades y relaciones. Todo acceso filtrado por RLS (membresía, ADR 0005).
 
 ### 3.1 Ciclo de vida de la Sesión
 
-```
-preparation ──(crear cita + confirmar)──▶ lobby ──(moderador inicia)──▶ in_progress
-     ▲                                                                    │
-     │                                                                    │ (moderador cierra)
-     └────────────────────────────────────────────────────────────────────▼
-                                                             closed ──(auto/confirm)──▶ archived
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "preparación" as preparation
+    state "lobby" as lobby
+    state "en_curso" as in_progress
+    state "cerrada" as closed
+    state "histórico" as archived
+
+    preparation --> lobby: crear cita + confirmar
+    lobby --> in_progress: moderador inicia
+    in_progress --> closed: moderador cierra
+    closed --> archived: auto/confirm
 ```
 
 | Estado | Qué pasa | Quién avanza |
@@ -222,8 +229,17 @@ preparation ──(crear cita + confirmar)──▶ lobby ──(moderador inici
 
 ### 3.2 Sorteo (`draws.status`)
 
-```
-pending ──(ejecutar)──▶ hidden ──(revelar una)──▶ revealing ──(última revelada)──▶ revealed
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "pendiente" as pending
+    state "oculto" as hidden
+    state "revelando" as revealing
+    state "revelado" as revealed
+
+    pending --> hidden: ejecutar
+    hidden --> revealing: revelar una
+    revealing --> revealed: última revelada
 ```
 
 - En `hidden` nadie —ni el Moderador— ve las asignaciones (ADR 0001).
@@ -231,8 +247,19 @@ pending ──(ejecutar)──▶ hidden ──(revelar una)──▶ revealing 
 
 ### 3.3 Intervención (`assignments.state`)
 
-```
-hidden → preparation → exposition → complement → complete
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "oculta" as hidden
+    state "preparación" as preparation
+    state "exposición" as exposition
+    state "complemento" as complement
+    state "completa" as complete
+
+    hidden --> preparation
+    preparation --> exposition
+    exposition --> complement
+    complement --> complete
 ```
 
 - Avance manual por el Moderador (revelar / continuar / siguiente).
