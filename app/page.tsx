@@ -1,5 +1,30 @@
-export default function Home() {
+import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { getCurrentMember } from "@/lib/memberships/current-member";
+
+export default async function HomePage() {
+	const { member } = await getCurrentMember();
+
+	if (!member) {
+		redirect("/auth/login");
+	}
+
 	return (
-		<div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black"></div>
+		<div className="flex flex-1 flex-col items-center justify-center gap-6 px-4">
+			<div className="text-center">
+				<h1 className="text-3xl font-semibold tracking-tight">
+					Café y Tertulias
+				</h1>
+				<p className="mt-2 text-muted-foreground">
+					Hola, {member.display_name || "Miembro"} — el club te espera.
+				</p>
+			</div>
+			<div className="flex gap-3">
+				<Button variant="outline" render={<a href="/invite" />}>
+					Invitar a alguien
+				</Button>
+				<Button render={<a href="/profile" />}>Tu perfil</Button>
+			</div>
+		</div>
 	);
 }
