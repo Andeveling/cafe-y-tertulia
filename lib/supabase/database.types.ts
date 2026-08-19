@@ -216,10 +216,7 @@ export type Database = {
 			[_ in never]: never;
 		};
 		Functions: {
-			is_active_member: { Args: { uid: string }; Returns: boolean };
-			is_member:
-				| { Args: never; Returns: boolean }
-				| { Args: { uid: string }; Returns: boolean };
+			is_member: { Args: never; Returns: boolean };
 			is_session_moderator: { Args: { session_id: string }; Returns: boolean };
 		};
 		Enums: {
