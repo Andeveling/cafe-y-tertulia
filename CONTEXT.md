@@ -5,7 +5,7 @@ Club de lectura y conversación. Aplicación web que acompaña y organiza las se
 ## Language
 
 **Miembro**:
-Una persona del club con acceso a la aplicación.
+Una persona del club con acceso a la aplicación. Ciclo de vida: `invitado` (creado por la Invitación de otro Miembro, aún no ingresó), `activo`, `baja` (sus aportes permanecen como memoria del club).
 _Avoid_: Usuario, Participante (como entidad)
 
 **Participante**:
@@ -13,7 +13,7 @@ Un Miembro confirmado como presente en una Sesión concreta. Término de context
 _Avoid_: Asistente, integrante
 
 **Moderador**:
-Estado temporal que un Miembro asume al iniciar o conducir una Sesión. Cualquier miembro puede serlo; no existe un moderador permanente.
+Estado temporal que un Miembro asume al iniciar o conducir una Sesión. Lo asume quien abre la Sesión, puede cederlo a otro Participante en el lobby antes del Sorteo y no se transfiere durante la Sesión; cualquier miembro puede serlo — no existe un moderador permanente.
 _Avoid_: Host, anfitrión, admin de sesión
 
 **Sesión**:
@@ -89,23 +89,39 @@ Postura de un participante ante un Take: de acuerdo, en desacuerdo o neutral. Se
 _Avoid_: Voto del take, respuesta, postura individual
 
 **Insignia**:
-Logro visible que recompensa participación, individual o colectivo.
+Logro visible individual que recompensa participación. Los logros del club como grupo son Hitos.
 _Avoid_: Badge, medalla, trofeo
 
+**Invitación**:
+Acto por el que un Miembro (padrino) suma a una nueva persona al club; quien la recibe queda como Miembro `invitado` hasta su primer ingreso. Cualquier Miembro puede invitar; no existe invitación pública.
+_Avoid_: Alta, registro, signup, reclutar
+
 **Punto**:
-Unidad interna acumulable por acciones (preparar pregunta, participar, ganar trivia, asistencia). Base para calcular insignias y logros; no es la capa visible.
+Unidad interna acumulable por acciones (preparar pregunta, participar, ganar trivia, asistencia). Base para calcular insignias y logros; no es la capa visible. En el MVP entra como concepto (regla documentada), no como tabla: cada acción registra un Conteo.
 _Avoid_: Score, ranking
 
+**Conteo**:
+Contador de eventos que alimenta Puntos e Insignias: preguntas creadas, sesiones asistidas, trivias ganadas, exposiciones, etc. Es la capa de cálculo del MVP; los valores de punto se definen cuando exista un consumidor que los use.
+_Avoid_: Evento, métrica, ledger
+
 **Logro**:
-Término paraguas para lo que un Miembro o el club gana: una Insignia o un hito.
+Término paraguas para lo que un Miembro o el club gana: una Insignia (individual) o un Hito (colectivo).
 _Avoid_: Premio, conquista
 
+**Hito**:
+Logro colectivo del club, no de un Miembro: Primer libro terminado, 50 sesiones realizadas, 100 preguntas debatidas. Se registra en la página del Material o del club, no en un perfil individual.
+_Avoid_: Meta, logro grupal
+
 **Reconocimiento**:
-Entrega concreta de un Logro en un momento dado (ej. cierre de Temporada, insignia otorgada por el moderador).
-_Avoid_: Celebración, mención
+Entrega concreta de un Logro en un momento dado: insignias otorgadas por el moderador (incluido él mismo) y, al cierre de Temporada, Reconocimientos por categoría — Maestro de la trivia, Gran debatiente, Creador de preguntas, Asistencia perfecta — sin Top 1/2/3 ni ranking.
+_Avoid_: Celebración, mención, premio
+
+**Otorgamiento**:
+Acción del moderador de entregar una Insignia a un Miembro durante una Intervención (las subjetivas "Cambio de perspectiva" y "Pregunta que hizo pensar"), o bien la entrega automática al cumplir un umbral. Queda registrado en el histórico, ligado a la Intervención o al evento que lo disparó.
+_Avoid_: Concesión, entrega, award
 
 **Temporada**:
-Período de actividad del club (inicialmente un mes) con fecha de inicio y fin, dentro del cual se acumulan logros y puntos. Al cerrar, entrega reconocimientos y el ranking competitivo reinicia; los logros históricos persisten.
+Período de actividad del club de un mes calendario natural, con fecha de inicio y fin, dentro del cual se acumulan logros y puntos. Se crea y cierra automáticamente por calendario; el moderador puede reabrir una cerrada para corregir errores. Al cerrar entrega los Reconocimientos por categoría y el ranking competitivo reinicia; los logros históricos persisten.
 _Avoid_: Ciclo, ronda, liga
 
 **Rating**:
