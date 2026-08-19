@@ -48,6 +48,14 @@ _Avoid_: Respuesta escrita, ensayo, minuta
 Aporte breve (unos dos minutos) que el autor de una Pregunta hace tras la exposición del asignado, cuando está presente. Si una Pregunta tiene dos asignados, el autor complementa una sola vez, tras el último.
 _Avoid_: Réplica, turno extra
 
+**Intervención**:
+Ciclo de una Asignación dentro del debate: `oculta` → Momento de preparación → `exposición` → Complemento → completa. Lo conduce el Moderador, que avanza de fase en fase manualmente; el temporizador es orientativo y nunca corta. La rotación de Intervenciones es la permutación aleatoria fijada por el Sorteo.
+_Avoid_: Turno, intervención libre (como fase), bloque de debate
+
+**Escenario**:
+Zona central de la pantalla compartida donde vive la conversación: la Pregunta revelada, el estado de la Intervención actual y el temporizador. Mínimo y focal; no compite con la charla. Los controles del Moderador solo exponen acciones (revelar, continuar, extender, siguiente), nunca el contenido oculto.
+_Avoid_: Dashboard, panel, stage
+
 **Sorteo**:
 Asignación aleatoria de Preguntas a los participantes de la Sesión, con estado propio y oculto hasta revelar. Nadie —ni el Moderador— conoce su Pregunta hasta el momento de revelarla. Una Pregunta puede asignarse a hasta dos participantes, nunca a su autor. Estados: `pendiente` (aún no ejecutado), `oculto` (ejecutado, nadie ve las asignaciones), `revelando` (algunas asignaciones reveladas), `revelado` (todas reveladas).
 _Avoid_: Ruleta, rifa, asignación manual
@@ -64,9 +72,21 @@ _Avoid_: Descartada, descualificada
 Minijuego de preguntas de opción múltiple sobre el Material, que recompensa memoria y atención. Se crea colaborativamente antes de la Sesión.
 _Avoid_: Quiz, juego de preguntas
 
+**Ronda de trivia**:
+Grupo de 3-5 preguntas de Trivia que se juegan de una vez dentro de `en_curso`. Cada acierto suma +1 punto interno, sin penalización por error; todos responden en su dispositivo a la vez y los resultados se muestran agregados en la pantalla del moderador, sin exponer errores individuales por pregunta.
+_Avoid_: Quiz, partida, nivel
+
+**Marcador**:
+Conteo de aciertos por participante dentro de una Trivia, visible al final del juego. Es la capa visible del minijuego; alimenta la acumulación de Puntos.
+_Avoid_: Score, puntuación del juego, ranking del juego
+
 **Take**:
-Disparador corto de conversación (frase para completar, votación o miniargumentación) que el moderador puede lanzar durante la Sesión.
+Disparador corto de conversación (frase para completar, votación o miniargumentación) que el moderador puede lanzar durante la Sesión. En el MVP, solo la variante de frase disparadora con votación rápida.
 _Avoid_: Prompt, disparador, gancho
+
+**Posición**:
+Postura de un participante ante un Take: de acuerdo, en desacuerdo o neutral. Se recoge por votación rápida y solo se muestra agregada (conteo por postura); las posiciones individuales nunca se exponen.
+_Avoid_: Voto del take, respuesta, postura individual
 
 **Insignia**:
 Logro visible que recompensa participación, individual o colectivo.

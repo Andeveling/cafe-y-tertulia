@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pantalla del moderador — wireframes (ticket #6)</title>
+<style>
+  :root{--bg:#1c1917;--panel:#292524;--line:#44403c;--ink:#fafaf9;--muted:#a8a29e;--accent:#e7b45a;--ok:#4ade80;}
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,Segoe UI,sans-serif;margin:0;padding:32px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--muted);margin-bottom:24px}
+  .layout{display:grid;grid-template-columns:1fr 340px;gap:28px;max-width:1100px;margin:0 auto}
+  .scene{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;min-height:480px;display:flex;flex-direction:column}
+  .scene h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 14px}
+  .stage{margin:auto 0;text-align:center;padding:20px 0}
+  .timer{font-variant-numeric:tabular-nums;font-size:30px;font-weight:700}
+  .timer .sug{color:var(--muted);font-size:14px;font-weight:400}
+  .q{font-size:24px;font-weight:650;max-width:560px;margin:18px auto 6px}
+  .persona{color:var(--accent);font-weight:600}
+  .muted{color:var(--muted)}
+  .pill{display:inline-block;background:#3f3f46;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--muted)}
+  .controls{margin-top:auto;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  .btn{border:1px solid var(--line);background:#3f3f46;color:var(--ink);border-radius:9px;padding:9px 15px;font-size:14px;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#1c1917;font-weight:600}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .phone{background:#111;border:1px solid var(--line);border-radius:22px;padding:18px;height:100%}
+  .phone h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 12px}
+  .notes{border:1px dashed var(--muted);border-radius:10px;padding:14px;min-height:220px;color:var(--muted)}
+  .notes b{color:var(--accent)}
+  code{background:#27272a;border:1px solid var(--line);padding:1px 5px;border-radius:5px;font-size:12px}
+  .legend{max-width:1100px;margin:34px auto 0;color:var(--muted);font-size:13px}
+  .legend ul{columns:2;padding-left:18px}
+</style>
+</head>
+<body>
+  <h1>Escenario del moderador · wireframe de baja fidelidad</h1>
+  <div class="sub">Ticket #6 — Pantalla compartida por Meet · escenas de una Intervención (↵ avanzar por acción manual, nunca corta)</div>
+
+  <div class="layout">
+    <div class="scene">
+      <h2 id="sceneTitle">Fase · oculta</h2>
+      <div class="stage"><div id="stageInner"></div></div>
+      <div class="controls">
+        <button class="btn" id="btnRevelar">Revelar</button>
+        <button class="btn" id="btnNotas">Pasar a preparación</button>
+        <button class="btn" id="btnExponer">Iniciar exposición</button>
+        <button class="btn" id="btnComplementar" disabled>Autor complementa</button>
+        <button class="btn" id="btnSiguiente" disabled>Siguiente de la rotación</button>
+        <button class="btn primary" id="btnExtender">Extender +1:00</button>
+      </div>
+      <div style="margin-top:14px;color:var(--muted);font-size:12px"><span class="pill">rotación 3 / 8</span> <span class="pill">sorteo revelado 2 / 8</span></div>
+    </div>
+
+    <div class="phone">
+      <h2>Teléfono · asignado actual</h2>
+      <div class="notes" id="phoneInner"></div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <b>Principios:</b> escenario central mínimo · controles solo acciones, nunca contenido oculto · avance 100% manual · temporizador orientativo (transcurrido + sugerido) · el moderador también puede ser asignado (usa el teléfono).
+    <ul>
+      <li><b>oculta</b> — “próximo: [nombre]”, Pregunta sin revelar.</li>
+      <li><b>preparación</b> — Pregunta revelada + prompt “escribí tus ideas en tu teléfono”.</li>
+      <li><b>exposición</b> — Pregunta + asignado + temporizador.</li>
+      <li><b>complemento</b> — “el autor complementa” (solo si está presente).</li>
+      <li><b>completa</b> — siguiente de la rotación.</li>
+    </ul>
+  </div>
+
+<script>
+  const titles = {
+    oculta: 'Fase · oculta',
+    preparacion: 'Fase · Momento de preparación',
+    exposicion: 'Fase · Exposición',
+    complemento: 'Fase · Complemento',
+    completa: 'Fase · completa / siguiente'
+  };
+  const stage = {
+    oculta: () => `
+      <div><span class="persona">Próximo: Valeria</span> · <span class="muted">rotación fija del sorteo</span></div>
+      <div class="q">❔ Pregunta oculta — nadie la ha visto aún</div>
+      <div class="timer">00:00 <span class="sug">sugerido 4:00</span></div>`,
+    preparacion: () => `
+      <div class="persona">Asignado: Valeria</div>
+      <div class="q">¿Por qué creés que el autor eligió ese desenlace?</div>
+      <div style="color:var(--muted)">✍️ escribe tus ideas en tu teléfono</div>
+      <div class="timer">01:12 <span class="sug">sugerido 2:00</span></div>`,
+    exposicion: () => `
+      <div class="persona">Expone: Valeria</div>
+      <div class="q">¿Por qué creés que el autor eligió ese desenlace?</div>
+      <div class="timer">03:48 <span class="sug">sugerido 4:00</span></div>`,
+    complemento: () => `
+      <div class="muted">Autor de la Pregunta presente</div>
+      <div class="q">El autor complementa (~2 min)</div>
+      <div class="timer">01:10 <span class="sug">sugerido 2:00</span></div>`,
+    completa: () => `
+      <div class="q">Intervención completa ✅</div>
+      <div class="muted">Siguiente de la rotación por revelar</div>
+      <div class="timer">—</div>`
+  };
+  const phone = {
+    oculta: () => 'En espera — no sos el asignado actual.',
+    preparacion: () => '<b>Valeria · Notas de respuesta</b><br><br>Causalidad<br>paralelo con el cap. 3<br>ironía',
+    exposicion: () => '✍️ Notas guardadas · Escuchá el escenario.',
+    complemento: () => 'Notas de tu exposición listas.',
+    completa: () => 'Listo. Esperá tu próxima rotación.'
+  };
+  let cur = 'oculta';
+  function limits(){return {
+    oculta: {r:1,c:0,ex:0,co:1,n:1},
+    preparacion: {r:1,c:1,ex:0,co:1,n:1},
+    exposicion: {r:1,c:1,ex:1,co:0,n:1},
+    complemento: {r:1,c:1,ex:1,co:1,n:0},
+    completa: {r:1,c:1,ex:1,co:0,n:1}
+  };}
+  function draw(){ document.getElementById('sceneTitle').textContent = titles[cur];
+    document.getElementById('stageInner').innerHTML = stage[cur]();
+    document.getElementById('phoneInner').innerHTML = phone[cur]();
+    const l = limits()[cur];
+    document.getElementById('btnRevelar').disabled = !!l.r;
+    document.getElementById('btnNotas').disabled = !!l.c;
+    document.getElementById('btnExponer').disabled = !!l.ex;
+    document.getElementById('btnComplementar').disabled = !!l.co;
+    document.getElementById('btnSiguiente').disabled = !!l.n; }
+  const go = (k)=>()=>{ cur=k; draw(); };
+  document.getElementById('btnRevelar').onclick = ()=>{cur='preparacion';draw();};
+  document.getElementById('btnNotas').onclick = ()=>{cur='exposicion';draw();};
+  document.getElementById('btnExponer').onclick = ()=>{cur='complemento';draw();};
+  document.getElementById('btnComplementar').onclick = ()=>{cur='completa';draw();};
+  document.getElementById('btnSiguiente').onclick = ()=>{cur='oculta';draw();};
+  document.getElementById('btnExtender').onclick = ()=>{ /* orientativo: suma tiempo, nunca corta */ };
+  draw();
+</script>
+</body>
+</html>
