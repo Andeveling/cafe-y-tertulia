@@ -7,23 +7,232 @@ export type Json =
 	| Json[];
 
 export type Database = {
-	// Allows to automatically instantiate createClient with right options
-	// instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-	__InternalSupabase: {
-		PostgrestVersion: "14.15";
-	};
 	public: {
 		Tables: {
-			[_ in never]: never;
+			invitations: {
+				Row: {
+					created_at: string;
+					email: string;
+					expires_at: string;
+					id: string;
+					invited_by: string;
+					status: Database["public"]["Enums"]["invitation_status"];
+				};
+				Insert: {
+					created_at?: string;
+					email: string;
+					expires_at: string;
+					id?: string;
+					invited_by: string;
+					status?: Database["public"]["Enums"]["invitation_status"];
+				};
+				Update: {
+					created_at?: string;
+					email?: string;
+					expires_at?: string;
+					id?: string;
+					invited_by?: string;
+					status?: Database["public"]["Enums"]["invitation_status"];
+				};
+				Relationships: [
+					{
+						foreignKeyName: "invitations_invited_by_fkey";
+						columns: ["invited_by"];
+						isOneToOne: false;
+						referencedRelation: "members";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			materials: {
+				Row: {
+					author: string;
+					created_at: string;
+					created_by: string;
+					id: string;
+					kind: Database["public"]["Enums"]["material_kind"];
+					status: Database["public"]["Enums"]["material_status"];
+					title: string;
+				};
+				Insert: {
+					author: string;
+					created_at?: string;
+					created_by: string;
+					id?: string;
+					kind: Database["public"]["Enums"]["material_kind"];
+					status?: Database["public"]["Enums"]["material_status"];
+					title: string;
+				};
+				Update: {
+					author?: string;
+					created_at?: string;
+					created_by?: string;
+					id?: string;
+					kind?: Database["public"]["Enums"]["material_kind"];
+					status?: Database["public"]["Enums"]["material_status"];
+					title?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "materials_created_by_fkey";
+						columns: ["created_by"];
+						isOneToOne: false;
+						referencedRelation: "members";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			members: {
+				Row: {
+					created_at: string;
+					display_name: string;
+					id: string;
+					invited_by: string | null;
+					status: Database["public"]["Enums"]["member_status"];
+				};
+				Insert: {
+					created_at?: string;
+					display_name?: string;
+					id: string;
+					invited_by?: string | null;
+					status?: Database["public"]["Enums"]["member_status"];
+				};
+				Update: {
+					created_at?: string;
+					display_name?: string;
+					id?: string;
+					invited_by?: string | null;
+					status?: Database["public"]["Enums"]["member_status"];
+				};
+				Relationships: [
+					{
+						foreignKeyName: "members_invited_by_fkey";
+						columns: ["invited_by"];
+						isOneToOne: false;
+						referencedRelation: "members";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			questions: {
+				Row: {
+					author_id: string;
+					created_at: string;
+					id: string;
+					material_id: string;
+					outside_draw: boolean;
+					session_id: string;
+					text: string;
+				};
+				Insert: {
+					author_id: string;
+					created_at?: string;
+					id?: string;
+					material_id: string;
+					outside_draw?: boolean;
+					session_id: string;
+					text: string;
+				};
+				Update: {
+					author_id?: string;
+					created_at?: string;
+					id?: string;
+					material_id?: string;
+					outside_draw?: boolean;
+					session_id?: string;
+					text?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "questions_author_id_fkey";
+						columns: ["author_id"];
+						isOneToOne: false;
+						referencedRelation: "members";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "questions_material_id_fkey";
+						columns: ["material_id"];
+						isOneToOne: false;
+						referencedRelation: "materials";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "questions_session_id_fkey";
+						columns: ["session_id"];
+						isOneToOne: false;
+						referencedRelation: "sessions";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			sessions: {
+				Row: {
+					created_at: string;
+					id: string;
+					material_id: string;
+					moderator_id: string | null;
+					range: string;
+					scheduled_at: string | null;
+					status: Database["public"]["Enums"]["session_status"];
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					material_id: string;
+					moderator_id?: string | null;
+					range: string;
+					scheduled_at?: string | null;
+					status?: Database["public"]["Enums"]["session_status"];
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					material_id?: string;
+					moderator_id?: string | null;
+					range?: string;
+					scheduled_at?: string | null;
+					status?: Database["public"]["Enums"]["session_status"];
+				};
+				Relationships: [
+					{
+						foreignKeyName: "sessions_material_id_fkey";
+						columns: ["material_id"];
+						isOneToOne: false;
+						referencedRelation: "materials";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "sessions_moderator_id_fkey";
+						columns: ["moderator_id"];
+						isOneToOne: false;
+						referencedRelation: "members";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 		};
 		Views: {
 			[_ in never]: never;
 		};
 		Functions: {
-			[_ in never]: never;
+			is_active_member: { Args: { uid: string }; Returns: boolean };
+			is_member:
+				| { Args: never; Returns: boolean }
+				| { Args: { uid: string }; Returns: boolean };
+			is_session_moderator: { Args: { session_id: string }; Returns: boolean };
 		};
 		Enums: {
-			[_ in never]: never;
+			invitation_status: "pending" | "accepted" | "expired";
+			material_kind: "book" | "podcast" | "video" | "article";
+			material_status: "proposed" | "selected" | "in_progress" | "finished";
+			member_status: "invited" | "active" | "left";
+			session_status:
+				| "preparation"
+				| "lobby"
+				| "in_progress"
+				| "closed"
+				| "archived";
 		};
 		CompositeTypes: {
 			[_ in never]: never;
@@ -153,6 +362,18 @@ export type CompositeTypes<
 
 export const Constants = {
 	public: {
-		Enums: {},
+		Enums: {
+			invitation_status: ["pending", "accepted", "expired"],
+			material_kind: ["book", "podcast", "video", "article"],
+			material_status: ["proposed", "selected", "in_progress", "finished"],
+			member_status: ["invited", "active", "left"],
+			session_status: [
+				"preparation",
+				"lobby",
+				"in_progress",
+				"closed",
+				"archived",
+			],
+		},
 	},
 } as const;
