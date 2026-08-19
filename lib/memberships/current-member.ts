@@ -22,7 +22,7 @@ export async function getCurrentMember() {
 		.from("members")
 		.select("*")
 		.eq("id", user.id)
-		.single();
+		.maybeSingle();
 
 	return { supabase, member };
 }

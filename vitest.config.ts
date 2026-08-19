@@ -18,6 +18,9 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "."),
+			// Next.js virtual module; a no-op outside the app runtime so
+			// server-only modules can be unit-tested (inviteMember, actions).
+			"server-only": path.resolve(__dirname, "tests/__mocks__/server-only.ts"),
 		},
 	},
 });

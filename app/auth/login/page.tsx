@@ -8,7 +8,11 @@ import { getCurrentMember } from "@/lib/memberships/current-member";
 export default async function LoginPage({
 	searchParams,
 }: {
-	searchParams: Promise<{ error?: string; email?: string }>;
+	searchParams: Promise<{
+		error?: string;
+		email?: string;
+		password_updated?: string;
+	}>;
 }) {
 	const params = await searchParams;
 	const { member } = await getCurrentMember();
@@ -53,6 +57,15 @@ export default async function LoginPage({
 					>
 						Todavía no activaste tu membresía. Revisá el enlace de invitación
 						que recibiste por email.
+					</div>
+				)}
+
+				{params.password_updated === "1" && (
+					<div
+						role="status"
+						className="rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground"
+					>
+						Contraseña actualizada. Ya podés iniciar sesión.
 					</div>
 				)}
 

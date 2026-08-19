@@ -53,6 +53,56 @@ async function createMember(
 	return data.user;
 }
 
+/** Sign in with the anon client — the same path the app uses. */
+async function signIn(email: string, password: string) {
+	const anon = createClient<Database>(URL, ANON_KEY);
+	const { data, error } = await anon.auth.signInWithPassword({
+		email,
+		password,
+	});
+	if (error) throw error;
+	return { anon, user: data.user };
+}
+
+/**
+ * Create an invited member with a confirmed email and a live pending
+ * invitation (the state the invitee is in after clicking the invite link).
+ */
+async function createInvitedMemberWithInvitation(email: string) {
+	const { data: invited, error: inviteErr } =
+		await admin.auth.admin.inviteUserByEmail(email, {
+			redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/invite`,
+		});
+	if (inviteErr) throw inviteErr;
+	if (!invited.user) throw new Error("inviteUserByEmail returned no user");
+	membersToClean.push(invited.user.id);
+	// The invite link confirms the email when the guest clicks it (the
+	// browser client picks up the session from the URL fragment). The tests
+	// simulate that click so the user can sign in with a password.
+	const { error: confirmErr } = await admin.auth.admin.updateUserById(
+		invited.user.id,
+		{ email_confirm: true },
+	);
+	if (confirmErr) throw confirmErr;
+	await admin.from("members").insert({
+		id: invited.user.id,
+		status: "invited",
+		invited_by: padrino.id,
+	});
+	const { data: invRow, error: iErr } = await admin
+		.from("invitations")
+		.insert({
+			email,
+			invited_by: padrino.id,
+			status: "pending",
+			expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+		})
+		.select()
+		.single();
+	if (iErr) throw iErr;
+	return { user: invited.user, invitation: invRow! };
+}
+
 beforeAll(async () => {
 	admin = createClient<Database>(URL, SERVICE_KEY, {
 		auth: { autoRefreshToken: false, persistSession: false },
@@ -90,14 +140,15 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 		expect(data).toBeNull();
 	});
 
-	it("lets an active member read the roster", async () => {
-		const { data, error } = await admin
+	it("lets an active member read the roster with a real session", async () => {
+		const { anon, user } = await signIn(padrino.email, padrino.password);
+		const { data, error } = await anon
 			.from("members")
-			.select("id")
-			.eq("id", padrino.id)
+			.select("id, status")
+			.eq("id", user.id)
 			.single();
 		expect(error).toBeNull();
-		expect(data?.id).toBe(padrino.id);
+		expect(data?.id).toBe(user.id);
 	});
 
 	it("registers the invitation with padrino, status pending and 24h expiry", async () => {
@@ -139,11 +190,14 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 		expect(durationMs).toBeCloseTo(24 * 60 * 60 * 1000, -3);
 	});
 
-	it("activates the invited member and marks the invitation accepted", async () => {
-		const email = uniqueEmail("accept");
-		const { data: invited } = await admin.auth.admin.inviteUserByEmail(email, {
-			redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/invite`,
-		});
+	it("lets the padrino re-invite after the previous invitation expired", async () => {
+		const email = uniqueEmail("reinvite");
+		// An invited member with an expired (still pending) invitation.
+		const { data: invited, error: inviteErr } =
+			await admin.auth.admin.inviteUserByEmail(email, {
+				redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/invite`,
+			});
+		expect(inviteErr).toBeNull();
 		expect(invited.user).not.toBeNull();
 		membersToClean.push(invited.user!.id);
 		await admin.from("members").insert({
@@ -151,60 +205,155 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 			status: "invited",
 			invited_by: padrino.id,
 		});
-		const { data: invRow } = await admin
+		const { data: invRow, error: iErr } = await admin
 			.from("invitations")
 			.insert({
 				email,
 				invited_by: padrino.id,
 				status: "pending",
-				expires_at: new Date(Date.now() + 86400000).toISOString(),
+				expires_at: new Date(Date.now() - 60_000).toISOString(), // expired
 			})
 			.select()
 			.single();
+		expect(iErr).toBeNull();
 		expect(invRow).not.toBeNull();
 
-		// The invitee (once signed in) activates their own membership.
-		const { error: pwErr } = await admin.auth.admin.updateUserById(
-			invited.user!.id,
-			{
-				password: "invitee-password-123",
-				user_metadata: { display_name: "Invitada Aceptada" },
-			},
-		);
+		// The re-invite flow: mark the expired one closed and open a new one.
+		const { error: closeErr } = await admin
+			.from("invitations")
+			.update({ status: "expired" })
+			.eq("id", invRow!.id);
+		expect(closeErr).toBeNull();
+		const { data: newInv, error: newErr } = await admin
+			.from("invitations")
+			.insert({
+				email,
+				invited_by: padrino.id,
+				status: "pending",
+				expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+			})
+			.select()
+			.single();
+		expect(newErr).toBeNull();
+		expect(newInv?.status).toBe("pending");
+
+		// The old one is no longer live.
+		const { data: closed } = await admin
+			.from("invitations")
+			.select("status")
+			.eq("id", invRow!.id)
+			.single();
+		expect(closed?.status).toBe("expired");
+	});
+
+	it("allows only one live invitation per email (partial unique index)", async () => {
+		const email = uniqueEmail("uniqueinvite");
+		const first = await createInvitedMemberWithInvitation(email);
+
+		// A second pending invitation for the same email is rejected.
+		const { error: dupErr } = await admin.from("invitations").insert({
+			email,
+			invited_by: padrino.id,
+			status: "pending",
+			expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+		});
+		expect(dupErr).not.toBeNull();
+
+		// Marking the first accepted frees the email.
+		const { error: accErr } = await admin
+			.from("invitations")
+			.update({ status: "accepted" })
+			.eq("id", first.invitation.id);
+		expect(accErr).toBeNull();
+	});
+
+	it("activates the invited member server-side (the app's accept flow)", async () => {
+		const email = uniqueEmail("accept");
+		const { user, invitation } = await createInvitedMemberWithInvitation(email);
+
+		// The app's accept flow (server action with service role): set the
+		// password + display name, activate the membership, accept the
+		// invitation. This is the same sequence acceptInvitation() runs.
+		const { error: pwErr } = await admin.auth.admin.updateUserById(user.id, {
+			password: "invitee-password-123",
+			user_metadata: { display_name: "Invitada Aceptada" },
+		});
 		expect(pwErr).toBeNull();
 
-		// Member row: invited -> active (the app does this with the user's own session).
 		const { data: row, error: actErr } = await admin
 			.from("members")
 			.update({ status: "active", display_name: "Invitada Aceptada" })
-			.eq("id", invited.user!.id)
+			.eq("id", user.id)
 			.select()
 			.single();
 		expect(actErr).toBeNull();
 		expect(row?.status).toBe("active");
 
-		// Invitation: pending -> accepted.
 		const { error: accErr } = await admin
 			.from("invitations")
 			.update({ status: "accepted" })
-			.eq("id", invRow!.id);
+			.eq("id", invitation.id);
 		expect(accErr).toBeNull();
-		const { data: after } = await admin
-			.from("invitations")
-			.select("status")
-			.eq("id", invRow!.id)
+
+		// Now the member signs in with the password they set — the app path.
+		const { anon } = await signIn(email, "invitee-password-123");
+		const { data: self } = await anon
+			.from("members")
+			.select("status, display_name")
+			.eq("id", user.id)
 			.single();
-		expect(after?.status).toBe("accepted");
+		expect(self?.status).toBe("active");
+		expect(self?.display_name).toBe("Invitada Aceptada");
 	});
 
-	it("lets the member edit their display name", async () => {
-		const { data, error } = await admin
+	it("blocks a member from self-promoting via the Data API (no members UPDATE policy)", async () => {
+		const email = uniqueEmail("selfpromo");
+		const user = await createMember(email, "selfpromo-password-123", "invited");
+		const { anon } = await signIn(email, "selfpromo-password-123");
+
+		// The acceptance is server-side (ADR 0005): an UPDATE to one's own row
+		// matches no policy and silently affects 0 rows.
+		const { data, error } = await anon
+			.from("members")
+			.update({ status: "active" })
+			.eq("id", user.id)
+			.select();
+		expect(error).toBeNull();
+		expect(data).toHaveLength(0);
+	});
+
+	it("lets the invitee list their own pending invitations with a real session", async () => {
+		const email = uniqueEmail("owninvites");
+		const { user } = await createInvitedMemberWithInvitation(email);
+		// The invitee sets a password when accepting (acceptInvitation); do the
+		// same here so they can sign in.
+		await admin.auth.admin.updateUserById(user.id, {
+			password: "owninvites-password-123",
+		});
+		const { anon } = await signIn(email, "owninvites-password-123");
+		const { data, error } = await anon
+			.from("invitations")
+			.select("email, status")
+			.eq("email", email);
+		expect(error).toBeNull();
+		expect(data?.some((i) => i.email === email)).toBe(true);
+	});
+
+	it("lets the member edit their display name server-side", async () => {
+		// Profile edits go through the server action with the service role;
+		// there is no members UPDATE policy (self-edit via the API would allow
+		// self-promotion). The member's session can read its own row.
+		const { error } = await admin
 			.from("members")
 			.update({ display_name: "Nombre Editado" })
-			.eq("id", padrino.id)
-			.select("display_name")
-			.single();
+			.eq("id", padrino.id);
 		expect(error).toBeNull();
+		const { anon } = await signIn(padrino.email, padrino.password);
+		const { data } = await anon
+			.from("members")
+			.select("display_name")
+			.eq("id", padrino.id)
+			.single();
 		expect(data?.display_name).toBe("Nombre Editado");
 		await admin
 			.from("members")
@@ -258,7 +407,7 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 		});
 		expect(sess.user).toBeDefined();
 
-		// RLS: the invitations insert policy requires is_active_member.
+		// RLS: the invitations insert policy requires is_member() (active).
 		const { error } = await anon.from("invitations").insert({
 			email: uniqueEmail("victim"),
 			invited_by: user.id,
@@ -283,12 +432,7 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 			.single();
 		expect(inv).not.toBeNull();
 
-		const anon = createClient<Database>(URL, ANON_KEY);
-		const { data: sess } = await anon.auth.signInWithPassword({
-			email: padrino.email,
-			password: padrino.password,
-		});
-		expect(sess.user).toBeDefined();
+		const { anon } = await signIn(padrino.email, padrino.password);
 
 		// Forging an acceptance is blocked by the policy (only the invitee can).
 		const { error: forgeErr } = await anon
@@ -320,12 +464,7 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 	});
 
 	it("lets an active member sign in with email + password", async () => {
-		const anon = createClient<Database>(URL, ANON_KEY);
-		const { data, error } = await anon.auth.signInWithPassword({
-			email: padrino.email,
-			password: padrino.password,
-		});
-		expect(error).toBeNull();
-		expect(data.user?.email).toBe(padrino.email);
+		const { user } = await signIn(padrino.email, padrino.password);
+		expect(user.email).toBe(padrino.email);
 	});
 });

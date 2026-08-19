@@ -9,6 +9,12 @@ export default async function HomePage() {
 		redirect("/auth/login");
 	}
 
+	// Only an active membership opens the app; an invited member with a live
+	// invite-link session must finish accepting first (SPEC §2.1, ADR 0005).
+	if (member.status !== "active") {
+		redirect("/auth/invite");
+	}
+
 	return (
 		<div className="flex flex-1 flex-col items-center justify-center gap-6 px-4">
 			<div className="text-center">
