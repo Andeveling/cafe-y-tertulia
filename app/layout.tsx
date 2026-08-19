@@ -22,7 +22,9 @@ export const metadata: Metadata = {
 	description: "La mesa digital del club de lectura y conversación.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+	children,
+}: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<html
 			lang="es"

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdvanceButton } from "@/components/materials/advance-button";
 import { SessionForm } from "@/components/materials/session-form";
+import { MaterialQuestionsSection } from "@/components/questions/material-questions-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -86,9 +87,9 @@ export default async function MaterialDetailPage({
 						</CardContent>
 					</Card>
 				) : (
-					<ul className="flex flex-col gap-2">
+					<ul className="flex flex-col gap-4">
 						{material.sessions.map((session) => (
-							<li key={session.id}>
+							<li key={session.id} className="flex flex-col gap-3">
 								<Card>
 									<CardContent className="flex items-center justify-between gap-4">
 										<div className="flex min-w-0 flex-col gap-1">
@@ -120,6 +121,13 @@ export default async function MaterialDetailPage({
 										</div>
 									</CardContent>
 								</Card>
+								{session.status === "preparation" && (
+									<MaterialQuestionsSection
+										materialId={material.id}
+										sessionId={session.id}
+										sessionRange={session.range}
+									/>
+								)}
 							</li>
 						))}
 					</ul>
