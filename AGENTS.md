@@ -8,9 +8,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-Skills
+## Skills
 shadcn con base UI - .agents/skills/shadcn/SKILL.md
 para estructurar el proyecto - .agents/skills/nextjs-16/SKILL.md
+
+## Desing
+- Apply principles of Dont make me think not exesive text 
 
 ## Agent skills
 
