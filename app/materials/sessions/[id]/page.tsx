@@ -51,6 +51,11 @@ export default async function SessionHistoryPage({
 				<p className="text-muted-foreground">
 					{session.range} · {session.material.author}
 				</p>
+				{session.rating_count > 0 && (
+					<p className="text-sm">
+						Rating sesión: {session.rating_avg}★ · {session.rating_count} votos
+					</p>
+				)}
 			</header>
 
 			<Card>

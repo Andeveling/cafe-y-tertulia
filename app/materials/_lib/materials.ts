@@ -37,6 +37,8 @@ export type MaterialWithSessionsCount = {
 	status: MaterialStatus;
 	created_at: string;
 	sessions_count: number;
+	rating_avg: number | null;
+	rating_count: number;
 };
 
 export type SessionHistory = {
@@ -45,12 +47,16 @@ export type SessionHistory = {
 	status: SessionStatus;
 	scheduled_at: string | null;
 	created_at: string;
+	rating_avg: number | null;
+	rating_count: number;
 	material: {
 		id: string;
 		title: string;
 		kind: MaterialKind;
 		author: string;
 		status: MaterialStatus;
+		rating_avg: number | null;
+		rating_count: number;
 	};
 	questions: {
 		id: string;
@@ -67,6 +73,8 @@ export type MaterialDetail = {
 	author: string;
 	status: MaterialStatus;
 	created_at: string;
+	rating_avg: number | null;
+	rating_count: number;
 	sessions: Omit<SessionHistory, "material" | "questions">[];
 };
 
@@ -80,7 +88,9 @@ export async function getMaterials(): Promise<MaterialWithSessionsCount[]> {
 
 	const { data, error } = await supabase
 		.from("materials")
-		.select("id, title, kind, author, status, created_at, sessions(id)")
+		.select(
+			"id, title, kind, author, status, created_at, rating_avg, rating_count, sessions(id)",
+		)
 		.order("created_at", { ascending: false });
 
 	if (error) {
@@ -95,6 +105,8 @@ export async function getMaterials(): Promise<MaterialWithSessionsCount[]> {
 		status: material.status,
 		created_at: material.created_at,
 		sessions_count: material.sessions?.length ?? 0,
+		rating_avg: material.rating_avg,
+		rating_count: material.rating_count,
 	}));
 }
 
@@ -107,7 +119,7 @@ export async function getMaterial(id: string): Promise<MaterialDetail | null> {
 	const { data, error } = await supabase
 		.from("materials")
 		.select(
-			"id, title, kind, author, status, created_at, sessions(id, range, status, scheduled_at, created_at)",
+			"id, title, kind, author, status, created_at, rating_avg, rating_count, sessions(id, range, status, scheduled_at, created_at, rating_avg, rating_count)",
 		)
 		.eq("id", id)
 		.single();
@@ -123,6 +135,8 @@ export async function getMaterial(id: string): Promise<MaterialDetail | null> {
 		author: data.author,
 		status: data.status,
 		created_at: data.created_at,
+		rating_avg: data.rating_avg,
+		rating_count: data.rating_count,
 		sessions: [...(data.sessions ?? [])].sort((a, b) =>
 			b.created_at.localeCompare(a.created_at),
 		),
@@ -137,7 +151,7 @@ export async function getSessionHistory(
 	const { data, error } = await supabase
 		.from("sessions")
 		.select(
-			"id, range, status, scheduled_at, created_at, materials(id, title, kind, author, status), questions(id, text, created_at, members(display_name))",
+			"id, range, status, scheduled_at, created_at, rating_avg, rating_count, materials(id, title, kind, author, status, rating_avg, rating_count), questions(id, text, created_at, members(display_name))",
 		)
 		.eq("id", id)
 		.single();
@@ -150,6 +164,8 @@ export async function getSessionHistory(
 		status: data.status,
 		scheduled_at: data.scheduled_at,
 		created_at: data.created_at,
+		rating_avg: data.rating_avg,
+		rating_count: data.rating_count,
 		material: data.materials,
 		questions: (data.questions ?? []).map((question) => ({
 			id: question.id,
