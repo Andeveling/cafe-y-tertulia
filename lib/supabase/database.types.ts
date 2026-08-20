@@ -76,6 +76,8 @@ export type Database = {
 					created_by: string;
 					id: string;
 					kind: Database["public"]["Enums"]["material_kind"];
+					rating_avg: number | null;
+					rating_count: number;
 					status: Database["public"]["Enums"]["material_status"];
 					title: string;
 				};
@@ -85,6 +87,8 @@ export type Database = {
 					created_by: string;
 					id?: string;
 					kind: Database["public"]["Enums"]["material_kind"];
+					rating_avg?: number | null;
+					rating_count?: number;
 					status?: Database["public"]["Enums"]["material_status"];
 					title: string;
 				};
@@ -94,6 +98,8 @@ export type Database = {
 					created_by?: string;
 					id?: string;
 					kind?: Database["public"]["Enums"]["material_kind"];
+					rating_avg?: number | null;
+					rating_count?: number;
 					status?: Database["public"]["Enums"]["material_status"];
 					title?: string;
 				};
@@ -138,6 +144,60 @@ export type Database = {
 						referencedColumns: ["id"];
 					},
 				];
+			};
+			assignments: {
+				Row: {
+					assignee_id: string;
+					draw_id: string;
+					id: string;
+					notes: string;
+					question_id: string;
+					reveal_order: number;
+					session_id: string;
+					state: Database["public"]["Enums"]["assignment_state"];
+				};
+				Insert: {
+					assignee_id: string;
+					draw_id: string;
+					id?: string;
+					notes?: string;
+					question_id: string;
+					reveal_order: number;
+					session_id: string;
+					state?: Database["public"]["Enums"]["assignment_state"];
+				};
+				Update: {
+					assignee_id?: string;
+					draw_id?: string;
+					id?: string;
+					notes?: string;
+					question_id?: string;
+					reveal_order?: number;
+					session_id?: string;
+					state?: Database["public"]["Enums"]["assignment_state"];
+				};
+				Relationships: [];
+			};
+			draws: {
+				Row: {
+					created_at: string;
+					id: string;
+					session_id: string;
+					status: Database["public"]["Enums"]["draw_status"];
+				};
+				Insert: {
+					created_at?: string;
+					id?: string;
+					session_id: string;
+					status?: Database["public"]["Enums"]["draw_status"];
+				};
+				Update: {
+					created_at?: string;
+					id?: string;
+					session_id?: string;
+					status?: Database["public"]["Enums"]["draw_status"];
+				};
+				Relationships: [];
 			};
 			questions: {
 				Row: {
@@ -191,6 +251,24 @@ export type Database = {
 					},
 				];
 			};
+			session_participants: {
+				Row: {
+					member_id: string;
+					opt_out: boolean;
+					session_id: string;
+				};
+				Insert: {
+					member_id: string;
+					opt_out?: boolean;
+					session_id: string;
+				};
+				Update: {
+					member_id?: string;
+					opt_out?: boolean;
+					session_id?: string;
+				};
+				Relationships: [];
+			};
 			sessions: {
 				Row: {
 					created_at: string;
@@ -198,6 +276,9 @@ export type Database = {
 					material_id: string;
 					moderator_id: string | null;
 					range: string;
+					rating_avg: number | null;
+					rating_count: number;
+					rating_open: boolean;
 					scheduled_at: string | null;
 					status: Database["public"]["Enums"]["session_status"];
 				};
@@ -207,6 +288,9 @@ export type Database = {
 					material_id: string;
 					moderator_id?: string | null;
 					range: string;
+					rating_avg?: number | null;
+					rating_count?: number;
+					rating_open?: boolean;
 					scheduled_at?: string | null;
 					status?: Database["public"]["Enums"]["session_status"];
 				};
@@ -216,6 +300,9 @@ export type Database = {
 					material_id?: string;
 					moderator_id?: string | null;
 					range?: string;
+					rating_avg?: number | null;
+					rating_count?: number;
+					rating_open?: boolean;
 					scheduled_at?: string | null;
 					status?: Database["public"]["Enums"]["session_status"];
 				};
@@ -236,15 +323,301 @@ export type Database = {
 					},
 				];
 			};
+
+			trivias: {
+				Row: {
+					id: string;
+					material_id: string;
+					author_id: string;
+					title: string;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					material_id: string;
+					author_id: string;
+					title: string;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					material_id?: string;
+					author_id?: string;
+					title?: string;
+					created_at?: string;
+				};
+				Relationships: [];
+			};
+			trivia_items: {
+				Row: {
+					id: string;
+					trivia_id: string;
+					prompt: string;
+					options: string[];
+					correct_index: number;
+					sort_order: number;
+				};
+				Insert: {
+					id?: string;
+					trivia_id: string;
+					prompt: string;
+					options: string[];
+					correct_index: number;
+					sort_order: number;
+				};
+				Update: {
+					id?: string;
+					trivia_id?: string;
+					prompt?: string;
+					options?: string[];
+					correct_index?: number;
+					sort_order?: number;
+				};
+				Relationships: [];
+			};
+			trivia_rounds: {
+				Row: {
+					id: string;
+					session_id: string;
+					trivia_id: string;
+					status: Database["public"]["Enums"]["trivia_round_status"];
+					question_index: number;
+					locked: boolean;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					session_id: string;
+					trivia_id: string;
+					status?: Database["public"]["Enums"]["trivia_round_status"];
+					question_index?: number;
+					locked?: boolean;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					session_id?: string;
+					trivia_id?: string;
+					status?: Database["public"]["Enums"]["trivia_round_status"];
+					question_index?: number;
+					locked?: boolean;
+					created_at?: string;
+				};
+				Relationships: [];
+			};
+			trivia_answers: {
+				Row: {
+					round_id: string;
+					member_id: string;
+					question_index: number;
+					option_index: number;
+				};
+				Insert: {
+					round_id: string;
+					member_id: string;
+					question_index: number;
+					option_index: number;
+				};
+				Update: {
+					round_id?: string;
+					member_id?: string;
+					question_index?: number;
+					option_index?: number;
+				};
+				Relationships: [];
+			};
+			trivia_hits: {
+				Row: {
+					round_id: string;
+					member_id: string;
+					hits: number;
+				};
+				Insert: {
+					round_id: string;
+					member_id: string;
+					hits?: number;
+				};
+				Update: {
+					round_id?: string;
+					member_id?: string;
+					hits?: number;
+				};
+				Relationships: [];
+			};
+			takes: {
+				Row: {
+					id: string;
+					session_id: string;
+					prompt: string;
+					status: Database["public"]["Enums"]["take_status"];
+					created_by: string;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					session_id: string;
+					prompt: string;
+					status?: Database["public"]["Enums"]["take_status"];
+					created_by: string;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					session_id?: string;
+					prompt?: string;
+					status?: Database["public"]["Enums"]["take_status"];
+					created_by?: string;
+					created_at?: string;
+				};
+				Relationships: [];
+			};
+			take_votes: {
+				Row: {
+					take_id: string;
+					member_id: string;
+					position: Database["public"]["Enums"]["take_position"];
+				};
+				Insert: {
+					take_id: string;
+					member_id: string;
+					position: Database["public"]["Enums"]["take_position"];
+				};
+				Update: {
+					take_id?: string;
+					member_id?: string;
+					position?: Database["public"]["Enums"]["take_position"];
+				};
+				Relationships: [];
+			};
+			votes: {
+				Row: {
+					session_id: string;
+					member_id: string;
+					stars: number;
+				};
+				Insert: {
+					session_id: string;
+					member_id: string;
+					stars: number;
+				};
+				Update: {
+					session_id?: string;
+					member_id?: string;
+					stars?: number;
+				};
+				Relationships: [];
+			};
 		};
 		Views: {
 			[_ in never]: never;
 		};
 		Functions: {
+			advance_intervention: {
+				Args: { target_session_id: string };
+				Returns: Database["public"]["Enums"]["assignment_state"];
+			};
+			draw_lobby_summary: {
+				Args: { target_session_id: string };
+				Returns: Json;
+			};
+			execute_draw: { Args: { target_session_id: string }; Returns: string };
 			is_member: { Args: never; Returns: boolean };
-			is_session_moderator: { Args: { session_id: string }; Returns: boolean };
+			is_session_moderator: {
+				Args: { session_id: string };
+				Returns: boolean;
+			};
+			reveal_next_assignment: {
+				Args: { target_session_id: string };
+				Returns: Database["public"]["Tables"]["assignments"]["Row"][];
+			};
+			save_assignment_notes: {
+				Args: { target_assignment_id: string; new_notes: string };
+				Returns: undefined;
+			};
+			stage_snapshot: {
+				Args: { target_session_id: string };
+				Returns: Json;
+			};
+			create_trivia_with_items: {
+				Args: { p_material_id: string; p_title: string; p_items: Json };
+				Returns: string;
+			};
+			start_trivia_round: {
+				Args: { target_session_id: string; target_trivia_id: string };
+				Returns: string;
+			};
+			answer_trivia: {
+				Args: { target_round_id: string; p_option_index: number };
+				Returns: undefined;
+			};
+			lock_trivia_question: {
+				Args: { target_round_id: string };
+				Returns: undefined;
+			};
+			next_trivia_question: {
+				Args: { target_round_id: string };
+				Returns: undefined;
+			};
+			finish_trivia_round: {
+				Args: { target_round_id: string };
+				Returns: undefined;
+			};
+			trivia_round_snapshot: {
+				Args: { target_round_id: string };
+				Returns: Json;
+			};
+			session_minigame_state: {
+				Args: { target_session_id: string };
+				Returns: Json;
+			};
+			start_take: {
+				Args: { target_session_id: string; p_prompt: string };
+				Returns: string;
+			};
+			vote_take: {
+				Args: {
+					target_take_id: string;
+					p_position: Database["public"]["Enums"]["take_position"];
+				};
+				Returns: undefined;
+			};
+			close_take: {
+				Args: { target_take_id: string };
+				Returns: undefined;
+			};
+			open_session_rating: {
+				Args: { target_session_id: string };
+				Returns: undefined;
+			};
+			cast_session_vote: {
+				Args: { target_session_id: string; p_stars: number };
+				Returns: undefined;
+			};
+			close_session_rating: {
+				Args: { target_session_id: string };
+				Returns: Json;
+			};
+			rating_progress: {
+				Args: { target_session_id: string };
+				Returns: Json;
+			};
+			clear_session_rating: {
+				Args: { target_session_id: string };
+				Returns: undefined;
+			};
+			refresh_material_rating: {
+				Args: { p_material_id: string };
+				Returns: undefined;
+			};
 		};
 		Enums: {
+			assignment_state:
+				| "hidden"
+				| "preparation"
+				| "exposition"
+				| "complement"
+				| "complete";
+			draw_status: "pending" | "hidden" | "revealing" | "revealed";
 			invitation_status: "pending" | "accepted" | "expired";
 			material_kind: "book" | "podcast" | "video" | "article";
 			material_status: "proposed" | "selected" | "in_progress" | "finished";
@@ -255,6 +628,9 @@ export type Database = {
 				| "in_progress"
 				| "closed"
 				| "archived";
+			trivia_round_status: "live" | "board";
+			take_status: "open" | "closed";
+			take_position: "agree" | "disagree" | "neutral";
 		};
 		CompositeTypes: {
 			[_ in never]: never;
@@ -388,6 +764,14 @@ export const Constants = {
 	},
 	public: {
 		Enums: {
+			assignment_state: [
+				"hidden",
+				"preparation",
+				"exposition",
+				"complement",
+				"complete",
+			],
+			draw_status: ["pending", "hidden", "revealing", "revealed"],
 			invitation_status: ["pending", "accepted", "expired"],
 			material_kind: ["book", "podcast", "video", "article"],
 			material_status: ["proposed", "selected", "in_progress", "finished"],

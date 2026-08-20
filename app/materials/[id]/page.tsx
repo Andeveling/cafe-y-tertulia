@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { AdvanceButton } from "@/app/materials/_components/advance-button";
 import { MaterialQuestionsSection } from "@/app/materials/_components/material-questions-section";
 import { SessionForm } from "@/app/materials/_components/session-form";
+import { TriviaBank } from "@/app/materials/_components/trivia-bank";
+import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +17,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { createClient } from "@/lib/supabase/server";
 import {
 	getMaterial,
 	MATERIAL_KIND_LABELS,
@@ -28,13 +31,21 @@ export const metadata = {
 
 export default async function MaterialDetailPage({
 	params,
-}: PageProps<"/materials/[id]">) {
+}: {
+	params: Promise<{ id: string }>;
+}) {
 	const { id } = await params;
 	const material = await getMaterial(id);
 
 	if (!material) {
 		notFound();
 	}
+
+	const supabase = await createClient();
+	const bank = await listMaterialTrivias(supabase, id).catch(() => []);
+	const showTriviaBank = material.sessions.some(
+		(s) => s.status === "preparation",
+	);
 
 	return (
 		<div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
@@ -57,6 +68,11 @@ export default async function MaterialDetailPage({
 					<Badge variant="secondary">
 						{MATERIAL_STATUS_LABELS[material.status]}
 					</Badge>
+					{material.rating_count > 0 && (
+						<Badge variant="outline">
+							{material.rating_avg}★ · {material.rating_count}
+						</Badge>
+					)}
 				</CardHeader>
 				<CardContent className="flex flex-col gap-3">
 					{material.status !== "finished" && (
@@ -102,6 +118,36 @@ export default async function MaterialDetailPage({
 													Ver memoria
 												</Link>
 											)}
+											{session.status === "lobby" && (
+												<Link
+													href={`/materials/sessions/${session.id}/lobby`}
+													className="text-sm text-primary hover:underline"
+												>
+													Ir al lobby
+												</Link>
+											)}
+											{session.status === "in_progress" && (
+												<>
+													<Link
+														href={`/materials/sessions/${session.id}/stage`}
+														className="text-sm text-primary hover:underline"
+													>
+														Escenario
+													</Link>
+													<Link
+														href={`/materials/sessions/${session.id}/minigames`}
+														className="text-sm text-primary hover:underline"
+													>
+														Minijuegos
+													</Link>
+													<Link
+														href={`/materials/sessions/${session.id}/rating`}
+														className="text-sm text-primary hover:underline"
+													>
+														Rating
+													</Link>
+												</>
+											)}
 											<span className="text-xs text-muted-foreground">
 												{session.scheduled_at
 													? new Date(session.scheduled_at).toLocaleDateString(
@@ -141,6 +187,8 @@ export default async function MaterialDetailPage({
 					</ul>
 				)}
 			</section>
+
+			{showTriviaBank && <TriviaBank materialId={material.id} bank={bank} />}
 		</div>
 	);
 }
