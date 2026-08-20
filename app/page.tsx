@@ -26,10 +26,16 @@ export default async function HomePage() {
 				</p>
 			</div>
 			<div className="flex gap-3">
-				<Button variant="outline" render={<a href="/invite" />}>
+				<Button
+					variant="outline"
+					nativeButton={false}
+					render={<a href="/invite" />}
+				>
 					Invitar a alguien
 				</Button>
-				<Button render={<a href="/profile" />}>Tu perfil</Button>
+				<Button nativeButton={false} render={<a href="/profile" />}>
+					Tu perfil
+				</Button>
 			</div>
 		</div>
 	);

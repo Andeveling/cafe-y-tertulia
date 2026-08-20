@@ -33,6 +33,7 @@ export default async function SessionHistoryPage({
 			<Button
 				variant="ghost"
 				size="sm"
+				nativeButton={false}
 				render={<Link href={`/materials/${session.material.id}`} />}
 				className="w-fit"
 			>

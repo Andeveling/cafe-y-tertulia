@@ -30,7 +30,7 @@ export default async function MaterialsPage() {
 						conversamos.
 					</p>
 				</div>
-				<Button render={<Link href="/materiales/nuevo" />}>
+				<Button nativeButton={false} render={<Link href="/materiales/nuevo" />}>
 					<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
 					Proponer material
 				</Button>

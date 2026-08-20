@@ -52,6 +52,7 @@ export default async function MaterialDetailPage({
 			<Button
 				variant="ghost"
 				size="sm"
+				nativeButton={false}
 				render={<Link href="/materiales" />}
 				className="w-fit"
 			>

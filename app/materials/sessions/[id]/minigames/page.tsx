@@ -46,6 +46,7 @@ export default async function MinigamesPage({
 				<Button
 					variant="ghost"
 					size="sm"
+					nativeButton={false}
 					render={<Link href={`/materials/${session.material_id}`} />}
 					className="w-fit"
 				>
@@ -59,6 +60,7 @@ export default async function MinigamesPage({
 						<Button
 							variant="outline"
 							size="sm"
+							nativeButton={false}
 							render={<Link href={`/materials/sessions/${sessionId}/stage`} />}
 						>
 							Escenario

@@ -31,6 +31,7 @@ export default async function LobbyPage({
 			<Button
 				variant="ghost"
 				size="sm"
+				nativeButton={false}
 				render={<Link href={`/materials/${lobby.materialId}`} />}
 				className="w-fit"
 			>

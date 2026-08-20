@@ -31,6 +31,7 @@ export default async function StagePage({
 				<Button
 					variant="ghost"
 					size="sm"
+					nativeButton={false}
 					render={<Link href={`/materials/${stage.materialId}`} />}
 					className="w-fit"
 				>
@@ -43,6 +44,7 @@ export default async function StagePage({
 					<Button
 						variant="outline"
 						size="sm"
+						nativeButton={false}
 						render={<Link href={`/materials/sessions/${sessionId}/rating`} />}
 					>
 						Rating
