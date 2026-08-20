@@ -15,14 +15,34 @@ export function useInviteSession(formState: AcceptInvitationState) {
 
 	useEffect(() => {
 		const supabase = createBrowserClient();
-		// Invite email lands with session in the URL fragment
-		// (access_token + type=invite). The browser client picks it up.
-		supabase.auth
-			.getSession()
-			.then(({ data }) => {
+		// El invite llega con access_token/refresh_token en el fragment (#)
+		// via GoTrue. @supabase/ssr no siempre lo hydrata solo, así que lo
+		// seteamos explícitamente si está en la URL y luego verificamos.
+		async function init() {
+			try {
+				const hash = window.location.hash;
+				if (hash.includes("access_token")) {
+					const params = new URLSearchParams(hash.slice(1));
+					const access_token = params.get("access_token");
+					const refresh_token = params.get("refresh_token");
+					if (access_token && refresh_token) {
+						const { error } = await supabase.auth.setSession({
+							access_token,
+							refresh_token,
+						});
+						if (error) {
+							setStatus("invalid_or_expired");
+							return;
+						}
+					}
+				}
+				const { data } = await supabase.auth.getSession();
 				setStatus(data.session ? "ready" : "invalid_or_expired");
-			})
-			.catch(() => setStatus("invalid_or_expired"));
+			} catch {
+				setStatus("invalid_or_expired");
+			}
+		}
+		init();
 	}, []);
 
 	useEffect(() => {

@@ -148,12 +148,14 @@ export async function inviteMember(input: {
 	// Create (or re-send) the auth user with the invite email. The email link
 	// redirects to the public /auth/invite page where the guest sets their
 	// password and display name.
+	const redirectBase =
+		process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000";
 	const { data: invitedUser, error: inviteError } =
 		await admin.auth.admin.inviteUserByEmail(email, {
 			data: {
 				godfather_display_name: input.padrinoDisplayName,
 			},
-			redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/invite`,
+			redirectTo: `${redirectBase}/auth/invite`,
 		});
 
 	if (inviteError || !invitedUser?.user) {
