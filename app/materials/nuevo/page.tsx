@@ -1,7 +1,7 @@
 import { ArrowLeftIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
-import { MaterialForm } from "@/components/materials/material-form";
+import { MaterialForm } from "@/app/materials/_components/material-form";
 import { Button } from "@/components/ui/button";
 import {
 	Card,

@@ -28,7 +28,7 @@ export const metadata = {
 
 export default async function MaterialDetailPage({
 	params,
-}: PageProps<"/materiales/[id]">) {
+}: PageProps<"/materials/[id]">) {
 	const { id } = await params;
 	const material = await getMaterial(id);
 
