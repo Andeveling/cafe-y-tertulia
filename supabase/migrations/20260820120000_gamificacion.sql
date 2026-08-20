@@ -57,7 +57,6 @@ create table public.counts (
 
 create unique index counts_member_unique on public.counts (member_id, event, season_id) where member_id is not null;
 create unique index counts_club_unique on public.counts (event, season_id) where member_id is null;
-);
 
 create table public.season_recognitions (
   id uuid primary key default gen_random_uuid(),
