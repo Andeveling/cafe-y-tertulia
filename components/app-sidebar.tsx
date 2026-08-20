@@ -42,7 +42,7 @@ export function AppSidebar() {
 
 	return (
 		<Sidebar collapsible="icon" variant="sidebar">
-			<SidebarHeader className="flex h-12 shrink-0 items-center border-b border-sidebar-border px-2">
+			<SidebarHeader className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-2">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton
@@ -51,10 +51,10 @@ export function AppSidebar() {
 							render={<Link href="/" />}
 							isActive={pathname === "/"}
 						>
-							<div className="flex size-7 items-center justify-center rounded-none border border-sidebar-border bg-primary text-primary-foreground text-xs font-bold leading-none">
-								C
+							<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+								<HugeiconsIcon icon={Book01Icon} className="size-4" />
 							</div>
-							<div className="flex flex-col gap-0.5 leading-none">
+							<div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
 								<span className="font-semibold tracking-tight text-sm">
 									Café y Tertulias
 								</span>
@@ -83,7 +83,7 @@ export function AppSidebar() {
 											(item.url !== "/" && pathname.startsWith(item.url))
 										}
 										render={<Link href={item.url} />}
-										className="rounded-none border border-transparent data-active:border-sidebar-border data-active:bg-sidebar-accent"
+										className="rounded-lg data-active:bg-blue-600 data-active:text-white"
 									>
 										<HugeiconsIcon icon={item.icon} />
 										<span>{item.title}</span>
@@ -108,7 +108,7 @@ export function AppSidebar() {
 										tooltip={item.title}
 										isActive={pathname.startsWith(item.url)}
 										render={<Link href={item.url} />}
-										className="rounded-none border border-transparent data-active:border-sidebar-border data-active:bg-sidebar-accent"
+										className="rounded-lg data-active:bg-blue-600 data-active:text-white"
 									>
 										<HugeiconsIcon icon={item.icon} />
 										<span>{item.title}</span>
