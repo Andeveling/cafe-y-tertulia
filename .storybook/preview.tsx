@@ -1,7 +1,11 @@
 import type { Preview } from "@storybook/nextjs-vite";
+import MockDate from "mockdate";
+import { mswLoader } from "msw-storybook-addon/csf3";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { ThemeProvider } from "../components/theme-provider";
+import { Toaster } from "../components/ui/sonner";
 import { cn } from "../lib/utils";
+import { mswHandlers } from "./msw-handlers";
 // Tailwind/PostCSS: handled by nextjs-vite from postcss.config.mjs
 import "../app/globals.css";
 
@@ -57,10 +61,17 @@ const preview: Preview = {
 					<div className="bg-background text-foreground">
 						<Story />
 					</div>
+					<Toaster />
 				</ThemeProvider>
 			</div>
 		),
 	],
+	loaders: [mswLoader()],
+	async beforeEach({ msw }) {
+		msw.use(...mswHandlers);
+		localStorage.setItem("theme", "light");
+		MockDate.set("2024-04-01T12:00:00Z");
+	},
 };
 
 export default preview;

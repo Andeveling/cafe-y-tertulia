@@ -1,5 +1,6 @@
 allowBuilds:
   esbuild: true
+  msw: true
 minimumReleaseAgeExclude:
   - '@biomejs/biome@2.5.9'
   - '@biomejs/cli-darwin-arm64@2.5.9'
