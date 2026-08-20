@@ -1,12 +1,7 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-	/* config options here */
-	framework: {
-		// name: '@storybook/react-webpack5', // Remove this
-		name: "@storybook/nextjs", // Add this
-		options: {},
-	},
-};
+// Storybook's framework (nextjs-vite) is configured in .storybook/main.ts,
+// not here — Next.js rejects any unknown keys (e.g. `framework`).
+const nextConfig: NextConfig = {};
 
 export default nextConfig;
