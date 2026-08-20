@@ -9,11 +9,16 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 <!-- END:nextjs-agent-rules -->
 
 ## Skills
+
 shadcn con base UI - .agents/skills/shadcn/SKILL.md
 para estructurar el proyecto - .agents/skills/nextjs-16/SKILL.md
 
-## Desing
-- Apply principles of Dont make me think not exesive text 
+## Design
+
+- Don't make me think; no excessive text.
+- **Brutalist tokens** in `app/globals.css` (CSS variables / `@theme`) — not ad-hoc edits across every `ui/*`.
+- **UI layers** (page → view → ui, Storybook vs e2e, shadcn re-add policy): `docs/agents/ui-layers.md`.
+- `components/ui` = primitives only (see `components/ui/AGENTS.md`).
 
 ## Agent skills
 
@@ -29,16 +34,11 @@ Five canonical triage roles mapped to `needs-triage`, `needs-info`, `ready-for-a
 
 Single-context layout: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
+## Storybook UI
 
-## Story book UI
-When working on UI components, always use the `your-project-sb-mcp` MCP tools to access Storybook's component and documentation knowledge before answering or taking any action.
+Requires `pnpm storybook` (MCP at `http://localhost:6006/mcp` when configured).
 
-- **CRITICAL: Never hallucinate component properties!** Before using ANY property on a component from a design system (including common-sounding ones like `shadow`, etc.), you MUST use the MCP tools to check if the property is actually documented for that component.
-- Query `list-all-documentation` to get a list of all components
-- Query `get-documentation` for that component to see all available properties and examples
-- Only use properties that are explicitly documented or shown in example stories
-- If a property isn't documented, do not assume properties based on naming conventions or common patterns from other libraries. Check back with the user in these cases.
-- Use the `get-storybook-story-instructions` tool to fetch the latest instructions for creating or updating stories. This will ensure you follow current conventions and recommendations.
-- Check your work by running `run-story-tests`.
-
-Remember: A story name might not reflect the property name correctly, so always verify properties through documentation or example stories before using them.
+- Prefer existing `*.stories.tsx` and Storybook MCP over guessing component props.
+- Never invent props; check stories/docs or the component source.
+- New feature UI: extract a view + story; don't story async pages that hit Supabase.
+- See `docs/agents/ui-layers.md`.

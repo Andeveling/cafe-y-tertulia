@@ -11,10 +11,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-	type ActionResult,
-	createTriviaAction,
-} from "../_lib/minigame-actions";
+import type { ActionResult } from "@/lib/server-action";
+import { createTriviaAction } from "../_lib/minigame-actions";
 import type { TriviaBankItem } from "../_lib/minigames";
 
 type Props = {

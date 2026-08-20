@@ -10,9 +10,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import type { ActionResult } from "@/lib/server-action";
 import type { RatingProgress } from "../_lib/rating";
 import {
-	type ActionResult,
 	castVoteAction,
 	clearRatingAction,
 	closeRatingAction,

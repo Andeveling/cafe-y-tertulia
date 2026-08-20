@@ -25,6 +25,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import type { ActionResult } from "@/lib/server-action";
 
 type Props = {
 	stage: StageSnapshot;
@@ -36,10 +37,10 @@ export function StagePanel({ stage, userId, isModerator }: Props) {
 	const [pending, start] = useTransition();
 	const router = useRouter();
 
-	function act(fn: () => Promise<{ error: string } | { success: true }>) {
+	function act(fn: () => Promise<ActionResult>) {
 		start(async () => {
 			const r = await fn();
-			if ("error" in r) toast.error(r.error);
+			if (!r.ok) toast.error(r.error);
 			else router.refresh();
 		});
 	}
@@ -145,7 +146,7 @@ function NotesBox({
 	sessionId: string;
 	initial: string;
 	pending: boolean;
-	act: (fn: () => Promise<{ error: string } | { success: true }>) => void;
+	act: (fn: () => Promise<ActionResult>) => void;
 }) {
 	const [text, setText] = useState(initial);
 

@@ -1,7 +1,11 @@
 import "server-only";
 
-import type { Enums } from "@/lib/supabase/database.types";
-import { createClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database, Enums } from "@/lib/supabase/database.types";
+
+// Alineado con el resto de lectores del área: recibe el cliente por parámetro
+// (inyección) y lanza ante un error real; `null`/`[]` solo para ausencia.
+export type MaterialsClient = Pick<SupabaseClient<Database>, "from">;
 
 export type MaterialStatus = Enums<"material_status">;
 export type MaterialKind = Enums<"material_kind">;
@@ -83,9 +87,9 @@ export type MaterialDetail = {
  * Un Miembro sin fila en `members` (aún invitado) ve la lista vacía: el RLS
  * filtra por membresía y esto no debe romper la página (sin 500).
  */
-export async function getMaterials(): Promise<MaterialWithSessionsCount[]> {
-	const supabase = await createClient();
-
+export async function getMaterials(
+	supabase: MaterialsClient,
+): Promise<MaterialWithSessionsCount[]> {
 	const { data, error } = await supabase
 		.from("materials")
 		.select(
@@ -93,9 +97,7 @@ export async function getMaterials(): Promise<MaterialWithSessionsCount[]> {
 		)
 		.order("created_at", { ascending: false });
 
-	if (error) {
-		return [];
-	}
+	if (error) throw error;
 
 	return (data ?? []).map((material) => ({
 		id: material.id,
@@ -112,10 +114,12 @@ export async function getMaterials(): Promise<MaterialWithSessionsCount[]> {
 
 /**
  * Detalle de un Material con sus Sesiones (SPEC §4.3, cronología descendente).
+ * `null` solo cuando el Material no existe (o el RLS lo oculta).
  */
-export async function getMaterial(id: string): Promise<MaterialDetail | null> {
-	const supabase = await createClient();
-
+export async function getMaterial(
+	supabase: MaterialsClient,
+	id: string,
+): Promise<MaterialDetail | null> {
 	const { data, error } = await supabase
 		.from("materials")
 		.select(
@@ -124,9 +128,7 @@ export async function getMaterial(id: string): Promise<MaterialDetail | null> {
 		.eq("id", id)
 		.single();
 
-	if (error) {
-		return null;
-	}
+	if (error) throw error;
 
 	return {
 		id: data.id,
@@ -145,9 +147,9 @@ export async function getMaterial(id: string): Promise<MaterialDetail | null> {
 
 /** Lectura de una Sesión para el Histórico, incluyendo sus Preguntas y autores. */
 export async function getSessionHistory(
+	supabase: MaterialsClient,
 	id: string,
 ): Promise<SessionHistory | null> {
-	const supabase = await createClient();
 	const { data, error } = await supabase
 		.from("sessions")
 		.select(
@@ -156,7 +158,8 @@ export async function getSessionHistory(
 		.eq("id", id)
 		.single();
 
-	if (error || !data || !data.materials) return null;
+	if (error) throw error;
+	if (!data || !data.materials) return null;
 
 	return {
 		id: data.id,

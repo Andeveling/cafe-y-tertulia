@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
 import {
 	getMaterials,
 	MATERIAL_KIND_LABELS,
@@ -16,7 +17,8 @@ export const metadata = {
 };
 
 export default async function MaterialsPage() {
-	const materials = await getMaterials();
+	const supabase = await createClient();
+	const materials = await getMaterials(supabase);
 
 	return (
 		<div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">

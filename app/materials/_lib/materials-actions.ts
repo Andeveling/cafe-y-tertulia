@@ -2,39 +2,35 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { type ActionResult, runServerAction } from "@/lib/server-action";
 import type { MaterialKind, SessionStatus } from "./materials";
-
-export type ActionResult = { error: string } | { success: true };
 
 export async function createMaterial(input: {
 	title: string;
 	kind: MaterialKind;
 	author: string;
 }): Promise<ActionResult> {
-	const supabase = await createClient();
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase, user }) => {
+			const { error } = await supabase.from("materials").insert({
+				title: input.title.trim(),
+				kind: input.kind,
+				author: input.author.trim(),
+				created_by: user!.id,
+			});
 
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
+			if (error) {
+				return {
+					ok: false,
+					error: `No se pudo crear el material: ${error.message}`,
+				};
+			}
 
-	if (!user) {
-		redirect("/auth/login");
-	}
-
-	const { error } = await supabase.from("materials").insert({
-		title: input.title.trim(),
-		kind: input.kind,
-		author: input.author.trim(),
-		created_by: user.id,
+			revalidatePath("/materiales");
+			redirect("/materiales");
+		},
 	});
-
-	if (error) {
-		return { error: `No se pudo crear el material: ${error.message}` };
-	}
-
-	revalidatePath("/materiales");
-	redirect("/materiales");
 }
 
 /**
@@ -42,59 +38,65 @@ export async function createMaterial(input: {
  * Lo decide el club/moderador; el RLS y esta acción garantizan que solo un Miembro activo lo hace.
  */
 export async function advanceMaterial(id: string): Promise<ActionResult> {
-	const supabase = await createClient();
+	return runServerAction({
+		run: async ({ supabase }) => {
+			const { data, error } = await supabase
+				.from("materials")
+				.select("status")
+				.eq("id", id)
+				.single();
 
-	const { data, error } = await supabase
-		.from("materials")
-		.select("status")
-		.eq("id", id)
-		.single();
+			if (error || !data) {
+				return { ok: false, error: "No se encontró el material para avanzar." };
+			}
 
-	if (error || !data) {
-		return { error: "No se encontró el material para avanzar." };
-	}
+			const order = [
+				"proposed",
+				"selected",
+				"in_progress",
+				"finished",
+			] as const;
+			const currentIndex = order.indexOf(data.status);
+			const nextStatus = order[currentIndex + 1];
 
-	const order = ["proposed", "selected", "in_progress", "finished"] as const;
-	const currentIndex = order.indexOf(data.status);
-	const nextStatus = order[currentIndex + 1];
+			if (!nextStatus) return;
 
-	if (!nextStatus) {
-		return { success: true };
-	}
+			const { error: updateError } = await supabase
+				.from("materials")
+				.update({ status: nextStatus })
+				.eq("id", id);
 
-	const { error: updateError } = await supabase
-		.from("materials")
-		.update({ status: nextStatus })
-		.eq("id", id);
-
-	if (updateError) {
-		return {
-			error: `No se pudo avanzar el material: ${updateError.message}`,
-		};
-	}
-
-	revalidatePath("/materiales");
-	revalidatePath(`/materiales/${id}`);
-	return { success: true };
+			if (updateError) {
+				return {
+					ok: false,
+					error: `No se pudo avanzar el material: ${updateError.message}`,
+				};
+			}
+		},
+		revalidate: async () => ["/materiales", `/materiales/${id}`],
+	});
 }
 
 export async function createSession(input: {
 	materialId: string;
 	range: string;
 }): Promise<ActionResult> {
-	const supabase = await createClient();
+	return runServerAction({
+		run: async ({ supabase }) => {
+			const { error } = await supabase.from("sessions").insert({
+				material_id: input.materialId,
+				range: input.range.trim(),
+			});
 
-	const { error } = await supabase.from("sessions").insert({
-		material_id: input.materialId,
-		range: input.range.trim(),
+			if (error) {
+				return {
+					ok: false,
+					error: `No se pudo crear la sesión: ${error.message}`,
+				};
+			}
+		},
+		revalidate: async () => [`/materiales/${input.materialId}`],
 	});
-
-	if (error) {
-		return { error: `No se pudo crear la sesión: ${error.message}` };
-	}
-
-	revalidatePath(`/materiales/${input.materialId}`);
-	return { success: true };
 }
 
 /**
@@ -105,55 +107,51 @@ export async function advanceSession(input: {
 	materialId: string;
 	sessionId: string;
 }): Promise<ActionResult> {
-	const supabase = await createClient();
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase, user }) => {
+			const { data, error } = await supabase
+				.from("sessions")
+				.select("status, moderator_id")
+				.eq("id", input.sessionId)
+				.single();
 
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
+			if (error || !data) {
+				return { ok: false, error: "No se encontró la sesión para avanzar." };
+			}
 
-	const { data, error } = await supabase
-		.from("sessions")
-		.select("status, moderator_id")
-		.eq("id", input.sessionId)
-		.single();
+			const nextStatus = (
+				{
+					preparation: "lobby",
+					lobby: "in_progress",
+					in_progress: "closed",
+					closed: "archived",
+					archived: null,
+				} as const
+			)[data.status] as SessionStatus | null;
 
-	if (error || !data) {
-		return { error: "No se encontró la sesión para avanzar." };
-	}
+			if (!nextStatus) return;
 
-	const nextStatus = (
-		{
-			preparation: "lobby",
-			lobby: "in_progress",
-			in_progress: "closed",
-			closed: "archived",
-			archived: null,
-		} as const
-	)[data.status] as SessionStatus | null;
+			const patch: {
+				status: SessionStatus;
+				moderator_id?: string;
+			} = { status: nextStatus };
+			if (data.status === "preparation" && user) {
+				patch.moderator_id = user.id;
+			}
 
-	if (!nextStatus) {
-		return { success: true };
-	}
+			const { error: updateError } = await supabase
+				.from("sessions")
+				.update(patch)
+				.eq("id", input.sessionId);
 
-	const patch: {
-		status: SessionStatus;
-		moderator_id?: string;
-	} = { status: nextStatus };
-	if (data.status === "preparation" && user) {
-		patch.moderator_id = user.id;
-	}
-
-	const { error: updateError } = await supabase
-		.from("sessions")
-		.update(patch)
-		.eq("id", input.sessionId);
-
-	if (updateError) {
-		return {
-			error: `No se pudo avanzar la sesión: ${updateError.message}`,
-		};
-	}
-
-	revalidatePath(`/materiales/${input.materialId}`);
-	return { success: true };
+			if (updateError) {
+				return {
+					ok: false,
+					error: `No se pudo avanzar la sesión: ${updateError.message}`,
+				};
+			}
+		},
+		revalidate: async () => [`/materiales/${input.materialId}`],
+	});
 }

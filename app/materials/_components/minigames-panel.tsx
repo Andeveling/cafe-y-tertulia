@@ -11,8 +11,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import type { ActionResult } from "@/lib/server-action";
 import {
-	type ActionResult,
 	answerTriviaAction,
 	closeTakeAction,
 	finishTriviaAction,

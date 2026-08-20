@@ -15,6 +15,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Sesión · Histórico · Café y Tertulia" };
 
@@ -23,7 +24,8 @@ export default async function SessionHistoryPage({
 }: {
 	params: Promise<{ id: string }>;
 }) {
-	const session = await getSessionHistory((await params).id);
+	const supabase = await createClient();
+	const session = await getSessionHistory(supabase, (await params).id);
 	if (!session) notFound();
 
 	return (

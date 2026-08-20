@@ -1,11 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { isActiveMember } from "./members";
+import { type ActionResult, runServerAction } from "@/lib/server-action";
 import { createQuestion, toggleOutsideDraw } from "./questions";
 
-export type ActionResult = { ok: true } | { ok: false; error: string };
+export type { ActionResult };
 
 /**
  * Un Miembro activo aporta una Pregunta a una Sesión en `preparation`
@@ -16,63 +14,58 @@ export async function createQuestionAction(
 	_prevState: ActionResult,
 	formData: FormData,
 ): Promise<ActionResult> {
-	const supabase = await createClient();
-	const { data: authData } = await supabase.auth.getUser();
-	const user = authData.user;
+	return runServerAction({
+		requireMember: true,
+		notSignedInMessage: "Debes iniciar sesión para aportar una pregunta.",
+		memberErrorMessage: "Solo los Miembros del club pueden aportar preguntas.",
+		run: async ({ supabase, user }) => {
+			const sessionId = formData.get("session_id");
+			const text = String(formData.get("text") ?? "").trim();
 
-	if (!user) {
-		return {
-			ok: false,
-			error: "Debes iniciar sesión para aportar una pregunta.",
-		};
-	}
+			if (typeof sessionId !== "string") {
+				return { ok: false, error: "Faltan datos de la Sesión." };
+			}
+			if (text.length === 0) {
+				return { ok: false, error: "La pregunta no puede estar vacía." };
+			}
 
-	if (!(await isActiveMember(supabase, user.id))) {
-		return {
-			ok: false,
-			error: "Solo los Miembros del club pueden aportar preguntas.",
-		};
-	}
+			// El material se deriva de la Sesión (nunca del formulario).
+			const { data: session, error: sessionError } = await supabase
+				.from("sessions")
+				.select("material_id")
+				.eq("id", sessionId)
+				.maybeSingle();
 
-	const sessionId = formData.get("session_id");
-	const text = String(formData.get("text") ?? "").trim();
+			if (sessionError || !session) {
+				return { ok: false, error: "La Sesión no existe." };
+			}
 
-	if (typeof sessionId !== "string") {
-		return { ok: false, error: "Faltan datos de la Sesión." };
-	}
-	if (text.length === 0) {
-		return { ok: false, error: "La pregunta no puede estar vacía." };
-	}
-
-	// El material se deriva de la Sesión (nunca del formulario): la página
-	// revalida sobre la ruta del material correcta.
-	const { data: session, error: sessionError } = await supabase
-		.from("sessions")
-		.select("material_id")
-		.eq("id", sessionId)
-		.maybeSingle();
-
-	if (sessionError || !session) {
-		return { ok: false, error: "La Sesión no existe." };
-	}
-
-	try {
-		await createQuestion(supabase, {
-			sessionId,
-			materialId: session.material_id,
-			authorId: user.id,
-			text,
-		});
-	} catch {
-		return {
-			ok: false,
-			error:
-				"No se pudo aportar la pregunta. La Sesión puede no estar en preparación.",
-		};
-	}
-
-	revalidatePath(`/materiales/${session.material_id}`);
-	return { ok: true };
+			try {
+				await createQuestion(supabase, {
+					sessionId,
+					materialId: session.material_id,
+					authorId: user!.id,
+					text,
+				});
+			} catch {
+				return {
+					ok: false,
+					error:
+						"No se pudo aportar la pregunta. La Sesión puede no estar en preparación.",
+				};
+			}
+		},
+		revalidate: async ({ supabase }) => {
+			const sessionId = formData.get("session_id");
+			if (typeof sessionId !== "string") return [];
+			const { data } = await supabase
+				.from("sessions")
+				.select("material_id")
+				.eq("id", sessionId)
+				.maybeSingle();
+			return data ? [`/materiales/${data.material_id}`] : [];
+		},
+	});
 }
 
 /**
@@ -84,49 +77,49 @@ export async function toggleOutsideDrawAction(
 	_prevState: ActionResult,
 	formData: FormData,
 ): Promise<ActionResult> {
-	const supabase = await createClient();
-	const { data: authData } = await supabase.auth.getUser();
-	const user = authData.user;
+	return runServerAction({
+		requireMember: true,
+		notSignedInMessage: "Debes iniciar sesión.",
+		memberErrorMessage:
+			"Solo los Miembros del club pueden modificar preguntas.",
+		run: async ({ supabase }) => {
+			const questionId = formData.get("question_id");
+			const outsideDraw = formData.get("outside_draw") === "true";
 
-	if (!user) {
-		return { ok: false, error: "Debes iniciar sesión." };
-	}
+			if (typeof questionId !== "string") {
+				return { ok: false, error: "Faltan datos de la Pregunta." };
+			}
 
-	if (!(await isActiveMember(supabase, user.id))) {
-		return {
-			ok: false,
-			error: "Solo los Miembros del club pueden modificar preguntas.",
-		};
-	}
+			// El material se deriva de la Pregunta (nunca del formulario).
+			const { data: question, error: questionError } = await supabase
+				.from("questions")
+				.select("material_id")
+				.eq("id", questionId)
+				.maybeSingle();
 
-	const questionId = formData.get("question_id");
-	const outsideDraw = formData.get("outside_draw") === "true";
+			if (questionError || !question) {
+				return { ok: false, error: "La Pregunta no existe." };
+			}
 
-	if (typeof questionId !== "string") {
-		return { ok: false, error: "Faltan datos de la Pregunta." };
-	}
-
-	// El material se deriva de la Pregunta (nunca del formulario).
-	const { data: question, error: questionError } = await supabase
-		.from("questions")
-		.select("material_id")
-		.eq("id", questionId)
-		.maybeSingle();
-
-	if (questionError || !question) {
-		return { ok: false, error: "La Pregunta no existe." };
-	}
-
-	try {
-		await toggleOutsideDraw(supabase, questionId, outsideDraw);
-	} catch {
-		return {
-			ok: false,
-			error:
-				"No se pudo marcar la pregunta. Solo el moderador de la Sesión puede hacerlo.",
-		};
-	}
-
-	revalidatePath(`/materiales/${question.material_id}`);
-	return { ok: true };
+			try {
+				await toggleOutsideDraw(supabase, questionId, outsideDraw);
+			} catch {
+				return {
+					ok: false,
+					error:
+						"No se pudo marcar la pregunta. Solo el moderador de la Sesión puede hacerlo.",
+				};
+			}
+		},
+		revalidate: async ({ supabase }) => {
+			const questionId = formData.get("question_id");
+			if (typeof questionId !== "string") return [];
+			const { data } = await supabase
+				.from("questions")
+				.select("material_id")
+				.eq("id", questionId)
+				.maybeSingle();
+			return data ? [`/materiales/${data.material_id}`] : [];
+		},
+	});
 }

@@ -35,13 +35,13 @@ export default async function MaterialDetailPage({
 	params: Promise<{ id: string }>;
 }) {
 	const { id } = await params;
-	const material = await getMaterial(id);
+	const supabase = await createClient();
+	const material = await getMaterial(supabase, id);
 
 	if (!material) {
 		notFound();
 	}
 
-	const supabase = await createClient();
 	const bank = await listMaterialTrivias(supabase, id).catch(() => []);
 	const showTriviaBank = material.sessions.some(
 		(s) => s.status === "preparation",

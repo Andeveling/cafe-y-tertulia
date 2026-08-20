@@ -18,6 +18,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import type { ActionResult } from "@/lib/server-action";
 
 type Props = {
 	lobby: LobbySnapshot;
@@ -33,10 +34,10 @@ export function LobbyPanel({ lobby, userId, isModerator }: Props) {
 		...lobby.unassignedNames,
 	];
 
-	function act(fn: () => Promise<{ error: string } | { success: true }>) {
+	function act(fn: () => Promise<ActionResult>) {
 		start(async () => {
 			const r = await fn();
-			if ("error" in r) toast.error(r.error);
+			if (!r.ok) toast.error(r.error);
 		});
 	}
 
