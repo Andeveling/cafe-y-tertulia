@@ -107,9 +107,13 @@ export async function advanceSession(input: {
 }): Promise<ActionResult> {
 	const supabase = await createClient();
 
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
 	const { data, error } = await supabase
 		.from("sessions")
-		.select("status")
+		.select("status, moderator_id")
 		.eq("id", input.sessionId)
 		.single();
 
@@ -131,9 +135,17 @@ export async function advanceSession(input: {
 		return { success: true };
 	}
 
+	const patch: {
+		status: SessionStatus;
+		moderator_id?: string;
+	} = { status: nextStatus };
+	if (data.status === "preparation" && user) {
+		patch.moderator_id = user.id;
+	}
+
 	const { error: updateError } = await supabase
 		.from("sessions")
-		.update({ status: nextStatus })
+		.update(patch)
 		.eq("id", input.sessionId);
 
 	if (updateError) {
