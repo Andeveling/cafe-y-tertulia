@@ -1,12 +1,15 @@
 import { revalidatePath } from "next/cache";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as memberRepo from "@/app/materials/_lib/members";
 import {
 	type ActionResult,
 	createQuestionAction,
 	toggleOutsideDrawAction,
-} from "@/lib/actions/questions";
-import * as memberRepo from "@/lib/members";
-import { createQuestion, toggleOutsideDraw } from "@/lib/questions";
+} from "@/app/materials/_lib/question-actions";
+import {
+	createQuestion,
+	toggleOutsideDraw,
+} from "@/app/materials/_lib/questions";
 import * as serverClient from "@/lib/supabase/server";
 
 // La autenticación vive en la capa de acciones; el DAL es un colaborador
@@ -15,11 +18,11 @@ vi.mock("@/lib/supabase/server", () => ({
 	createClient: vi.fn(),
 }));
 
-vi.mock("@/lib/members", () => ({
+vi.mock("@/app/materials/_lib/members", () => ({
 	isActiveMember: vi.fn(),
 }));
 
-vi.mock("@/lib/questions", () => ({
+vi.mock("@/app/materials/_lib/questions", () => ({
 	createQuestion: vi.fn(),
 	toggleOutsideDraw: vi.fn(),
 }));

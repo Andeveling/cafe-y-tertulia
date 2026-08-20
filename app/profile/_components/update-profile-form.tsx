@@ -12,7 +12,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { updateProfile } from "@/lib/memberships/actions";
+import { updateProfile } from "../_lib/actions";
 
 const updateProfileSchema = z.object({
 	displayName: z

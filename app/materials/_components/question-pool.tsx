@@ -26,8 +26,8 @@ import {
 	type ActionResult,
 	createQuestionAction,
 	toggleOutsideDrawAction,
-} from "@/lib/actions/questions";
-import type { QuestionWithAuthor } from "@/lib/questions";
+} from "../_lib/question-actions";
+import type { QuestionWithAuthor } from "../_lib/questions";
 
 type QuestionPoolProps = {
 	questions: QuestionWithAuthor[];

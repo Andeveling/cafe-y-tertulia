@@ -12,22 +12,12 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signIn } from "@/lib/memberships/actions";
-
-const loginSchema = z.object({
-	email: z
-		.string()
-		.trim()
-		.min(1, "Ingresá tu email.")
-		.email("El email no parece válido."),
-	password: z.string().min(1, "Ingresá tu contraseña."),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
+import { signIn } from "../_lib/actions";
+import { LoginValues, loginSchema } from "../_schemas/login-schema";
 
 export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
 	const [isPending, startTransition] = useTransition();
-	const form = useForm<LoginValues>({
+	const { control, handleSubmit } = useForm<LoginValues>({
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
 			email: defaultEmail ?? "",
@@ -35,20 +25,20 @@ export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
 		},
 	});
 
-	function onSubmit(data: LoginValues) {
+	const onSubmit = handleSubmit(async (data) => {
 		startTransition(async () => {
 			const formData = new FormData();
 			formData.set("email", data.email);
 			formData.set("password", data.password);
 			await signIn(formData);
 		});
-	}
+	});
 
 	return (
-		<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+		<form onSubmit={onSubmit} className="space-y-4">
 			<Controller
 				name="email"
-				control={form.control}
+				control={control}
 				render={({ field, fieldState }) => (
 					<Field data-invalid={fieldState.invalid}>
 						<FieldLabel htmlFor={field.name}>Email</FieldLabel>
@@ -68,7 +58,7 @@ export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
 			/>
 			<Controller
 				name="password"
-				control={form.control}
+				control={control}
 				render={({ field, fieldState }) => (
 					<Field data-invalid={fieldState.invalid}>
 						<FieldLabel htmlFor={field.name}>Contraseña</FieldLabel>

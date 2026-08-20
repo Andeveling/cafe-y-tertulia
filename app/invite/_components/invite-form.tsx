@@ -12,7 +12,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { invite } from "@/lib/memberships/actions";
+import { invite } from "../_lib/actions";
 
 const inviteSchema = z.object({
 	email: z.email("Ese email no parece válido."),

@@ -1,9 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isActiveMember } from "@/lib/members";
-import { createQuestion, toggleOutsideDraw } from "@/lib/questions";
 import { createClient } from "@/lib/supabase/server";
+import { isActiveMember } from "./members";
+import { createQuestion, toggleOutsideDraw } from "./questions";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 

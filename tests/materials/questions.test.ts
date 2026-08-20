@@ -3,7 +3,7 @@ import {
 	createQuestion,
 	getSessionPool,
 	toggleOutsideDraw,
-} from "@/lib/questions";
+} from "@/app/materials/_lib/questions";
 
 // Fixture: un Miembro activo (autor), una Sesión en preparation y su Material.
 const sessionId = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";

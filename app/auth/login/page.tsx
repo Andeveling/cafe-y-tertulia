@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/app/auth/login/_components/login-form";
-import { getCurrentMember } from "@/lib/memberships/current-member";
+import { getCurrentMember } from "@/lib/current-member";
 
 export default async function LoginPage({
 	searchParams,

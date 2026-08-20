@@ -8,7 +8,7 @@ import {
 	getMaterials,
 	MATERIAL_KIND_LABELS,
 	MATERIAL_STATUS_LABELS,
-} from "@/lib/materials";
+} from "./_lib/materials";
 
 export const metadata = {
 	title: "Materiales · Café y Tertulia",

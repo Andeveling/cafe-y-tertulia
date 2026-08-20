@@ -1,8 +1,8 @@
 import "server-only";
 import { QuestionPool } from "@/app/materials/_components/question-pool";
-import { isActiveMember } from "@/lib/members";
-import { getSessionPool } from "@/lib/questions";
 import { createClient } from "@/lib/supabase/server";
+import { isActiveMember } from "../_lib/members";
+import { getSessionPool } from "../_lib/questions";
 
 type MaterialQuestionsSectionProps = {
 	materialId: string;

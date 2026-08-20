@@ -11,8 +11,8 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { acceptInvitation } from "@/lib/memberships/actions";
 import { useInviteSession } from "../_hooks/use-invite-session";
+import { acceptInvitation } from "../_lib/actions";
 import {
 	type AcceptInvitationValues,
 	acceptInvitationSchema,

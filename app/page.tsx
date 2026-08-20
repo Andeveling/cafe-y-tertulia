@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getCurrentMember } from "@/lib/memberships/current-member";
+import { getCurrentMember } from "@/lib/current-member";
 
 export default async function HomePage() {
 	const { member } = await getCurrentMember();

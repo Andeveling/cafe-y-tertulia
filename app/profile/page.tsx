@@ -8,8 +8,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { leaveClub, signOut } from "@/lib/memberships/actions";
-import { getCurrentMember } from "@/lib/memberships/current-member";
+import { getCurrentMember } from "@/lib/current-member";
+import { leaveClub, signOut } from "./_lib/actions";
 
 export default async function ProfilePage({
 	searchParams,

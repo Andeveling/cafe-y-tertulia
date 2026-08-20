@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { inviteMember } from "@/lib/memberships/invite";
+import { inviteMember } from "@/app/invite/_lib/invite";
 import type { Database } from "@/lib/supabase/database.types";
 
 /**

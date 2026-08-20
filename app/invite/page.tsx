@@ -7,7 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { getCurrentMember } from "@/lib/memberships/current-member";
+import { getCurrentMember } from "@/lib/current-member";
 
 const INVITE_ERRORS: Record<string, string> = {
 	invalid_email: "Ese email no parece válido.",
