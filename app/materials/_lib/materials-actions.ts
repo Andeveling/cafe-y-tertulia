@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { MaterialKind } from "./materials";
+import type { MaterialKind, SessionStatus } from "./materials";
 
 export type ActionResult = { error: string } | { success: true };
 
@@ -98,8 +98,8 @@ export async function createSession(input: {
 }
 
 /**
- * Avanza el estado de una Sesión: preparación → lobby → en curso → cerrada → histórico.
- * El club/moderador lo decide; el estado propio de cada Sesión es parte del AC4.
+ * Avanza exactamente un estado: preparación → lobby → en curso → cerrada → histórico.
+ * La transición también está protegida por el trigger de la base de datos.
  */
 export async function advanceSession(input: {
 	materialId: string;
@@ -117,15 +117,15 @@ export async function advanceSession(input: {
 		return { error: "No se encontró la sesión para avanzar." };
 	}
 
-	const order = [
-		"preparation",
-		"lobby",
-		"in_progress",
-		"closed",
-		"archived",
-	] as const;
-	const currentIndex = order.indexOf(data.status);
-	const nextStatus = order[currentIndex + 1];
+	const nextStatus = (
+		{
+			preparation: "lobby",
+			lobby: "in_progress",
+			in_progress: "closed",
+			closed: "archived",
+			archived: null,
+		} as const
+	)[data.status] as SessionStatus | null;
 
 	if (!nextStatus) {
 		return { success: true };
