@@ -51,7 +51,7 @@ export function AppSidebar() {
 							render={<Link href="/" />}
 							isActive={pathname === "/"}
 						>
-							<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+							<div className="flex size-8 shrink-0 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground">
 								<HugeiconsIcon icon={Book01Icon} className="size-4" />
 							</div>
 							<div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
@@ -83,7 +83,7 @@ export function AppSidebar() {
 											(item.url !== "/" && pathname.startsWith(item.url))
 										}
 										render={<Link href={item.url} />}
-										className="rounded-lg data-active:bg-blue-600 data-active:text-white"
+										className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
 									>
 										<HugeiconsIcon icon={item.icon} />
 										<span>{item.title}</span>
@@ -108,7 +108,7 @@ export function AppSidebar() {
 										tooltip={item.title}
 										isActive={pathname.startsWith(item.url)}
 										render={<Link href={item.url} />}
-										className="rounded-lg data-active:bg-blue-600 data-active:text-white"
+										className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
 									>
 										<HugeiconsIcon icon={item.icon} />
 										<span>{item.title}</span>
