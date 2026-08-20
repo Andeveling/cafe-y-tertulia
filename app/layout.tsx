@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
+import { AppHeader } from "@/components/app-header";
+import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +25,7 @@ export const metadata: Metadata = {
 	description: "Club de lectura y conversación.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
@@ -38,14 +41,20 @@ export default function RootLayout({
 				inter.variable,
 			)}
 		>
-			<body className="min-h-full flex flex-col">
+			<body className="min-h-full">
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"
 					enableSystem
 					disableTransitionOnChange
 				>
-					{children}
+					<SidebarProvider>
+						<AppSidebar />
+						<SidebarInset>
+							<AppHeader />
+							<div className="flex flex-1 flex-col">{children}</div>
+						</SidebarInset>
+					</SidebarProvider>
 					<Toaster />
 				</ThemeProvider>
 			</body>
