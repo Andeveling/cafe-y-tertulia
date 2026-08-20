@@ -12,7 +12,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { requestPasswordReset } from "../_lib/actions";
+import { requestPasswordReset } from "../_lib/reset-actions";
 
 const resetSchema = z.object({
 	email: z

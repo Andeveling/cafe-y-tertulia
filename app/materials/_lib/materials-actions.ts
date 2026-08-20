@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { MaterialKind } from "./_lib/materials";
+import type { MaterialKind } from "./materials";
 
 export type ActionResult = { error: string } | { success: true };
 

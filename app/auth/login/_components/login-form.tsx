@@ -12,7 +12,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signIn } from "../_lib/actions";
+import { signIn } from "../_lib/login-actions";
 import { LoginValues, loginSchema } from "../_schemas/login-schema";
 
 export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {

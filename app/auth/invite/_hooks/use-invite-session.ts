@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
-import type { AcceptInvitationState } from "../_lib/actions";
+import type { AcceptInvitationState } from "../_lib/accept-invitation-actions";
 
 export type InviteSessionStatus =
 	| "loading"

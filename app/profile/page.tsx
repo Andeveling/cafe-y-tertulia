@@ -9,7 +9,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { getCurrentMember } from "@/lib/current-member";
-import { leaveClub, signOut } from "./_lib/actions";
+import { leaveClub, signOut } from "./_lib/profile-actions";
 
 export default async function ProfilePage({
 	searchParams,

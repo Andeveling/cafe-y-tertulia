@@ -4,7 +4,10 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { advanceMaterial, advanceSession } from "@/app/materials/actions";
+import {
+	advanceMaterial,
+	advanceSession,
+} from "@/app/materials/_lib/materials-actions";
 import { Button } from "@/components/ui/button";
 
 type Props =

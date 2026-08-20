@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useInviteSession } from "../_hooks/use-invite-session";
-import { acceptInvitation } from "../_lib/actions";
+import { acceptInvitation } from "../_lib/accept-invitation-actions";
 import {
 	type AcceptInvitationValues,
 	acceptInvitationSchema,

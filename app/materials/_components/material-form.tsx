@@ -7,7 +7,7 @@ import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { createMaterial } from "@/app/materials/actions";
+import { createMaterial } from "@/app/materials/_lib/materials-actions";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
