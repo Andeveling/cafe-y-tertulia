@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { UpdateProfileForm } from "@/app/profile/_components/update-profile-form";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -7,9 +8,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { leaveClub, signOut, updateProfile } from "@/lib/memberships/actions";
+import { leaveClub, signOut } from "@/lib/memberships/actions";
 import { getCurrentMember } from "@/lib/memberships/current-member";
 
 export default async function ProfilePage({
@@ -58,25 +57,7 @@ export default async function ProfilePage({
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<form action={updateProfile} className="flex flex-col gap-4">
-						<Field>
-							<FieldLabel htmlFor="displayName">Nombre</FieldLabel>
-							<FieldContent>
-								<Input
-									id="displayName"
-									name="displayName"
-									type="text"
-									autoComplete="nickname"
-									required
-									maxLength={60}
-									defaultValue={member.display_name}
-								/>
-							</FieldContent>
-						</Field>
-						<Button type="submit" className="self-start">
-							Guardar
-						</Button>
-					</form>
+					<UpdateProfileForm defaultDisplayName={member.display_name} />
 				</CardContent>
 			</Card>
 

@@ -2,9 +2,9 @@ import { ArrowLeftIcon, Book01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AdvanceButton } from "@/components/materials/advance-button";
-import { SessionForm } from "@/components/materials/session-form";
-import { MaterialQuestionsSection } from "@/components/questions/material-questions-section";
+import { AdvanceButton } from "@/app/materiales/_components/advance-button";
+import { MaterialQuestionsSection } from "@/app/materiales/_components/material-questions-section";
+import { SessionForm } from "@/app/materiales/_components/session-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

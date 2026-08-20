@@ -1,14 +1,35 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useActionState, useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
+import {
+	Field,
+	FieldContent,
+	FieldError,
+	FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
 	type AcceptInvitationState,
 	acceptInvitation,
 } from "@/lib/memberships/actions";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
+
+const acceptInvitationSchema = z.object({
+	displayName: z
+		.string()
+		.trim()
+		.min(1, "Elegí un nombre visible.")
+		.max(60, "El nombre no puede superar los 60 caracteres."),
+	password: z
+		.string()
+		.min(6, "La contraseña debe tener al menos 6 caracteres."),
+});
+
+type AcceptInvitationValues = z.infer<typeof acceptInvitationSchema>;
 
 export default function InviteAcceptPage() {
 	const supabase = createBrowserClient();
@@ -19,6 +40,13 @@ export default function InviteAcceptPage() {
 		acceptInvitation,
 		null,
 	);
+	const form = useForm<AcceptInvitationValues>({
+		resolver: zodResolver(acceptInvitationSchema),
+		defaultValues: {
+			displayName: "",
+			password: "",
+		},
+	});
 
 	useEffect(() => {
 		// The invite email link lands here with the session in the URL fragment
@@ -40,6 +68,13 @@ export default function InviteAcceptPage() {
 			);
 		}
 	}, [formState]);
+
+	function onSubmit(data: AcceptInvitationValues) {
+		const formData = new FormData();
+		formData.set("displayName", data.displayName);
+		formData.set("password", data.password);
+		formAction(formData);
+	}
 
 	if (status === "loading") {
 		return (
@@ -87,35 +122,51 @@ export default function InviteAcceptPage() {
 					</div>
 				)}
 
-				<form action={formAction} className="space-y-4">
-					<Field>
-						<FieldLabel htmlFor="displayName">Nombre visible</FieldLabel>
-						<FieldContent>
-							<Input
-								id="displayName"
-								name="displayName"
-								type="text"
-								autoComplete="nickname"
-								required
-								maxLength={60}
-								placeholder="Tu nombre en el club"
-							/>
-						</FieldContent>
-					</Field>
-					<Field>
-						<FieldLabel htmlFor="password">Contraseña</FieldLabel>
-						<FieldContent>
-							<Input
-								id="password"
-								name="password"
-								type="password"
-								autoComplete="new-password"
-								required
-								minLength={6}
-								placeholder="Mínimo 6 caracteres"
-							/>
-						</FieldContent>
-					</Field>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+					<Controller
+						name="displayName"
+						control={form.control}
+						render={({ field, fieldState }) => (
+							<Field data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor="displayName">Nombre visible</FieldLabel>
+								<FieldContent>
+									<Input
+										{...field}
+										id="displayName"
+										type="text"
+										autoComplete="nickname"
+										aria-invalid={fieldState.invalid}
+										placeholder="Tu nombre en el club"
+									/>
+								</FieldContent>
+								{fieldState.invalid && (
+									<FieldError errors={[fieldState.error]} />
+								)}
+							</Field>
+						)}
+					/>
+					<Controller
+						name="password"
+						control={form.control}
+						render={({ field, fieldState }) => (
+							<Field data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor="password">Contraseña</FieldLabel>
+								<FieldContent>
+									<Input
+										{...field}
+										id="password"
+										type="password"
+										autoComplete="new-password"
+										aria-invalid={fieldState.invalid}
+										placeholder="Mínimo 6 caracteres"
+									/>
+								</FieldContent>
+								{fieldState.invalid && (
+									<FieldError errors={[fieldState.error]} />
+								)}
+							</Field>
+						)}
+					/>
 					<Button type="submit" className="w-full" disabled={isPending}>
 						{isPending ? "Guardando…" : "Aceptar invitación"}
 					</Button>

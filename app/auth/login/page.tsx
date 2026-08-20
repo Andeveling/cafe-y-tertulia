@@ -1,8 +1,5 @@
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { signIn } from "@/lib/memberships/actions";
+import { LoginForm } from "@/app/auth/login/_components/login-form";
 import { getCurrentMember } from "@/lib/memberships/current-member";
 
 export default async function LoginPage({
@@ -69,38 +66,7 @@ export default async function LoginPage({
 					</div>
 				)}
 
-				<form action={signIn} className="space-y-4">
-					<Field>
-						<FieldLabel htmlFor="email">Email</FieldLabel>
-						<FieldContent>
-							<Input
-								id="email"
-								name="email"
-								type="email"
-								autoComplete="email"
-								required
-								defaultValue={params.email ?? ""}
-								placeholder="tucorreo@ejemplo.com"
-							/>
-						</FieldContent>
-					</Field>
-					<Field>
-						<FieldLabel htmlFor="password">Contraseña</FieldLabel>
-						<FieldContent>
-							<Input
-								id="password"
-								name="password"
-								type="password"
-								autoComplete="current-password"
-								required
-								placeholder="••••••••"
-							/>
-						</FieldContent>
-					</Field>
-					<Button type="submit" className="w-full">
-						Iniciar sesión
-					</Button>
-				</form>
+				<LoginForm defaultEmail={params.email} />
 
 				<p className="text-center text-sm text-muted-foreground">
 					¿Olvidaste tu contraseña?{" "}

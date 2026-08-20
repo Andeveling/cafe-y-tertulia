@@ -1,17 +1,39 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
+import {
+	Field,
+	FieldContent,
+	FieldError,
+	FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { createClient as createBrowserClient } from "@/lib/supabase/client";
+
+const updatePasswordSchema = z.object({
+	password: z
+		.string()
+		.min(6, "La contraseña debe tener al menos 6 caracteres."),
+});
+
+type UpdatePasswordValues = z.infer<typeof updatePasswordSchema>;
 
 export default function UpdatePasswordPage() {
 	const router = useRouter();
 	const supabase = createBrowserClient();
 	const [ready, setReady] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const form = useForm<UpdatePasswordValues>({
+		resolver: zodResolver(updatePasswordSchema),
+		defaultValues: {
+			password: "",
+		},
+	});
 
 	useEffect(() => {
 		// The recovery link lands here with the session in the URL fragment
@@ -25,16 +47,11 @@ export default function UpdatePasswordPage() {
 		return () => sub.subscription.unsubscribe();
 	}, [supabase]);
 
-	async function handleSubmit(formData: FormData) {
-		const password = String(formData.get("password") ?? "");
-
-		if (password.length < 6) {
-			setError("La contraseña debe tener al menos 6 caracteres.");
-			return;
-		}
-
+	async function onSubmit(data: UpdatePasswordValues) {
 		// updateUser with the browser session captured from the recovery link.
-		const { error: updateError } = await supabase.auth.updateUser({ password });
+		const { error: updateError } = await supabase.auth.updateUser({
+			password: data.password,
+		});
 
 		if (updateError) {
 			setError(
@@ -68,22 +85,30 @@ export default function UpdatePasswordPage() {
 					</div>
 				)}
 
-				<form action={handleSubmit} className="space-y-4">
-					<Field>
-						<FieldLabel htmlFor="password">Contraseña nueva</FieldLabel>
-						<FieldContent>
-							<Input
-								id="password"
-								name="password"
-								type="password"
-								autoComplete="new-password"
-								required
-								minLength={6}
-								placeholder="Mínimo 6 caracteres"
-								disabled={!ready}
-							/>
-						</FieldContent>
-					</Field>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+					<Controller
+						name="password"
+						control={form.control}
+						render={({ field, fieldState }) => (
+							<Field data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor={field.name}>Contraseña nueva</FieldLabel>
+								<FieldContent>
+									<Input
+										{...field}
+										id={field.name}
+										type="password"
+										autoComplete="new-password"
+										aria-invalid={fieldState.invalid}
+										placeholder="Mínimo 6 caracteres"
+										disabled={!ready}
+									/>
+								</FieldContent>
+								{fieldState.invalid && (
+									<FieldError errors={[fieldState.error]} />
+								)}
+							</Field>
+						)}
+					/>
 					<Button type="submit" className="w-full" disabled={!ready}>
 						Cambiar contraseña
 					</Button>

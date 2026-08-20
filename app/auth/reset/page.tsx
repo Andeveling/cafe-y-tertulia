@@ -1,7 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { requestPasswordReset } from "@/lib/memberships/actions";
+import { ResetPasswordForm } from "@/app/auth/reset/_components/reset-password-form";
 
 export default async function ResetPasswordPage({
 	searchParams,
@@ -32,26 +29,7 @@ export default async function ResetPasswordPage({
 					</div>
 				)}
 
-				{!params.sent && (
-					<form action={requestPasswordReset} className="space-y-4">
-						<Field>
-							<FieldLabel htmlFor="email">Email</FieldLabel>
-							<FieldContent>
-								<Input
-									id="email"
-									name="email"
-									type="email"
-									autoComplete="email"
-									required
-									placeholder="tucorreo@ejemplo.com"
-								/>
-							</FieldContent>
-						</Field>
-						<Button type="submit" className="w-full">
-							Enviar enlace
-						</Button>
-					</form>
-				)}
+				{!params.sent && <ResetPasswordForm />}
 			</div>
 		</div>
 	);

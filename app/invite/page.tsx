@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { InviteForm } from "@/app/invite/_components/invite-form";
 import {
 	Card,
 	CardContent,
@@ -7,11 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { invite } from "@/lib/memberships/actions";
 import { getCurrentMember } from "@/lib/memberships/current-member";
-import { createClient as createServerClient } from "@/lib/supabase/server";
 
 const INVITE_ERRORS: Record<string, string> = {
 	invalid_email: "Ese email no parece válido.",
@@ -87,24 +83,7 @@ export default async function InvitePage({
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<form action={invite} className="flex flex-col gap-4 sm:flex-row">
-						<Field className="flex-1">
-							<FieldLabel htmlFor="email" className="sr-only">
-								Email
-							</FieldLabel>
-							<FieldContent>
-								<Input
-									id="email"
-									name="email"
-									type="email"
-									autoComplete="off"
-									required
-									placeholder="correo@ejemplo.com"
-								/>
-							</FieldContent>
-						</Field>
-						<Button type="submit">Enviar invitación</Button>
-					</form>
+					<InviteForm />
 				</CardContent>
 			</Card>
 

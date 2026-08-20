@@ -1,6 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useActionState, useEffect, useRef, useTransition } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +16,7 @@ import {
 import {
 	Field,
 	FieldContent,
+	FieldError,
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
@@ -36,6 +40,12 @@ type QuestionPoolProps = {
 
 const initialCreateState: ActionResult = { ok: true };
 
+const createQuestionSchema = z.object({
+	text: z.string().trim().min(1, "La pregunta no puede estar vacía."),
+});
+
+type CreateQuestionValues = z.infer<typeof createQuestionSchema>;
+
 export function QuestionPool({
 	questions,
 	sessionId,
@@ -52,6 +62,35 @@ export function QuestionPool({
 		toggleOutsideDrawAction,
 		initialCreateState,
 	);
+	const [isPending, startTransition] = useTransition();
+	const form = useForm<CreateQuestionValues>({
+		resolver: zodResolver(createQuestionSchema),
+		defaultValues: {
+			text: "",
+		},
+	});
+	const justSubmitted = useRef(false);
+
+	// Reset only after the server action resolved successfully: createState
+	// changes after the async action settles, so the reset lives here instead
+	// of in onSubmit (where the previous state would be stale).
+	useEffect(() => {
+		if (justSubmitted.current && createState.ok) {
+			form.reset();
+			justSubmitted.current = false;
+		}
+	}, [createState, form]);
+
+	function onSubmit(data: CreateQuestionValues) {
+		justSubmitted.current = true;
+		startTransition(async () => {
+			const formData = new FormData();
+			formData.set("session_id", sessionId);
+			formData.set("material_id", materialId);
+			formData.set("text", data.text);
+			await createAction(formData);
+		});
+	}
 
 	async function onToggle(questionId: string, outsideDraw: boolean) {
 		const formData = new FormData();
@@ -70,23 +109,33 @@ export function QuestionPool({
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-6">
-				<form action={createAction} className="flex flex-col gap-3">
-					<input type="hidden" name="session_id" value={sessionId} />
-					<input type="hidden" name="material_id" value={materialId} />
+				<form
+					onSubmit={form.handleSubmit(onSubmit)}
+					className="flex flex-col gap-3"
+				>
 					<FieldGroup>
-						<Field>
-							<FieldLabel htmlFor="question-text">
-								Aporta una pregunta
-							</FieldLabel>
-							<FieldContent>
-								<Textarea
-									id="question-text"
-									name="text"
-									placeholder="¿Qué te hizo pensar del capítulo 2?"
-									required
-								/>
-							</FieldContent>
-						</Field>
+						<Controller
+							name="text"
+							control={form.control}
+							render={({ field, fieldState }) => (
+								<Field data-invalid={fieldState.invalid}>
+									<FieldLabel htmlFor="question-text">
+										Aporta una pregunta
+									</FieldLabel>
+									<FieldContent>
+										<Textarea
+											{...field}
+											id="question-text"
+											placeholder="¿Qué te hizo pensar del capítulo 2?"
+											aria-invalid={fieldState.invalid}
+										/>
+									</FieldContent>
+									{fieldState.invalid && (
+										<FieldError errors={[fieldState.error]} />
+									)}
+								</Field>
+							)}
+						/>
 					</FieldGroup>
 					{!createState.ok && (
 						<p role="alert" className="text-destructive text-xs">
@@ -94,7 +143,7 @@ export function QuestionPool({
 						</p>
 					)}
 					<div className="flex justify-end">
-						<Button type="submit" disabled={createPending}>
+						<Button type="submit" disabled={createPending || isPending}>
 							Aportar
 						</Button>
 					</div>

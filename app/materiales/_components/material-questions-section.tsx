@@ -1,5 +1,5 @@
 import "server-only";
-import { QuestionPool } from "@/components/questions/question-pool";
+import { QuestionPool } from "@/app/materiales/_components/question-pool";
 import { isActiveMember } from "@/lib/members";
 import { getSessionPool } from "@/lib/questions";
 import { createClient } from "@/lib/supabase/server";
