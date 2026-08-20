@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { parseForm } from "@/app/_lib/form-helpers";
 import { getCurrentMember } from "@/lib/current-member";
+import { inviteSchema } from "../_schemas/invite-schema";
 import { inviteMember } from "./invite";
 
 export async function invite(formData: FormData) {
@@ -11,10 +13,13 @@ export async function invite(formData: FormData) {
 		redirect("/auth/login");
 	}
 
-	const email = String(formData.get("email") ?? "");
+	const parsed = await parseForm(inviteSchema, formData);
+	if (!parsed.ok) {
+		redirect(`/invite?error=invalid_email`);
+	}
 
 	const result = await inviteMember({
-		email,
+		email: parsed.data.email,
 		padrinoId: member.id,
 		padrinoDisplayName: member.display_name,
 	});

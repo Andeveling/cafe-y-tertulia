@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { parseForm } from "@/app/_lib/form-helpers";
 import { getCurrentMember } from "@/lib/current-member";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { displayNameSchema } from "../_schemas/profile-schema";
 
 export async function signOut() {
 	const supabase = await createServerClient();
@@ -21,9 +23,14 @@ export async function updateProfile(formData: FormData) {
 		redirect("/");
 	}
 
-	const displayName = String(formData.get("displayName") ?? "").trim();
+	const parsed = await parseForm(displayNameSchema, formData);
+	if (!parsed.ok) {
+		redirect("/profile?error=update_failed");
+	}
 
-	if (displayName && displayName !== member.display_name) {
+	const { displayName } = parsed.data;
+
+	if (displayName !== member.display_name) {
 		// Service role: members has no UPDATE policy (self-edit via the Data
 		// API would allow self-promotion); profile edits are server-side.
 		const admin = createAdminClient();

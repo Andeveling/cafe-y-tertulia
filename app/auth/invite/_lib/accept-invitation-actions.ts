@@ -1,8 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { parseForm } from "@/app/_lib/form-helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { acceptInvitationSchema } from "../_schemas/accept-invitation-schema";
 
 export type AcceptInvitationState = {
 	error: "invalid" | "update_failed" | "invalid_or_expired";
@@ -24,6 +26,11 @@ export async function acceptInvitation(
 	_prev: AcceptInvitationState,
 	formData: FormData,
 ): Promise<AcceptInvitationState> {
+	const parsed = await parseForm(acceptInvitationSchema, formData);
+	if (!parsed.ok) {
+		return { error: "invalid" };
+	}
+
 	const supabase = await createServerClient();
 	const {
 		data: { user },
@@ -32,13 +39,7 @@ export async function acceptInvitation(
 		return { error: "invalid_or_expired" };
 	}
 
-	const displayName = String(formData.get("displayName") ?? "").trim();
-	const password = String(formData.get("password") ?? "");
-
-	if (password.length < 6 || !displayName) {
-		return { error: "invalid" };
-	}
-
+	const { displayName, password } = parsed.data;
 	const admin = createAdminClient();
 
 	// The session must belong to an invited member: an active or left member

@@ -1,19 +1,20 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { parseForm } from "@/app/_lib/form-helpers";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { loginSchema } from "../_schemas/login-schema";
 
 export async function signIn(formData: FormData) {
-	const supabase = await createServerClient();
-	const email = String(formData.get("email") ?? "")
-		.trim()
-		.toLowerCase();
-	const password = String(formData.get("password") ?? "");
-
-	if (!email || !password) {
+	const parsed = await parseForm(loginSchema, formData);
+	if (!parsed.ok) {
 		redirect("/auth/login?error=invalid");
 	}
 
+	const email = parsed.data.email.toLowerCase();
+	const password = parsed.data.password;
+
+	const supabase = await createServerClient();
 	const { data, error } = await supabase.auth.signInWithPassword({
 		email,
 		password,
