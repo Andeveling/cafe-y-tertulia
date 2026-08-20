@@ -6,14 +6,14 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const titles: Record<string, string> = {
 	"/": "Inicio",
-	"/materiales": "Materiales",
+	"/materials": "Materiales",
 	"/invite": "Invitar",
 	"/profile": "Perfil",
 };
 
 function getTitle(pathname: string) {
 	if (titles[pathname]) return titles[pathname];
-	if (pathname.startsWith("/materiales/")) return "Material";
+	if (pathname.startsWith("/materials")) return "Material";
 	if (pathname.startsWith("/invite")) return "Invitar";
 	if (pathname.startsWith("/profile")) return "Perfil";
 	return "Café y Tertulias";
@@ -24,7 +24,7 @@ export function AppHeader() {
 	if (pathname.startsWith("/auth")) return null;
 
 	return (
-		<header className="sticky top-0 z-10 flex h-10 shrink-0 items-center gap-2 border-b bg-background px-4">
+		<header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 border-b bg-background px-4">
 			<SidebarTrigger className="-ml-1" />
 			<div className="h-4 w-px bg-border" />
 			<span className="text-xs font-medium tracking-tight">

@@ -27,7 +27,7 @@ import {
 
 const navClub = [
 	{ title: "Inicio", url: "/", icon: Home01Icon },
-	{ title: "Materiales", url: "/materiales", icon: Book01Icon },
+	{ title: "Materiales", url: "/materials", icon: Book01Icon },
 ];
 
 const navCuenta = [
@@ -42,7 +42,7 @@ export function AppSidebar() {
 
 	return (
 		<Sidebar collapsible="icon" variant="sidebar">
-			<SidebarHeader className="flex h-10 shrink-0 items-center border-b border-sidebar-border px-2">
+			<SidebarHeader className="flex h-12 shrink-0 items-center border-b border-sidebar-border px-2">
 				<SidebarMenu>
 					<SidebarMenuItem>
 						<SidebarMenuButton
