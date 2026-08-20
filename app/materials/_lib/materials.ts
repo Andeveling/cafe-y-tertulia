@@ -39,6 +39,27 @@ export type MaterialWithSessionsCount = {
 	sessions_count: number;
 };
 
+export type SessionHistory = {
+	id: string;
+	range: string;
+	status: SessionStatus;
+	scheduled_at: string | null;
+	created_at: string;
+	material: {
+		id: string;
+		title: string;
+		kind: MaterialKind;
+		author: string;
+		status: MaterialStatus;
+	};
+	questions: {
+		id: string;
+		text: string;
+		author: string;
+		created_at: string;
+	}[];
+};
+
 export type MaterialDetail = {
 	id: string;
 	title: string;
@@ -46,13 +67,7 @@ export type MaterialDetail = {
 	author: string;
 	status: MaterialStatus;
 	created_at: string;
-	sessions: {
-		id: string;
-		range: string;
-		status: SessionStatus;
-		scheduled_at: string | null;
-		created_at: string;
-	}[];
+	sessions: Omit<SessionHistory, "material" | "questions">[];
 };
 
 /**
@@ -111,5 +126,36 @@ export async function getMaterial(id: string): Promise<MaterialDetail | null> {
 		sessions: [...(data.sessions ?? [])].sort((a, b) =>
 			b.created_at.localeCompare(a.created_at),
 		),
+	};
+}
+
+/** Lectura de una Sesión para el Histórico, incluyendo sus Preguntas y autores. */
+export async function getSessionHistory(
+	id: string,
+): Promise<SessionHistory | null> {
+	const supabase = await createClient();
+	const { data, error } = await supabase
+		.from("sessions")
+		.select(
+			"id, range, status, scheduled_at, created_at, materials(id, title, kind, author, status), questions(id, text, created_at, members(display_name))",
+		)
+		.eq("id", id)
+		.single();
+
+	if (error || !data || !data.materials) return null;
+
+	return {
+		id: data.id,
+		range: data.range,
+		status: data.status,
+		scheduled_at: data.scheduled_at,
+		created_at: data.created_at,
+		material: data.materials,
+		questions: (data.questions ?? []).map((question) => ({
+			id: question.id,
+			text: question.text,
+			created_at: question.created_at,
+			author: question.members?.display_name ?? "Miembro del club",
+		})),
 	};
 }

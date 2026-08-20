@@ -94,6 +94,14 @@ export default async function MaterialDetailPage({
 									<CardContent className="flex items-center justify-between gap-4">
 										<div className="flex min-w-0 flex-col gap-1">
 											<span className="font-medium">{session.range}</span>
+											{session.status === "archived" && (
+												<Link
+													href={`/materials/sessions/${session.id}`}
+													className="text-sm text-primary hover:underline"
+												>
+													Ver memoria
+												</Link>
+											)}
 											<span className="text-xs text-muted-foreground">
 												{session.scheduled_at
 													? new Date(session.scheduled_at).toLocaleDateString(
