@@ -2,7 +2,10 @@
 
 import { useTransition } from "react";
 import { toast } from "sonner";
-import type { LobbySnapshot } from "@/app/materials/_lib/lobby";
+import type {
+	LobbyAssignment,
+	LobbySnapshot,
+} from "@/app/materials/_lib/lobby";
 import {
 	joinLobby,
 	leaveLobby,
@@ -25,6 +28,46 @@ type Props = {
 	userId: string;
 	isModerator: boolean;
 };
+
+function stateBadge(state: LobbyAssignment["state"]): {
+	label: string;
+	variant: "secondary" | "outline" | "default";
+} {
+	switch (state) {
+		case "hidden":
+			return { label: "Oculta", variant: "outline" };
+		case "preparation":
+			return { label: "Revelando", variant: "secondary" };
+		case "exposition":
+		case "complement":
+			return { label: "Revelando", variant: "secondary" };
+		case "complete":
+			return { label: "Revelada", variant: "default" };
+	}
+}
+
+function AssignmentRow({ assignment }: { assignment: LobbyAssignment }) {
+	const badge = stateBadge(assignment.state);
+	return (
+		<li className="flex flex-col gap-1 rounded-md border border-border p-3 text-sm">
+			<div className="flex items-center justify-between gap-2">
+				<span>
+					{assignment.authorName} → {assignment.assigneeName}
+				</span>
+				<Badge variant={badge.variant}>{badge.label}</Badge>
+			</div>
+			{assignment.questionVisible && assignment.questionText ? (
+				<p className="text-xs text-muted-foreground">
+					{assignment.questionText}
+				</p>
+			) : (
+				<p className="text-xs text-muted-foreground italic">
+					Pregunta oculta hasta el debate
+				</p>
+			)}
+		</li>
+	);
+}
 
 export function LobbyPanel({ lobby, userId, isModerator }: Props) {
 	const [pending, start] = useTransition();
@@ -113,15 +156,25 @@ export function LobbyPanel({ lobby, userId, isModerator }: Props) {
 				<CardHeader>
 					<CardTitle>Sorteo</CardTitle>
 					<CardDescription>
-						Una sola vez. Queda oculto hasta revelar en el debate.
+						{lobby.drawDone
+							? "Parejas visibles. El texto se revela en el debate."
+							: "Una sola vez. Queda oculto hasta revelar en el debate."}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-3">
 					{lobby.drawDone ? (
 						<>
-							<p className="text-sm">
-								Sorteo listo · oculto. Nadie ve las asignaciones todavía.
-							</p>
+							{lobby.lobbyAssignments.length > 0 ? (
+								<ul className="flex flex-col gap-2">
+									{lobby.lobbyAssignments.map((a) => (
+										<AssignmentRow key={a.assignmentId} assignment={a} />
+									))}
+								</ul>
+							) : (
+								<p className="text-sm text-muted-foreground">
+									Sorteo listo · sin asignaciones.
+								</p>
+							)}
 							{freeTalkers.length > 0 && (
 								<p className="text-xs text-muted-foreground">
 									Sin asignación / libre: {freeTalkers.join(", ")}

@@ -523,6 +523,10 @@ export type Database = {
 				Args: { target_session_id: string };
 				Returns: Json;
 			};
+			lobby_assignments: {
+				Args: { target_session_id: string };
+				Returns: Json;
+			};
 			execute_draw: { Args: { target_session_id: string }; Returns: string };
 			is_member: { Args: never; Returns: boolean };
 			is_session_moderator: {

@@ -10,6 +10,17 @@ export type LobbyParticipant = {
 	optOut: boolean;
 };
 
+export type LobbyAssignment = {
+	assignmentId: string;
+	questionId: string;
+	authorName: string;
+	assigneeName: string;
+	state: Database["public"]["Enums"]["assignment_state"];
+	revealOrder: number;
+	questionText: string | null;
+	questionVisible: boolean;
+};
+
 export type LobbySnapshot = {
 	sessionId: string;
 	materialId: string;
@@ -23,6 +34,8 @@ export type LobbySnapshot = {
 	eligibleCount: number;
 	optOutCount: number;
 	unassignedNames: string[];
+	/** Parejas autor→asignado visibles tras el Sorteo. */
+	lobbyAssignments: LobbyAssignment[];
 };
 
 type ParticipantRow = {
@@ -77,6 +90,13 @@ export async function getLobbySnapshot(
 		if (Array.isArray(names)) unassignedNames = names;
 	}
 
+	const { data: assignmentsData } = await supabase.rpc("lobby_assignments", {
+		target_session_id: sessionId,
+	});
+	const lobbyAssignments: LobbyAssignment[] = Array.isArray(assignmentsData)
+		? (assignmentsData as unknown as LobbyAssignment[])
+		: [];
+
 	return {
 		sessionId: session.id,
 		materialId: session.material_id,
@@ -89,5 +109,6 @@ export async function getLobbySnapshot(
 		eligibleCount: participants.filter((p) => !p.optOut).length,
 		optOutCount: participants.filter((p) => p.optOut).length,
 		unassignedNames,
+		lobbyAssignments,
 	};
 }
