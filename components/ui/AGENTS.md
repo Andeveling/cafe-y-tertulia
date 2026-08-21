@@ -2,7 +2,7 @@
 
 Shadcn/base-ui **primitives only**.
 
-- Theme/brutalism → `app/globals.css` tokens, not one-off classes here unless the primitive structure requires it.
+- Theme → `app/globals.css` tokens. Use `rounded-*` token classes, not `rounded-none`.
 - No domain, no data fetching, no server actions.
 - Stories: `*.stories.tsx` beside each component.
 - Full rules: `docs/agents/ui-layers.md`.

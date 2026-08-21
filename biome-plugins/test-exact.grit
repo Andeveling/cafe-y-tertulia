@@ -1,6 +1,6 @@
 language js
 
 `"$a"` as $lit where {
-  $a <: r"bg-blue-600",
-  register_diagnostic(span = $lit, message = "no bg-blue-600 exact", severity = "error")
+	$a <: r"bg-blue-600",
+	register_diagnostic(span=$lit, message="no bg-blue-600 exact", severity="error")
 }

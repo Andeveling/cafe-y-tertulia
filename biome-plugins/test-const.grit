@@ -1,3 +1,3 @@
 `const $x = "$a"` as $stmt where {
-  register_diagnostic(span = $stmt, message = "any const string", severity = "error")
+	register_diagnostic(span=$stmt, message="any const string", severity="error")
 }

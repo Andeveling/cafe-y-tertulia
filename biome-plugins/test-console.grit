@@ -1,5 +1,5 @@
 language js
 
 `console.log($msg)` as $call where {
-  register_diagnostic(span = $call, message = "no console.log", severity = "error")
+	register_diagnostic(span=$call, message="no console.log", severity="error")
 }

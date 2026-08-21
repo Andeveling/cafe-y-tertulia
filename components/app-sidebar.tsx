@@ -59,7 +59,7 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 							render={<Link href="/" />}
 							isActive={pathname === "/"}
 						>
-							<div className="flex size-8 shrink-0 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground">
+							<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
 								<HugeiconsIcon icon={Book01Icon} className="size-4" />
 							</div>
 							<div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">

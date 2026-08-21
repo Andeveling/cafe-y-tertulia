@@ -5,7 +5,7 @@
 | Topic | Choice |
 | ------- | -------- |
 | What “design system” means | Tokens + composition rules; not a private registry (yet) |
-| Brutalism lives in | `app/globals.css` tokens first (`--radius: 0`, border/ink contrast) |
+| Look lives in | `app/globals.css` tokens first (warm café, `--radius` ~0.875rem, not ad-hoc `ui/*` colors) |
 | Re-add shadcn component | Prefer **never overwrite** edited `components/ui/*`; only `add` new names. Diff if you must upgrade one file. |
 | Storybook scope | Primitives + **views**; full pages with real auth/DB → Playwright |
 

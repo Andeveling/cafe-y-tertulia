@@ -16,7 +16,7 @@ para estructurar el proyecto - .agents/skills/nextjs-16/SKILL.md
 ## Design
 
 - Don't make me think; no excessive text.
-- **Brutalist tokens** in `app/globals.css` (CSS variables / `@theme`) — not ad-hoc edits across every `ui/*`.
+- **Tokens** in `app/globals.css` (CSS variables / `@theme`) — café, radio suave, no colores ad-hoc en `ui/*`.
 - **UI layers** (page → view → ui, Storybook vs e2e, shadcn re-add policy): `docs/agents/ui-layers.md`.
 - `components/ui` = primitives only (see `components/ui/AGENTS.md`).
 

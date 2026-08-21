@@ -57,6 +57,7 @@
 		"msw": "^2.15.0",
 		"msw-storybook-addon": "^3.0.0",
 		"playwright": "latest",
+		"react-grab": "^0.2.0",
 		"storybook": "^10.5.10",
 		"tailwindcss": "^4.3.3",
 		"typescript": "^5.9.3",
