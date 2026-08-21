@@ -18,6 +18,7 @@ const baseLobby: LobbySnapshot = {
 	eligibleCount: 2,
 	optOutCount: 0,
 	unassignedNames: [],
+	lobbyAssignments: [],
 };
 
 const meta = {
@@ -67,6 +68,60 @@ export const DrawDone: Story = {
 			...baseLobby,
 			drawDone: true,
 			unassignedNames: ["Pedro"],
+			lobbyAssignments: [
+				{
+					assignmentId: "a1",
+					questionId: "q1",
+					authorName: "Ana",
+					assigneeName: "Marta",
+					state: "hidden",
+					revealOrder: 1,
+					questionText: null,
+					questionVisible: false,
+				},
+				{
+					assignmentId: "a2",
+					questionId: "q2",
+					authorName: "Marta",
+					assigneeName: "Ana",
+					state: "hidden",
+					revealOrder: 2,
+					questionText: null,
+					questionVisible: false,
+				},
+			],
+		},
+	},
+};
+
+export const DrawRevealing: Story = {
+	args: {
+		lobby: {
+			...baseLobby,
+			drawDone: true,
+			unassignedNames: [],
+			lobbyAssignments: [
+				{
+					assignmentId: "a1",
+					questionId: "q1",
+					authorName: "Ana",
+					assigneeName: "Marta",
+					state: "exposition",
+					revealOrder: 1,
+					questionText: "¿Qué opinas del capítulo 2?",
+					questionVisible: true,
+				},
+				{
+					assignmentId: "a2",
+					questionId: "q2",
+					authorName: "Marta",
+					assigneeName: "Ana",
+					state: "hidden",
+					revealOrder: 2,
+					questionText: null,
+					questionVisible: false,
+				},
+			],
 		},
 	},
 };
