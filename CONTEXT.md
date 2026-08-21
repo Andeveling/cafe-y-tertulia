@@ -12,6 +12,18 @@ _Avoid_: Usuario, Participante (como entidad)
 Un Miembro confirmado como presente en una Sesión concreta. Término de contexto de sesión, no una entidad propia.
 _Avoid_: Asistente, integrante
 
+**Sala de Sesión**:
+Única vista de una Sesión activa: ocupa todo el espacio de la pantalla, cambia de contenido según la Etapa y se mantiene sincronizada en realtime para Moderador y Participantes. Durante una Sesión nadie navega a otras páginas: las transiciones ocurren dentro de la Sala.
+_Avoid_: Lobby (como página), Escenario (como página separada), dashboard
+
+**Etapa**:
+Lo que la Sala muestra en cada momento y todos los dispositivos ven igual, en orden fijo: `Preguntas` → `Presentes` → `Sorteo` → `Debate` → `Cierre`. El Estado técnico de la Sesión respalda a las Etapas; la interfaz siempre indica la Etapa actual y las ya completadas.
+_Avoid_: Pantalla, vista, pestaña
+
+**Listo**:
+Condición de un Participante que está presente y tiene al menos una Pregunta registrada para la Sesión. Cuando todos están Listos, la siguiente Etapa queda habilitada; el Moderador puede avanzar de todos modos y la interfaz muestra siempre quién falta y por qué.
+_Avoid_: Ready, confirmado, completo
+
 **Moderador**:
 Estado temporal que un Miembro asume al iniciar o conducir una Sesión. Lo asume quien abre la Sesión, puede cederlo a otro Participante en el lobby antes del Sorteo y no se transfiere durante la Sesión; cualquier miembro puede serlo — no existe un moderador permanente.
 _Avoid_: Host, anfitrión, admin de sesión
@@ -21,8 +33,8 @@ Encuentro del club (presencial o por videollamada) con sus fases, estados y dato
 _Avoid_: Tertulia (como término de modelo), reunión, meet
 
 **Estado de la sesión**:
-Ciclo de vida de una Sesión: `preparación` (los miembros proponen materiales, preguntas y trivias antes de que exista una cita), `lobby` (el moderador confirma participantes y ejecuta el Sorteo), `en_curso` (el debate; internamente lleva un punto de revelación y el estado de la intervención actual), `cerrada` (datos consolidados al cerrar — rating congelado y minijuegos finalizados; solo editable por el moderador de la sesión para correcciones puntuales: rango, fecha programada, notas de respuesta y agregado de rating vía `clear_session_rating`; nunca votos individuales, participantes, asignaciones, sorteo ni resultados de minijuegos) e `histórico` (solo lectura, permanente e inmutable; corresponde al valor técnico `archived`). `cerrada → histórico` es manual inmediato con archivado automático a las 48h. Los minijuegos son acciones dentro de `en_curso`, no estados propios.
-_Avoid_: Fase, etapa, status, archivado (como término de dominio; usar `histórico`)
+Ciclo de vida técnico de una Sesión: `preparación` (los miembros proponen materiales, preguntas y trivias antes de que exista una cita), `lobby` (el moderador confirma participantes y ejecuta el Sorteo), `en_curso` (el debate; internamente lleva un punto de revelación y el estado de la intervención actual), `cerrada` (datos consolidados al cerrar — rating congelado y minijuegos finalizados; solo editable por el moderador de la sesión para correcciones puntuales: rango, fecha programada, notas de respuesta y agregado de rating vía `clear_session_rating`; nunca votos individuales, participantes, asignaciones, sorteo ni resultados de minijuegos) e `histórico` (solo lectura, permanente e inmutable; corresponde al valor técnico `archived`). `cerrada → histórico` es manual inmediato con archivado automático a las 48h. Los minijuegos son acciones dentro de `en_curso`, no estados propios. Las Etapas visibles de la Sala se apoyan en estos estados.
+_Avoid_: Fase, status, archivado (como término de dominio; usar `histórico`)
 
 **Material**:
 Contenido sobre el que se conversa: libro, podcast, video o artículo. Tiene un pipeline de estados (propuesto → seleccionado → en curso → terminado) y puede cubrirse en varias Sesiones.
@@ -33,7 +45,7 @@ Porción del Material que aborda una Sesión concreta (ej. "Capítulos 1-3", "Ep
 _Avoid_: Capítulo (como entidad), episodio, sección
 
 **Pregunta**:
-Pregunta abierta que un Miembro aporta para una Sesión sobre un Material. Tiene autor y, dentro de la Sesión, un asignado.
+Pregunta abierta que un Miembro aporta para una Sesión sobre un Material, asincrónicamente: puede escribirla días antes desde la etapa `Preguntas` de la Sala. Su texto es visible solo para su autor hasta la Intervención que la revela; los demás participantes ven autor y estado (enviada ✓), no el contenido. Tiene autor y, dentro de la Sesión, un asignado.
 _Avoid_: Cuestión, interrogante
 
 **Asignación**:
@@ -53,7 +65,7 @@ Aporte breve (unos dos minutos) que el autor de una Pregunta hace tras la exposi
 _Avoid_: Réplica, turno extra
 
 **Intervención**:
-Ciclo de una Asignación dentro del debate: `oculta` → Momento de preparación → `exposición` → Complemento → completa. Lo conduce el Moderador, que avanza de fase en fase manualmente; el temporizador es orientativo y nunca corta. La rotación de Intervenciones es la permutación aleatoria fijada por el Sorteo.
+Ciclo de una Asignación dentro del debate: `oculta` → Momento de preparación → `exposición` → Complemento → completa. Lo conduce el Moderador; el temporizador orienta el ritmo pero nunca corta ni fuerza transiciones — solo habilita acciones de conducción (tiempo extra, siguiente fase). La rotación de Intervenciones es la permutación aleatoria fijada por el Sorteo.
 _Avoid_: Turno, intervención libre (como fase), bloque de debate
 
 **Escenario**:
@@ -61,11 +73,15 @@ Zona central de la pantalla compartida donde vive la conversación: la Pregunta 
 _Avoid_: Dashboard, panel, stage
 
 **Sorteo**:
-Asignación aleatoria de Preguntas a los participantes de la Sesión, con estado propio y oculto hasta revelar. Nadie —ni el Moderador— conoce su Pregunta hasta el momento de revelarla. Una Pregunta puede asignarse a hasta dos participantes, nunca a su autor. Estados: `pendiente` (aún no ejecutado), `oculto` (ejecutado, nadie ve las asignaciones), `revelando` (algunas asignaciones reveladas), `revelado` (todas reveladas).
+Asignación aleatoria de Preguntas a los participantes de la Sesión. Ejecutado el Sorteo, todos ven las parejas autor → asignado, pero el texto de cada Pregunta permanece oculto hasta la Intervención de su asignado: la sorpresa es el texto y el momento, no la pareja. Una Pregunta puede asignarse a hasta dos participantes, nunca a su autor. Estados: `pendiente` (aún no ejecutado), `oculto` (ejecutado: parejas visibles, textos ocultos), `revelando` (algunas Intervenciones completadas), `revelado` (todas completadas).
 _Avoid_: Ruleta, rifa, asignación manual
 
+**Espectador**:
+Persona presente en una Sesión que esta vez no participa: no aporta Preguntas, no recibe Asignación y no cuenta para la condición de todos Listos. La agrega el Moderador a la mesa; sí cuenta como presente. No es una variante de Sin sorteo: el que está Sin sorteo aportó al club pero prefiere conversar libre.
+_Avoid_: Invitado pasivo, oyente, audiencia
+
 **Sin sorteo**:
-Opt-out que un Participante marca al confirmar en el lobby: no recibe Asignación ni llamada del Sorteo y conversa libremente.
+Opt-out que un Participante marca al confirmar en el lobby: no recibe Asignación ni llamada del Sorteo y conversa libremente. Difiere del Espectador en que quien está Sin sorteo es Miembro activo y aporta Preguntas normalmente.
 _Avoid_: No participar, espectador
 
 **Fuera de sorteo**:
