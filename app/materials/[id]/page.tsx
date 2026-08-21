@@ -1,9 +1,10 @@
-import { ArrowLeftIcon, Book01Icon } from "@hugeicons/core-free-icons";
+import { Book01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdvanceButton } from "@/app/materials/_components/advance-button";
 import { MaterialQuestionsSection } from "@/app/materials/_components/material-questions-section";
+import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { SessionForm } from "@/app/materials/_components/session-form";
 import { SessionScheduler } from "@/app/materials/_components/session-scheduler";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
@@ -15,7 +16,6 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -56,16 +56,6 @@ export default async function MaterialDetailPage({
 
 	return (
 		<div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
-			<Button
-				variant="ghost"
-				nativeButton={false}
-				render={<Link href="/materials" />}
-				className="w-fit"
-			>
-				<HugeiconsIcon icon={ArrowLeftIcon} data-icon="inline-start" />
-				Volver a materiales
-			</Button>
-
 			<Card>
 				<CardHeader className="grid-cols-[1fr_auto]">
 					<CardTitle>{material.title}</CardTitle>
@@ -77,7 +67,10 @@ export default async function MaterialDetailPage({
 					</Badge>
 					{material.rating_count > 0 && (
 						<Badge variant="outline">
-							{material.rating_avg}★ · {material.rating_count}
+							<RatingDisplay
+								value={material.rating_avg}
+								count={material.rating_count}
+							/>
 						</Badge>
 					)}
 				</CardHeader>
@@ -129,9 +122,11 @@ export default async function MaterialDetailPage({
 											{SESSION_STATUS_LABELS[session.status]}
 										</Badge>
 										{session.rating_count > 0 && (
-											<span className="hidden shrink-0 text-xs tabular-nums text-muted-foreground sm:inline">
-												{session.rating_avg}★ · {session.rating_count}
-											</span>
+											<RatingDisplay
+												value={session.rating_avg}
+												count={session.rating_count}
+												className="hidden shrink-0 sm:inline-flex"
+											/>
 										)}
 									</span>
 								</AccordionTrigger>
@@ -140,10 +135,14 @@ export default async function MaterialDetailPage({
 										<div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
 											<div className="flex min-w-0 flex-col gap-1">
 												{session.rating_count > 0 && (
-													<span className="text-xs tabular-nums text-muted-foreground">
-														{session.rating_avg}★ · {session.rating_count}{" "}
-														{session.rating_count === 1 ? "voto" : "votos"} ·
-														congelado
+													<span className="flex flex-wrap items-center gap-1 text-xs">
+														<RatingDisplay
+															value={session.rating_avg}
+															count={session.rating_count}
+														/>
+														<span className="text-muted-foreground">
+															· congelado
+														</span>
 													</span>
 												)}
 												<SessionScheduler

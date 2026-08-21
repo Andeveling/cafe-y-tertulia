@@ -2,6 +2,7 @@ import { ArrowLeftIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { StagePanel } from "@/app/materials/_components/stage-panel";
 import { getStageSnapshot } from "@/app/materials/_lib/stage";
 import { Badge } from "@/components/ui/badge";
@@ -77,14 +78,12 @@ export default async function StagePage({
 							Votos descartados · hasta cerrar la sesión
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="flex items-baseline gap-2">
-						<span className="text-3xl font-semibold tabular-nums">
-							{frozenRating.avg ?? "—"}
-						</span>
-						<span className="text-sm text-muted-foreground">
-							★ · {frozenRating.count}{" "}
-							{frozenRating.count === 1 ? "voto" : "votos"}
-						</span>
+					<CardContent>
+						<RatingDisplay
+							value={frozenRating.avg}
+							count={frozenRating.count}
+							size="lg"
+						/>
 					</CardContent>
 				</Card>
 			)}

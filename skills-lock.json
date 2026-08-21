@@ -67,8 +67,14 @@
 			"skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
 			"computedHash": "4a02bd01030d5ed6a5040c0382b9f56fbf02c7c8b8fd68aa1bcc55628963f760"
 		},
+		"interface-design": {
+			"source": "dammyjay93/interface-design",
+			"sourceType": "github",
+			"skillPath": ".claude/skills/interface-design/SKILL.md",
+			"computedHash": "340cc79a1558f09371aa3eb689952a8b777c1d7362c24226e99693606a80828e"
+		},
 		"nextjs-16": {
-			"source": "/home/andresp/Projects/personal/cafe-y-tertulia/skills",
+			"source": "./skills",
 			"sourceType": "local",
 			"computedHash": "46bec90e2c99b4ca02feec770b62800d4eba5e06139fd8b893bb90b64d1e0cb1"
 		},
@@ -175,7 +181,7 @@
 			"computedHash": "ccfa1e94d8f6ab5c6a1edd55293ca477faf93c39207771331efdb1e798ed21d6"
 		},
 		"zod4": {
-			"source": "/home/andresp/Projects/personal/cafe-y-tertulia/skills",
+			"source": "./skills",
 			"sourceType": "local",
 			"computedHash": "2c54536f71f99559b5ba7b6134a8fe5faff3d41f476537fa8ac3ff46accb812a"
 		}

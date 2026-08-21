@@ -1,13 +1,12 @@
-import { ArrowLeftIcon, Message01Icon } from "@hugeicons/core-free-icons";
+import { Message01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import {
 	getSessionHistory,
 	SESSION_STATUS_LABELS,
 } from "@/app/materials/_lib/materials";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -30,17 +29,6 @@ export default async function SessionHistoryPage({
 
 	return (
 		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
-			<Button
-				variant="ghost"
-				size="sm"
-				nativeButton={false}
-				render={<Link href={`/materials/${session.material.id}`} />}
-				className="w-fit"
-			>
-				<HugeiconsIcon icon={ArrowLeftIcon} data-icon="inline-start" />
-				Volver al material
-			</Button>
-
 			<header className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="secondary">Histórico</Badge>
@@ -55,8 +43,12 @@ export default async function SessionHistoryPage({
 					{session.range} · {session.material.author}
 				</p>
 				{session.rating_count > 0 && (
-					<p className="text-sm">
-						Rating sesión: {session.rating_avg}★ · {session.rating_count} votos
+					<p className="flex flex-wrap items-center gap-2 text-sm">
+						<span>Rating sesión:</span>
+						<RatingDisplay
+							value={session.rating_avg}
+							count={session.rating_count}
+						/>
 					</p>
 				)}
 			</header>

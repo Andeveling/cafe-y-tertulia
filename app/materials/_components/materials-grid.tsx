@@ -2,11 +2,11 @@ import {
 	Book01Icon,
 	News01Icon,
 	PodcastIcon,
-	StarIcon,
 	Video01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
+import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -41,20 +41,6 @@ const KIND_ICON: Record<string, typeof Book01Icon> = {
 	podcast: PodcastIcon,
 	article: News01Icon,
 };
-
-function Stars({ avg, count }: { avg: number | null; count: number }) {
-	if (!count || avg == null)
-		return <span className="text-xs text-muted-foreground/60">sin votos</span>;
-	return (
-		<span className="inline-flex items-center gap-1 tabular-nums text-xs">
-			<HugeiconsIcon
-				icon={StarIcon}
-				className="size-3.5 text-secondary-foreground/80"
-			/>
-			{avg.toFixed(1)} · {count}
-		</span>
-	);
-}
 
 /**
  * Portadas — grid de covers (variante C ganadora).
@@ -95,7 +81,7 @@ export function MaterialsGrid({
 										{m.sessions_count}{" "}
 										{m.sessions_count === 1 ? "sesión" : "sesiones"}
 									</span>
-									<Stars avg={m.rating_avg} count={m.rating_count} />
+									<RatingDisplay value={m.rating_avg} count={m.rating_count} />
 								</div>
 							</CardContent>
 						</Card>

@@ -67,7 +67,7 @@ export function SessionForm({ materialId }: { materialId: string }) {
 					</Field>
 				)}
 			/>
-			<Field className="w-48">
+			<Field className="w-56">
 				<FieldLabel htmlFor="session-scheduled-at">Fecha programada</FieldLabel>
 				<DatePicker
 					date={scheduledAt}

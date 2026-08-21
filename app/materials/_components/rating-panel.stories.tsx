@@ -31,6 +31,9 @@ export const OpenVoting: Story = {
 		await expect(
 			canvas.getByRole("button", { name: /cerrar votación/i }),
 		).toBeEnabled();
+		await expect(
+			canvas.getByRole("button", { name: /calificar con 3 estrellas/i }),
+		).toHaveAttribute("aria-pressed", "true");
 		await expect(canvas.getByText(/1 de 4/i)).toBeVisible();
 	},
 };

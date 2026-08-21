@@ -1,7 +1,10 @@
 "use client";
 
+import { StarIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -49,14 +52,12 @@ export function RatingPanel({ progress }: Props) {
 						<CardTitle>Rating de la sesión</CardTitle>
 						<CardDescription>Congelado · votos descartados</CardDescription>
 					</CardHeader>
-					<CardContent className="flex items-baseline gap-2">
-						<span className="text-3xl font-semibold tabular-nums">
-							{progress.ratingAvg ?? "—"}
-						</span>
-						<span className="text-muted-foreground text-sm">
-							★ · {progress.ratingCount} voto
-							{progress.ratingCount === 1 ? "" : "s"}
-						</span>
+					<CardContent>
+						<RatingDisplay
+							value={progress.ratingAvg}
+							count={progress.ratingCount}
+							size="lg"
+						/>
 					</CardContent>
 				</Card>
 			)}
@@ -116,7 +117,7 @@ export function RatingPanel({ progress }: Props) {
 							<CardHeader>
 								<CardTitle>Tu voto</CardTitle>
 								<CardDescription>
-									1–5★ · anónimo · puedes cambiarlo
+									1–5 estrellas · anónimo · puedes cambiarlo
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="flex flex-wrap gap-2">
@@ -126,6 +127,8 @@ export function RatingPanel({ progress }: Props) {
 										variant={progress.myStars === n ? "default" : "outline"}
 										size="lg"
 										disabled={pending}
+										aria-pressed={progress.myStars === n}
+										aria-label={`Calificar con ${n} ${n === 1 ? "estrella" : "estrellas"}`}
 										onClick={() =>
 											run(castVoteAction, {
 												session_id: progress.sessionId,
@@ -133,7 +136,12 @@ export function RatingPanel({ progress }: Props) {
 											})
 										}
 									>
-										{n}★
+										<span>{n}</span>
+										<HugeiconsIcon
+											icon={StarIcon}
+											data-icon="inline-start"
+											aria-hidden="true"
+										/>
 									</Button>
 								))}
 							</CardContent>
