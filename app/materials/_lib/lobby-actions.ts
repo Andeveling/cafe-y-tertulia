@@ -6,6 +6,10 @@ function lobbyPath(sessionId: string) {
 	return `/materials/sessions/${sessionId}/lobby`;
 }
 
+function roomPath(sessionId: string) {
+	return `/materials/sessions/${sessionId}/room`;
+}
+
 export async function joinLobby(sessionId: string): Promise<ActionResult> {
 	return runServerAction({
 		requireAuth: true,
@@ -30,7 +34,7 @@ export async function joinLobby(sessionId: string): Promise<ActionResult> {
 
 			if (error) return { ok: false, error: error.message };
 		},
-		revalidate: async () => [lobbyPath(sessionId)],
+		revalidate: async () => [lobbyPath(sessionId), roomPath(sessionId)],
 	});
 }
 
@@ -46,7 +50,7 @@ export async function leaveLobby(sessionId: string): Promise<ActionResult> {
 
 			if (error) return { ok: false, error: error.message };
 		},
-		revalidate: async () => [lobbyPath(sessionId)],
+		revalidate: async () => [lobbyPath(sessionId), roomPath(sessionId)],
 	});
 }
 
@@ -65,7 +69,7 @@ export async function setOptOut(
 
 			if (error) return { ok: false, error: error.message };
 		},
-		revalidate: async () => [lobbyPath(sessionId)],
+		revalidate: async () => [lobbyPath(sessionId), roomPath(sessionId)],
 	});
 }
 
@@ -78,6 +82,6 @@ export async function runDraw(sessionId: string): Promise<ActionResult> {
 			});
 			if (error) return { ok: false, error: error.message };
 		},
-		revalidate: async () => [lobbyPath(sessionId)],
+		revalidate: async () => [lobbyPath(sessionId), roomPath(sessionId)],
 	});
 }

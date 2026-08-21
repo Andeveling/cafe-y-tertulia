@@ -1,100 +1,25 @@
-import { ArrowLeftIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { LobbyPanel } from "@/app/materials/_components/lobby-panel";
 import { getLobbySnapshot } from "@/app/materials/_lib/lobby";
-import { SESSION_STATUS_LABELS } from "@/app/materials/_lib/materials";
-import { LobbyProto } from "@/app/materials/sessions/[id]/lobby/_proto/lobby-proto";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Lobby · Café y Tertulia" };
 
+/** /lobby redirige a /room (ticket #29 — Sala v1 ruta única). */
 export default async function LobbyPage({
 	params,
-	searchParams,
 }: {
 	params: Promise<{ id: string }>;
-	searchParams: Promise<{ variant?: string }>;
 }) {
 	const { id: sessionId } = await params;
-	const { variant } = await searchParams;
 	const supabase = await createClient();
 	const {
 		data: { user },
 	} = await supabase.auth.getUser();
 	if (!user) redirect("/auth/login");
 
+	// Verificar que la sesión existe antes de redirigir.
 	const lobby = await getLobbySnapshot(supabase, sessionId);
 	if (!lobby) notFound();
 
-	// PROTOTIPO DESCARTABLE — solo con ?variant= y fuera de producción.
-	if (
-		process.env.NODE_ENV !== "production" &&
-		variant &&
-		["A", "B", "C"].includes(variant)
-	) {
-		return (
-			<main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-6">
-				<Button
-					variant="ghost"
-					size="sm"
-					nativeButton={false}
-					render={<Link href={`/materials/${lobby.materialId}`} />}
-					className="w-fit"
-				>
-					<HugeiconsIcon icon={ArrowLeftIcon} data-icon="inline-start" />
-					Material
-				</Button>
-
-				<header className="flex flex-col gap-2">
-					<div className="flex flex-wrap gap-2">
-						<Badge variant="secondary">Lobby</Badge>
-						<Badge variant="outline">
-							{SESSION_STATUS_LABELS[lobby.status]}
-						</Badge>
-					</div>
-					<h1 className="font-heading text-2xl font-semibold">{lobby.range}</h1>
-				</header>
-
-				<LobbyProto
-					lobby={lobby}
-					variant={variant}
-					myId={user.id}
-					myName={
-						lobby.participants.find((p) => p.memberId === user.id)
-							?.displayName ??
-						user.email?.split("@")[0] ??
-						"Vos"
-					}
-					realIsModerator={lobby.moderatorId === user.id}
-				/>
-			</main>
-		);
-	}
-
-	return (
-		<main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-6">
-			<header className="flex flex-col gap-2">
-				<div className="flex flex-wrap gap-2">
-					<Badge variant="outline">{SESSION_STATUS_LABELS[lobby.status]}</Badge>
-				</div>
-				<h1 className="font-heading text-2xl font-semibold">{lobby.range}</h1>
-			</header>
-
-			{lobby.status !== "lobby" ? (
-				<p className="text-sm text-muted-foreground">
-					Esta sesión no está en lobby.
-				</p>
-			) : (
-				<LobbyPanel
-					lobby={lobby}
-					userId={user.id}
-					isModerator={lobby.moderatorId === user.id}
-				/>
-			)}
-		</main>
-	);
+	redirect(`/materials/sessions/${sessionId}/room`);
 }

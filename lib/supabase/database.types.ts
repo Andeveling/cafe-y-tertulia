@@ -255,16 +255,19 @@ export type Database = {
 				Row: {
 					member_id: string;
 					opt_out: boolean;
+					role: Database["public"]["Enums"]["participant_role"];
 					session_id: string;
 				};
 				Insert: {
 					member_id: string;
 					opt_out?: boolean;
+					role?: Database["public"]["Enums"]["participant_role"];
 					session_id: string;
 				};
 				Update: {
 					member_id?: string;
 					opt_out?: boolean;
+					role?: Database["public"]["Enums"]["participant_role"];
 					session_id?: string;
 				};
 				Relationships: [];
@@ -279,6 +282,7 @@ export type Database = {
 					rating_avg: number | null;
 					rating_count: number;
 					rating_open: boolean;
+					room_stage: Database["public"]["Enums"]["room_stage"];
 					scheduled_at: string | null;
 					status: Database["public"]["Enums"]["session_status"];
 					updated_at: string;
@@ -292,6 +296,7 @@ export type Database = {
 					rating_avg?: number | null;
 					rating_count?: number;
 					rating_open?: boolean;
+					room_stage?: Database["public"]["Enums"]["room_stage"];
 					scheduled_at?: string | null;
 					status?: Database["public"]["Enums"]["session_status"];
 					updated_at?: string;
@@ -305,6 +310,7 @@ export type Database = {
 					rating_avg?: number | null;
 					rating_count?: number;
 					rating_open?: boolean;
+					room_stage?: Database["public"]["Enums"]["room_stage"];
 					scheduled_at?: string | null;
 					status?: Database["public"]["Enums"]["session_status"];
 					updated_at?: string;
@@ -545,6 +551,25 @@ export type Database = {
 				Args: { target_session_id: string };
 				Returns: Json;
 			};
+			room_snapshot: {
+				Args: { target_session_id: string };
+				Returns: Json;
+			};
+			advance_room_stage: {
+				Args: {
+					target_session_id: string;
+					new_stage: Database["public"]["Enums"]["room_stage"];
+				};
+				Returns: undefined;
+			};
+			set_spectator: {
+				Args: {
+					target_session_id: string;
+					target_member_id: string;
+					make_spectator: boolean;
+				};
+				Returns: undefined;
+			};
 			create_trivia_with_items: {
 				Args: { p_material_id: string; p_title: string; p_items: Json };
 				Returns: string;
@@ -637,6 +662,8 @@ export type Database = {
 			material_kind: "book" | "podcast" | "video" | "article";
 			material_status: "proposed" | "selected" | "in_progress" | "finished";
 			member_status: "invited" | "active" | "left";
+			participant_role: "member" | "spectator";
+			room_stage: "questions" | "presence" | "draw";
 			session_status:
 				| "preparation"
 				| "lobby"
@@ -791,6 +818,8 @@ export const Constants = {
 			material_kind: ["book", "podcast", "video", "article"],
 			material_status: ["proposed", "selected", "in_progress", "finished"],
 			member_status: ["invited", "active", "left"],
+			participant_role: ["member", "spectator"],
+			room_stage: ["questions", "presence", "draw"],
 			session_status: [
 				"preparation",
 				"lobby",
