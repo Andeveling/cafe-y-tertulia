@@ -3,12 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { createSession } from "@/app/materials/_lib/materials-actions";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
@@ -20,6 +21,7 @@ type SessionFormValues = z.infer<typeof sessionFormSchema>;
 
 export function SessionForm({ materialId }: { materialId: string }) {
 	const [isPending, startTransition] = useTransition();
+	const [scheduledAt, setScheduledAt] = useState<Date | undefined>(undefined);
 	const form = useForm<SessionFormValues>({
 		resolver: zodResolver(sessionFormSchema),
 		defaultValues: {
@@ -29,12 +31,17 @@ export function SessionForm({ materialId }: { materialId: string }) {
 
 	function onSubmit(data: SessionFormValues) {
 		startTransition(async () => {
-			const result = await createSession({ materialId, range: data.range });
+			const result = await createSession({
+				materialId,
+				range: data.range,
+				scheduledAt: scheduledAt?.toISOString() ?? null,
+			});
 			if ("error" in result) {
 				toast.error(result.error);
 			} else {
 				toast.success("Sesión creada");
 				form.reset();
+				setScheduledAt(undefined);
 			}
 		});
 	}
@@ -60,7 +67,16 @@ export function SessionForm({ materialId }: { materialId: string }) {
 					</Field>
 				)}
 			/>
-			<Button type="submit" size="sm" disabled={isPending}>
+			<Field className="w-48">
+				<FieldLabel htmlFor="session-scheduled-at">Fecha programada</FieldLabel>
+				<DatePicker
+					date={scheduledAt}
+					onSelect={setScheduledAt}
+					placeholder="Sin fecha"
+					id="session-scheduled-at"
+				/>
+			</Field>
+			<Button type="submit" disabled={isPending}>
 				<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
 				Nueva sesión
 			</Button>

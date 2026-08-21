@@ -80,18 +80,45 @@ export async function advanceMaterial(id: string): Promise<ActionResult> {
 export async function createSession(input: {
 	materialId: string;
 	range: string;
+	scheduledAt?: string | null;
 }): Promise<ActionResult> {
 	return runServerAction({
 		run: async ({ supabase }) => {
 			const { error } = await supabase.from("sessions").insert({
 				material_id: input.materialId,
 				range: input.range.trim(),
+				scheduled_at: input.scheduledAt ?? null,
 			});
 
 			if (error) {
 				return {
 					ok: false,
 					error: `No se pudo crear la sesión: ${error.message}`,
+				};
+			}
+		},
+		revalidate: async () => [`/materials/${input.materialId}`],
+	});
+}
+
+/** Actualiza la fecha programada de una sesión (o la limpia si es null). */
+export async function rescheduleSession(input: {
+	materialId: string;
+	sessionId: string;
+	scheduledAt: string | null;
+}): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			const { error } = await supabase
+				.from("sessions")
+				.update({ scheduled_at: input.scheduledAt })
+				.eq("id", input.sessionId);
+
+			if (error) {
+				return {
+					ok: false,
+					error: `No se pudo reprogramar la sesión: ${error.message}`,
 				};
 			}
 		},

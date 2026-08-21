@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { AdvanceButton } from "@/app/materials/_components/advance-button";
 import { MaterialQuestionsSection } from "@/app/materials/_components/material-questions-section";
 import { SessionForm } from "@/app/materials/_components/session-form";
+import { SessionScheduler } from "@/app/materials/_components/session-scheduler";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
 import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
 import {
@@ -57,7 +58,6 @@ export default async function MaterialDetailPage({
 		<div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
 			<Button
 				variant="ghost"
-				size="sm"
 				nativeButton={false}
 				render={<Link href="/materials" />}
 				className="w-fit"
@@ -146,18 +146,11 @@ export default async function MaterialDetailPage({
 														congelado
 													</span>
 												)}
-												<span className="text-xs text-muted-foreground">
-													{session.scheduled_at
-														? new Date(session.scheduled_at).toLocaleDateString(
-																"es",
-																{
-																	day: "numeric",
-																	month: "long",
-																	year: "numeric",
-																},
-															)
-														: "Sin fecha programada"}
-												</span>
+												<SessionScheduler
+													materialId={material.id}
+													sessionId={session.id}
+													scheduledAt={session.scheduled_at}
+												/>
 											</div>
 											<div className="flex shrink-0 items-center gap-2">
 												{session.status !== "archived" && (
