@@ -21,8 +21,8 @@ Encuentro del club (presencial o por videollamada) con sus fases, estados y dato
 _Avoid_: Tertulia (como término de modelo), reunión, meet
 
 **Estado de la sesión**:
-Ciclo de vida de una Sesión: `preparación` (los miembros proponen materiales, preguntas y trivias antes de que exista una cita), `lobby` (el moderador confirma participantes y ejecuta el Sorteo), `en_curso` (el debate; internamente lleva un punto de revelación y el estado de la intervención actual), `cerrada` (datos congelados, aún editable por el moderador para corregir errores) e `histórico` (solo lectura, permanente). Los minijuegos son acciones dentro de `en_curso`, no estados propios.
-_Avoid_: Fase, etapa, status
+Ciclo de vida de una Sesión: `preparación` (los miembros proponen materiales, preguntas y trivias antes de que exista una cita), `lobby` (el moderador confirma participantes y ejecuta el Sorteo), `en_curso` (el debate; internamente lleva un punto de revelación y el estado de la intervención actual), `cerrada` (datos consolidados al cerrar — rating congelado y minijuegos finalizados; solo editable por el moderador de la sesión para correcciones puntuales: rango, fecha programada, notas de respuesta y agregado de rating vía `clear_session_rating`; nunca votos individuales, participantes, asignaciones, sorteo ni resultados de minijuegos) e `histórico` (solo lectura, permanente e inmutable; corresponde al valor técnico `archived`). `cerrada → histórico` es manual inmediato con archivado automático a las 48h. Los minijuegos son acciones dentro de `en_curso`, no estados propios.
+_Avoid_: Fase, etapa, status, archivado (como término de dominio; usar `histórico`)
 
 **Material**:
 Contenido sobre el que se conversa: libro, podcast, video o artículo. Tiene un pipeline de estados (propuesto → seleccionado → en curso → terminado) y puede cubrirse en varias Sesiones.

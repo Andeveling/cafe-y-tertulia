@@ -221,10 +221,11 @@ stateDiagram-v2
 | `preparation` | miembros proponen Materiales, Preguntas y Trivias; no hay cita | cualquiera |
 | `lobby` | moderador confirma Participantes, ejecuta el Sorteo | moderador |
 | `in_progress` | debate; revelación progresiva, minijuegos, rating | moderador (100% manual) |
-| `closed` | datos congelados; aún editable para corregir errores | moderador |
-| `archived` | solo lectura, permanente | — |
+| `closed` | datos consolidados al cerrar (rating congelado, minijuegos finalizados); solo editable por el moderador de la sesión para correcciones puntuales: `range`, `scheduled_at`, `assignments.notes` y agregado de rating (`clear_session_rating`); nunca votos individuales, participantes, asignaciones, sorteo ni resultados | moderador |
+| `archived` | solo lectura, permanente e inmutable (valor técnico `archived` = `histórico` del glosario) | — (manual inmediato + auto a las 48h) |
 
-- Minijuegos y Rating son **acciones dentro de `in_progress`**, no estados.
+- Minijuegos y Rating son **acciones dentro de `in_progress`**, no estados. El cierre `in_progress → closed` es atómico: congela rating si estaba abierto, bloquea si queda trivia/take/draw sin terminar y solo entonces cambia `status`.
+- `closed → archived` es manual ("Archivar") + job diario que archiva `closed` con `updated_at < now()-48h`.
 - El tiempo es guía, nunca corta (ADR 0002).
 
 ### 3.2 Sorteo (`draws.status`)
