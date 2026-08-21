@@ -28,6 +28,10 @@ _Avoid_: Fase, etapa, status
 Contenido sobre el que se conversa: libro, podcast, video o artículo. Tiene un pipeline de estados (propuesto → seleccionado → en curso → terminado) y puede cubrirse en varias Sesiones.
 _Avoid_: Contenido, recurso, libro (como término general)
 
+**Rango cubierto**:
+Porción del Material que aborda una Sesión concreta (ej. "Capítulos 1-3", "Ep. 2", "Min 0-30"). Se define progresivamente al crear cada Sesión como texto libre, sin lista previa de capítulos ni validación de solapes; una Sesión puede cubrir uno o varios capítulos. Es la etiqueta que ordena la cronología del Histórico.
+_Avoid_: Capítulo (como entidad), episodio, sección
+
 **Pregunta**:
 Pregunta abierta que un Miembro aporta para una Sesión sobre un Material. Tiene autor y, dentro de la Sesión, un asignado.
 _Avoid_: Cuestión, interrogante
