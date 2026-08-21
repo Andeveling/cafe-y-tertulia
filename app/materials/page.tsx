@@ -1,15 +1,11 @@
 import { Book01Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import {
-	getMaterials,
-	MATERIAL_KIND_LABELS,
-	MATERIAL_STATUS_LABELS,
-} from "./_lib/materials";
+import { MaterialsGrid } from "./_components/materials-grid";
+import { getMaterials } from "./_lib/materials";
 
 export const metadata = {
 	title: "Materiales · Café y Tertulia",
@@ -21,13 +17,12 @@ export default async function MaterialsPage() {
 	const materials = await getMaterials(supabase);
 
 	return (
-		<div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
+		<div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6 pb-20">
 			<header className="flex items-center justify-between gap-4">
 				<div>
 					<h1 className="font-heading text-2xl font-medium">Materiales</h1>
 					<p className="text-sm text-muted-foreground">
-						El pipeline del club: lo propuesto, lo seleccionado y lo que ya
-						conversamos.
+						Portadas — el club como estantería.
 					</p>
 				</div>
 				<Button nativeButton={false} render={<Link href="/materials/new" />}>
@@ -50,50 +45,7 @@ export default async function MaterialsPage() {
 					</CardContent>
 				</Card>
 			) : (
-				<ul className="flex flex-col gap-3">
-					{materials.map((material) => (
-						<li key={material.id}>
-							<Card>
-								<CardHeader className="grid-cols-[1fr_auto]">
-									<CardTitle>
-										<Link href={`/materials/${material.id}`}>
-											<span className="block truncate">{material.title}</span>
-											<span className="block truncate text-xs font-normal text-muted-foreground">
-												{material.author} ·{" "}
-												{MATERIAL_KIND_LABELS[material.kind]}
-												{material.sessions_count > 0 && (
-													<>
-														{" · "}
-														{material.sessions_count}{" "}
-														{material.sessions_count === 1
-															? "sesión"
-															: "sesiones"}
-													</>
-												)}
-												{material.rating_count > 0 && (
-													<>
-														{" "}
-														· {material.rating_avg}★ · {material.rating_count}
-													</>
-												)}
-											</span>
-										</Link>
-									</CardTitle>
-									<div className="flex flex-wrap gap-2 justify-self-end">
-										<Badge variant="secondary">
-											{MATERIAL_STATUS_LABELS[material.status]}
-										</Badge>
-										{material.rating_count > 0 && (
-											<Badge variant="outline" className="tabular-nums">
-												{material.rating_avg}★ · {material.rating_count}
-											</Badge>
-										)}
-									</div>
-								</CardHeader>
-							</Card>
-						</li>
-					))}
-				</ul>
+				<MaterialsGrid materials={materials} />
 			)}
 		</div>
 	);
