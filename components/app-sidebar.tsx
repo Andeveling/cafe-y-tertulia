@@ -63,10 +63,10 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 								<HugeiconsIcon icon={Book01Icon} className="size-4" />
 							</div>
 							<div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
-								<span className="font-semibold tracking-tight text-sm">
+								<span className="font-semibold text-sm tracking-tight">
 									Café y Tertulias
 								</span>
-								<span className="text-xs text-sidebar-foreground/60">
+								<span className="text-sm text-sidebar-foreground/60">
 									El club te espera
 								</span>
 							</div>
@@ -77,7 +77,7 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 
 			<SidebarContent className="gap-0">
 				<SidebarGroup className="py-3">
-					<SidebarGroupLabel className="px-2 text-xs tracking-widest">
+					<SidebarGroupLabel className="px-2 text-sm tracking-widest">
 						Club
 					</SidebarGroupLabel>
 					<SidebarGroupContent>
@@ -105,7 +105,7 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 				<SidebarSeparator className="mx-0" />
 
 				<SidebarGroup className="py-3">
-					<SidebarGroupLabel className="px-2 text-xs tracking-widest">
+					<SidebarGroupLabel className="px-2 text-sm tracking-widest">
 						Cuenta
 					</SidebarGroupLabel>
 					<SidebarGroupContent>

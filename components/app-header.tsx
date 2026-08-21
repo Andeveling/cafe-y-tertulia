@@ -41,7 +41,7 @@ export function AppHeader() {
 		<header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
 			<SidebarTrigger className="-ml-1" aria-expanded={open} />
 			<nav aria-label="Migas de pan" className="min-w-0">
-				<ol className="flex items-center gap-2 overflow-hidden text-xs">
+				<ol className="flex items-center gap-2 overflow-hidden text-sm">
 					<li className="shrink-0">
 						{breadcrumbs.length === 0 ? (
 							<span className="font-medium">Inicio</span>
