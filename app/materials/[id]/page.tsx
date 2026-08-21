@@ -7,6 +7,12 @@ import { MaterialQuestionsSection } from "@/app/materials/_components/material-q
 import { SessionForm } from "@/app/materials/_components/session-form";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
 import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -86,7 +92,7 @@ export default async function MaterialDetailPage({
 
 			<section className="flex flex-col gap-3">
 				<div className="flex items-center justify-between gap-4">
-					<h2 className="font-heading text-sm font-medium">Sesiones</h2>
+					<h2 className="font-heading text-sm font-medium">Capítulos</h2>
 					<SessionForm materialId={material.id} />
 				</div>
 
@@ -98,30 +104,77 @@ export default async function MaterialDetailPage({
 								className="text-muted-foreground"
 							/>
 							<p className="text-sm text-muted-foreground">
-								Aún no hay sesiones para este material. Crea la primera con su
+								Aún no hay capítulos para este material. Crea el primero con su
 								rango cubierto.
 							</p>
 						</CardContent>
 					</Card>
 				) : (
-					<ul className="flex flex-col gap-4">
+					<Accordion
+						defaultValue={material.sessions[0] ? [material.sessions[0].id] : []}
+						className="flex flex-col gap-3"
+					>
 						{material.sessions.map((session) => (
-							<li key={session.id} className="flex flex-col gap-3">
-								<Card>
-									<CardContent className="flex items-center justify-between gap-4">
-										<div className="flex min-w-0 flex-col gap-1">
-											<span className="font-medium">{session.range}</span>
-											{session.rating_count > 0 && (
-												<span className="text-xs tabular-nums text-muted-foreground">
-													{session.rating_avg}★ · {session.rating_count}{" "}
-													{session.rating_count === 1 ? "voto" : "votos"} ·
-													congelado
+							<AccordionItem
+								key={session.id}
+								value={session.id}
+								className="overflow-hidden rounded-xl border bg-card ring-1 ring-foreground/10 data-[open]:ring-primary/20"
+							>
+								<AccordionTrigger className="px-4 py-3 hover:no-underline [&[data-panel-open]>span]:text-foreground">
+									<span className="flex min-w-0 flex-1 items-center gap-2 text-left">
+										<span className="truncate font-medium">
+											{session.range}
+										</span>
+										<Badge variant="outline" className="shrink-0">
+											{SESSION_STATUS_LABELS[session.status]}
+										</Badge>
+										{session.rating_count > 0 && (
+											<span className="hidden shrink-0 text-xs tabular-nums text-muted-foreground sm:inline">
+												{session.rating_avg}★ · {session.rating_count}
+											</span>
+										)}
+									</span>
+								</AccordionTrigger>
+								<AccordionContent className="px-0 pb-0">
+									<div className="flex flex-col gap-4 px-4 pb-4">
+										<div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+											<div className="flex min-w-0 flex-col gap-1">
+												{session.rating_count > 0 && (
+													<span className="text-xs tabular-nums text-muted-foreground">
+														{session.rating_avg}★ · {session.rating_count}{" "}
+														{session.rating_count === 1 ? "voto" : "votos"} ·
+														congelado
+													</span>
+												)}
+												<span className="text-xs text-muted-foreground">
+													{session.scheduled_at
+														? new Date(session.scheduled_at).toLocaleDateString(
+																"es",
+																{
+																	day: "numeric",
+																	month: "long",
+																	year: "numeric",
+																},
+															)
+														: "Sin fecha programada"}
 												</span>
-											)}
+											</div>
+											<div className="flex shrink-0 items-center gap-2">
+												{session.status !== "archived" && (
+													<AdvanceButton
+														kind="session"
+														id={session.id}
+														materialId={material.id}
+													/>
+												)}
+											</div>
+										</div>
+
+										<div className="flex flex-wrap gap-2 text-sm">
 											{session.status === "archived" && (
 												<Link
 													href={`/materials/sessions/${session.id}`}
-													className="text-sm text-primary hover:underline"
+													className="text-primary hover:underline"
 												>
 													Ver memoria
 												</Link>
@@ -129,7 +182,7 @@ export default async function MaterialDetailPage({
 											{session.status === "lobby" && (
 												<Link
 													href={`/materials/sessions/${session.id}/lobby`}
-													className="text-sm text-primary hover:underline"
+													className="text-primary hover:underline"
 												>
 													Ir al lobby
 												</Link>
@@ -138,19 +191,19 @@ export default async function MaterialDetailPage({
 												<>
 													<Link
 														href={`/materials/sessions/${session.id}/stage`}
-														className="text-sm text-primary hover:underline"
+														className="text-primary hover:underline"
 													>
 														Escenario
 													</Link>
 													<Link
 														href={`/materials/sessions/${session.id}/minigames`}
-														className="text-sm text-primary hover:underline"
+														className="text-primary hover:underline"
 													>
 														Minijuegos
 													</Link>
 													<Link
 														href={`/materials/sessions/${session.id}/rating`}
-														className="text-sm text-primary hover:underline"
+														className="text-primary hover:underline"
 													>
 														Rating
 													</Link>
@@ -161,48 +214,25 @@ export default async function MaterialDetailPage({
 												session.rating_count > 0 && (
 													<Link
 														href={`/materials/sessions/${session.id}`}
-														className="text-sm text-primary hover:underline"
+														className="text-primary hover:underline"
 													>
 														Ver rating en memoria
 													</Link>
 												)}
-											<span className="text-xs text-muted-foreground">
-												{session.scheduled_at
-													? new Date(session.scheduled_at).toLocaleDateString(
-															"es",
-															{
-																day: "numeric",
-																month: "long",
-																year: "numeric",
-															},
-														)
-													: "Sin fecha programada"}
-											</span>
 										</div>
-										<div className="flex items-center gap-2">
-											<Badge variant="outline">
-												{SESSION_STATUS_LABELS[session.status]}
-											</Badge>
-											{session.status !== "archived" && (
-												<AdvanceButton
-													kind="session"
-													id={session.id}
-													materialId={material.id}
-												/>
-											)}
-										</div>
-									</CardContent>
-								</Card>
-								{session.status === "preparation" && (
-									<MaterialQuestionsSection
-										materialId={material.id}
-										sessionId={session.id}
-										sessionRange={session.range}
-									/>
-								)}
-							</li>
+
+										{session.status === "preparation" && (
+											<MaterialQuestionsSection
+												materialId={material.id}
+												sessionId={session.id}
+												sessionRange={session.range}
+											/>
+										)}
+									</div>
+								</AccordionContent>
+							</AccordionItem>
 						))}
-					</ul>
+					</Accordion>
 				)}
 			</section>
 
