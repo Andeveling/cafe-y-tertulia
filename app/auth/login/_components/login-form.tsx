@@ -1,9 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { ViewIcon, ViewOffIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -17,6 +18,7 @@ import { LoginValues, loginSchema } from "../_schemas/login-schema";
 
 export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
 	const [isPending, startTransition] = useTransition();
+	const [showPassword, setShowPassword] = useState(false);
 	const { control, handleSubmit } = useForm<LoginValues>({
 		resolver: zodResolver(loginSchema),
 		defaultValues: {
@@ -63,14 +65,31 @@ export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
 					<Field data-invalid={fieldState.invalid}>
 						<FieldLabel htmlFor={field.name}>Contraseña</FieldLabel>
 						<FieldContent>
-							<Input
-								{...field}
-								id={field.name}
-								type="password"
-								autoComplete="current-password"
-								aria-invalid={fieldState.invalid}
-								placeholder="••••••••"
-							/>
+							<div className="relative">
+								<Input
+									{...field}
+									id={field.name}
+									type={showPassword ? "text" : "password"}
+									autoComplete="current-password"
+									aria-invalid={fieldState.invalid}
+									placeholder="••••••••"
+									className="pr-9"
+								/>
+								<button
+									type="button"
+									onClick={() => setShowPassword((v) => !v)}
+									aria-label={
+										showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+									}
+									aria-pressed={showPassword}
+									className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground transition-colors hover:text-foreground"
+								>
+									<HugeiconsIcon
+										icon={showPassword ? ViewOffIcon : ViewIcon}
+										className="size-4"
+									/>
+								</button>
+							</div>
 						</FieldContent>
 						{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
 					</Field>
