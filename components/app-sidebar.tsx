@@ -2,6 +2,7 @@
 
 import {
 	Book01Icon,
+	Github01Icon,
 	Home01Icon,
 	UserAdd01Icon,
 	UserCircleIcon,
@@ -9,6 +10,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NavUser } from "@/components/nav-user";
 
 import {
 	Sidebar,
@@ -35,7 +37,13 @@ const navCuenta = [
 	{ title: "Perfil", url: "/profile", icon: UserCircleIcon },
 ];
 
-export function AppSidebar() {
+export type AppSidebarUser = {
+	name: string;
+	email: string;
+	avatar?: string | null;
+} | null;
+
+export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 	const pathname = usePathname();
 
 	if (pathname.startsWith("/auth")) return null;
@@ -121,23 +129,36 @@ export function AppSidebar() {
 			</SidebarContent>
 
 			<SidebarFooter className="border-t border-sidebar-border">
-				<SidebarMenu>
-					<SidebarMenuItem>
-						<SidebarMenuButton
-							tooltip="Soporte"
-							render={
-								<a
-									href="https://github.com/Andeveling/cafe-y-tertulia"
-									target="_blank"
-									rel="noreferrer"
-								/>
-							}
-						>
-							<HugeiconsIcon icon={UserCircleIcon} />
-							<span>Soporte</span>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-				</SidebarMenu>
+				{user ? (
+					<NavUser user={user} />
+				) : (
+					<SidebarMenu>
+						<SidebarMenuItem>
+							<SidebarMenuButton
+								tooltip="Iniciar sesión"
+								render={<Link href="/auth/login" />}
+							>
+								<HugeiconsIcon icon={UserCircleIcon} />
+								<span>Iniciar sesión</span>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+						<SidebarMenuItem>
+							<SidebarMenuButton
+								tooltip="Iniciar discusión"
+								render={
+									<a
+										href="https://github.com/Andeveling/cafe-y-tertulia/discussions/new/choose"
+										target="_blank"
+										rel="noreferrer"
+									/>
+								}
+							>
+								<HugeiconsIcon icon={Github01Icon} />
+								<span>Discusión</span>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					</SidebarMenu>
+				)}
 			</SidebarFooter>
 			<SidebarRail />
 		</Sidebar>

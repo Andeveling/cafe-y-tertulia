@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -28,6 +29,40 @@ export const metadata: Metadata = {
 export default async function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+
+	let navUser: { name: string; email: string; avatar?: string | null } | null =
+		null;
+	if (user) {
+		const { data: member } = await supabase
+			.from("members")
+			.select("display_name")
+			.eq("id", user.id)
+			.maybeSingle();
+
+		const avatar =
+			(user.user_metadata?.avatar_url as string | undefined) ??
+			(user.user_metadata?.picture as string | undefined) ??
+			null;
+
+		if (member) {
+			navUser = {
+				name: member.display_name,
+				email: user.email ?? "",
+				avatar,
+			};
+		} else if (user.email) {
+			navUser = {
+				name: user.email.split("@")[0],
+				email: user.email,
+				avatar,
+			};
+		}
+	}
+
 	return (
 		<html
 			lang="es"
@@ -49,7 +84,7 @@ export default async function RootLayout({
 					disableTransitionOnChange
 				>
 					<SidebarProvider>
-						<AppSidebar />
+						<AppSidebar user={navUser} />
 						<SidebarInset>
 							<AppHeader />
 							<div className="flex flex-1 flex-col">{children}</div>
