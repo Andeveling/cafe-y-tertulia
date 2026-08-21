@@ -22,32 +22,34 @@ type Props =
 	| { kind: "session"; id: string; materialId: string; status: SessionStatus };
 
 /** Una acción por estado de Sesión: qué hace, cómo se ve y qué confirma. */
+type SessionAction = {
+	label: string;
+	icon: typeof CircleLock01Icon | typeof ArchiveIcon | typeof ArrowRight01Icon;
+	success: string;
+	run: (input: {
+		sessionId: string;
+		materialId: string;
+	}) => Promise<ActionResult>;
+};
+
+// Base para avanzar en el flujo (preparation/lobby → mismo RPC, distinta etiqueta).
+const BASE_ADVANCE: Omit<SessionAction, "label"> = {
+	icon: ArrowRight01Icon,
+	success: "Sesión avanzada",
+	run: advanceSession,
+};
+
 const SESSION_ACTIONS: Record<
 	Exclude<SessionStatus, "archived">,
-	{
-		label: string;
-		icon:
-			| typeof CircleLock01Icon
-			| typeof ArchiveIcon
-			| typeof ArrowRight01Icon;
-		success: string;
-		run: (input: {
-			sessionId: string;
-			materialId: string;
-		}) => Promise<ActionResult>;
-	}
+	SessionAction
 > = {
 	preparation: {
 		label: "Avanzar",
-		icon: ArrowRight01Icon,
-		success: "Sesión avanzada",
-		run: advanceSession,
+		...BASE_ADVANCE,
 	},
 	lobby: {
 		label: "Iniciar sesión",
-		icon: ArrowRight01Icon,
-		success: "Sesión avanzada",
-		run: advanceSession,
+		...BASE_ADVANCE,
 	},
 	in_progress: {
 		label: "Cerrar sesión",

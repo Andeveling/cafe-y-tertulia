@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { type ActionResult, runServerAction } from "@/lib/server-action";
 import type { MaterialKind, SessionStatus } from "./materials";
+import { SESSION_NEXT_STATUS } from "./materials";
 
 export async function createMaterial(input: {
 	title: string;
@@ -154,14 +155,15 @@ export async function advanceSession(input: {
 				return { ok: false, error: "Para cerrar la sesión usa Cerrar sesión." };
 			}
 
-			const nextStatus = (
-				{
-					preparation: "lobby",
-					lobby: "in_progress",
-					closed: "archived",
-					archived: null,
-				} as const
-			)[data.status];
+			// Archivado manual solo por el moderador (SPEC §3.1, AC5).
+			if (data.status === "closed" && data.moderator_id !== user?.id) {
+				return {
+					ok: false,
+					error: "Solo el moderador puede archivar la sesión.",
+				};
+			}
+
+			const nextStatus = SESSION_NEXT_STATUS[data.status];
 
 			if (!nextStatus) return;
 

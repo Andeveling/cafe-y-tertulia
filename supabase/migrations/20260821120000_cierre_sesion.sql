@@ -60,6 +60,16 @@ begin
   end if;
 
   if old.status = 'closed' then
+    -- Cerrada → histórico: solo el moderador (o servicio) puede archivar.
+    if old.status = 'closed' and new.status = 'archived' then
+      if auth.uid() <> old.moderator_id
+         and current_user not in ('service_role', 'postgres')
+      then
+        raise exception 'Solo el moderador puede archivar la sesión'
+          using errcode = 'P0001';
+      end if;
+    end if;
+
     -- Rango y fecha programada: los corrige el moderador (o servicio).
     if new.range is distinct from old.range
        or new.scheduled_at is distinct from old.scheduled_at
@@ -256,6 +266,159 @@ create policy "participants_update_member" on public.session_participants
       where s.id = session_id and s.status = 'lobby'
     )
   );
+
+-- ============================================================
+-- 5b. Inmutabilidad de tablas hijas en cerrada/histórico (SPEC §3.1 AC4).
+--     En `cerrada` solo se permite corregir `assignments.notes` vía
+--     `correct_assignment_notes` (o directo por moderador); todo lo demás
+--     (preguntas, sorteo, minijuegos, votos) queda congelado. En `archived`
+--     todo es inmutable, a nivel DB.
+-- ============================================================
+
+create or replace function public.assignments_frozen_guard()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  sess_status public.session_status;
+  sess_mod uuid;
+  sess_id uuid;
+begin
+  sess_id := coalesce(new.session_id, old.session_id);
+  select status, moderator_id into sess_status, sess_mod from public.sessions where id = sess_id;
+  if sess_status is null then
+    return coalesce(new, old);
+  end if;
+  if sess_status in ('closed', 'archived') then
+    -- Histórico: siempre inmutable, incluso para service_role.
+    if sess_status = 'archived' then
+      raise exception 'La sesión en histórico es inmutable (asignaciones)'
+        using errcode = 'P0001';
+    end if;
+    -- Cerrada: solo se permite corregir Notas (typos). El RPC
+    -- correct_assignment_notes corre como service_role y toca solo notes.
+    if TG_OP = 'UPDATE' then
+      -- Service_role vía RPC: solo notes cambia
+      if current_user in ('service_role', 'postgres') then
+        if new.notes is not distinct from old.notes then
+          raise exception 'Asignaciones de sesión cerrada solo permiten corregir Notas' using errcode='P0001';
+        end if;
+        if new.id is distinct from old.id
+           or new.session_id is distinct from old.session_id
+           or new.question_id is distinct from old.question_id
+           or new.assignee_id is distinct from old.assignee_id
+           or new.draw_id is distinct from old.draw_id
+           or new.reveal_order is distinct from old.reveal_order
+           or new.state is distinct from old.state then
+          raise exception 'Asignaciones de sesión cerrada solo permiten corregir Notas' using errcode='P0001';
+        end if;
+        return new;
+      end if;
+      -- Moderador directo: también solo notes
+      if auth.uid() = sess_mod
+         and new.notes is distinct from old.notes
+         and new.id = old.id
+         and new.session_id = old.session_id
+         and new.question_id = old.question_id
+         and new.assignee_id = old.assignee_id
+         and new.draw_id = old.draw_id
+         and new.reveal_order = old.reveal_order
+         and new.state = old.state then
+        return new;
+      end if;
+    end if;
+    raise exception 'La sesión cerrada solo permite corregir Notas vía el moderador' using errcode='P0001';
+  end if;
+  return coalesce(new, old);
+end;
+$$;
+
+create trigger assignments_frozen_guard
+  before insert or update or delete on public.assignments
+  for each row execute function public.assignments_frozen_guard();
+
+-- Helper genérico: bloquea cualquier mutación si la sesión está cerrada/histórico.
+create or replace function public.session_child_frozen_guard()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  sess_status public.session_status;
+  sess_id uuid;
+begin
+  -- Resolver session_id según la tabla que dispara
+  if TG_TABLE_NAME = 'questions' then
+    sess_id := coalesce(new.session_id, old.session_id);
+  elsif TG_TABLE_NAME = 'draws' then
+    sess_id := coalesce(new.session_id, old.session_id);
+  elsif TG_TABLE_NAME = 'session_participants' then
+    sess_id := coalesce(new.session_id, old.session_id);
+  elsif TG_TABLE_NAME = 'takes' then
+    sess_id := coalesce(new.session_id, old.session_id);
+  elsif TG_TABLE_NAME = 'trivia_rounds' then
+    sess_id := coalesce(new.session_id, old.session_id);
+  elsif TG_TABLE_NAME = 'votes' then
+    sess_id := coalesce(new.session_id, old.session_id);
+  elsif TG_TABLE_NAME = 'take_votes' then
+    -- take_votes -> takes -> session_id
+    if TG_OP = 'DELETE' then
+      select session_id into sess_id from public.takes where id = old.take_id;
+    else
+      select session_id into sess_id from public.takes where id = new.take_id;
+    end if;
+  elsif TG_TABLE_NAME = 'trivia_answers' then
+    if TG_OP = 'DELETE' then
+      select session_id into sess_id from public.trivia_rounds where id = old.round_id;
+    else
+      select session_id into sess_id from public.trivia_rounds where id = new.round_id;
+    end if;
+  else
+    sess_id := null;
+  end if;
+
+  if sess_id is not null then
+    select status into sess_status from public.sessions where id = sess_id;
+    if sess_status in ('closed', 'archived') then
+      -- En histórico todo es inmutable; en cerrada también para estas tablas.
+      if sess_status = 'archived' then
+        raise exception 'La sesión en histórico es inmutable (%)', TG_TABLE_NAME using errcode='P0001';
+      else
+        raise exception 'No se puede modificar % en sesión cerrada', TG_TABLE_NAME using errcode='P0001';
+      end if;
+    end if;
+  end if;
+  return coalesce(new, old);
+end;
+$$;
+
+create trigger questions_frozen_guard
+  before insert or update or delete on public.questions
+  for each row execute function public.session_child_frozen_guard();
+create trigger draws_frozen_guard
+  before insert or update or delete on public.draws
+  for each row execute function public.session_child_frozen_guard();
+create trigger session_participants_frozen_guard
+  before insert or update or delete on public.session_participants
+  for each row execute function public.session_child_frozen_guard();
+create trigger takes_frozen_guard
+  before insert or update or delete on public.takes
+  for each row execute function public.session_child_frozen_guard();
+create trigger trivia_rounds_frozen_guard
+  before insert or update or delete on public.trivia_rounds
+  for each row execute function public.session_child_frozen_guard();
+create trigger votes_frozen_guard
+  before insert or update or delete on public.votes
+  for each row execute function public.session_child_frozen_guard();
+create trigger take_votes_frozen_guard
+  before insert or update or delete on public.take_votes
+  for each row execute function public.session_child_frozen_guard();
+create trigger trivia_answers_frozen_guard
+  before insert or update or delete on public.trivia_answers
+  for each row execute function public.session_child_frozen_guard();
 
 -- ============================================================
 -- 6. Job diario: cerrada → histórico tras 48h sin actividad.

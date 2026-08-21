@@ -33,6 +33,16 @@ export const SESSION_STATUS_LABELS: Record<SessionStatus, string> = {
 	archived: "Histórico",
 };
 
+/** Avance lineal del ciclo de vida de la Sesión (SPEC §3.1). Centralizado para no duplicar el mapa. */
+export const SESSION_NEXT_STATUS: Record<SessionStatus, SessionStatus | null> =
+	{
+		preparation: "lobby",
+		lobby: "in_progress",
+		in_progress: "closed",
+		closed: "archived",
+		archived: null,
+	};
+
 export type MaterialWithSessionsCount = {
 	id: string;
 	title: string;
