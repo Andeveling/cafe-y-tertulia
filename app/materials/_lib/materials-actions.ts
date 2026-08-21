@@ -127,8 +127,10 @@ export async function rescheduleSession(input: {
 }
 
 /**
- * Avanza exactamente un estado: preparación → lobby → en curso → cerrada → histórico.
- * La transición también está protegida por el trigger de la base de datos.
+ * Avanza exactamente un estado: preparación → lobby → en curso → histórico.
+ * El cierre `en_curso → cerrada` NO pasa por aquí: usa `closeSessionAction`,
+ * que consolida (rating, minijuegos) vía el RPC atómico `close_session`.
+ * La transición también está protegida por los triggers de la base de datos.
  */
 export async function advanceSession(input: {
 	materialId: string;
@@ -147,15 +149,19 @@ export async function advanceSession(input: {
 				return { ok: false, error: "No se encontró la sesión para avanzar." };
 			}
 
+			// El cierre `en_curso → cerrada` pasa por `closeSessionAction` (consolida).
+			if (data.status === "in_progress") {
+				return { ok: false, error: "Para cerrar la sesión usa Cerrar sesión." };
+			}
+
 			const nextStatus = (
 				{
 					preparation: "lobby",
 					lobby: "in_progress",
-					in_progress: "closed",
 					closed: "archived",
 					archived: null,
 				} as const
-			)[data.status] as SessionStatus | null;
+			)[data.status];
 
 			if (!nextStatus) return;
 
@@ -180,5 +186,35 @@ export async function advanceSession(input: {
 			}
 		},
 		revalidate: async () => [`/materials/${input.materialId}`],
+	});
+}
+
+/**
+ * Cierre atómico `en_curso → cerrada` vía el RPC `close_session`: consolida
+ * participantes, minijuegos y rating (congela promedio + conteo y descarta los
+ * votos individuales, ADR 0003). Solo el moderador; falla si queda una trivia,
+ * una votación o el Sorteo sin terminar.
+ */
+export async function closeSessionAction(input: {
+	materialId: string;
+	sessionId: string;
+}): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			const { error } = await supabase.rpc("close_session", {
+				target_session_id: input.sessionId,
+			});
+			if (error) {
+				return { ok: false, error: error.message };
+			}
+		},
+		revalidate: async () => [
+			`/materials/${input.materialId}`,
+			`/materials/sessions/${input.sessionId}/stage`,
+			`/materials/sessions/${input.sessionId}/rating`,
+			`/materials/sessions/${input.sessionId}`,
+			"/materials",
+		],
 	});
 }

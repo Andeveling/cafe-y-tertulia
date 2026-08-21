@@ -158,6 +158,7 @@ export default async function MaterialDetailPage({
 														kind="session"
 														id={session.id}
 														materialId={material.id}
+														status={session.status}
 													/>
 												)}
 											</div>

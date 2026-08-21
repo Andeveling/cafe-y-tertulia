@@ -281,6 +281,7 @@ export type Database = {
 					rating_open: boolean;
 					scheduled_at: string | null;
 					status: Database["public"]["Enums"]["session_status"];
+					updated_at: string;
 				};
 				Insert: {
 					created_at?: string;
@@ -293,6 +294,7 @@ export type Database = {
 					rating_open?: boolean;
 					scheduled_at?: string | null;
 					status?: Database["public"]["Enums"]["session_status"];
+					updated_at?: string;
 				};
 				Update: {
 					created_at?: string;
@@ -305,6 +307,7 @@ export type Database = {
 					rating_open?: boolean;
 					scheduled_at?: string | null;
 					status?: Database["public"]["Enums"]["session_status"];
+					updated_at?: string;
 				};
 				Relationships: [
 					{
@@ -603,6 +606,14 @@ export type Database = {
 			};
 			clear_session_rating: {
 				Args: { target_session_id: string };
+				Returns: undefined;
+			};
+			close_session: {
+				Args: { target_session_id: string };
+				Returns: Json;
+			};
+			correct_assignment_notes: {
+				Args: { target_assignment_id: string; new_notes: string };
 				Returns: undefined;
 			};
 			refresh_material_rating: {
