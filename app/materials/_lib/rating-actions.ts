@@ -15,13 +15,17 @@ function ratingRevalidate(sessionId: string) {
 		const paths = [
 			`/materials/sessions/${sessionId}/rating`,
 			`/materials/sessions/${sessionId}/stage`,
+			`/materials/sessions/${sessionId}`,
 		];
 		const { data } = await supabase
 			.from("sessions")
 			.select("material_id")
 			.eq("id", sessionId)
 			.maybeSingle();
-		if (data) paths.push(`/materials/${data.material_id}`);
+		if (data) {
+			paths.push(`/materials/${data.material_id}`);
+			paths.push("/materials");
+		}
 		return paths;
 	};
 }

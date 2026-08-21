@@ -70,12 +70,25 @@ export default async function MaterialsPage() {
 															: "sesiones"}
 													</>
 												)}
+												{material.rating_count > 0 && (
+													<>
+														{" "}
+														· {material.rating_avg}★ · {material.rating_count}
+													</>
+												)}
 											</span>
 										</Link>
 									</CardTitle>
-									<Badge variant="secondary">
-										{MATERIAL_STATUS_LABELS[material.status]}
-									</Badge>
+									<div className="flex flex-wrap gap-2 justify-self-end">
+										<Badge variant="secondary">
+											{MATERIAL_STATUS_LABELS[material.status]}
+										</Badge>
+										{material.rating_count > 0 && (
+											<Badge variant="outline" className="tabular-nums">
+												{material.rating_avg}★ · {material.rating_count}
+											</Badge>
+										)}
+									</div>
 								</CardHeader>
 							</Card>
 						</li>
