@@ -123,9 +123,17 @@ export function MaterialForm() {
 									className="w-full"
 									aria-invalid={fieldState.invalid}
 								>
-									<SelectValue />
+									<SelectValue placeholder="Selecciona un tipo">
+										{(value: string | null) =>
+											value
+												? MATERIAL_KIND_LABELS[
+														value as (typeof MATERIAL_KIND_OPTIONS)[number]
+													]
+												: null
+										}
+									</SelectValue>
 								</SelectTrigger>
-								<SelectContent>
+								<SelectContent alignItemWithTrigger={false}>
 									<SelectGroup>
 										{MATERIAL_KIND_OPTIONS.map((option) => (
 											<SelectItem key={option} value={option}>
