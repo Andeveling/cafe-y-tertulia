@@ -107,123 +107,129 @@ export default async function MaterialDetailPage({
 						defaultValue={material.sessions[0] ? [material.sessions[0].id] : []}
 						className="flex flex-col gap-3"
 					>
-						{material.sessions.map((session) => (
-							<AccordionItem
-								key={session.id}
-								value={session.id}
-								className="overflow-hidden rounded-xl border bg-card ring-1 ring-foreground/10 data-[open]:ring-primary/20"
-							>
-								<AccordionTrigger className="px-4 py-3 hover:no-underline [&[data-panel-open]>span]:text-foreground">
-									<span className="flex min-w-0 flex-1 items-center gap-2 text-left">
-										<span className="truncate font-medium">
-											{session.range}
-										</span>
-										<Badge variant="outline" className="shrink-0">
-											{SESSION_STATUS_LABELS[session.status]}
-										</Badge>
-										{session.rating_count > 0 && (
-											<RatingDisplay
-												value={session.rating_avg}
-												count={session.rating_count}
-												className="hidden shrink-0 sm:inline-flex"
-											/>
-										)}
-									</span>
-								</AccordionTrigger>
-								<AccordionContent className="px-0 pb-0">
-									<div className="flex flex-col gap-4 px-4 pb-4">
-										<div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
-											<div className="flex min-w-0 flex-col gap-1">
-												{session.rating_count > 0 && (
-													<span className="flex flex-wrap items-center gap-1 text-xs">
-														<RatingDisplay
-															value={session.rating_avg}
-															count={session.rating_count}
-														/>
-														<span className="text-muted-foreground">
-															· congelado
-														</span>
-													</span>
-												)}
-												<SessionScheduler
-													materialId={material.id}
-													sessionId={session.id}
-													scheduledAt={session.scheduled_at}
+						{material.sessions.map((session) => {
+							const isArchived = session.status === "archived";
+							return (
+								<AccordionItem
+									key={session.id}
+									value={session.id}
+									className="overflow-hidden rounded-xl border bg-card ring-1 ring-foreground/10 data-[open]:ring-primary/20"
+								>
+									<AccordionTrigger className="px-4 py-3 hover:no-underline [&[data-panel-open]>span]:text-foreground">
+										<span className="flex min-w-0 flex-1 items-center gap-2 text-left">
+											<span className="truncate font-medium">
+												{session.range}
+											</span>
+											<Badge variant="outline" className="shrink-0">
+												{SESSION_STATUS_LABELS[session.status]}
+											</Badge>
+											{session.rating_count > 0 && (
+												<RatingDisplay
+													value={session.rating_avg}
+													count={session.rating_count}
+													className="hidden shrink-0 sm:inline-flex"
 												/>
+											)}
+										</span>
+									</AccordionTrigger>
+									<AccordionContent className="px-0 pb-0">
+										<div className="flex flex-col gap-4 px-4 pb-4">
+											<div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+												<div className="flex min-w-0 flex-col gap-1">
+													{session.rating_count > 0 && (
+														<span className="flex flex-wrap items-center gap-1 text-xs">
+															<RatingDisplay
+																value={session.rating_avg}
+																count={session.rating_count}
+															/>
+															<span className="text-muted-foreground">
+																· congelado
+															</span>
+														</span>
+													)}
+													{!isArchived && (
+														<SessionScheduler
+															materialId={material.id}
+															sessionId={session.id}
+															scheduledAt={session.scheduled_at}
+														/>
+													)}
+												</div>
+												<div className="flex shrink-0 items-center gap-2">
+													{!isArchived && (
+														<AdvanceButton
+															kind="session"
+															id={session.id}
+															materialId={material.id}
+															status={session.status}
+														/>
+													)}
+												</div>
 											</div>
-											<div className="flex shrink-0 items-center gap-2">
-												{session.status !== "archived" && (
-													<AdvanceButton
-														kind="session"
-														id={session.id}
-														materialId={material.id}
-													/>
-												)}
-											</div>
-										</div>
 
-										<div className="flex flex-wrap gap-2 text-sm">
-											{session.status === "archived" && (
-												<Link
-													href={`/materials/sessions/${session.id}`}
-													className="text-primary hover:underline"
-												>
-													Ver memoria
-												</Link>
-											)}
-											{session.status === "lobby" && (
-												<Link
-													href={`/materials/sessions/${session.id}/lobby`}
-													className="text-primary hover:underline"
-												>
-													Ir al lobby
-												</Link>
-											)}
-											{session.status === "in_progress" && (
-												<>
-													<Link
-														href={`/materials/sessions/${session.id}/stage`}
-														className="text-primary hover:underline"
-													>
-														Escenario
-													</Link>
-													<Link
-														href={`/materials/sessions/${session.id}/minigames`}
-														className="text-primary hover:underline"
-													>
-														Minijuegos
-													</Link>
-													<Link
-														href={`/materials/sessions/${session.id}/rating`}
-														className="text-primary hover:underline"
-													>
-														Rating
-													</Link>
-												</>
-											)}
-											{(session.status === "closed" ||
-												session.status === "archived") &&
-												session.rating_count > 0 && (
+											<div className="flex flex-wrap gap-2 text-sm">
+												{session.status === "archived" && (
 													<Link
 														href={`/materials/sessions/${session.id}`}
 														className="text-primary hover:underline"
 													>
-														Ver rating en memoria
+														Ver memoria
 													</Link>
 												)}
-										</div>
+												{session.status === "lobby" && (
+													<Link
+														href={`/materials/sessions/${session.id}/lobby`}
+														className="text-primary hover:underline"
+													>
+														Ir al lobby
+													</Link>
+												)}
+												{session.status === "in_progress" && (
+													<>
+														<Link
+															href={`/materials/sessions/${session.id}/stage`}
+															className="text-primary hover:underline"
+														>
+															Escenario
+														</Link>
+														<Link
+															href={`/materials/sessions/${session.id}/minigames`}
+															className="text-primary hover:underline"
+														>
+															Minijuegos
+														</Link>
+														<Link
+															href={`/materials/sessions/${session.id}/rating`}
+															className="text-primary hover:underline"
+														>
+															Rating
+														</Link>
+													</>
+												)}
+												{(session.status === "closed" ||
+													session.status === "archived") &&
+													session.rating_count > 0 && (
+														<Link
+															href={`/materials/sessions/${session.id}`}
+															className="text-primary hover:underline"
+														>
+															Ver rating en memoria
+														</Link>
+													)}
+											</div>
 
-										{session.status === "preparation" && (
-											<MaterialQuestionsSection
-												materialId={material.id}
-												sessionId={session.id}
-												sessionRange={session.range}
-											/>
-										)}
-									</div>
-								</AccordionContent>
-							</AccordionItem>
-						))}
+											{session.status === "preparation" && (
+												<MaterialQuestionsSection
+													materialId={material.id}
+													sessionId={session.id}
+													sessionRange={session.range}
+												/>
+											)}
+										</div>
+									</AccordionContent>
+								</AccordionItem>
+							);
+						})}
 					</Accordion>
 				)}
 			</section>
