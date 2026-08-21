@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import * as React from "react";
 
+import {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useSidebarPreference } from "@/hooks/use-sidebar-preference";
 
@@ -40,48 +49,38 @@ export function AppHeader() {
 	return (
 		<header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
 			<SidebarTrigger className="-ml-1" aria-expanded={open} />
-			<nav aria-label="Migas de pan" className="min-w-0">
-				<ol className="flex items-center gap-2 overflow-hidden text-sm">
-					<li className="shrink-0">
+			<Breadcrumb aria-label="Migas de pan" className="min-w-0">
+				<BreadcrumbList className="flex-nowrap items-center gap-1.5 overflow-hidden sm:gap-2">
+					<BreadcrumbItem>
 						{breadcrumbs.length === 0 ? (
-							<span className="font-medium">Inicio</span>
+							<BreadcrumbPage className="font-medium">Inicio</BreadcrumbPage>
 						) : (
-							<Link
-								href="/"
-								className="text-muted-foreground hover:text-foreground"
-							>
-								Inicio
-							</Link>
+							<BreadcrumbLink render={<Link href="/" />}>Inicio</BreadcrumbLink>
 						)}
-					</li>
+					</BreadcrumbItem>
 					{breadcrumbs.map((breadcrumb, index) => {
 						const isCurrent = index === breadcrumbs.length - 1;
+						const key = breadcrumb.href ?? `${breadcrumb.label}-${index}`;
 
 						return (
-							<li
-								key={breadcrumb.href}
-								className="flex min-w-0 items-center gap-2"
-							>
-								<span aria-hidden="true" className="text-muted-foreground">
-									/
-								</span>
-								{isCurrent || !breadcrumb.href ? (
-									<span aria-current="page" className="truncate font-medium">
-										{breadcrumb.label}
-									</span>
-								) : (
-									<Link
-										href={breadcrumb.href}
-										className="shrink-0 text-muted-foreground hover:text-foreground"
-									>
-										{breadcrumb.label}
-									</Link>
-								)}
-							</li>
+							<React.Fragment key={key}>
+								<BreadcrumbSeparator />
+								<BreadcrumbItem className="min-w-0">
+									{isCurrent || !breadcrumb.href ? (
+										<BreadcrumbPage className="max-w-[12rem] truncate font-medium sm:max-w-none">
+											{breadcrumb.label}
+										</BreadcrumbPage>
+									) : (
+										<BreadcrumbLink render={<Link href={breadcrumb.href} />}>
+											{breadcrumb.label}
+										</BreadcrumbLink>
+									)}
+								</BreadcrumbItem>
+							</React.Fragment>
 						);
 					})}
-				</ol>
-			</nav>
+				</BreadcrumbList>
+			</Breadcrumb>
 		</header>
 	);
 }
