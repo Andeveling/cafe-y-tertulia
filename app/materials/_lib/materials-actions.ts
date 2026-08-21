@@ -27,8 +27,8 @@ export async function createMaterial(input: {
 				};
 			}
 
-			revalidatePath("/materiales");
-			redirect("/materiales");
+			revalidatePath("/materials");
+			redirect("/materials");
 		},
 	});
 }
@@ -73,7 +73,7 @@ export async function advanceMaterial(id: string): Promise<ActionResult> {
 				};
 			}
 		},
-		revalidate: async () => ["/materiales", `/materiales/${id}`],
+		revalidate: async () => ["/materials", `/materials/${id}`],
 	});
 }
 
@@ -95,7 +95,7 @@ export async function createSession(input: {
 				};
 			}
 		},
-		revalidate: async () => [`/materiales/${input.materialId}`],
+		revalidate: async () => [`/materials/${input.materialId}`],
 	});
 }
 
@@ -152,6 +152,6 @@ export async function advanceSession(input: {
 				};
 			}
 		},
-		revalidate: async () => [`/materiales/${input.materialId}`],
+		revalidate: async () => [`/materials/${input.materialId}`],
 	});
 }

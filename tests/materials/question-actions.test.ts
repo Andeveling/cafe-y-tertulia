@@ -135,7 +135,7 @@ describe("createQuestionAction", () => {
 			authorId: "11111111-1111-1111-1111-111111111111",
 			text: "¿Qué opinas del capítulo 2?",
 		});
-		expect(revalidatePath).toHaveBeenCalledWith(`/materiales/${materialId}`);
+		expect(revalidatePath).toHaveBeenCalledWith(`/materials/${materialId}`);
 	});
 });
 
@@ -186,6 +186,6 @@ describe("toggleOutsideDrawAction", () => {
 			"q1",
 			true,
 		);
-		expect(revalidatePath).toHaveBeenCalledWith(`/materiales/${materialId}`);
+		expect(revalidatePath).toHaveBeenCalledWith(`/materials/${materialId}`);
 	});
 });

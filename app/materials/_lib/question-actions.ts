@@ -63,7 +63,7 @@ export async function createQuestionAction(
 				.select("material_id")
 				.eq("id", sessionId)
 				.maybeSingle();
-			return data ? [`/materiales/${data.material_id}`] : [];
+			return data ? [`/materials/${data.material_id}`] : [];
 		},
 	});
 }
@@ -119,7 +119,7 @@ export async function toggleOutsideDrawAction(
 				.select("material_id")
 				.eq("id", questionId)
 				.maybeSingle();
-			return data ? [`/materiales/${data.material_id}`] : [];
+			return data ? [`/materials/${data.material_id}`] : [];
 		},
 	});
 }

@@ -1,0 +1,7 @@
+or {
+  `"$a"` as $lit,
+  `'$a'` as $lit
+} where {
+  $a <: r".*bg-blue.*",
+  register_diagnostic(span = $lit, message = "no bg-blue", severity = "error")
+}

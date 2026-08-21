@@ -1,0 +1,5 @@
+language js
+
+`"$a"` as $lit where {
+  register_diagnostic(span = $lit, message = "any string", severity = "error")
+}

@@ -1,0 +1,6 @@
+language js
+
+`"$a"` as $lit where {
+  $lit <: r".*bg-blue.*",
+  register_diagnostic(span = $lit, message = "no bg-blue lit", severity = "error")
+}

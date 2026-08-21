@@ -16,7 +16,7 @@ export default async function HomePage() {
 	}
 
 	return (
-		<div className="flex flex-1 flex-col items-center justify-center gap-6 px-4">
+		<div className="flex flex-1 flex-col items-center justify-center gap-6 bg-card px-4">
 			<div className="text-center">
 				<h1 className="text-3xl font-semibold tracking-tight">
 					Café y Tertulias

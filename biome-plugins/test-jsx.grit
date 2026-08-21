@@ -1,0 +1,6 @@
+language js
+
+`<div className="$class" />` as $el where {
+  $class <: r".*bg-blue.*",
+  register_diagnostic(span = $el, message = "no bg-blue jsx", severity = "error")
+}

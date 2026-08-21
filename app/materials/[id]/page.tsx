@@ -53,7 +53,7 @@ export default async function MaterialDetailPage({
 				variant="ghost"
 				size="sm"
 				nativeButton={false}
-				render={<Link href="/materiales" />}
+				render={<Link href="/materials" />}
 				className="w-fit"
 			>
 				<HugeiconsIcon icon={ArrowLeftIcon} data-icon="inline-start" />

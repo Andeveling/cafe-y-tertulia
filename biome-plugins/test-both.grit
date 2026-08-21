@@ -1,0 +1,9 @@
+`$a` as $pa where {
+  $a <: r".*bg-blue.*",
+  register_diagnostic(span = $pa, message = "blue", severity = "error")
+}
+
+`$b` as $pb where {
+  $b <: r".*#[0-9a-fA-F]{3,8}.*",
+  register_diagnostic(span = $pb, message = "hex", severity = "error")
+}

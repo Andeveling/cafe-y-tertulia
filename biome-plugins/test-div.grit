@@ -1,0 +1,3 @@
+`<div />` as $el where {
+  register_diagnostic(span = $el, message = "no div", severity = "error")
+}

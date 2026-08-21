@@ -30,7 +30,7 @@ export default async function MaterialsPage() {
 						conversamos.
 					</p>
 				</div>
-				<Button nativeButton={false} render={<Link href="/materiales/nuevo" />}>
+				<Button nativeButton={false} render={<Link href="/materials/new" />}>
 					<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
 					Proponer material
 				</Button>
@@ -56,7 +56,7 @@ export default async function MaterialsPage() {
 							<Card>
 								<CardHeader className="grid-cols-[1fr_auto]">
 									<CardTitle>
-										<Link href={`/materiales/${material.id}`}>
+										<Link href={`/materials/${material.id}`}>
 											<span className="block truncate">{material.title}</span>
 											<span className="block truncate text-xs font-normal text-muted-foreground">
 												{material.author} ·{" "}
