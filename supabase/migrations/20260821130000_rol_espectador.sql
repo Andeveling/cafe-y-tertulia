@@ -1,12 +1,20 @@
 -- Ticket #27: Rol Espectador en participantes (SPEC §2.6-2.7 · ADR 0001).
 -- El Moderador agrega Espectadores al lobby: presentes pero sin Sorteo ni Listos.
 
--- 1. Tipo enum para el rol del participante.
-create type public.participant_role as enum ('member', 'spectator');
+-- 1. Tipo enum para el rol del participante (idempotente).
+do $$
+begin
+	create type public.participant_role as enum ('member', 'spectator');
+exception when duplicate_object then null;
+end $$;
 
 -- 2. Expand: nueva columna role convive con opt_out (participantes existentes = member).
-alter table public.session_participants
-	add column role public.participant_role not null default 'member';
+do $$
+begin
+	alter table public.session_participants
+		add column role public.participant_role not null default 'member';
+exception when duplicate_column then null;
+end $$;
 
 comment on column public.session_participants.role is
 	'Rol del participante: member (default, conserva comportamiento) o spectator (presente, sin Sorteo ni Listos).';
@@ -68,7 +76,6 @@ declare
 	new_draw uuid;
 	person uuid;
 	pick uuid;
-	ord int := 0;
 begin
 	if not exists (
 		select 1 from sessions
