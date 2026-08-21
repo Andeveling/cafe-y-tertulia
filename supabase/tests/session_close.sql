@@ -3,7 +3,7 @@
 -- inmutabilidad en `archived` y `clear_session_rating`/`correct_assignment_notes`.
 
 begin;
-select plan(22);
+select plan(27);
 
 -- ============================================================
 -- Fixtures: membresía + material + sesiones en cada estado
@@ -59,6 +59,10 @@ update public.sessions set rating_open = true where id = 'c1000000-0000-0000-000
 insert into public.votes (session_id, member_id, stars) values
 	('c1000000-0000-0000-0000-000000000005', '11111111-1111-1111-1111-111111111111', 4),
 	('c1000000-0000-0000-0000-000000000005', '22222222-2222-2222-2222-222222222222', 5);
+
+-- Agregado pre-congelado para la sesión cerrada 6 (test 12: clear_session_rating)
+update public.sessions set rating_avg = 4.5, rating_count = 2
+where id = 'c1000000-0000-0000-0000-000000000006';
 
 -- ============================================================
 -- Tests
@@ -180,7 +184,6 @@ select throws_ok(
 );
 
 -- 12. En closed, el moderador puede borrar/mover el agregado vía RPC.
-update public.sessions set rating_avg = 4.5, rating_count = 2 where id = 'c1000000-0000-0000-0000-000000000006';
 select lives_ok(
 	$$ select public.clear_session_rating('c1000000-0000-0000-0000-000000000006') $$,
 	'12. El moderador limpia el agregado de rating en una sesión cerrada'
@@ -208,6 +211,44 @@ select throws_ok(
 	$$ update public.sessions set range = 'Nada' where id = 'c1000000-0000-0000-0000-000000000007' $$,
 	'La sesión en histórico es inmutable',
 	'14. Una sesión en histórico es inmutable'
+);
+
+-- 15. Un no-moderador no puede cerrar saltándose el RPC con un UPDATE directo.
+set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+select throws_ok(
+	$$ update public.sessions set status = 'closed' where id = 'c1000000-0000-0000-0000-000000000002' $$,
+	'Solo el moderador puede cerrar la sesión',
+	'15. Un no-moderador no puede cerrar con un UPDATE directo (AC3)'
+);
+
+-- 16. En closed no se puede reabrir la votación (ni el moderador por UPDATE).
+set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
+select throws_ok(
+	$$ update public.sessions set rating_open = true where id = 'c1000000-0000-0000-0000-000000000006' $$,
+	'El rating de una sesión cerrada solo se mueve con clear_session_rating',
+	'16. En closed no se reabre la votación (AC4)'
+);
+
+-- 17. Un no-moderador no puede limpiar el agregado de rating (clear_session_rating).
+set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+select throws_ok(
+	$$ select public.clear_session_rating('c1000000-0000-0000-0000-000000000006') $$,
+	'Solo el moderador en sesión cerrada',
+	'17. Un no-moderador no puede limpiar el rating de una sesión cerrada (AC6)'
+);
+
+-- 18. Los participantes quedan congelados al avanzar de lobby: un Miembro no
+--    puede auto-insertarse en una sesión cerrada (AC4).
+set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
+select throws_ok(
+	$$ insert into public.session_participants (session_id, member_id) values ('c1000000-0000-0000-0000-000000000006', '22222222-2222-2222-2222-222222222222') $$,
+	null,
+	'18. No se puede sumar un participante a una sesión cerrada (AC4)'
+);
+select is(
+	(select count(*)::int from public.session_participants where session_id = 'c1000000-0000-0000-0000-000000000006'),
+	0,
+	'18b. El participante no se insertó en la sesión cerrada'
 );
 
 rollback;

@@ -146,11 +146,13 @@ export default async function MaterialDetailPage({
 														congelado
 													</span>
 												)}
-												<SessionScheduler
-													materialId={material.id}
-													sessionId={session.id}
-													scheduledAt={session.scheduled_at}
-												/>
+												{session.status !== "archived" && (
+													<SessionScheduler
+														materialId={material.id}
+														sessionId={session.id}
+														scheduledAt={session.scheduled_at}
+													/>
+												)}
 											</div>
 											<div className="flex shrink-0 items-center gap-2">
 												{session.status !== "archived" && (

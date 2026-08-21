@@ -15,36 +15,83 @@ import {
 	closeSessionAction,
 } from "@/app/materials/_lib/materials-actions";
 import { Button } from "@/components/ui/button";
+import type { ActionResult } from "@/lib/server-action";
 
 type Props =
 	| { kind: "material"; id: string }
 	| { kind: "session"; id: string; materialId: string; status: SessionStatus };
 
-const SESSION_ACTION_LABELS: Partial<Record<SessionStatus, string>> = {
-	preparation: "Avanzar",
-	lobby: "Iniciar sesión",
-	in_progress: "Cerrar sesión",
-	closed: "Archivar",
+/** Una acción por estado de Sesión: qué hace, cómo se ve y qué confirma. */
+const SESSION_ACTIONS: Record<
+	Exclude<SessionStatus, "archived">,
+	{
+		label: string;
+		icon:
+			| typeof CircleLock01Icon
+			| typeof ArchiveIcon
+			| typeof ArrowRight01Icon;
+		success: string;
+		run: (input: {
+			sessionId: string;
+			materialId: string;
+		}) => Promise<ActionResult>;
+	}
+> = {
+	preparation: {
+		label: "Avanzar",
+		icon: ArrowRight01Icon,
+		success: "Sesión avanzada",
+		run: advanceSession,
+	},
+	lobby: {
+		label: "Iniciar sesión",
+		icon: ArrowRight01Icon,
+		success: "Sesión avanzada",
+		run: advanceSession,
+	},
+	in_progress: {
+		label: "Cerrar sesión",
+		icon: CircleLock01Icon,
+		success: "Sesión cerrada",
+		run: closeSessionAction,
+	},
+	closed: {
+		label: "Archivar",
+		icon: ArchiveIcon,
+		success: "Sesión archivada",
+		run: advanceSession,
+	},
 };
 
 export function AdvanceButton(props: Props) {
 	const [isPending, startTransition] = useTransition();
 
-	const isMaterial = props.kind === "material";
-	const status = props.kind === "session" ? props.status : null;
-	const id = props.id;
-	const materialId = props.kind === "session" ? props.materialId : null;
+	if (props.kind === "material") {
+		return (
+			<Button
+				variant="outline"
+				size="sm"
+				disabled={isPending}
+				onClick={() =>
+					startTransition(async () => {
+						const result = await advanceMaterial(props.id);
+						if ("error" in result) {
+							toast.error(result.error);
+						} else {
+							toast.success("Material avanzado en el pipeline");
+						}
+					})
+				}
+			>
+				<HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-start" />
+				Avanzar estado
+			</Button>
+		);
+	}
 
-	const label = isMaterial
-		? "Avanzar estado"
-		: (SESSION_ACTION_LABELS[status ?? "lobby"] ?? "Avanzar sesión");
-
-	const icon =
-		status === "in_progress"
-			? CircleLock01Icon
-			: status === "closed"
-				? ArchiveIcon
-				: ArrowRight01Icon;
+	// Histórico es solo lectura: el botón no existe ahí.
+	if (props.status === "archived") return null;
+	const action = SESSION_ACTIONS[props.status];
 
 	return (
 		<Button
@@ -53,36 +100,20 @@ export function AdvanceButton(props: Props) {
 			disabled={isPending}
 			onClick={() =>
 				startTransition(async () => {
-					const result = isMaterial
-						? await advanceMaterial(id)
-						: status === "in_progress"
-							? await closeSessionAction({
-									sessionId: id,
-									materialId: materialId!,
-								})
-							: await advanceSession({
-									sessionId: id,
-									materialId: materialId!,
-								});
-
+					const result = await action.run({
+						sessionId: props.id,
+						materialId: props.materialId,
+					});
 					if ("error" in result) {
 						toast.error(result.error);
 					} else {
-						toast.success(
-							isMaterial
-								? "Material avanzado en el pipeline"
-								: status === "in_progress"
-									? "Sesión cerrada"
-									: status === "closed"
-										? "Sesión archivada"
-										: "Sesión avanzada",
-						);
+						toast.success(action.success);
 					}
 				})
 			}
 		>
-			<HugeiconsIcon icon={icon} data-icon="inline-start" />
-			{label}
+			<HugeiconsIcon icon={action.icon} data-icon="inline-start" />
+			{action.label}
 		</Button>
 	);
 }

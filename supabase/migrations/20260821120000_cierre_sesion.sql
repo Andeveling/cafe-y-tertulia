@@ -40,8 +40,6 @@ language plpgsql
 security invoker
 set search_path = public
 as $$
-declare
-  is_privileged boolean;
 begin
   -- Histórico: inmutable, nadie lo toca.
   if old.status = 'archived' then
@@ -49,20 +47,40 @@ begin
       using errcode = 'P0001';
   end if;
 
+  -- Cierre `en_curso → cerrada`: solo el moderador (o un rol de servicio, que
+  -- es quien ejecuta el RPC `close_session`). Impide saltarse el RPC con un
+  -- UPDATE directo (SPEC §3.1, AC3).
+  if old.status = 'in_progress' and new.status = 'closed' then
+    if auth.uid() <> old.moderator_id
+       and current_user not in ('service_role', 'postgres')
+    then
+      raise exception 'Solo el moderador puede cerrar la sesión'
+        using errcode = 'P0001';
+    end if;
+  end if;
+
   if old.status = 'closed' then
-    -- Cualquier cambio de contenido (rango, fecha, agregado de rating) lo
-    -- ejecuta el moderador, o un rol de servicio (RPC `clear_session_rating`,
-    -- `correct_assignment_notes`, job de archivado).
+    -- Rango y fecha programada: los corrige el moderador (o servicio).
     if new.range is distinct from old.range
        or new.scheduled_at is distinct from old.scheduled_at
-       or new.rating_avg is distinct from old.rating_avg
+    then
+      if auth.uid() <> old.moderator_id
+         and current_user not in ('service_role', 'postgres')
+      then
+        raise exception 'Solo el moderador de la sesión puede corregirla'
+          using errcode = 'P0001';
+      end if;
+    end if;
+
+    -- Agregado de rating: solo se mueve vía `clear_session_rating` (rol de
+    -- servicio). Un UPDATE directo no puede tocarlo, y en cerrada no se puede
+    -- reabrir la votación (AC4).
+    if new.rating_avg is distinct from old.rating_avg
        or new.rating_count is distinct from old.rating_count
        or new.rating_open is distinct from old.rating_open
     then
-      is_privileged := auth.uid() = old.moderator_id
-        or current_user in ('service_role', 'postgres');
-      if not is_privileged then
-        raise exception 'Solo el moderador de la sesión puede corregirla'
+      if current_user not in ('service_role', 'postgres') then
+        raise exception 'El rating de una sesión cerrada solo se mueve con clear_session_rating'
           using errcode = 'P0001';
       end if;
     end if;
@@ -204,7 +222,43 @@ $$;
 grant execute on function public.correct_assignment_notes(uuid, text) to authenticated;
 
 -- ============================================================
--- 5. Job diario: cerrada → histórico tras 48h sin actividad.
+-- 5. Participantes: solo se confirman en el lobby. Una vez que la Sesión avanza
+--    (en_curso/cerrada/histórico) los participantes quedan congelados (AC4).
+-- ============================================================
+
+drop policy if exists "participants_insert_member" on public.session_participants;
+drop policy if exists "participants_update_member" on public.session_participants;
+
+create policy "participants_insert_member" on public.session_participants
+  for insert to authenticated
+  with check (
+    public.is_member()
+    and member_id = auth.uid()
+    and exists (
+      select 1 from public.sessions s
+      where s.id = session_id and s.status = 'lobby'
+    )
+  );
+
+create policy "participants_update_member" on public.session_participants
+  for update to authenticated
+  using (
+    (member_id = auth.uid() or public.is_session_moderator(session_id))
+    and exists (
+      select 1 from public.sessions s
+      where s.id = session_id and s.status = 'lobby'
+    )
+  )
+  with check (
+    (member_id = auth.uid() or public.is_session_moderator(session_id))
+    and exists (
+      select 1 from public.sessions s
+      where s.id = session_id and s.status = 'lobby'
+    )
+  );
+
+-- ============================================================
+-- 6. Job diario: cerrada → histórico tras 48h sin actividad.
 -- ============================================================
 
 create extension if not exists pg_cron;
