@@ -87,16 +87,14 @@ export default async function RootLayout({
 				inter.variable,
 			)}
 		>
-			<head>
+			<body className="min-h-full">
 				{process.env.NODE_ENV === "development" && (
 					<Script
 						src="//unpkg.com/react-grab/dist/index.global.js"
 						crossOrigin="anonymous"
-						strategy="beforeInteractive"
+						strategy="afterInteractive"
 					/>
 				)}
-			</head>
-			<body className="min-h-full">
 				<ThemeProvider
 					attribute="class"
 					defaultTheme="system"
