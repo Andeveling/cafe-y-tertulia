@@ -49,7 +49,7 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 	if (pathname.startsWith("/auth")) return null;
 
 	return (
-		<Sidebar collapsible="icon" variant="sidebar">
+		<Sidebar collapsible="offcanvas" variant="inset">
 			<SidebarHeader className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-2">
 				<SidebarMenu>
 					<SidebarMenuItem>

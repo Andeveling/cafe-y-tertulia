@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { cookies } from "next/headers";
+import Script from "next/script";
 import "./globals.css";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import {
+	SIDEBAR_COOKIE_NAME,
+	sidebarOpenFromCookie,
+} from "@/lib/sidebar-preference";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +69,11 @@ export default async function RootLayout({
 		}
 	}
 
+	const cookieStore = await cookies();
+	const defaultSidebarOpen = sidebarOpenFromCookie(
+		cookieStore.get(SIDEBAR_COOKIE_NAME)?.value,
+	);
+
 	return (
 		<html
 			lang="es"
@@ -76,6 +87,15 @@ export default async function RootLayout({
 				inter.variable,
 			)}
 		>
+			<head>
+				{process.env.NODE_ENV === "development" && (
+					<Script
+						src="//unpkg.com/react-grab/dist/index.global.js"
+						crossOrigin="anonymous"
+						strategy="beforeInteractive"
+					/>
+				)}
+			</head>
 			<body className="min-h-full">
 				<ThemeProvider
 					attribute="class"
@@ -83,7 +103,7 @@ export default async function RootLayout({
 					enableSystem
 					disableTransitionOnChange
 				>
-					<SidebarProvider>
+					<SidebarProvider defaultOpen={defaultSidebarOpen}>
 						<AppSidebar user={navUser} />
 						<SidebarInset>
 							<AppHeader />

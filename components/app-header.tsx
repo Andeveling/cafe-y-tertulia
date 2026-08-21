@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useSidebarPreference } from "@/hooks/use-sidebar-preference";
 
 const labels: Record<string, string> = {
 	invite: "Invitar",
@@ -32,12 +33,13 @@ export function getBreadcrumbs(pathname: string) {
 
 export function AppHeader() {
 	const pathname = usePathname();
+	const { open } = useSidebarPreference();
 	if (pathname.startsWith("/auth")) return null;
 	const breadcrumbs = getBreadcrumbs(pathname);
 
 	return (
 		<header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
-			<SidebarTrigger className="-ml-1" />
+			<SidebarTrigger className="-ml-1" aria-expanded={open} />
 			<nav aria-label="Migas de pan" className="min-w-0">
 				<ol className="flex items-center gap-2 overflow-hidden text-xs">
 					<li className="shrink-0">

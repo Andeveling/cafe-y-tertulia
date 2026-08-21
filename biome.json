@@ -4,7 +4,12 @@
 	"plugins": ["./biome-plugins/no-hardcoded-colors.grit"],
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!supabase/templates/**"]
+		"includes": [
+			"**",
+			"!supabase/templates/**",
+			"!docs/prototypes/**",
+			"!biome-plugins/test-*.grit"
+		]
 	},
 	"formatter": { "enabled": true, "indentStyle": "tab" },
 	"linter": {
@@ -51,14 +56,8 @@
 			"!out/**",
 			"!build/**",
 			"!next-env.d.ts",
-			"!.next/**",
-			"!out/**",
-			"!build/**",
-			"!next-env.d.ts",
-			"!.next/**",
-			"!out/**",
-			"!build/**",
-			"!next-env.d.ts"
+			"!docs/prototypes/**",
+			"!biome-plugins/test-*.grit"
 		]
 	},
 	"javascript": {
