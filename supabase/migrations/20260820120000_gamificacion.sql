@@ -36,6 +36,8 @@ create table public.badges (
   created_at timestamptz not null default now()
 );
 
+-- Individual awards require member_id; collective awards may reference a session without a member.
+-- Enforced by application logic (collective badges have kind='collective').
 create table public.awards (
   id uuid primary key default gen_random_uuid(),
   badge_id uuid not null references public.badges (id),
@@ -43,8 +45,7 @@ create table public.awards (
   session_id uuid references public.sessions (id),
   assignment_id uuid,
   trigger text not null,
-  created_at timestamptz not null default now(),
-  constraint award_target check (member_id is not null or session_id is null)
+  created_at timestamptz not null default now()
 );
 
 create table public.counts (

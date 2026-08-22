@@ -21,12 +21,12 @@ as $$
 declare
   active_count int;
   session_rec record;
-  badge_id uuid;
+  v_badge_id uuid;
 begin
-  select id into badge_id from badges where key = 'mesa_llena';
-  if badge_id is null then return; end if;
+  select id into v_badge_id from badges where key = 'mesa_llena';
+  if v_badge_id is null then return; end if;
   -- Already awarded?
-  if exists (select 1 from awards where badge_id = check_mesa_llena.badge_id) then
+  if exists (select 1 from awards a where a.badge_id = v_badge_id) then
     return;
   end if;
 
@@ -47,7 +47,7 @@ begin
         and sp.role != 'spectator'
     ) >= active_count then
       insert into awards (badge_id, member_id, session_id, trigger)
-      values (badge_id, null, session_rec.id, 'mesa_llena');
+      values (v_badge_id, null, session_rec.id, 'mesa_llena');
       return;
     end if;
   end loop;
@@ -62,11 +62,11 @@ as $$
 declare
   participant_count int;
   answerer_count int;
-  badge_id uuid;
+  v_badge_id uuid;
 begin
-  select id into badge_id from badges where key = 'triviantes';
-  if badge_id is null then return; end if;
-  if exists (select 1 from awards where badge_id = check_triviantes.badge_id) then
+  select id into v_badge_id from badges where key = 'triviantes';
+  if v_badge_id is null then return; end if;
+  if exists (select 1 from awards a where a.badge_id = v_badge_id) then
     return;
   end if;
 
@@ -85,7 +85,7 @@ begin
 
   if answerer_count >= participant_count then
     insert into awards (badge_id, member_id, session_id, trigger)
-    values (badge_id, null, target_session_id, 'triviantes');
+    values (v_badge_id, null, target_session_id, 'triviantes');
   end if;
 end $$;
 
@@ -97,11 +97,11 @@ returns void language plpgsql security definer set search_path = public
 as $$
 declare
   question_count int;
-  badge_id uuid;
+  v_badge_id uuid;
 begin
-  select id into badge_id from badges where key = 'debate_intenso';
-  if badge_id is null then return; end if;
-  if exists (select 1 from awards where badge_id = check_debate_intenso.badge_id) then
+  select id into v_badge_id from badges where key = 'debate_intenso';
+  if v_badge_id is null then return; end if;
+  if exists (select 1 from awards a where a.badge_id = v_badge_id) then
     return;
   end if;
 
@@ -111,7 +111,7 @@ begin
 
   if question_count >= 10 then
     insert into awards (badge_id, member_id, session_id, trigger)
-    values (badge_id, null, target_session_id, 'debate_intenso');
+    values (v_badge_id, null, target_session_id, 'debate_intenso');
   end if;
 end $$;
 
@@ -123,21 +123,21 @@ returns void language plpgsql security definer set search_path = public
 as $$
 declare
   material_count int;
-  badge_id uuid;
+  v_badge_id uuid;
 begin
-  select id into badge_id from badges where key = 'exploradores';
-  if badge_id is null then return; end if;
-  if exists (select 1 from awards where badge_id = check_exploradores.badge_id) then
+  select id into v_badge_id from badges where key = 'exploradores';
+  if v_badge_id is null then return; end if;
+  if exists (select 1 from awards a where a.badge_id = v_badge_id) then
     return;
   end if;
 
   select count(*) into material_count
   from materials
-  where status in ('en_curso', 'finished');
+  where status in ('in_progress', 'finished');
 
   if material_count >= 5 then
     insert into awards (badge_id, member_id, session_id, trigger)
-    values (badge_id, null, null, 'exploradores');
+    values (v_badge_id, null, null, 'exploradores');
   end if;
 end $$;
 
@@ -149,11 +149,11 @@ returns void language plpgsql security definer set search_path = public
 as $$
 declare
   session_count int;
-  badge_id uuid;
+  v_badge_id uuid;
 begin
-  select id into badge_id from badges where key = 'club_de_plata';
-  if badge_id is null then return; end if;
-  if exists (select 1 from awards where badge_id = check_club_de_plata.badge_id) then
+  select id into v_badge_id from badges where key = 'club_de_plata';
+  if v_badge_id is null then return; end if;
+  if exists (select 1 from awards a where a.badge_id = v_badge_id) then
     return;
   end if;
 
@@ -163,7 +163,7 @@ begin
 
   if session_count >= 25 then
     insert into awards (badge_id, member_id, session_id, trigger)
-    values (badge_id, null, null, 'club_de_plata');
+    values (v_badge_id, null, null, 'club_de_plata');
   end if;
 end $$;
 
@@ -176,7 +176,7 @@ create or replace function public.on_session_closed_hitos()
 returns trigger language plpgsql security definer set search_path = public
 as $$
 begin
-  if new.status = 'closed' and old.status = 'en_curso' then
+  if new.status = 'closed' and old.status = 'in_progress' then
     perform public.check_mesa_llena();
     perform public.check_debate_intenso(new.id);
     perform public.check_club_de_plata();
