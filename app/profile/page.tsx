@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { BadgeVitrina } from "@/app/profile/_components/badge-vitrina";
 import { UpdateProfileForm } from "@/app/profile/_components/update-profile-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +10,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { getCurrentMember } from "@/lib/current-member";
+import { getMemberBadges } from "./_lib/gamification-actions";
 import { leaveClub, signOut } from "./_lib/profile-actions";
 
 export default async function ProfilePage({
@@ -22,12 +24,14 @@ export default async function ProfilePage({
 		redirect("/auth/login");
 	}
 
+	const { badges, recognitions } = await getMemberBadges(member.id);
+
 	return (
 		<div className="mx-auto w-full max-w-xl flex-1 px-4 py-8">
 			<div className="space-y-2">
 				<h1 className="text-2xl font-semibold tracking-tight">Tu perfil</h1>
 				<p className="text-sm text-muted-foreground">
-					Tu nombre visible y el estado de tu membresía.
+					Tu nombre visible, insignias y el estado de tu membresía.
 				</p>
 			</div>
 
@@ -58,6 +62,16 @@ export default async function ProfilePage({
 				</CardHeader>
 				<CardContent>
 					<UpdateProfileForm defaultDisplayName={member.display_name} />
+				</CardContent>
+			</Card>
+
+			<Card className="mt-6">
+				<CardHeader>
+					<CardTitle>Insignias</CardTitle>
+					<CardDescription>Tus logros y los hitos del club.</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<BadgeVitrina badges={badges} recognitions={recognitions} />
 				</CardContent>
 			</Card>
 

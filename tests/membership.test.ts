@@ -134,10 +134,14 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 		expect(error?.message).toContain("Signups not allowed");
 	});
 
-	it("blocks anonymous access to the members table", async () => {
+	it("allows anonymous read of members display_name for historical view", async () => {
 		const anon = createClient<Database>(URL, ANON_KEY);
-		const { data } = await anon.from("members").select("*");
-		expect(data).toBeNull();
+		const { data, error } = await anon
+			.from("members")
+			.select("id, display_name");
+		expect(error).toBeNull();
+		expect(data).not.toBeNull();
+		expect(data!.length).toBeGreaterThan(0);
 	});
 
 	it("lets an active member read the roster with a real session", async () => {

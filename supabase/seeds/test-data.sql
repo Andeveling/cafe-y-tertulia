@@ -56,8 +56,10 @@ begin
   on conflict (id) do nothing;
 
   -- ── Sesión histórica (memoria del club, solo lectura) ───────────────────
+  -- Primero creamos la sesión en preparación, luego participantes y preguntas,
+  -- y finalmente la archivamos (el frozen guard bloquea inserts en archived).
   insert into public.sessions (id, material_id, range, status, moderator_id)
-  values (ses_hist_id, mat_id, 'Capítulo prólogo', 'archived', andres_id)
+  values (ses_hist_id, mat_id, 'Capítulo prólogo', 'preparation', andres_id)
   on conflict (id) do nothing;
 
   insert into public.session_participants (session_id, member_id)
@@ -68,6 +70,13 @@ begin
     ('cccccccc-0000-0000-0000-000000000004', ses_hist_id, mat_id, andres_id,
      '¿Qué esperábamos del club antes de empezar el libro?')
   on conflict (id) do nothing;
+
+  -- Archivamos la sesión: preparation → lobby → in_progress → closed → archived
+  -- (forward-only guard exige cada paso)
+  update public.sessions set status = 'lobby' where id = ses_hist_id;
+  update public.sessions set status = 'in_progress' where id = ses_hist_id;
+  update public.sessions set status = 'closed' where id = ses_hist_id;
+  update public.sessions set status = 'archived' where id = ses_hist_id;
 
   raise notice 'test-data OK: material % · sesión lobby % · sesión histórica %', mat_id, ses_lobby_id, ses_hist_id;
 end

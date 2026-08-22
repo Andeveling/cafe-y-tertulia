@@ -26,6 +26,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import {
+	getClubMilestones,
 	getMaterial,
 	MATERIAL_KIND_LABELS,
 	MATERIAL_STATUS_LABELS,
@@ -34,6 +35,12 @@ import {
 
 export const metadata = {
 	title: "Material · Café y Tertulia",
+};
+
+const MILESTONE_LABELS: Record<string, string> = {
+	first_book_finished: "Primer libro terminado",
+	fifty_sessions: "50 sesiones",
+	hundred_questions: "100 preguntas",
 };
 
 export default async function MaterialDetailPage({
@@ -50,6 +57,7 @@ export default async function MaterialDetailPage({
 	}
 
 	const bank = await listMaterialTrivias(supabase, id).catch(() => []);
+	const milestones = await getClubMilestones(supabase).catch(() => []);
 	const showTriviaBank = material.sessions.some(
 		(s) => s.status === "preparation",
 	);
@@ -80,6 +88,21 @@ export default async function MaterialDetailPage({
 					)}
 				</CardContent>
 			</Card>
+
+			{milestones.length > 0 && (
+				<div className="flex flex-wrap gap-2">
+					{milestones.map((m) => (
+						<span
+							key={m.id}
+							className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-sm"
+							title={m.trigger}
+						>
+							<span aria-hidden="true">{m.emoji}</span>
+							<span>{MILESTONE_LABELS[m.badge_key] ?? m.badge_key}</span>
+						</span>
+					))}
+				</div>
+			)}
 
 			<Separator />
 

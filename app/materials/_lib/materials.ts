@@ -72,11 +72,46 @@ export type SessionHistory = {
 		rating_avg: number | null;
 		rating_count: number;
 	};
+	participants: {
+		member_id: string;
+		display_name: string;
+		opt_out: boolean;
+	}[];
 	questions: {
 		id: string;
 		text: string;
 		author: string;
 		created_at: string;
+		assignment?: {
+			id: string;
+			assignee: string;
+			state: string;
+			notes: string;
+		};
+	}[];
+	trivia_rounds: {
+		id: string;
+		title: string;
+		status: string;
+		items: {
+			member_id: string;
+			display_name: string;
+			hits: number;
+		}[];
+	}[];
+	takes: {
+		id: string;
+		prompt: string;
+		status: string;
+		counts: { agree: number; disagree: number; neutral: number };
+	}[];
+	awards: {
+		id: string;
+		trigger: string;
+		member_id: string | null;
+		display_name: string | null;
+		emoji: string;
+		badge_key: string;
 	}[];
 };
 
@@ -89,7 +124,15 @@ export type MaterialDetail = {
 	created_at: string;
 	rating_avg: number | null;
 	rating_count: number;
-	sessions: Omit<SessionHistory, "material" | "questions">[];
+	sessions: Omit<
+		SessionHistory,
+		| "material"
+		| "questions"
+		| "participants"
+		| "trivia_rounds"
+		| "takes"
+		| "awards"
+	>[];
 };
 
 /**
@@ -155,7 +198,78 @@ export async function getMaterial(
 	};
 }
 
-/** Lectura de una Sesión para el Histórico, incluyendo sus Preguntas y autores. */
+/** Perfil público de un Miembro con sus insignias. */
+export async function getMemberProfile(
+	supabase: MaterialsClient,
+	memberId: string,
+): Promise<{
+	id: string;
+	display_name: string;
+	awards: {
+		id: string;
+		emoji: string;
+		badge_key: string;
+		trigger: string;
+		session_id: string | null;
+		created_at: string;
+	}[];
+} | null> {
+	const { data: member, error } = await supabase
+		.from("members")
+		.select("id, display_name")
+		.eq("id", memberId)
+		.single();
+
+	if (error || !member) return null;
+
+	const { data: awards } = await supabase
+		.from("awards")
+		.select("id, trigger, session_id, created_at, badges(key, emoji)")
+		.eq("member_id", memberId)
+		.order("created_at", { ascending: false });
+
+	return {
+		id: member.id,
+		display_name: member.display_name,
+		awards: (awards ?? []).map((a) => ({
+			id: a.id,
+			emoji: a.badges?.emoji ?? "🏆",
+			badge_key: a.badges?.key ?? "",
+			trigger: a.trigger,
+			session_id: a.session_id,
+			created_at: a.created_at,
+		})),
+	};
+}
+
+/** Hitos colectivos del club (badges con kind = 'collective'). */
+export async function getClubMilestones(supabase: MaterialsClient): Promise<
+	{
+		id: string;
+		emoji: string;
+		badge_key: string;
+		trigger: string;
+		created_at: string;
+	}[]
+> {
+	const { data } = await supabase
+		.from("awards")
+		.select("id, trigger, created_at, badges(key, emoji, kind)")
+		.is("member_id", null)
+		.order("created_at", { ascending: false });
+
+	return (data ?? [])
+		.filter((a) => a.badges?.kind === "collective")
+		.map((a) => ({
+			id: a.id,
+			emoji: a.badges?.emoji ?? "🏆",
+			badge_key: a.badges?.key ?? "",
+			trigger: a.trigger,
+			created_at: a.created_at,
+		}));
+}
+
+/** Lectura de una Sesión para el Histórico: preguntas, participantes, asignaciones, minijuegos y logros. */
 export async function getSessionHistory(
 	supabase: MaterialsClient,
 	id: string,
@@ -171,6 +285,53 @@ export async function getSessionHistory(
 	if (error) throw error;
 	if (!data || !data.materials) return null;
 
+	const sessionId = data.id;
+
+	// Participantes (join con members para display_name)
+	const { data: participants } = await supabase
+		.from("session_participants")
+		.select("member_id, opt_out, members(display_name)")
+		.eq("session_id", sessionId);
+
+	// Asignaciones (join con questions + members para autor y asignado)
+	const { data: assignments } = await supabase
+		.from("assignments")
+		.select(
+			"id, question_id, state, notes, reveal_order, questions(id, text, created_at, author_id, members(display_name)), members(display_name)",
+		)
+		.eq("session_id", sessionId)
+		.order("reveal_order");
+
+	// Trivia rounds + hits agregados
+	const { data: rounds } = await supabase
+		.from("trivia_rounds")
+		.select(
+			"id, status, trivias(title), trivia_hits(member_id, hits, members(display_name))",
+		)
+		.eq("session_id", sessionId)
+		.order("created_at");
+
+	// Takes + conteo de votos (agregado, no individual)
+	const { data: takes } = await supabase
+		.from("takes")
+		.select("id, prompt, status, take_votes(position)")
+		.eq("session_id", sessionId)
+		.order("created_at");
+
+	// Awards de esta sesión
+	const { data: awards } = await supabase
+		.from("awards")
+		.select(
+			"id, trigger, member_id, badge_id, badges(key, emoji), members(display_name)",
+		)
+		.eq("session_id", sessionId)
+		.order("created_at");
+
+	// Indexar asignaciones por question_id para emparejar con preguntas
+	const assignmentMap = new Map(
+		(assignments ?? []).map((a) => [a.question_id, a]),
+	);
+
 	return {
 		id: data.id,
 		range: data.range,
@@ -180,11 +341,61 @@ export async function getSessionHistory(
 		rating_avg: data.rating_avg,
 		rating_count: data.rating_count,
 		material: data.materials,
-		questions: (data.questions ?? []).map((question) => ({
-			id: question.id,
-			text: question.text,
-			created_at: question.created_at,
-			author: question.members?.display_name ?? "Miembro del club",
+		participants: (participants ?? []).map((p) => ({
+			member_id: p.member_id,
+			display_name: p.members?.display_name ?? "Miembro del club",
+			opt_out: p.opt_out,
+		})),
+		questions: (data.questions ?? []).map((question) => {
+			const assignment = assignmentMap.get(question.id);
+			return {
+				id: question.id,
+				text: question.text,
+				created_at: question.created_at,
+				author: question.members?.display_name ?? "Miembro del club",
+				...(assignment
+					? {
+							assignment: {
+								id: assignment.id,
+								assignee:
+									assignment.members?.display_name ?? "Miembro del club",
+								state: assignment.state,
+								notes: assignment.notes,
+							},
+						}
+					: {}),
+			};
+		}),
+		trivia_rounds: (rounds ?? []).map((round) => ({
+			id: round.id,
+			title: round.trivias?.title ?? "Trivia",
+			status: round.status,
+			items: (round.trivia_hits ?? []).map((hit) => ({
+				member_id: hit.member_id,
+				display_name: hit.members?.display_name ?? "Miembro del club",
+				hits: hit.hits,
+			})),
+		})),
+		takes: (takes ?? []).map((take) => {
+			const votes = take.take_votes ?? [];
+			return {
+				id: take.id,
+				prompt: take.prompt,
+				status: take.status,
+				counts: {
+					agree: votes.filter((v) => v.position === "agree").length,
+					disagree: votes.filter((v) => v.position === "disagree").length,
+					neutral: votes.filter((v) => v.position === "neutral").length,
+				},
+			};
+		}),
+		awards: (awards ?? []).map((award) => ({
+			id: award.id,
+			trigger: award.trigger,
+			member_id: award.member_id,
+			display_name: award.members?.display_name ?? null,
+			emoji: award.badges?.emoji ?? "🏆",
+			badge_key: award.badges?.key ?? "",
 		})),
 	};
 }
