@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { InfoButton } from "@/components/info-button";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -43,30 +44,29 @@ export function LeaveClubDialog() {
 			</DialogTrigger>
 			<DialogContent showCloseButton>
 				<DialogHeader>
-					<DialogTitle>¿Darte de baja del club?</DialogTitle>
+					<div className="flex items-center gap-1.5">
+						<DialogTitle>¿Darte de baja?</DialogTitle>
+						<InfoButton
+							title="¿Qué pasa con mis datos?"
+							description="Tus aportes (preguntas, notas, participación) quedan como memoria del club. No podrás iniciar sesión ni participar en futuras sesiones."
+						/>
+					</div>
 					<DialogDescription>
-						Esta acción es permanente. Tus aportes (preguntas, notas,
-						participación) quedan como memoria del club, pero no podrás iniciar
-						sesión ni participar en futuras sesiones.
+						Acción permanente. Para confirmar, escribí{" "}
+						<span className="font-semibold text-foreground">
+							{CONFIRM_TEXT}
+						</span>
+						:
 					</DialogDescription>
 				</DialogHeader>
 
-				<div className="flex flex-col gap-3">
-					<p className="text-sm text-muted-foreground">
-						Para confirmar, escribí{" "}
-						<span className="font-semibold text-foreground">
-							{CONFIRM_TEXT}
-						</span>{" "}
-						abajo:
-					</p>
-					<Input
-						value={input}
-						onChange={(e) => setInput(e.target.value)}
-						placeholder={CONFIRM_TEXT}
-						autoFocus
-						aria-label="Confirmar baja"
-					/>
-				</div>
+				<Input
+					value={input}
+					onChange={(e) => setInput(e.target.value)}
+					placeholder={CONFIRM_TEXT}
+					autoFocus
+					aria-label="Confirmar baja"
+				/>
 
 				<DialogFooter>
 					<DialogClose
