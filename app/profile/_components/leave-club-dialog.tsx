@@ -52,7 +52,7 @@ export function LeaveClubDialog() {
 						/>
 					</div>
 					<DialogDescription>
-						Acción permanente. Para confirmar, escribí{" "}
+						Acción permanente. Para confirmar, escribe{" "}
 						<span className="font-semibold text-foreground">
 							{CONFIRM_TEXT}
 						</span>
