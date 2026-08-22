@@ -294,10 +294,12 @@ export async function getSessionHistory(
 		.eq("session_id", sessionId);
 
 	// Asignaciones (join con questions + members para autor y asignado)
+	// !assignments_assignee_id_fkey y !questions_author_id_fkey desambiguan
+	// los dos caminos a members (asignado vía assignee_id, autor vía author_id).
 	const { data: assignments } = await supabase
 		.from("assignments")
 		.select(
-			"id, question_id, state, notes, reveal_order, questions(id, text, created_at, author_id, members(display_name)), members(display_name)",
+			"id, question_id, state, notes, reveal_order, questions(id, text, created_at, author_id, members!questions_author_id_fkey(display_name)), members!assignments_assignee_id_fkey(display_name)",
 		)
 		.eq("session_id", sessionId)
 		.order("reveal_order");
