@@ -111,6 +111,7 @@ export type SessionHistory = {
 		member_id: string | null;
 		display_name: string | null;
 		emoji: string;
+		name: string;
 		badge_key: string;
 	}[];
 };
@@ -208,6 +209,7 @@ export async function getMemberProfile(
 	awards: {
 		id: string;
 		emoji: string;
+		name: string;
 		badge_key: string;
 		trigger: string;
 		session_id: string | null;
@@ -224,7 +226,7 @@ export async function getMemberProfile(
 
 	const { data: awards } = await supabase
 		.from("awards")
-		.select("id, trigger, session_id, created_at, badges(key, emoji)")
+		.select("id, trigger, session_id, created_at, badges(key, name, emoji)")
 		.eq("member_id", memberId)
 		.order("created_at", { ascending: false });
 
@@ -234,6 +236,7 @@ export async function getMemberProfile(
 		awards: (awards ?? []).map((a) => ({
 			id: a.id,
 			emoji: a.badges?.emoji ?? "🏆",
+			name: a.badges?.name ?? a.badges?.key ?? "",
 			badge_key: a.badges?.key ?? "",
 			trigger: a.trigger,
 			session_id: a.session_id,
@@ -247,6 +250,7 @@ export async function getClubMilestones(supabase: MaterialsClient): Promise<
 	{
 		id: string;
 		emoji: string;
+		name: string;
 		badge_key: string;
 		trigger: string;
 		created_at: string;
@@ -254,7 +258,7 @@ export async function getClubMilestones(supabase: MaterialsClient): Promise<
 > {
 	const { data } = await supabase
 		.from("awards")
-		.select("id, trigger, created_at, badges(key, emoji, kind)")
+		.select("id, trigger, created_at, badges(key, name, emoji, kind)")
 		.is("member_id", null)
 		.order("created_at", { ascending: false });
 
@@ -263,6 +267,7 @@ export async function getClubMilestones(supabase: MaterialsClient): Promise<
 		.map((a) => ({
 			id: a.id,
 			emoji: a.badges?.emoji ?? "🏆",
+			name: a.badges?.name ?? a.badges?.key ?? "",
 			badge_key: a.badges?.key ?? "",
 			trigger: a.trigger,
 			created_at: a.created_at,
@@ -324,7 +329,7 @@ export async function getSessionHistory(
 	const { data: awards } = await supabase
 		.from("awards")
 		.select(
-			"id, trigger, member_id, badge_id, badges(key, emoji), members(display_name)",
+			"id, trigger, member_id, badge_id, badges(key, name, emoji), members(display_name)",
 		)
 		.eq("session_id", sessionId)
 		.order("created_at");
@@ -397,6 +402,7 @@ export async function getSessionHistory(
 			member_id: award.member_id,
 			display_name: award.members?.display_name ?? null,
 			emoji: award.badges?.emoji ?? "🏆",
+			name: award.badges?.name ?? award.badges?.key ?? "",
 			badge_key: award.badges?.key ?? "",
 		})),
 	};

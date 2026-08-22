@@ -42,9 +42,7 @@ export function HistoryAwards({ awards }: { awards: Award[] }) {
 								{award.emoji}
 							</span>
 							<div className="flex flex-col gap-0.5 min-w-0 flex-1">
-								<span className="text-sm font-medium">
-									{BADGE_LABELS[award.badge_key] ?? award.badge_key}
-								</span>
+								<span className="text-sm font-medium">{award.name}</span>
 								{award.member_id ? (
 									<Link
 										href={`/members/${award.member_id}`}
@@ -65,15 +63,3 @@ export function HistoryAwards({ awards }: { awards: Award[] }) {
 		</Card>
 	);
 }
-
-const BADGE_LABELS: Record<string, string> = {
-	first_question: "Primera pregunta",
-	elephant_memory: "Memoria de elefante",
-	perspective_shift: "Cambio de perspectiva",
-	thought_provoking_question: "Pregunta que hizo pensar",
-	perfect_participation: "Participación perfecta",
-	consistent_reader: "Lector constante",
-	first_book_finished: "Primer libro terminado",
-	fifty_sessions: "50 sesiones",
-	hundred_questions: "100 preguntas",
-};

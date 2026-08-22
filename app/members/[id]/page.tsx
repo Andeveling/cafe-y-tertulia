@@ -14,18 +14,6 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Miembro · Café y Tertulia" };
 
-const BADGE_LABELS: Record<string, string> = {
-	first_question: "Primera pregunta",
-	elephant_memory: "Memoria de elefante",
-	perspective_shift: "Cambio de perspectiva",
-	thought_provoking_question: "Pregunta que hizo pensar",
-	perfect_participation: "Participación perfecta",
-	consistent_reader: "Lector constante",
-	first_book_finished: "Primer libro terminado",
-	fifty_sessions: "50 sesiones",
-	hundred_questions: "100 preguntas",
-};
-
 export default async function MemberProfilePage({
 	params,
 }: {
@@ -78,9 +66,7 @@ export default async function MemberProfilePage({
 									<span className="text-xl" aria-hidden="true">
 										{award.emoji}
 									</span>
-									<span className="text-sm">
-										{BADGE_LABELS[award.badge_key] ?? award.badge_key}
-									</span>
+									<span className="text-sm">{award.name}</span>
 								</li>
 							))}
 						</ul>

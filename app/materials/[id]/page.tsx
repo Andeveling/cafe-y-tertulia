@@ -37,12 +37,6 @@ export const metadata = {
 	title: "Material · Café y Tertulia",
 };
 
-const MILESTONE_LABELS: Record<string, string> = {
-	first_book_finished: "Primer libro terminado",
-	fifty_sessions: "50 sesiones",
-	hundred_questions: "100 preguntas",
-};
-
 export default async function MaterialDetailPage({
 	params,
 }: {
@@ -63,7 +57,7 @@ export default async function MaterialDetailPage({
 	);
 
 	return (
-		<div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
+		<div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6">
 			<Card>
 				<CardHeader className="grid-cols-[1fr_auto]">
 					<CardTitle>{material.title}</CardTitle>
@@ -98,7 +92,7 @@ export default async function MaterialDetailPage({
 							title={m.trigger}
 						>
 							<span aria-hidden="true">{m.emoji}</span>
-							<span>{MILESTONE_LABELS[m.badge_key] ?? m.badge_key}</span>
+							<span>{m.name}</span>
 						</span>
 					))}
 				</div>
