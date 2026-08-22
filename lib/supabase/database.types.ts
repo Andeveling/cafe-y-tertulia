@@ -934,6 +934,10 @@ export type Database = {
 				Returns: Json;
 			};
 			close_take: { Args: { target_take_id: string }; Returns: undefined };
+			compute_member_level: {
+				Args: { target_member_id: string };
+				Returns: Json;
+			};
 			correct_assignment_notes: {
 				Args: { new_notes: string; target_assignment_id: string };
 				Returns: undefined;

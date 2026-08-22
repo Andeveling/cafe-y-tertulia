@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import Script from "next/script";
 import "./globals.css";
+import { getMemberLevel } from "@/app/profile/_lib/gamification-actions";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -69,6 +70,8 @@ export default async function RootLayout({
 		}
 	}
 
+	const memberLevel = user ? await getMemberLevel(user.id) : null;
+
 	const cookieStore = await cookies();
 	const defaultSidebarOpen = sidebarOpenFromCookie(
 		cookieStore.get(SIDEBAR_COOKIE_NAME)?.value,
@@ -104,7 +107,7 @@ export default async function RootLayout({
 					<SidebarProvider defaultOpen={defaultSidebarOpen}>
 						<AppSidebar user={navUser} />
 						<SidebarInset>
-							<AppHeader />
+							<AppHeader level={memberLevel} />
 							<div className="flex flex-1 flex-col">{children}</div>
 						</SidebarInset>
 					</SidebarProvider>

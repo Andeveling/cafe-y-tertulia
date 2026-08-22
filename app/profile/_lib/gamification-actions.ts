@@ -20,6 +20,54 @@ export type SeasonRecognition = {
 	seasonMonth: string;
 };
 
+export type MemberLevel = {
+	level: number;
+	title: string;
+	sessionsAttended: number;
+	insigniasCount: number;
+	currentThreshold: number;
+	nextThreshold: number;
+	nextTitle: string;
+	nextInsigniasRequired: number;
+};
+
+/**
+ * Computes the member's level from session attendance and individual badges.
+ * Calls the DB function compute_member_level — no new tables, derived on-the-fly.
+ */
+export async function getMemberLevel(memberId: string): Promise<MemberLevel> {
+	const supabase = await createServerClient();
+
+	const { data, error } = await supabase.rpc("compute_member_level", {
+		target_member_id: memberId,
+	});
+
+	if (error || !data) {
+		return {
+			level: 0,
+			title: "",
+			sessionsAttended: 0,
+			insigniasCount: 0,
+			currentThreshold: 0,
+			nextThreshold: 1,
+			nextTitle: "Novato",
+			nextInsigniasRequired: 0,
+		};
+	}
+
+	const d = data as Record<string, unknown>;
+	return {
+		level: d.level as number,
+		title: d.title as string,
+		sessionsAttended: d.sessions_attended as number,
+		insigniasCount: d.insignias_count as number,
+		currentThreshold: d.current_threshold as number,
+		nextThreshold: d.next_threshold as number,
+		nextTitle: d.next_title as string,
+		nextInsigniasRequired: d.next_insignias_required as number,
+	};
+}
+
 /**
  * Fetches all badges for the current member: which ones they've earned
  * (with date and context) and which remain. Also fetches any season
