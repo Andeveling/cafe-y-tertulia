@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { BadgeVitrina } from "@/app/profile/_components/badge-vitrina";
+import { LeaveClubDialog } from "@/app/profile/_components/leave-club-dialog";
 import { UpdateProfileForm } from "@/app/profile/_components/update-profile-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { getCurrentMember } from "@/lib/current-member";
 import { getMemberBadges } from "./_lib/gamification-actions";
-import { leaveClub, signOut } from "./_lib/profile-actions";
+import { signOut } from "./_lib/profile-actions";
 
 export default async function ProfilePage({
 	searchParams,
@@ -89,16 +90,12 @@ export default async function ProfilePage({
 						</span>
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="space-y-4">
+				<CardContent className="flex flex-col gap-4">
 					<p className="text-sm text-muted-foreground">
 						Si te das de baja, tus aportes quedan como memoria del club y no
 						podrás iniciar sesión.
 					</p>
-					<form action={leaveClub} className="flex gap-2">
-						<Button type="submit" variant="destructive">
-							Darme de baja
-						</Button>
-					</form>
+					<LeaveClubDialog />
 				</CardContent>
 			</Card>
 
