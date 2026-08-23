@@ -90,9 +90,7 @@ export function AppHeader({ level }: { level?: MemberLevel | null }) {
 				<BreadcrumbList className="flex-nowrap items-center gap-1.5 overflow-hidden sm:gap-2">
 					<BreadcrumbItem>
 						{breadcrumbs.length === 0 ? (
-							<BreadcrumbPage className="font-medium text-base">
-								Inicio
-							</BreadcrumbPage>
+							<BreadcrumbPage className="font-medium">Inicio</BreadcrumbPage>
 						) : (
 							<BreadcrumbLink render={<Link href="/" />}>Inicio</BreadcrumbLink>
 						)}

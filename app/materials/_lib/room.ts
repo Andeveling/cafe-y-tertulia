@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/lib/supabase/database.types";
+import { asArray, asBool, asNumber, asString } from "./json-helpers";
 import type {
 	AssignmentState,
 	DrawStatus,
@@ -14,22 +15,6 @@ import type {
 } from "./room-types";
 
 export type RoomClient = Pick<SupabaseClient<Database>, "rpc">;
-
-function asString(v: Json | undefined, fallback = ""): string {
-	return typeof v === "string" ? v : fallback;
-}
-
-function asBool(v: Json | undefined, fallback = false): boolean {
-	return typeof v === "boolean" ? v : fallback;
-}
-
-function asNumber(v: Json | undefined, fallback = 0): number {
-	return typeof v === "number" ? v : fallback;
-}
-
-function asArray<T>(v: Json | undefined): T[] {
-	return Array.isArray(v) ? (v as T[]) : [];
-}
 
 /**
  * Snapshot completo de la Sala: una sola llamada al RPC `room_snapshot` que
@@ -51,22 +36,22 @@ export async function getRoomSnapshot(
 	const participants = asArray<Record<string, Json | undefined>>(
 		row.participants,
 	).map((p) => ({
-		memberId: asString(p.memberId),
-		displayName: asString(p.displayName, "Miembro"),
-		role: asString(p.role, "member") as ParticipantRole,
-		optOut: asBool(p.optOut),
+		memberId: asString(p.member_id),
+		displayName: asString(p.display_name),
+		role: (p.role as ParticipantRole) ?? "member",
+		optOut: asBool(p.opt_out),
 	}));
 
 	const questions = asArray<Record<string, Json | undefined>>(
 		row.questions,
 	).map((q) => ({
 		id: asString(q.id),
-		authorId: asString(q.authorId),
-		authorName: asString(q.authorName, "Miembro"),
-		text: q.text == null ? null : asString(q.text),
-		isMine: asBool(q.isMine),
-		outsideDraw: asBool(q.outsideDraw),
-		createdAt: asString(q.createdAt),
+		authorId: asString(q.author_id),
+		authorName: asString(q.author_name),
+		text: typeof q.text === "string" ? q.text : null,
+		isMine: asBool(q.is_mine),
+		outsideDraw: asBool(q.outside_draw),
+		createdAt: asString(q.created_at),
 	}));
 
 	const readinessRow = row.readiness as
@@ -75,41 +60,37 @@ export async function getRoomSnapshot(
 	const readiness: RoomReadiness = {
 		total: asNumber(readinessRow?.total),
 		ready: asNumber(readinessRow?.ready),
-		allReady: asBool(readinessRow?.allReady),
+		allReady: asBool(readinessRow?.all_ready),
 	};
 
 	const drawRow = row.draw as Record<string, Json | undefined> | undefined;
 	const draw: RoomDraw = {
 		done: asBool(drawRow?.done),
-		status:
-			drawRow?.status == null ? null : (asString(drawRow.status) as DrawStatus),
+		status: (drawRow?.status as DrawStatus) ?? null,
 	};
 
 	const assignments = asArray<Record<string, Json | undefined>>(
 		row.assignments,
 	).map((a) => ({
-		assignmentId: asString(a.assignmentId),
-		questionId: asString(a.questionId),
-		authorName: asString(a.authorName),
-		assigneeName: asString(a.assigneeName),
-		state: asString(a.state) as AssignmentState,
-		revealOrder: asNumber(a.revealOrder),
-		questionText: a.questionText == null ? null : asString(a.questionText),
-		questionVisible: asBool(a.questionVisible),
+		assignmentId: asString(a.assignment_id),
+		questionId: asString(a.question_id),
+		authorName: asString(a.author_name),
+		assigneeName: asString(a.assignee_name),
+		state: (a.state as AssignmentState) ?? "hidden",
+		revealOrder: asNumber(a.reveal_order),
+		questionText: typeof a.question_text === "string" ? a.question_text : null,
+		questionVisible: asBool(a.question_visible),
 	}));
 
 	return {
-		sessionId: asString(row.sessionId),
-		materialId: asString(row.materialId),
+		sessionId: asString(row.session_id),
+		materialId: asString(row.material_id),
 		range: asString(row.range),
-		status: asString(
-			row.status,
-		) as Database["public"]["Enums"]["session_status"],
-		moderatorId: row.moderatorId == null ? null : asString(row.moderatorId),
-		roomStage: asString(
-			row.roomStage,
+		status: row.status as Database["public"]["Enums"]["session_status"],
+		moderatorId: typeof row.moderator_id === "string" ? row.moderator_id : null,
+		roomStage:
+			(row.room_stage as Database["public"]["Enums"]["room_stage"]) ??
 			"questions",
-		) as Database["public"]["Enums"]["room_stage"],
 		participants,
 		questions,
 		readiness,

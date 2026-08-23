@@ -135,40 +135,41 @@
 }
 
 .dark {
-	--background: oklch(0.2 0.028 48);
-	--foreground: oklch(0.95 0.025 82);
-	--card: oklch(0.24 0.03 48);
-	--card-foreground: oklch(0.95 0.025 82);
-	--popover: oklch(0.25 0.03 48);
-	--popover-foreground: oklch(0.95 0.025 82);
-	--primary: oklch(0.82 0.1 78);
-	--primary-foreground: oklch(0.24 0.04 48);
-	--secondary: oklch(0.32 0.045 55);
-	--secondary-foreground: oklch(0.9 0.08 78);
-	--muted: oklch(0.28 0.03 48);
-	--muted-foreground: oklch(0.76 0.03 78);
-	--accent: oklch(0.34 0.05 50);
-	--accent-foreground: oklch(0.95 0.025 82);
-	--destructive: oklch(0.68 0.14 28);
-	--destructive-foreground: oklch(0.95 0.025 82);
-	--border: oklch(0.34 0.03 48);
-	--input: oklch(0.36 0.035 48);
-	--ring: oklch(0.82 0.1 78);
-	--chart-1: oklch(0.82 0.1 78);
+	/* ── Espresso night — fondo profundo, textos crema, acentos caramelo ── */
+	--background: oklch(0.17 0.022 55);
+	--foreground: oklch(0.93 0.018 80);
+	--card: oklch(0.21 0.025 52);
+	--card-foreground: oklch(0.93 0.018 80);
+	--popover: oklch(0.22 0.026 52);
+	--popover-foreground: oklch(0.93 0.018 80);
+	--primary: oklch(0.82 0.12 75);
+	--primary-foreground: oklch(0.2 0.03 50);
+	--secondary: oklch(0.28 0.035 55);
+	--secondary-foreground: oklch(0.88 0.06 75);
+	--muted: oklch(0.25 0.028 55);
+	--muted-foreground: oklch(0.72 0.025 75);
+	--accent: oklch(0.3 0.04 55);
+	--accent-foreground: oklch(0.93 0.018 80);
+	--destructive: oklch(0.65 0.16 25);
+	--destructive-foreground: oklch(0.95 0.015 80);
+	--border: oklch(0.32 0.028 52);
+	--input: oklch(0.34 0.03 52);
+	--ring: oklch(0.82 0.12 75);
+	--chart-1: oklch(0.82 0.12 75);
 	--chart-2: oklch(0.62 0.1 40);
-	--chart-3: oklch(0.7 0.08 145);
+	--chart-3: oklch(0.68 0.08 145);
 	--chart-4: oklch(0.55 0.08 250);
 	--chart-5: oklch(0.72 0.06 82);
-	--sidebar: oklch(0.22 0.028 48);
-	--sidebar-foreground: oklch(0.95 0.025 82);
-	--sidebar-primary: oklch(0.82 0.1 78);
-	--sidebar-primary-foreground: oklch(0.24 0.04 48);
-	--sidebar-accent: oklch(0.32 0.04 52);
-	--sidebar-accent-foreground: oklch(0.95 0.025 82);
-	--sidebar-border: oklch(0.34 0.03 48);
-	--sidebar-ring: oklch(0.82 0.1 78);
-	--shadow-color: oklch(0 0 0);
-	--shadow-opacity: 0.4;
+	--sidebar: oklch(0.19 0.024 55);
+	--sidebar-foreground: oklch(0.93 0.018 80);
+	--sidebar-primary: oklch(0.82 0.12 75);
+	--sidebar-primary-foreground: oklch(0.2 0.03 50);
+	--sidebar-accent: oklch(0.28 0.035 52);
+	--sidebar-accent-foreground: oklch(0.93 0.018 80);
+	--sidebar-border: oklch(0.32 0.028 52);
+	--sidebar-ring: oklch(0.82 0.12 75);
+	--shadow-color: oklch(0.12 0.02 55);
+	--shadow-opacity: 0.5;
 }
 
 @layer base {
@@ -189,9 +190,9 @@
 	}
 	.dark body {
 		background-image: radial-gradient(
-			70rem 32rem at 50% -14%,
-			color-mix(in oklch, var(--primary) 18%, transparent),
-			transparent 58%
+			80rem 40rem at 50% -16%,
+			color-mix(in oklch, var(--primary) 14%, transparent),
+			transparent 60%
 		);
 	}
 	h1,

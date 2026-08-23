@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/lib/supabase/database.types";
+import { asNumber, asString } from "./json-helpers";
 
 export type RatingClient = Pick<SupabaseClient<Database>, "rpc">;
 
@@ -17,13 +18,6 @@ export type RatingProgress = {
 	isParticipant: boolean;
 	sessionStatus: string;
 };
-
-function asString(v: Json | undefined, fallback = ""): string {
-	return typeof v === "string" ? v : fallback;
-}
-function asNumber(v: Json | undefined, fallback = 0): number {
-	return typeof v === "number" ? v : fallback;
-}
 
 export async function getRatingProgress(
 	supabase: RatingClient,

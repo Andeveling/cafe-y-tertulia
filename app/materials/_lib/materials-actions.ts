@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { type ActionResult, runServerAction } from "@/lib/server-action";
-import type { MaterialKind, SessionStatus } from "./materials";
-import { SESSION_NEXT_STATUS } from "./materials";
+import type { MaterialKind, SessionStatus } from "./constants";
+import { SESSION_NEXT_STATUS } from "./constants";
 
 export async function createMaterial(input: {
 	title: string;

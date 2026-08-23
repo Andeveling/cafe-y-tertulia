@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/lib/supabase/database.types";
+import { asNullString, asNumber, asString } from "./json-helpers";
 
 export type MinigamesClient = Pick<SupabaseClient<Database>, "rpc" | "from">;
 
@@ -44,17 +45,6 @@ export type TriviaRoundSnapshot = {
 	winnerId: string | null;
 	winnerName: string | null;
 };
-
-function asString(v: Json | undefined, fallback = ""): string {
-	return typeof v === "string" ? v : fallback;
-}
-function asNumber(v: Json | undefined, fallback = 0): number {
-	return typeof v === "number" ? v : fallback;
-}
-function asNullString(v: Json | undefined): string | null {
-	if (v == null) return null;
-	return typeof v === "string" ? v : null;
-}
 
 export async function getMinigameState(
 	supabase: MinigamesClient,

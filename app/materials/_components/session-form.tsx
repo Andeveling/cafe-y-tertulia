@@ -10,7 +10,7 @@ import { z } from "zod";
 import { createSession } from "@/app/materials/_lib/materials-actions";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 const sessionFormSchema = z.object({
@@ -46,16 +46,21 @@ export function SessionForm({ materialId }: { materialId: string }) {
 		});
 	}
 
+	function onInvalid() {
+		const message = form.formState.errors.range?.message;
+		if (message) toast.error(message);
+	}
+
 	return (
 		<form
-			onSubmit={form.handleSubmit(onSubmit)}
-			className="flex items-end gap-2"
+			onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+			className="flex flex-wrap items-end gap-2"
 		>
 			<Controller
 				name="range"
 				control={form.control}
 				render={({ field, fieldState }) => (
-					<Field data-invalid={fieldState.invalid} className="w-56">
+					<Field data-invalid={fieldState.invalid} className="min-w-40 flex-1">
 						<FieldLabel htmlFor="session-range">Rango cubierto</FieldLabel>
 						<Input
 							{...field}
@@ -63,11 +68,10 @@ export function SessionForm({ materialId }: { materialId: string }) {
 							placeholder='Ej. "Capítulos 1-3"'
 							aria-invalid={fieldState.invalid}
 						/>
-						{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
 					</Field>
 				)}
 			/>
-			<Field className="w-56">
+			<Field className="min-w-40 flex-1">
 				<FieldLabel htmlFor="session-scheduled-at">Fecha programada</FieldLabel>
 				<DatePicker
 					date={scheduledAt}
@@ -76,7 +80,7 @@ export function SessionForm({ materialId }: { materialId: string }) {
 					id="session-scheduled-at"
 				/>
 			</Field>
-			<Button type="submit" disabled={isPending}>
+			<Button type="submit" disabled={isPending} className="h-9">
 				<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
 				Nueva sesión
 			</Button>

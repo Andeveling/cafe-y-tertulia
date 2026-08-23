@@ -1,7 +1,13 @@
+/**
+ * Constantes de UI del Escenario (ADR 0002). La máquina de fases de una
+ * Intervención vive en el RPC `advance_intervention` — aquí solo lo que la
+ * pantalla necesita para mostrar y cronometrar.
+ */
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/lib/supabase/database.types";
 import type { AssignmentState } from "./intervention";
+import { asNumber, asString } from "./json-helpers";
 
 export type StageClient = Pick<SupabaseClient<Database>, "rpc">;
 
@@ -44,14 +50,6 @@ export type StageSnapshot =
 			moderatorId: string | null;
 			remainingHidden: number;
 	  };
-
-function asString(v: Json | undefined, fallback = ""): string {
-	return typeof v === "string" ? v : fallback;
-}
-
-function asNumber(v: Json | undefined, fallback = 0): number {
-	return typeof v === "number" ? v : fallback;
-}
 
 export async function getStageSnapshot(
 	supabase: StageClient,

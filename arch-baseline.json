@@ -1,0 +1,1156 @@
+{
+	"generatedAt": "2026-08-23T12:37:29.637Z",
+	"hashVersion": 5,
+	"root": ".",
+	"count": 164,
+	"violations": [
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/**\" should not have silent catch blocks (catch must reference the error)",
+			"file": "app/materials/_lib/minigame-actions.ts",
+			"line": 45,
+			"hash": "bd97b657fa7d8765",
+			"subject": "31d2ab245b1ec01e"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/**\" should not have silent catch blocks (catch must reference the error)",
+			"file": "app/materials/_lib/minigame-actions.ts",
+			"line": 45,
+			"hash": "f4f2754e515d6436",
+			"subject": "4f75bea55128a52c"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/**\" should not have silent catch blocks (catch must reference the error)",
+			"file": "app/materials/_lib/question-actions.ts",
+			"line": 50,
+			"hash": "8d89fefbd08664ba",
+			"subject": "debbc02ba6cab806"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/**\" should not have silent catch blocks (catch must reference the error)",
+			"file": "app/materials/_lib/question-actions.ts",
+			"line": 106,
+			"hash": "5d12cc029c2c1e32",
+			"subject": "fbc15f4e44d7f0b2"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/**\" should not have silent catch blocks (catch must reference the error)",
+			"file": "app/materials/_lib/question-actions.ts",
+			"line": 50,
+			"hash": "7ec1be678dc7dd4b",
+			"subject": "ab59414769c0bd63"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/**\" should not have silent catch blocks (catch must reference the error)",
+			"file": "app/materials/_lib/question-actions.ts",
+			"line": 106,
+			"hash": "f8e7b654ff134f02",
+			"subject": "3a0373a9b7ed4954"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/**\" should not have silent catch blocks (catch must reference the error)",
+			"file": "app/auth/invite/_hooks/use-invite-session.ts",
+			"line": 41,
+			"hash": "724df8dfc94287db",
+			"subject": "5988c9d58c740173"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/_lib/form-helpers.ts",
+			"line": 1,
+			"hash": "afad1d3244ec45d5",
+			"subject": "fdc7cf1fce9f8e12"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/page.tsx",
+			"line": 1,
+			"hash": "1d629a8fbaeba333",
+			"subject": "48539540894d4531"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_components/invite-form.stories.tsx",
+			"line": 1,
+			"hash": "b1af845efe7b662b",
+			"subject": "e8d44d970beb30c9"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_components/invite-form.stories.tsx",
+			"line": 2,
+			"hash": "9259905d134117a8",
+			"subject": "b2e311e910a92773"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_components/invite-form.tsx",
+			"line": 3,
+			"hash": "cd2ed9e20aa7f451",
+			"subject": "cba3caee7185a777"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_components/invite-form.tsx",
+			"line": 4,
+			"hash": "7e4ea9b3d12d9839",
+			"subject": "affe38990dabfb67"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_components/invite-form.tsx",
+			"line": 5,
+			"hash": "e090e08aed7803d5",
+			"subject": "aa191a59cf31afb8"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_components/invite-form.tsx",
+			"line": 6,
+			"hash": "4489dfc4972569f5",
+			"subject": "ddaa3b68b9339cb6"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_lib/invite-actions.ts",
+			"line": 3,
+			"hash": "16338d2a8cd11e04",
+			"subject": "aacbbc8717b45efe"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_lib/invite-actions.ts",
+			"line": 4,
+			"hash": "dc07a4df3b7fad8b",
+			"subject": "7c6c96fdceecf9f5"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_lib/invite.ts",
+			"line": 1,
+			"hash": "c440c85505cc7305",
+			"subject": "cf5505e78c64231d"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_lib/invite.ts",
+			"line": 3,
+			"hash": "3fd0d673e21382ec",
+			"subject": "bf217b0c7cef882f"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/invite/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/invite/_schemas/invite-schema.ts",
+			"line": 1,
+			"hash": "a6c0e38974d47390",
+			"subject": "e8911365376a90fe"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/page.tsx",
+			"line": 1,
+			"hash": "0bdb9d1ca9b9aa19",
+			"subject": "0b86679570043d80"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/page.tsx",
+			"line": 2,
+			"hash": "58a369ed4239f273",
+			"subject": "067c0952222faa8e"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/page.tsx",
+			"line": 3,
+			"hash": "eb3e072bb14e1823",
+			"subject": "585df4496376a987"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/advance-button.tsx",
+			"line": 3,
+			"hash": "87b12c09569b65f8",
+			"subject": "9bf7308931d27ca6"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/advance-button.tsx",
+			"line": 8,
+			"hash": "75e0215ed4ec4032",
+			"subject": "8c74f5184eb34e1e"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/advance-button.tsx",
+			"line": 9,
+			"hash": "12a51a25ce6e46e0",
+			"subject": "877b01acd728a9b8"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/advance-button.tsx",
+			"line": 10,
+			"hash": "8a9139932314846b",
+			"subject": "b01e9209a6a4e28a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-awards.tsx",
+			"line": 1,
+			"hash": "4c071073c2fd3c80",
+			"subject": "6289d9345aa6f6b2"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-awards.tsx",
+			"line": 2,
+			"hash": "5dce7b112a05e5a3",
+			"subject": "089d8351960f2061"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-awards.tsx",
+			"line": 3,
+			"hash": "fcede2e1e15debbc",
+			"subject": "cffdfcfd75dbb29f"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-minigames.tsx",
+			"line": 1,
+			"hash": "0f7bbed2917afbeb",
+			"subject": "c1433ed33ec28b96"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-minigames.tsx",
+			"line": 7,
+			"hash": "87c5bb58fe3fa853",
+			"subject": "19389e5a7ce4e5f9"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-participants.tsx",
+			"line": 1,
+			"hash": "9565f3dc83c66a1d",
+			"subject": "71cbdc3776a7edb9"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-participants.tsx",
+			"line": 2,
+			"hash": "929521fb84609ba3",
+			"subject": "9364cf8c41fb1b61"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-participants.tsx",
+			"line": 3,
+			"hash": "bea521829e59ebd5",
+			"subject": "c5220c9bd82a97e7"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-questions.tsx",
+			"line": 1,
+			"hash": "8ae97abcc25b54db",
+			"subject": "cc7fbf8c15576737"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/history-questions.tsx",
+			"line": 2,
+			"hash": "4abb4e3377515dd4",
+			"subject": "fd2926f6df958c1e"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/lobby-panel.stories.tsx",
+			"line": 1,
+			"hash": "3e78982dfbcf19f9",
+			"subject": "6b326f98e9f598a6"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/lobby-panel.stories.tsx",
+			"line": 2,
+			"hash": "72e7a58a0dd48d82",
+			"subject": "c7903b41ed3de9bb"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/lobby-panel.tsx",
+			"line": 3,
+			"hash": "aff0b72c06a4a9b2",
+			"subject": "0152e14bdd1ba7c8"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/lobby-panel.tsx",
+			"line": 4,
+			"hash": "1bc14ffcd964613e",
+			"subject": "4b305ab7d356c60d"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-form.stories.tsx",
+			"line": 1,
+			"hash": "e91af2396e9027f5",
+			"subject": "8ff112a4603f5fd1"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-form.stories.tsx",
+			"line": 2,
+			"hash": "cb5b116004bd8fb0",
+			"subject": "a33756064ccf6951"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-form.tsx",
+			"line": 3,
+			"hash": "9a25ffd9c62b90d8",
+			"subject": "4d7f1e869f9d89ec"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-form.tsx",
+			"line": 4,
+			"hash": "d16a1180bb0f7b6a",
+			"subject": "28f9d9fdd680027e"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-form.tsx",
+			"line": 5,
+			"hash": "8554b3e6fb92cf56",
+			"subject": "e98617868cefeec5"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-form.tsx",
+			"line": 6,
+			"hash": "787ac3229793489c",
+			"subject": "2b36a62ee1d9e400"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-form.tsx",
+			"line": 7,
+			"hash": "a10dd3ed8c05ec49",
+			"subject": "7700b871c14597d4"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-form.tsx",
+			"line": 8,
+			"hash": "7ebb8dd7532c05ae",
+			"subject": "6dccbaecbf615577"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-form.tsx",
+			"line": 9,
+			"hash": "cbe86b0381f1d624",
+			"subject": "66308b482ad0853e"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/material-questions-section.tsx",
+			"line": 1,
+			"hash": "798bdbe5024f15f2",
+			"subject": "dd5e5e9c9e8e15ca"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/materials-grid.tsx",
+			"line": 1,
+			"hash": "d798943bbffff94c",
+			"subject": "ef05a28e2497a38e"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/materials-grid.tsx",
+			"line": 7,
+			"hash": "06f993ac1b0f9c83",
+			"subject": "1d03f78ce4ddb3a8"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/materials-grid.tsx",
+			"line": 8,
+			"hash": "8596acf07e8fb8bc",
+			"subject": "ca378c41015cc70a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/minigames-panel.tsx",
+			"line": 3,
+			"hash": "76eb40878b546d38",
+			"subject": "28c2c3e98b5bf9f1"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/minigames-panel.tsx",
+			"line": 4,
+			"hash": "dcf6e0be4fdd2163",
+			"subject": "32e97c0a442c80d0"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/question-pool.stories.tsx",
+			"line": 1,
+			"hash": "1bef5eba8aa5e6a5",
+			"subject": "bb02f24b2f785dca"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/question-pool.stories.tsx",
+			"line": 2,
+			"hash": "e93f39f9e54a7898",
+			"subject": "008f54614e2da601"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/question-pool.tsx",
+			"line": 3,
+			"hash": "2d3ccd3a7cc1094e",
+			"subject": "587e3bdf4364ecb8"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/question-pool.tsx",
+			"line": 4,
+			"hash": "c4e26b2803b26138",
+			"subject": "815d5a9a976042ac"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/question-pool.tsx",
+			"line": 5,
+			"hash": "ad51b6dca0503cbe",
+			"subject": "960d3d2a044e8ba9"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/question-pool.tsx",
+			"line": 6,
+			"hash": "fe505fc8092b5f57",
+			"subject": "ef349f511563f7dd"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-display.stories.tsx",
+			"line": 1,
+			"hash": "187a17f1c8976e1b",
+			"subject": "70f2a0610abd2d5a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-display.stories.tsx",
+			"line": 2,
+			"hash": "6b21d449a7a9b6ec",
+			"subject": "94b3b3fe437d04a9"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-display.tsx",
+			"line": 1,
+			"hash": "db1f3d7163d2cd08",
+			"subject": "a69d443625bfa0d4"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-display.tsx",
+			"line": 2,
+			"hash": "6e5fcdfb47834c41",
+			"subject": "31571002c19ba537"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-panel.stories.tsx",
+			"line": 1,
+			"hash": "df2c4a9665d6b4a6",
+			"subject": "7d45f60d3f6bc893"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-panel.stories.tsx",
+			"line": 2,
+			"hash": "986c97b4d3dbd4b1",
+			"subject": "fdc6d40dc2e4691e"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-panel.tsx",
+			"line": 3,
+			"hash": "9a5db9f5f982cb5e",
+			"subject": "98f25c4b55e823d3"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-panel.tsx",
+			"line": 4,
+			"hash": "09cea668c8e56e86",
+			"subject": "9ba233bfd9370054"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-panel.tsx",
+			"line": 5,
+			"hash": "2f93e1aa8cdd281f",
+			"subject": "90f082bb0ac7d94d"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/rating-panel.tsx",
+			"line": 6,
+			"hash": "ee922d38c8519354",
+			"subject": "81e0ca35bc72357b"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/room-panel.tsx",
+			"line": 3,
+			"hash": "719e057e0744fe69",
+			"subject": "b7fb95f5faa8bca5"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/room-panel.tsx",
+			"line": 4,
+			"hash": "db26ee889743039c",
+			"subject": "733792b8c4914262"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-form.stories.tsx",
+			"line": 1,
+			"hash": "b140a06dfed28de9",
+			"subject": "79a4f9e4d411dfac"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-form.stories.tsx",
+			"line": 2,
+			"hash": "693de10e7d747d38",
+			"subject": "161e8ac9fd8d729d"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-form.tsx",
+			"line": 3,
+			"hash": "2874017fb6c37e25",
+			"subject": "e9ca54dc52a77c7a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-form.tsx",
+			"line": 4,
+			"hash": "2c1fa577ab7ad3da",
+			"subject": "cc448488544b4624"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-form.tsx",
+			"line": 5,
+			"hash": "0194716762a75ed7",
+			"subject": "8076bc701d0f2eae"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-form.tsx",
+			"line": 6,
+			"hash": "bd21ec88d1ce33e5",
+			"subject": "58360e0b826fc176"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-form.tsx",
+			"line": 7,
+			"hash": "cd0ba56a270f5499",
+			"subject": "4101e7d6b7150886"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-form.tsx",
+			"line": 8,
+			"hash": "028df089b3df1f69",
+			"subject": "95b32cbdfa0f054e"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-form.tsx",
+			"line": 9,
+			"hash": "9265483072e84883",
+			"subject": "40d548314f82211a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-scheduler.tsx",
+			"line": 3,
+			"hash": "a5e04b6ed712c59b",
+			"subject": "4134bb626faa59e8"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-scheduler.tsx",
+			"line": 4,
+			"hash": "ef85f57031396496",
+			"subject": "8b1864625bd8a727"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-scheduler.tsx",
+			"line": 5,
+			"hash": "9650744b6307b080",
+			"subject": "1f5be3a3c356873c"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/session-scheduler.tsx",
+			"line": 6,
+			"hash": "0f4a7334ad2dce38",
+			"subject": "5f6d55fbe4d01aaa"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/stage-bar.stories.tsx",
+			"line": 1,
+			"hash": "c5c762cb0c023f26",
+			"subject": "35fcb27380ad1202"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/stage-panel.stories.tsx",
+			"line": 1,
+			"hash": "bb72a1ad48218494",
+			"subject": "a298254a44a68f87"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/stage-panel.stories.tsx",
+			"line": 2,
+			"hash": "9f3336aae16b7e3f",
+			"subject": "b45ff6e7eba1de0f"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/stage-panel.tsx",
+			"line": 3,
+			"hash": "ea2790ed4be8ef38",
+			"subject": "026f42d7279c1dbc"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/stage-panel.tsx",
+			"line": 4,
+			"hash": "556311e13effe488",
+			"subject": "72ee18416fcbb3c6"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/stage-panel.tsx",
+			"line": 5,
+			"hash": "a18cfb1f0a9da50e",
+			"subject": "a849c2e2b7641681"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/stage-timer.tsx",
+			"line": 3,
+			"hash": "30f16ab733895085",
+			"subject": "ba7b99a9df34d9b9"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/step-indicator.tsx",
+			"line": 1,
+			"hash": "25dc13d44795fff8",
+			"subject": "f204e60496510971"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/step-indicator.tsx",
+			"line": 2,
+			"hash": "47bfa052b217face",
+			"subject": "e0bc54faadf38366"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_components/trivia-bank.tsx",
+			"line": 3,
+			"hash": "0c4b0056f83a43e5",
+			"subject": "2ab7654332bff6a9"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_hooks/use-room-realtime.ts",
+			"line": 3,
+			"hash": "1a57667e3f06755e",
+			"subject": "0e2eeb71d5466cf8"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_hooks/use-room-realtime.ts",
+			"line": 4,
+			"hash": "2174115b8e22c87b",
+			"subject": "24e3e44f2ad63677"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/constants.ts",
+			"line": 1,
+			"hash": "4b27c7a5c791326f",
+			"subject": "e843cfe5d5dbca3b"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/constants.ts",
+			"line": 3,
+			"hash": "ee5060caeff20c5a",
+			"subject": "333c396034afd2b1"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/json-helpers.ts",
+			"line": 1,
+			"hash": "7e5d2f2ad7e63980",
+			"subject": "6301e231373d7e54"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/lobby.ts",
+			"line": 1,
+			"hash": "d18469bb1d9f9a06",
+			"subject": "2b7ab213486b4b3a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/lobby.ts",
+			"line": 2,
+			"hash": "59569c0b06022cd5",
+			"subject": "1c5e45bebfaaf665"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/materials-actions.ts",
+			"line": 3,
+			"hash": "977aa7c407169a32",
+			"subject": "d318fdcdd8abe170"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/materials-actions.ts",
+			"line": 4,
+			"hash": "fee00e2c2367d2f3",
+			"subject": "0cbd2e7d8fe2a9d6"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/materials.ts",
+			"line": 1,
+			"hash": "88422e3788c574cb",
+			"subject": "8962b7407870a6df"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/member-profile.ts",
+			"line": 1,
+			"hash": "7687f0a2855cbb23",
+			"subject": "038544ec9f95bf7a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/member-profile.ts",
+			"line": 2,
+			"hash": "7b85c846381b277e",
+			"subject": "025ba1e40b6601f4"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/members.ts",
+			"line": 1,
+			"hash": "de08573970ba2ae0",
+			"subject": "94369ce519fb25c1"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/members.ts",
+			"line": 2,
+			"hash": "953dd270f6dc9b1b",
+			"subject": "d50577604c4ca08b"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/minigames.ts",
+			"line": 1,
+			"hash": "ff46b5e3e400611f",
+			"subject": "b072c3300edc6fb2"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/minigames.ts",
+			"line": 2,
+			"hash": "da9146bd60940316",
+			"subject": "eff264bf9b4934a9"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/questions.ts",
+			"line": 1,
+			"hash": "dbc93e282056eadc",
+			"subject": "9d84da8f08d63691"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/questions.ts",
+			"line": 2,
+			"hash": "67e7cb48a0424533",
+			"subject": "75342b3e8e5fa86c"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/rating.ts",
+			"line": 1,
+			"hash": "474d3d1e93817395",
+			"subject": "e68f6e12725fb09d"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/rating.ts",
+			"line": 2,
+			"hash": "be225938a43d9f3f",
+			"subject": "a5d4a39742764337"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/room.ts",
+			"line": 1,
+			"hash": "17205f735a2fc4c0",
+			"subject": "02eecd58dca42d29"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/room.ts",
+			"line": 2,
+			"hash": "5ae23201fcfbef0c",
+			"subject": "0c2d7ec68283cdbf"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/session-history.ts",
+			"line": 1,
+			"hash": "617c7b1868af0907",
+			"subject": "cacf4630abf44d6f"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/session-history.ts",
+			"line": 2,
+			"hash": "aa5067fc2145632b",
+			"subject": "6126a6c1a406bb5f"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/stage.ts",
+			"line": 6,
+			"hash": "6892e6d1fac0de75",
+			"subject": "e809424091ab2f75"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/_lib/stage.ts",
+			"line": 7,
+			"hash": "8fdc7b50a2eee4b7",
+			"subject": "ad4b39edd4a7cfcc"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/[id]/page.tsx",
+			"line": 1,
+			"hash": "9c5fc84472cc53af",
+			"subject": "1c76f3dcfb33e6ea"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/[id]/page.tsx",
+			"line": 12,
+			"hash": "69713402a9ef1b02",
+			"subject": "0159e49edb1332b0"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/[id]/page.tsx",
+			"line": 13,
+			"hash": "40ebabb1b17062f9",
+			"subject": "2cf86c9f1bd1dbb1"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/[id]/page.tsx",
+			"line": 14,
+			"hash": "40c4e5672cab86ba",
+			"subject": "ab7796d1ca5cf7ad"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/new/page.tsx",
+			"line": 1,
+			"hash": "2a6ee196f53ddcad",
+			"subject": "c52ebe6a29c70449"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/new/page.tsx",
+			"line": 2,
+			"hash": "267a4042e64b5ec0",
+			"subject": "3f09ca1e15138477"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/new/page.tsx",
+			"line": 3,
+			"hash": "cfb5239995280496",
+			"subject": "20dcddb9d6c6612a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/page.tsx",
+			"line": 1,
+			"hash": "3d0969150727dfc6",
+			"subject": "c68fd331170d5126"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/lobby/page.tsx",
+			"line": 1,
+			"hash": "dd3a8bf53c830f25",
+			"subject": "e34096fb2866daf2"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/minigames/page.tsx",
+			"line": 1,
+			"hash": "37057340f327ac71",
+			"subject": "448ec19175844374"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/minigames/page.tsx",
+			"line": 2,
+			"hash": "ddc68df7ad1bcbd3",
+			"subject": "90b54d8e802ac946"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/minigames/page.tsx",
+			"line": 3,
+			"hash": "4b00d08e1304b8cc",
+			"subject": "e6e541af2f896a51"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/minigames/page.tsx",
+			"line": 4,
+			"hash": "831443e9b1156a0b",
+			"subject": "d99695f7bf155372"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/rating/page.tsx",
+			"line": 1,
+			"hash": "1480b0a07869ce91",
+			"subject": "f289cd72f63a90c4"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/rating/page.tsx",
+			"line": 2,
+			"hash": "fab65bbf6f5594d4",
+			"subject": "0e593bcd17ccccff"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/rating/page.tsx",
+			"line": 3,
+			"hash": "35c5fb5c3ce4a554",
+			"subject": "1f579eb4a35df23d"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/rating/page.tsx",
+			"line": 4,
+			"hash": "f068306b90fa92a6",
+			"subject": "8d78da9c2b16a509"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/room/page.tsx",
+			"line": 1,
+			"hash": "dcc9f34ca8f14ad5",
+			"subject": "8cd57bd95c2f3af4"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/stage/page.tsx",
+			"line": 1,
+			"hash": "27c7f5b962903713",
+			"subject": "90edcac90a1323b0"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/stage/page.tsx",
+			"line": 2,
+			"hash": "68100ca49f3f0ea5",
+			"subject": "7569ff8bb866508d"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/stage/page.tsx",
+			"line": 3,
+			"hash": "b50f7dae6326fc49",
+			"subject": "6f69ec93857f3b80"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/stage/page.tsx",
+			"line": 4,
+			"hash": "216e787dd8d7c15f",
+			"subject": "5206bf306c33fa3a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/lobby/_proto/lobby-proto.tsx",
+			"line": 8,
+			"hash": "8525746af0f6ccd1",
+			"subject": "b7894e5fc63e3a2f"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/lobby/_proto/lobby-proto.tsx",
+			"line": 13,
+			"hash": "7c5fb8a6fefa809e",
+			"subject": "bcdbbfcaf71d8f9a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/lobby/_proto/lobby-proto.tsx",
+			"line": 14,
+			"hash": "87115eabf37dd203",
+			"subject": "77d6c04b79c72901"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/materials/sessions/[id]/lobby/_proto/lobby-proto.tsx",
+			"line": 15,
+			"hash": "671f58f8251e07d7",
+			"subject": "5b8ddfea25379344"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/page.tsx",
+			"line": 1,
+			"hash": "42f141ed1c9a809d",
+			"subject": "86dd3f4f023a8d3a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_components/leave-club-dialog.tsx",
+			"line": 3,
+			"hash": "6dc0f15d6e2e29ab",
+			"subject": "a3cf2dbebaa0afb6"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_components/update-profile-form.stories.tsx",
+			"line": 1,
+			"hash": "b43144e256adfdfe",
+			"subject": "38781b4e4af9975b"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_components/update-profile-form.stories.tsx",
+			"line": 2,
+			"hash": "319564886cbe3fa0",
+			"subject": "21d58cf3bb697d0e"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_components/update-profile-form.tsx",
+			"line": 3,
+			"hash": "9693d00829cbd316",
+			"subject": "16f4e3b60179b171"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_components/update-profile-form.tsx",
+			"line": 4,
+			"hash": "63dd88d1decbcd58",
+			"subject": "27f62aef6db60755"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_components/update-profile-form.tsx",
+			"line": 5,
+			"hash": "f6cfe1152da387fe",
+			"subject": "c97d1ff470a23329"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_components/update-profile-form.tsx",
+			"line": 6,
+			"hash": "8facb4b1d57ca0ec",
+			"subject": "59e179d37e64e8fd"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_lib/profile-actions.ts",
+			"line": 3,
+			"hash": "0a6dcdf8380c3d68",
+			"subject": "ae32a70ee228b56a"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_lib/profile-actions.ts",
+			"line": 4,
+			"hash": "8252ff67af807e15",
+			"subject": "34c044ef9f8d80d9"
+		},
+		{
+			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
+			"file": "app/profile/_schemas/profile-schema.ts",
+			"line": 1,
+			"hash": "b763ff21cbaf1b60",
+			"subject": "4040f28e3e4a1314"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\" or reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\" should not import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\"",
+			"file": "app/layout.tsx",
+			"line": 6,
+			"hash": "1b5e2762e6af1943",
+			"subject": "4545374ae257079a"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\" or reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\" should not import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\"",
+			"file": "lib/server-action.ts",
+			"line": 5,
+			"hash": "2e07b8e3ff14fcbe",
+			"subject": "f93117f26388745b"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\" or reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\" should not import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\"",
+			"file": "components/app-header.tsx",
+			"line": 6,
+			"hash": "cfec2ea6749c65e3",
+			"subject": "ac6e496baeee58a2"
+		},
+		{
+			"rule": "that reside in file matching \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\" or reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\" should not import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/profile/**\"",
+			"file": "components/nav-user.tsx",
+			"line": 12,
+			"hash": "34e6209b1caa73cf",
+			"subject": "adafb5b874079d85"
+		}
+	]
+}

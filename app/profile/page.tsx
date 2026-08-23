@@ -68,8 +68,7 @@ export default async function ProfilePage({
 
 			<Card className="mt-6">
 				<CardHeader>
-					<CardTitle>Insignias</CardTitle>
-					<CardDescription>Tus logros y los hitos del club.</CardDescription>
+					<CardTitle>Tus logros y los hitos del club.</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<BadgeVitrina badges={badges} recognitions={recognitions} />
