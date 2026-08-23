@@ -13,7 +13,7 @@ Un Miembro confirmado como presente en una Sesión concreta. Término de context
 _Avoid_: Asistente, integrante
 
 **Sala de Sesión**:
-Única vista de una Sesión activa: ocupa todo el espacio de la pantalla, cambia de contenido según la Etapa y se mantiene sincronizada en realtime para Moderador y Participantes. Durante una Sesión nadie navega a otras páginas: las transiciones ocurren dentro de la Sala.
+Única vista de una Sesión activa: ocupa todo el espacio de la pantalla, cambia de contenido según la Etapa y se mantiene sincronizada en realtime para Moderador y Participantes. Durante una Sesión nadie navega a otras páginas: las transiciones ocurren dentro de la Sala. Incluye el Escenario durante la etapa Debate: la Pregunta revelada, la Intervención actual y el temporizador viven dentro de la misma vista.
 _Avoid_: Lobby (como página), Escenario (como página separada), dashboard
 
 **Etapa**:

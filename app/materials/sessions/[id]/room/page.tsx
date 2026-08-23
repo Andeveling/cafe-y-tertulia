@@ -21,11 +21,12 @@ export default async function RoomPage({
 	const snapshot = await getRoomSnapshot(supabase, sessionId);
 	if (!snapshot) notFound();
 
-	if (snapshot.status !== "lobby") {
+	// La Sala vive en lobby (preguntas/presentes/sorteo) e in_progress (debate).
+	if (snapshot.status !== "lobby" && snapshot.status !== "in_progress") {
 		return (
 			<main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-6">
 				<p className="text-sm text-muted-foreground">
-					Esta sesión no está en lobby.
+					Esta sesión no está activa.
 				</p>
 			</main>
 		);

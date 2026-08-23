@@ -1,3 +1,7 @@
+/**
+ * @deprecated Usar room-actions.ts — las acciones de debate están consolidadas
+ * allí. Este archivo se elimina en ticket #33 (limpieza de rutas viejas).
+ */
 "use server";
 
 import { type ActionResult, runServerAction } from "@/lib/server-action";

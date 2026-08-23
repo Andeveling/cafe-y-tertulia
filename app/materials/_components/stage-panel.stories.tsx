@@ -1,28 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect } from "storybook/test";
-import type { StageSnapshot } from "../_lib/stage";
+import type { RoomDebateSnapshot } from "../_lib/room-types";
 import { StagePanel } from "./stage-panel";
 
-const waiting: StageSnapshot = {
+const waiting: RoomDebateSnapshot = {
 	mode: "waiting_reveal",
-	sessionId: "ses-1",
-	materialId: "mat-1",
-	range: "Capítulos 1-3",
-	status: "in_progress",
-	moderatorId: "u-marta",
 	nextAssigneeName: "Ana",
 	nextAssigneeId: "u-ana",
 	revealOrder: 1,
 	remainingHidden: 3,
 };
 
-const active: StageSnapshot = {
+const active: RoomDebateSnapshot = {
 	mode: "active",
-	sessionId: "ses-1",
-	materialId: "mat-1",
-	range: "Capítulos 1-3",
-	status: "in_progress",
-	moderatorId: "u-marta",
 	assignmentId: "asg-1",
 	state: "exposition",
 	questionText: "¿Qué te hizo pensar el capítulo 2?",
@@ -38,7 +28,8 @@ const meta = {
 	component: StagePanel,
 	tags: ["ai-generated"],
 	args: {
-		stage: waiting,
+		debate: waiting,
+		sessionId: "ses-1",
 		userId: "u-marta",
 		isModerator: true,
 	},
@@ -61,12 +52,12 @@ export const WaitingRevealMember: Story = {
 };
 
 export const ActiveExposition: Story = {
-	args: { stage: active },
+	args: { debate: active },
 };
 
 export const AssigneeNotes: Story = {
 	args: {
-		stage: { ...active, state: "preparation", myNotes: "Llevar el epígrafe" },
+		debate: { ...active, state: "preparation", myNotes: "Llevar el epígrafe" },
 		userId: "u-ana",
 		isModerator: false,
 	},
@@ -74,13 +65,8 @@ export const AssigneeNotes: Story = {
 
 export const Done: Story = {
 	args: {
-		stage: {
+		debate: {
 			mode: "done",
-			sessionId: "ses-1",
-			materialId: "mat-1",
-			range: "Capítulos 1-3",
-			status: "in_progress",
-			moderatorId: "u-marta",
 			remainingHidden: 0,
 		},
 	},

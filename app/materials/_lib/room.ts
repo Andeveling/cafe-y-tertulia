@@ -7,6 +7,7 @@ import type {
 	DrawStatus,
 	ParticipantRole,
 	RoomAssignment,
+	RoomDebateSnapshot,
 	RoomDraw,
 	RoomParticipant,
 	RoomQuestion,
@@ -82,6 +83,45 @@ export async function getRoomSnapshot(
 		questionVisible: asBool(a.question_visible),
 	}));
 
+	// Debate: null cuando roomStage !== 'debate'
+	const debateRow = row.debate as
+		| Record<string, Json | undefined>
+		| undefined
+		| null;
+	let debate: RoomDebateSnapshot | null = null;
+
+	if (debateRow) {
+		const mode = asString(debateRow.mode);
+		if (mode === "active") {
+			debate = {
+				mode: "active",
+				assignmentId: asString(debateRow.assignmentId),
+				state: asString(debateRow.state) as AssignmentState,
+				questionText: asString(debateRow.questionText),
+				assigneeName: asString(debateRow.assigneeName),
+				assigneeId: asString(debateRow.assigneeId),
+				authorName: asString(debateRow.authorName),
+				revealOrder: asNumber(debateRow.revealOrder),
+				myNotes:
+					typeof debateRow.myNotes === "string" ? debateRow.myNotes : null,
+				remainingHidden: asNumber(debateRow.remainingHidden),
+			};
+		} else if (mode === "waiting_reveal") {
+			debate = {
+				mode: "waiting_reveal",
+				nextAssigneeName: asString(debateRow.nextAssigneeName),
+				nextAssigneeId: asString(debateRow.nextAssigneeId),
+				revealOrder: asNumber(debateRow.revealOrder),
+				remainingHidden: asNumber(debateRow.remainingHidden),
+			};
+		} else if (mode === "done") {
+			debate = {
+				mode: "done",
+				remainingHidden: asNumber(debateRow.remainingHidden),
+			};
+		}
+	}
+
 	return {
 		sessionId: asString(row.session_id),
 		materialId: asString(row.material_id),
@@ -96,5 +136,6 @@ export async function getRoomSnapshot(
 		readiness,
 		draw,
 		assignments,
+		debate,
 	};
 }

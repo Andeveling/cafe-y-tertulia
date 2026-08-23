@@ -2,6 +2,7 @@
 
 import type { RoomStage } from "@/app/materials/_lib/room-types";
 import { type ActionResult, runServerAction } from "@/lib/server-action";
+import type { Database } from "@/lib/supabase/database.types";
 
 function roomPath(sessionId: string) {
 	return `/materials/sessions/${sessionId}/room`;
@@ -67,7 +68,7 @@ export async function advanceRoomStage(
 		run: async ({ supabase }) => {
 			const { error } = await supabase.rpc("advance_room_stage", {
 				target_session_id: sessionId,
-				new_stage: newStage,
+				new_stage: newStage as Database["public"]["Enums"]["room_stage"],
 			});
 
 			if (error) return { ok: false, error: error.message };
@@ -126,6 +127,57 @@ export async function setSpectator(
 				make_spectator: makeSpectator,
 			});
 
+			if (error) return { ok: false, error: error.message };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
+// ─── Debate actions (consolidadas de stage-actions.ts) ──────
+
+/** Revela la siguiente asignación oculta (solo Moderador). */
+export async function revealNext(sessionId: string): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			const { error } = await supabase.rpc("reveal_next_assignment", {
+				target_session_id: sessionId,
+			});
+			if (error) return { ok: false, error: error.message };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
+/** Avanza la Intervención actual un paso (solo Moderador). */
+export async function continueIntervention(
+	sessionId: string,
+): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			const { error } = await supabase.rpc("advance_intervention", {
+				target_session_id: sessionId,
+			});
+			if (error) return { ok: false, error: error.message };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
+/** Guarda Notas de respuesta durante el Momento de preparación. */
+export async function saveNotes(
+	assignmentId: string,
+	sessionId: string,
+	notes: string,
+): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			const { error } = await supabase.rpc("save_assignment_notes", {
+				target_assignment_id: assignmentId,
+				new_notes: notes,
+			});
 			if (error) return { ok: false, error: error.message };
 		},
 		revalidate: async () => [roomPath(sessionId)],

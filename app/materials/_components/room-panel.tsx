@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { StageBar } from "@/app/materials/_components/stage-bar";
+import { StagePanel } from "@/app/materials/_components/stage-panel";
 import { useRoomRealtime } from "@/app/materials/_hooks/use-room-realtime";
 import {
 	advanceRoomStage,
@@ -95,6 +96,16 @@ function StageContent({
 			return (
 				<DrawStage
 					snapshot={snapshot}
+					userId={userId}
+					isModerator={isModerator}
+				/>
+			);
+		case "debate":
+			if (!snapshot.debate) return null;
+			return (
+				<StagePanel
+					debate={snapshot.debate}
+					sessionId={snapshot.sessionId}
 					userId={userId}
 					isModerator={isModerator}
 				/>

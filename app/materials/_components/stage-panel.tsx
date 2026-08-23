@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { StageTimer } from "@/app/materials/_components/stage-timer";
@@ -9,12 +8,12 @@ import {
 	PHASE_LABELS,
 	SUGGESTED_SECONDS,
 } from "@/app/materials/_lib/intervention";
-import type { StageSnapshot } from "@/app/materials/_lib/stage";
 import {
 	continueIntervention,
 	revealNext,
 	saveNotes,
-} from "@/app/materials/_lib/stage-actions";
+} from "@/app/materials/_lib/room-actions";
+import type { RoomDebateSnapshot } from "@/app/materials/_lib/room-types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,24 +27,23 @@ import { Textarea } from "@/components/ui/textarea";
 import type { ActionResult } from "@/lib/server-action";
 
 type Props = {
-	stage: StageSnapshot;
+	debate: RoomDebateSnapshot;
+	sessionId: string;
 	userId: string;
 	isModerator: boolean;
 };
 
-export function StagePanel({ stage, userId, isModerator }: Props) {
+export function StagePanel({ debate, sessionId, userId, isModerator }: Props) {
 	const [pending, start] = useTransition();
-	const router = useRouter();
 
 	function act(fn: () => Promise<ActionResult>) {
 		start(async () => {
 			const r = await fn();
 			if (!r.ok) toast.error(r.error);
-			else router.refresh();
 		});
 	}
 
-	if (stage.mode === "done") {
+	if (debate.mode === "done") {
 		return (
 			<Card>
 				<CardHeader>
@@ -56,23 +54,23 @@ export function StagePanel({ stage, userId, isModerator }: Props) {
 		);
 	}
 
-	if (stage.mode === "waiting_reveal") {
+	if (debate.mode === "waiting_reveal") {
 		return (
 			<div className="flex flex-col items-center gap-8 py-10 text-center">
 				<p className="text-sm text-muted-foreground uppercase tracking-wide">
 					Próximo
 				</p>
 				<p className="font-heading text-3xl font-semibold">
-					{stage.nextAssigneeName}
+					{debate.nextAssigneeName}
 				</p>
 				<p className="text-muted-foreground text-sm">
-					Pregunta oculta · {stage.remainingHidden} por revelar
+					Pregunta oculta · {debate.remainingHidden} por revelar
 				</p>
 				{isModerator && (
 					<Button
 						size="lg"
 						disabled={pending}
-						onClick={() => act(() => revealNext(stage.sessionId))}
+						onClick={() => act(() => revealNext(sessionId))}
 					>
 						Revelar
 					</Button>
@@ -81,9 +79,10 @@ export function StagePanel({ stage, userId, isModerator }: Props) {
 		);
 	}
 
-	const state = stage.state as AssignmentState;
+	// mode === "active"
+	const state = debate.state as AssignmentState;
 	const suggested = SUGGESTED_SECONDS[state] ?? 120;
-	const isAssignee = stage.assigneeId === userId;
+	const isAssignee = debate.assigneeId === userId;
 	const showNotes = isAssignee && state === "preparation";
 
 	return (
@@ -91,18 +90,18 @@ export function StagePanel({ stage, userId, isModerator }: Props) {
 			<div className="flex flex-col items-center gap-4 text-center">
 				<Badge variant="secondary">{PHASE_LABELS[state]}</Badge>
 				<p className="font-heading text-2xl md:text-3xl font-medium max-w-2xl leading-snug">
-					{stage.questionText}
+					{debate.questionText}
 				</p>
 				<p className="text-sm text-muted-foreground">
-					{state === "preparation" && `Preparación · ${stage.assigneeName}`}
-					{state === "exposition" && `Expone ${stage.assigneeName}`}
-					{state === "complement" && `Complementa ${stage.authorName}`}
+					{state === "preparation" && `Preparación · ${debate.assigneeName}`}
+					{state === "exposition" && `Expone ${debate.assigneeName}`}
+					{state === "complement" && `Complementa ${debate.authorName}`}
 				</p>
 				{(state === "preparation" ||
 					state === "exposition" ||
 					state === "complement") && (
 					<StageTimer
-						key={`${stage.assignmentId}-${state}`}
+						key={`${debate.assignmentId}-${state}`}
 						suggestedSeconds={suggested}
 						showExtend={isModerator}
 					/>
@@ -111,9 +110,9 @@ export function StagePanel({ stage, userId, isModerator }: Props) {
 
 			{showNotes && (
 				<NotesBox
-					assignmentId={stage.assignmentId}
-					sessionId={stage.sessionId}
-					initial={stage.myNotes ?? ""}
+					assignmentId={debate.assignmentId}
+					sessionId={sessionId}
+					initial={debate.myNotes ?? ""}
 					pending={pending}
 					act={act}
 				/>
@@ -124,7 +123,7 @@ export function StagePanel({ stage, userId, isModerator }: Props) {
 					{state !== "complete" && (
 						<Button
 							disabled={pending}
-							onClick={() => act(() => continueIntervention(stage.sessionId))}
+							onClick={() => act(() => continueIntervention(sessionId))}
 						>
 							Continuar
 						</Button>
