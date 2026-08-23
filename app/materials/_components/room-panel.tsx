@@ -33,6 +33,16 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import type { ActionResult } from "@/lib/server-action";
 
@@ -122,6 +132,14 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 
 	if (!nextStage) return null;
 
+	// Calcular quién no está Listo (para "Comenzar de todos modos").
+	const members = snapshot.participants.filter((p) => p.role === "member");
+	const notReady = members.filter(
+		(p) => !snapshot.questions.some((q) => q.authorId === p.memberId),
+	);
+	const advancingToDebate = nextStage === "debate";
+	const showConfirmDialog = advancingToDebate && notReady.length > 0;
+
 	function handleAdvance() {
 		start(async () => {
 			const r = await advanceRoomStage(snapshot.sessionId, nextStage!);
@@ -129,16 +147,53 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 		});
 	}
 
+	const button = (
+		<Button
+			size="sm"
+			variant="outline"
+			disabled={pending}
+			onClick={showConfirmDialog ? undefined : handleAdvance}
+		>
+			Ir a {ROOM_STAGE_LABELS[nextStage!]} →
+		</Button>
+	);
+
+	if (!showConfirmDialog) {
+		return <div className="flex justify-end">{button}</div>;
+	}
+
 	return (
 		<div className="flex justify-end">
-			<Button
-				size="sm"
-				variant="outline"
-				disabled={pending}
-				onClick={handleAdvance}
-			>
-				Ir a {ROOM_STAGE_LABELS[nextStage!]} →
-			</Button>
+			<Dialog>
+				<DialogTrigger render={button} />
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Comenzar de todos modos</DialogTitle>
+						<DialogDescription>
+							Estos participantes no están Listos (sin pregunta registrada):
+						</DialogDescription>
+					</DialogHeader>
+					<ul className="flex flex-col gap-1 py-2">
+						{notReady.map((p) => (
+							<li key={p.memberId} className="text-sm">
+								{p.displayName}
+							</li>
+						))}
+					</ul>
+					<DialogFooter>
+						<DialogClose render={<Button variant="outline" size="sm" />}>
+							Cancelar
+						</DialogClose>
+						<DialogClose
+							render={
+								<Button size="sm" disabled={pending} onClick={handleAdvance} />
+							}
+						>
+							Comenzar de todos modos
+						</DialogClose>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

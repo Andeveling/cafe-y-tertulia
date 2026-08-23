@@ -1,10 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { StageTimer } from "@/app/materials/_components/stage-timer";
 import {
-	type AssignmentState,
 	PHASE_LABELS,
 	SUGGESTED_SECONDS,
 } from "@/app/materials/_lib/intervention";
@@ -35,11 +35,13 @@ type Props = {
 
 export function StagePanel({ debate, sessionId, userId, isModerator }: Props) {
 	const [pending, start] = useTransition();
+	const router = useRouter();
 
 	function act(fn: () => Promise<ActionResult>) {
 		start(async () => {
 			const r = await fn();
 			if (!r.ok) toast.error(r.error);
+			else router.refresh();
 		});
 	}
 
@@ -55,6 +57,7 @@ export function StagePanel({ debate, sessionId, userId, isModerator }: Props) {
 	}
 
 	if (debate.mode === "waiting_reveal") {
+		const total = debate.revealOrder + debate.remainingHidden;
 		return (
 			<div className="flex flex-col items-center gap-8 py-10 text-center">
 				<p className="text-sm text-muted-foreground uppercase tracking-wide">
@@ -64,7 +67,8 @@ export function StagePanel({ debate, sessionId, userId, isModerator }: Props) {
 					{debate.nextAssigneeName}
 				</p>
 				<p className="text-muted-foreground text-sm">
-					Pregunta oculta · {debate.remainingHidden} por revelar
+					Intervención {debate.revealOrder + 1}/{total} · Pregunta oculta ·{" "}
+					{debate.remainingHidden} por revelar
 				</p>
 				{isModerator && (
 					<Button
@@ -80,14 +84,18 @@ export function StagePanel({ debate, sessionId, userId, isModerator }: Props) {
 	}
 
 	// mode === "active"
-	const state = debate.state as AssignmentState;
+	const state = debate.state;
 	const suggested = SUGGESTED_SECONDS[state] ?? 120;
 	const isAssignee = debate.assigneeId === userId;
 	const showNotes = isAssignee && state === "preparation";
+	const total = debate.revealOrder + debate.remainingHidden;
 
 	return (
 		<div className="flex flex-col gap-8">
 			<div className="flex flex-col items-center gap-4 text-center">
+				<p className="text-sm text-muted-foreground uppercase tracking-wide">
+					Intervención {debate.revealOrder}/{total}
+				</p>
 				<Badge variant="secondary">{PHASE_LABELS[state]}</Badge>
 				<p className="font-heading text-2xl md:text-3xl font-medium max-w-2xl leading-snug">
 					{debate.questionText}
@@ -104,6 +112,7 @@ export function StagePanel({ debate, sessionId, userId, isModerator }: Props) {
 						key={`${debate.assignmentId}-${state}`}
 						suggestedSeconds={suggested}
 						showExtend={isModerator}
+						showPause={isModerator}
 					/>
 				)}
 			</div>
