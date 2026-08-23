@@ -57,7 +57,8 @@
 			"!build/**",
 			"!next-env.d.ts",
 			"!docs/prototypes/**",
-			"!biome-plugins/test-*.grit"
+			"!biome-plugins/test-*.grit",
+			"!app/globals.css"
 		]
 	},
 	"javascript": {
