@@ -1,7 +1,7 @@
 -- Ticket #20: lifecycle de Sesiones (SPEC §3.1).
 -- The database is the final guard against skipping or reversing a state.
 
-create function public.sessions_status_forward_only()
+create or replace function public.sessions_status_forward_only()
 returns trigger
 language plpgsql
 security invoker
@@ -24,6 +24,7 @@ begin
 end;
 $$;
 
+drop trigger if exists sessions_status_forward_only on public.sessions;
 create trigger sessions_status_forward_only
 	before update of status on public.sessions
 	for each row
