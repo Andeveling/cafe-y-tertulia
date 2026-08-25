@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { type BoardSession, InicioBoard } from "./start-board";
+import { type BoardSession, StartBoard } from "./start-board";
 
 const meta = {
-	component: InicioBoard,
+	component: StartBoard,
 	tags: ["ai-generated"],
 	decorators: [
 		(Story) => (
@@ -11,7 +11,7 @@ const meta = {
 			</div>
 		),
 	],
-} satisfies Meta<typeof InicioBoard>;
+} satisfies Meta<typeof StartBoard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
