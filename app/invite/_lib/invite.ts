@@ -195,3 +195,35 @@ export async function inviteMember(input: {
 
 	return { ok: true as const };
 }
+
+export type RevokeResult =
+	| { ok: true }
+	| { ok: false; code: "not_found" | "not_pending" };
+
+/** El padrino cierra una Invitación pendiente. El enlace deja de valer. */
+export async function revokeInvitation(input: {
+	invitationId: string;
+	padrinoId: string;
+}): Promise<RevokeResult> {
+	const admin = createAdminClient();
+	const { data } = await admin
+		.from("invitations")
+		.select("id, status, invited_by")
+		.eq("id", input.invitationId)
+		.maybeSingle();
+
+	if (!data || data.invited_by !== input.padrinoId) {
+		return { ok: false, code: "not_found" };
+	}
+	if (data.status !== "pending") {
+		return { ok: false, code: "not_pending" };
+	}
+
+	const { error } = await admin
+		.from("invitations")
+		.update({ status: "expired" })
+		.eq("id", input.invitationId);
+
+	if (error) return { ok: false, code: "not_found" };
+	return { ok: true };
+}

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { InvitationList } from "@/app/invite/_components/invitation-list";
 import { InviteForm } from "@/app/invite/_components/invite-form";
 import {
 	Card,
@@ -15,15 +16,17 @@ const INVITE_ERRORS: Record<string, string> = {
 	already_member: "Esa persona ya es Miembro del club.",
 	left_member: "Esa persona se dio de baja del club.",
 	already_invited_pending:
-		"Ya le enviamos una invitación a ese email. Esperá a que venza o que la acepte.",
+		"Ya hay una invitación pendiente. Revocala o esperá a que venza.",
 	send_failed:
 		"No pudimos enviar la invitación. Intentá de nuevo en un momento.",
+	not_found: "No encontramos esa invitación.",
+	not_pending: "Esa invitación ya no está pendiente.",
 };
 
 export default async function InvitePage({
 	searchParams,
 }: {
-	searchParams: Promise<{ invited?: string; error?: string }>;
+	searchParams: Promise<{ invited?: string; revoked?: string; error?: string }>;
 }) {
 	const params = await searchParams;
 	const { supabase, member } = await getCurrentMember();
@@ -41,18 +44,13 @@ export default async function InvitePage({
 		.eq("invited_by", member.id)
 		.order("created_at", { ascending: false });
 
-	const now = Date.now();
-	const pending = (invitations ?? []).filter(
-		(i) => i.status === "pending" && new Date(i.expires_at).getTime() > now,
-	);
-
 	return (
 		<div className="mx-auto w-full max-w-xl flex-1 px-4 py-8">
 			<div className="space-y-2">
 				<h1 className="text-2xl font-semibold tracking-tight">Invitar</h1>
 				<p className="text-sm text-muted-foreground">
-					Cualquier Miembro activo puede invitar a una nueva persona al club. La
-					invitación vence a las 24 horas.
+					Cualquier Miembro activo puede invitar. La invitación vence a las 24
+					horas; el padrino puede revocarla antes.
 				</p>
 			</div>
 
@@ -62,6 +60,15 @@ export default async function InvitePage({
 					className="mt-4 rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground"
 				>
 					Invitación enviada. Cuando la persona acepte, se sumará al club.
+				</div>
+			)}
+
+			{params.revoked === "1" && (
+				<div
+					role="status"
+					className="mt-4 rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground"
+				>
+					Invitación revocada. El enlace ya no vale.
 				</div>
 			)}
 
@@ -87,26 +94,7 @@ export default async function InvitePage({
 				</CardContent>
 			</Card>
 
-			{pending.length > 0 && (
-				<div className="mt-8 space-y-3">
-					<h2 className="text-sm font-medium text-muted-foreground">
-						Invitaciones pendientes
-					</h2>
-					<ul className="space-y-2">
-						{pending.map((inv) => (
-							<li
-								key={inv.id}
-								className="flex items-center justify-between rounded-lg border border-border px-4 py-3 text-sm"
-							>
-								<span>{inv.email}</span>
-								<span className="text-xs text-muted-foreground">
-									vence {new Date(inv.expires_at).toLocaleString("es")}
-								</span>
-							</li>
-						))}
-					</ul>
-				</div>
-			)}
+			<InvitationList invitations={invitations ?? []} />
 		</div>
 	);
 }

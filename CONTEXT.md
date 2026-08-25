@@ -117,7 +117,7 @@ Logro visible individual que recompensa participación. Los logros del club como
 _Avoid_: Badge, medalla, trofeo
 
 **Invitación**:
-Acto por el que un Miembro (padrino) suma a una nueva persona al club; quien la recibe queda como Miembro `invitado` hasta su primer ingreso. Cualquier Miembro puede invitar; no existe invitación pública. No es llamar a un Miembro a una Sesión.
+Acto por el que un Miembro (padrino) suma a una nueva persona al club; quien la recibe queda como Miembro `invitado` hasta su primer ingreso. Cualquier Miembro puede invitar; no existe invitación pública. El padrino puede revocarla mientras está pendiente: el enlace deja de valer y se puede invitar de nuevo. No es llamar a un Miembro a una Sesión.
 _Avoid_: Alta, registro, signup, reclutar, Convocatoria
 
 **Convocatoria**:

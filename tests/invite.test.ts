@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { inviteMember } from "@/app/invite/_lib/invite";
+import { inviteMember, revokeInvitation } from "@/app/invite/_lib/invite";
 import type { Database } from "@/lib/supabase/database.types";
 
 /**
@@ -205,5 +205,45 @@ describe("inviteMember (padrinazgo, ADR 0005)", () => {
 		});
 		expect(result.ok).toBe(false);
 		expect("code" in result && result.code).toBe("left_member");
+	});
+
+	it("revokes a pending invitation so a new one can be sent", async () => {
+		const email = uniqueEmail("revoke");
+		const first = await inviteMember({
+			email,
+			padrinoId: padrino.id,
+			padrinoDisplayName: "Padrino",
+		});
+		expect(first.ok).toBe(true);
+		const user = await findUserByEmail(email);
+		expect(user).not.toBeNull();
+		usersToClean.push(user!.id);
+
+		const { data: live } = await admin
+			.from("invitations")
+			.select("id")
+			.eq("email", email)
+			.eq("status", "pending")
+			.single();
+
+		const revoked = await revokeInvitation({
+			invitationId: live!.id,
+			padrinoId: padrino.id,
+		});
+		expect(revoked.ok).toBe(true);
+
+		const { data: after } = await admin
+			.from("invitations")
+			.select("status")
+			.eq("id", live!.id)
+			.single();
+		expect(after?.status).toBe("expired");
+
+		const second = await inviteMember({
+			email,
+			padrinoId: padrino.id,
+			padrinoDisplayName: "Padrino",
+		});
+		expect(second.ok).toBe(true);
 	});
 });
