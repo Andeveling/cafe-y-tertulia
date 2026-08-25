@@ -23,8 +23,8 @@ export type LobbyAssignment = {
 
 export type LobbySnapshot = {
 	sessionId: string;
-	materialId: string;
-	range: string;
+	materialId: string | null;
+	range: string | null;
 	status: Database["public"]["Enums"]["session_status"];
 	moderatorId: string | null;
 	participants: LobbyParticipant[];

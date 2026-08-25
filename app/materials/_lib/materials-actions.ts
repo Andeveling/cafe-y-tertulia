@@ -79,16 +79,39 @@ export async function advanceMaterial(id: string): Promise<ActionResult> {
 }
 
 export async function createSession(input: {
-	materialId: string;
-	range: string;
+	materialId?: string | null;
+	range?: string | null;
 	scheduledAt?: string | null;
+	material?: { title: string; kind: MaterialKind; author: string };
 }): Promise<ActionResult> {
 	return runServerAction({
-		run: async ({ supabase }) => {
-			const { error } = await supabase.from("sessions").insert({
-				material_id: input.materialId,
-				range: input.range.trim(),
-				scheduled_at: input.scheduledAt ?? null,
+		requireAuth: true,
+		run: async ({ supabase, user }) => {
+			let materialId = input.materialId ?? null;
+			if (input.material) {
+				const { data, error } = await supabase
+					.from("materials")
+					.insert({
+						title: input.material.title.trim(),
+						kind: input.material.kind,
+						author: input.material.author.trim(),
+						created_by: user!.id,
+					})
+					.select("id")
+					.single();
+				if (error || !data) {
+					return {
+						ok: false,
+						error: `No se pudo crear el material: ${error?.message ?? ""}`,
+					};
+				}
+				materialId = data.id;
+			}
+
+			const { error } = await supabase.rpc("create_session", {
+				p_material_id: materialId ?? undefined,
+				p_range: input.range?.trim() || undefined,
+				p_scheduled_at: input.scheduledAt ?? undefined,
 			});
 
 			if (error) {
@@ -98,7 +121,8 @@ export async function createSession(input: {
 				};
 			}
 		},
-		revalidate: async () => [`/materials/${input.materialId}`],
+		revalidate: async () =>
+			input.materialId ? [`/materials/${input.materialId}`, "/"] : ["/"],
 	});
 }
 

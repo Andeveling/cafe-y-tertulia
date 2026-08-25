@@ -1,7 +1,13 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/lib/supabase/database.types";
-import { asArray, asBool, asNumber, asString } from "./json-helpers";
+import {
+	asArray,
+	asBool,
+	asNullString,
+	asNumber,
+	asString,
+} from "./json-helpers";
 import type {
 	AssignmentState,
 	DrawStatus,
@@ -125,8 +131,8 @@ export async function getRoomSnapshot(
 
 	return {
 		sessionId: asString(row.session_id),
-		materialId: asString(row.material_id),
-		range: asString(row.range),
+		materialId: asNullString(row.material_id),
+		range: asNullString(row.range),
 		status: row.status as Database["public"]["Enums"]["session_status"],
 		moderatorId: typeof row.moderator_id === "string" ? row.moderator_id : null,
 		roomStage:

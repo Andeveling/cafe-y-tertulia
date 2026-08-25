@@ -14,7 +14,7 @@ type SessionHistoryClient = Pick<SupabaseClient<Database>, "from" | "rpc">;
 
 export type SessionHistory = {
 	id: string;
-	range: string;
+	range: string | null;
 	status: SessionStatus;
 	scheduled_at: string | null;
 	created_at: string;
