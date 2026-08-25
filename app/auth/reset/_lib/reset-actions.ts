@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { parseForm } from "@/app/_lib/form-helpers";
+import { siteUrl } from "@/lib/site-url";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { resetSchema } from "../_schemas/reset-schema";
 
@@ -17,7 +18,7 @@ export async function requestPasswordReset(formData: FormData) {
 	// Anti-enumeration: resetPasswordForEmail never reveals whether the email
 	// exists. Same response regardless.
 	await supabase.auth.resetPasswordForEmail(email, {
-		redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/update-password`,
+		redirectTo: `${siteUrl()}/auth/update-password`,
 	});
 
 	redirect("/auth/reset?sent=1");
