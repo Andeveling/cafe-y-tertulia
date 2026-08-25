@@ -45,7 +45,7 @@ const materialFormSchema = z.object({
 
 type MaterialFormValues = z.infer<typeof materialFormSchema>;
 
-export function MaterialForm() {
+export function MaterialForm({ onSuccess }: { onSuccess?: () => void } = {}) {
 	const [isPending, startTransition] = useTransition();
 	const form = useForm<MaterialFormValues>({
 		resolver: zodResolver(materialFormSchema),
@@ -63,6 +63,7 @@ export function MaterialForm() {
 				toast.error(result.error);
 			} else {
 				toast.success("Material propuesto");
+				onSuccess?.();
 			}
 		});
 	}

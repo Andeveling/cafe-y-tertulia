@@ -54,13 +54,13 @@ export function SessionForm({ materialId }: { materialId: string }) {
 	return (
 		<form
 			onSubmit={form.handleSubmit(onSubmit, onInvalid)}
-			className="flex flex-wrap items-end gap-2"
+			className="flex flex-col gap-3"
 		>
 			<Controller
 				name="range"
 				control={form.control}
 				render={({ field, fieldState }) => (
-					<Field data-invalid={fieldState.invalid} className="min-w-40 flex-1">
+					<Field data-invalid={fieldState.invalid}>
 						<FieldLabel htmlFor="session-range">Rango cubierto</FieldLabel>
 						<Input
 							{...field}
@@ -71,7 +71,7 @@ export function SessionForm({ materialId }: { materialId: string }) {
 					</Field>
 				)}
 			/>
-			<Field className="min-w-40 flex-1">
+			<Field>
 				<FieldLabel htmlFor="session-scheduled-at">Fecha programada</FieldLabel>
 				<DatePicker
 					date={scheduledAt}
