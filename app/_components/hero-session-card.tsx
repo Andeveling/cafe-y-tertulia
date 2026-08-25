@@ -16,7 +16,7 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 		<Card>
 			<CardContent className="flex flex-col gap-5 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-6">
 				<div className="flex flex-col gap-3">
-					<div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+					<div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 						<span
 							className={
 								meta.live
