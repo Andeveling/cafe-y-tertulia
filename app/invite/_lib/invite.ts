@@ -28,7 +28,7 @@ function isValidEmail(email: string): boolean {
  * caps at 200 per page; a small club outgrows that fast and the re-invite
  * path must not fail silently).
  */
-async function findUserByEmail(
+export async function findUserByEmail(
 	admin: ReturnType<typeof createAdminClient>,
 	email: string,
 ): Promise<{ user: User | null }> {

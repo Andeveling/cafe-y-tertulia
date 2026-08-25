@@ -69,6 +69,15 @@ export default async function LoginPage({
 				<LoginForm defaultEmail={params.email} />
 
 				<p className="text-center text-sm text-muted-foreground">
+					¿Te invitaron al club?{" "}
+					<a
+						href="/auth/register"
+						className="font-medium text-primary underline underline-offset-4"
+					>
+						Usá tu invitación
+					</a>
+				</p>
+				<p className="text-center text-sm text-muted-foreground">
 					¿Olvidaste tu contraseña?{" "}
 					<a
 						href="/auth/reset"

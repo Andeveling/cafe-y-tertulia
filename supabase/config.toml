@@ -417,3 +417,16 @@ enabled = true
 # declarative_schema_path = "./schemas"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+[remotes.production]
+project_id = "waehygdnapzhhtyppkhh"
+
+[remotes.production.auth]
+site_url = "https://cafe-y-tertulia.vercel.app"
+additional_redirect_urls = [
+	"https://cafe-y-tertulia.vercel.app/auth/invite",
+	"https://cafe-y-tertulia.vercel.app/auth/update-password",
+	"https://cafe-y-tertulia.vercel.app/auth/register",
+	"http://127.0.0.1:3000/auth/invite",
+	"http://127.0.0.1:3000/auth/update-password",
+]
