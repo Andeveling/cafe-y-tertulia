@@ -1,5 +1,11 @@
 import { notFound, redirect } from "next/navigation";
 import { RoomPanel } from "@/app/materials/_components/room-panel";
+import {
+	getMinigameState,
+	getTriviaRoundSnapshot,
+	type MinigameState,
+	type TriviaRoundSnapshot,
+} from "@/app/materials/_lib/minigames";
 import { getRoomSnapshot } from "@/app/materials/_lib/room";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
@@ -32,6 +38,17 @@ export default async function RoomPage({
 		);
 	}
 
+	// Bandeja de herramientas del Debate (ticket #31): solo en etapa debate.
+	let tools: MinigameState | null = null;
+	let round: TriviaRoundSnapshot | null = null;
+	if (snapshot.roomStage === "debate") {
+		tools = await getMinigameState(supabase, sessionId);
+		const roundId = tools?.liveRoundId ?? tools?.lastBoardRoundId ?? null;
+		if (roundId) {
+			round = await getTriviaRoundSnapshot(supabase, roundId);
+		}
+	}
+
 	return (
 		<main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-6">
 			<header className="flex flex-col gap-2">
@@ -47,6 +64,7 @@ export default async function RoomPage({
 				snapshot={snapshot}
 				userId={user.id}
 				isModerator={snapshot.moderatorId === user.id}
+				tools={tools ? { state: tools, round } : null}
 			/>
 		</main>
 	);

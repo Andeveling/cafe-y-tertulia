@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { DebateToolsTray } from "@/app/materials/_components/debate-tools-tray";
 import { StageBar } from "@/app/materials/_components/stage-bar";
 import { StagePanel } from "@/app/materials/_components/stage-panel";
 import { useRoomRealtime } from "@/app/materials/_hooks/use-room-realtime";
@@ -45,14 +46,22 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import type { ActionResult } from "@/lib/server-action";
+import type { MinigameState, TriviaRoundSnapshot } from "../_lib/minigames";
+
+type RoomTools = {
+	state: MinigameState;
+	round: TriviaRoundSnapshot | null;
+};
 
 type Props = {
 	snapshot: RoomSnapshot;
 	userId: string;
 	isModerator: boolean;
+	/** Estado de la bandeja de herramientas — presente solo en etapa Debate. */
+	tools?: RoomTools | null;
 };
 
-export function RoomPanel({ snapshot, userId, isModerator }: Props) {
+export function RoomPanel({ snapshot, userId, isModerator, tools }: Props) {
 	useRoomRealtime(snapshot.sessionId);
 
 	return (
@@ -63,6 +72,7 @@ export function RoomPanel({ snapshot, userId, isModerator }: Props) {
 				snapshot={snapshot}
 				userId={userId}
 				isModerator={isModerator}
+				tools={tools}
 			/>
 
 			{isModerator && <ModeratorNav snapshot={snapshot} />}
@@ -76,10 +86,12 @@ function StageContent({
 	snapshot,
 	userId,
 	isModerator,
+	tools,
 }: {
 	snapshot: RoomSnapshot;
 	userId: string;
 	isModerator: boolean;
+	tools?: RoomTools | null;
 }) {
 	switch (snapshot.roomStage) {
 		case "questions":
@@ -113,12 +125,24 @@ function StageContent({
 		case "debate":
 			if (!snapshot.debate) return null;
 			return (
-				<StagePanel
-					debate={snapshot.debate}
-					sessionId={snapshot.sessionId}
-					userId={userId}
-					isModerator={isModerator}
-				/>
+				<>
+					{/* Foco central: turno + temporizador intactos. */}
+					<StagePanel
+						debate={snapshot.debate}
+						sessionId={snapshot.sessionId}
+						userId={userId}
+						isModerator={isModerator}
+					/>
+					{/* Bandeja de herramientas (ticket #31). */}
+					{tools && (
+						<DebateToolsTray
+							sessionId={snapshot.sessionId}
+							state={tools.state}
+							round={tools.round}
+							isModerator={isModerator}
+						/>
+					)}
+				</>
 			);
 	}
 }

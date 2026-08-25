@@ -5,58 +5,38 @@ import { useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 /**
- * Subscripción realtime para la Sala: escucha cambios en
- * session_participants, questions, draws y assignments.
- * Cada cambio dispara router.refresh() para re-fetch del snapshot.
+ * Tablas por-participante que refrescan la Sala al cambiar. La bandeja del
+ * Debate (ticket #31) añade trivia_rounds y takes a las etapas anteriores.
  */
+const ROOM_TABLES = [
+	"session_participants",
+	"questions",
+	"draws",
+	"assignments",
+	"trivia_rounds",
+	"takes",
+] as const;
+
 export function useRoomRealtime(sessionId: string) {
 	const router = useRouter();
 
 	useEffect(() => {
 		const supabase = createClient();
 
-		const channel = supabase
-			.channel(`room:${sessionId}`)
-			.on(
+		const channel = supabase.channel(`room:${sessionId}`);
+		for (const table of ROOM_TABLES) {
+			channel.on(
 				"postgres_changes",
 				{
 					event: "*",
 					schema: "public",
-					table: "session_participants",
+					table,
 					filter: `session_id=eq.${sessionId}`,
 				},
 				() => router.refresh(),
-			)
-			.on(
-				"postgres_changes",
-				{
-					event: "*",
-					schema: "public",
-					table: "questions",
-					filter: `session_id=eq.${sessionId}`,
-				},
-				() => router.refresh(),
-			)
-			.on(
-				"postgres_changes",
-				{
-					event: "*",
-					schema: "public",
-					table: "draws",
-					filter: `session_id=eq.${sessionId}`,
-				},
-				() => router.refresh(),
-			)
-			.on(
-				"postgres_changes",
-				{
-					event: "*",
-					schema: "public",
-					table: "assignments",
-					filter: `session_id=eq.${sessionId}`,
-				},
-				() => router.refresh(),
-			)
+			);
+		}
+		channel
 			.on(
 				"postgres_changes",
 				{
