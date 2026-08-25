@@ -11,7 +11,7 @@ function roomPath(sessionId: string) {
 /** Crea una Pregunta en la sesión. author_id = auth.uid() (RLS). */
 export async function saveQuestion(
 	sessionId: string,
-	materialId: string,
+	materialId: string | null,
 	text: string,
 ): Promise<ActionResult> {
 	return runServerAction({

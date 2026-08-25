@@ -381,7 +381,7 @@ export default async function MaterialDetailPage({
 														<MaterialQuestionsSection
 															materialId={material.id}
 															sessionId={session.id}
-															sessionRange={session.range}
+															sessionRange={session.range ?? ""}
 														/>
 													</div>
 												)}

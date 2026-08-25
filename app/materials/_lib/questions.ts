@@ -12,7 +12,7 @@ type QuestionRow = Tables<"questions">;
 export type QuestionWithAuthor = {
 	id: string;
 	sessionId: string;
-	materialId: string;
+	materialId: string | null;
 	authorId: string;
 	text: string;
 	outsideDraw: boolean;
@@ -26,7 +26,7 @@ type QuestionPoolRow = QuestionRow & {
 
 export type CreateQuestionInput = {
 	sessionId: string;
-	materialId: string;
+	materialId: string | null;
 	authorId: string;
 	text: string;
 };

@@ -264,7 +264,7 @@ function QuestionsStage({
 	userId,
 }: {
 	sessionId: string;
-	materialId: string;
+	materialId: string | null;
 	questions: RoomQuestion[];
 	participants: RoomParticipant[];
 	userId: string;
