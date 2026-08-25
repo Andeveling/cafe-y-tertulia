@@ -170,12 +170,13 @@ export default async function MaterialDetailPage({
 								</div>
 							)}
 
-							{material.status !== "finished" && (
+							{/* Temporalmente desabilitado porque no encontramos valor en darle clcik a este boton */}
+							{/* {material.status !== "finished" && (
 								<>
 									<Separator />
 									<AdvanceButton kind="material" id={material.id} />
 								</>
-							)}
+							)} */}
 						</div>
 					</article>
 
