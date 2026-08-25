@@ -2,9 +2,8 @@
 
 import { StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 import { RatingDisplay } from "@/app/materials/_components/rating-display";
+import { useRunAction } from "@/app/materials/_hooks/use-run-action";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -13,7 +12,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import type { ActionResult } from "@/lib/server-action";
 import type { RatingProgress } from "../_lib/rating";
 import {
 	castVoteAction,
@@ -24,23 +22,8 @@ import {
 
 type Props = { progress: RatingProgress };
 
-const ok: ActionResult = { ok: true };
-
 export function RatingPanel({ progress }: Props) {
-	const router = useRouter();
-	const [pending, start] = useTransition();
-
-	function run(
-		action: (p: ActionResult, f: FormData) => Promise<ActionResult>,
-		fields: Record<string, string>,
-	) {
-		start(async () => {
-			const fd = new FormData();
-			for (const [k, v] of Object.entries(fields)) fd.set(k, v);
-			await action(ok, fd);
-			router.refresh();
-		});
-	}
+	const { pending, run } = useRunAction();
 
 	const frozen = progress.ratingCount > 0 && !progress.ratingOpen;
 

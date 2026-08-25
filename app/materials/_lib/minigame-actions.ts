@@ -8,15 +8,12 @@ import {
 import type { Json } from "@/lib/supabase/database.types";
 
 /**
- * Rutas que muestran los minijuegos: la propia, el escenario y la página del
- * material. El material se deriva de la Sesión (nunca del formulario).
+ * Ruta que muestra los minijuegos: la bandeja dentro de la Sala (ticket #31).
+ * El material se deriva de la Sesión (nunca del formulario).
  */
 function minigameRevalidate(sessionId: string) {
 	return async ({ supabase }: ActionContext): Promise<string[]> => {
-		const paths = [
-			`/materials/sessions/${sessionId}/minigames`,
-			`/materials/sessions/${sessionId}/stage`,
-		];
+		const paths = [`/materials/sessions/${sessionId}/room`];
 		const { data } = await supabase
 			.from("sessions")
 			.select("material_id")
