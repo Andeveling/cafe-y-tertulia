@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { type BoardSession, InicioBoard } from "./inicio-board";
+import { type BoardSession, InicioBoard } from "./start-board";
 
 const meta = {
 	component: InicioBoard,

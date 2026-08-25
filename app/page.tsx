@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import type { RosterMember } from "@/hooks/use-club-presence";
 import { getCurrentMember } from "@/lib/current-member";
-import { type BoardSession, InicioBoard } from "./_components/inicio-board";
+import { type BoardSession, StartBoard } from "./_components/start-board";
 
 export const metadata = { title: "Inicio · Café y Tertulia" };
 
@@ -76,7 +76,7 @@ export default async function HomePage() {
 	}));
 
 	return (
-		<InicioBoard
+		<StartBoard
 			sessions={sessions}
 			materials={materials}
 			displayName={member.display_name || "Miembro"}

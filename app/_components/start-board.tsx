@@ -108,7 +108,7 @@ function scheduledLabel(iso: string | null): string {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export function InicioBoard({
+export function StartBoard({
 	sessions,
 	materials,
 	displayName,
