@@ -13,10 +13,10 @@ import {
 export function HeroSessionCard({ session }: { session: BoardSession }) {
 	const meta = statusMeta(session.status);
 	return (
-		<Card className="border-border/30 bg-card/40 shadow-none backdrop-blur-sm">
-			<CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-end sm:justify-between sm:p-7">
+		<Card>
+			<CardContent className="flex flex-col gap-5 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-6">
 				<div className="flex flex-col gap-3">
-					<div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+					<div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
 						<span
 							className={
 								meta.live
@@ -29,10 +29,10 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 							<span>· {whenLabel(session.scheduled_at)}</span>
 						)}
 					</div>
-					<h2 className="font-heading text-[23px] font-light leading-none tracking-tight text-foreground">
+					<h2 className="font-heading text-2xl font-semibold leading-8 tracking-tight">
 						{sessionTitle(session)}
 					</h2>
-					<p className="text-sm font-light leading-snug text-foreground/65">
+					<p className="text-sm text-muted-foreground">
 						{session.material_title && session.range
 							? `${session.material_title} — `
 							: session.material_title
@@ -43,7 +43,7 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 				</div>
 				<Button
 					size="lg"
-					className="w-full shrink-0 rounded-full px-7 font-medium sm:w-auto"
+					className="w-full shrink-0 sm:w-auto"
 					nativeButton={false}
 					render={
 						<Link

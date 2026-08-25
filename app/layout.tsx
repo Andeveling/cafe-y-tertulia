@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist_Mono, Literata, Manrope } from "next/font/google";
 import { cookies } from "next/headers";
 import Script from "next/script";
 import "./globals.css";
@@ -17,12 +17,13 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-const geistSans = Geist({
-	variable: "--font-geist-sans",
+const literata = Literata({
+	variable: "--font-literata",
 	subsets: ["latin"],
+	weight: ["400", "600", "700"],
 });
+
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistMono = Geist_Mono({
 	variable: "--font-geist-mono",
@@ -51,25 +52,15 @@ export default async function RootLayout({
 			.select("display_name, status")
 			.eq("id", user.id)
 			.maybeSingle();
-		memberStatus = member?.status ?? null;
-
-		const avatar =
-			(user.user_metadata?.avatar_url as string | undefined) ??
-			(user.user_metadata?.picture as string | undefined) ??
-			null;
-
 		if (member) {
 			navUser = {
-				name: member.display_name,
-				email: user.email ?? "",
-				avatar,
+				name: member.display_name || user.email || "Miembro",
+				email: user.email || "",
+				avatar: null,
 			};
-		} else if (user.email) {
-			navUser = {
-				name: user.email.split("@")[0],
-				email: user.email,
-				avatar,
-			};
+			memberStatus = member.status;
+		} else {
+			navUser = { name: user.email || "Miembro", email: user.email || "" };
 		}
 	}
 
@@ -87,10 +78,10 @@ export default async function RootLayout({
 			className={cn(
 				"h-full",
 				"antialiased",
-				geistSans.variable,
+				literata.variable,
+				manrope.variable,
 				geistMono.variable,
 				"font-sans",
-				inter.variable,
 			)}
 		>
 			<body className="min-h-full">

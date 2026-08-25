@@ -61,10 +61,11 @@ export function MaterialsGrid({
 								<HugeiconsIcon
 									icon={KIND_ICON[m.kind] ?? Book01Icon}
 									className="size-10 text-primary/40"
+									aria-hidden="true"
 								/>
 								<Badge
-									variant="secondary"
-									className="bg-card/90 backdrop-blur text-xs shadow-sm"
+									variant={m.status === "in_progress" ? "default" : "secondary"}
+									className="text-xs"
 								>
 									{MATERIAL_STATUS_LABELS[m.status]}
 								</Badge>

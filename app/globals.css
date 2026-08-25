@@ -41,13 +41,20 @@
 	--color-popover: var(--popover);
 	--color-card-foreground: var(--card-foreground);
 	--color-card: var(--card);
-	--radius-sm: calc(var(--radius) * 0.45);
-	--radius-md: calc(var(--radius) * 0.7);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) * 1.35);
-	--radius-2xl: calc(var(--radius) * 1.8);
-	--radius-3xl: calc(var(--radius) * 2.2);
-	--radius-4xl: calc(var(--radius) * 2.6);
+	--color-primary-container: var(--primary-container);
+	--color-on-primary-container: var(--on-primary-container);
+	--color-reward: var(--reward);
+	--color-reward-foreground: var(--reward-foreground);
+	--color-rank-1: var(--rank-1);
+	--color-rank-2: var(--rank-2);
+	--color-rank-3: var(--rank-3);
+	--radius-sm: 0.25rem;
+	--radius-md: 0.75rem;
+	--radius-lg: 1rem;
+	--radius-xl: 1.5rem;
+	--radius-2xl: 1.5rem;
+	--radius-3xl: 2.2rem;
+	--radius-4xl: 2.6rem;
 	--text-xs: 0.875rem;
 	--text-xs--line-height: 1.35;
 	--text-sm: 1rem;
@@ -65,13 +72,11 @@
 }
 
 /*
-  Café y Tertulia — mesa de juego literario
-  ────────────────────────────────────────
-  Pergamino + espresso + miel (puntos) + terracota (turno).
-  Amable y lúdico, sin competir con la conversación.
-
-  Radio: posavasos / ficha (no brutalista 0, no píldora gigante).
-  secondary = miel de recompensa · chart = fichas del tablero.
+  Café y Tertulia — Sophisticated Lounge (DESIGN.md)
+  ────────────────────────────────────────────────
+  Surface #1c110c + Amber #ffcd97 / Miel #e8b06f — hushed, premium, slow.
+  Radius: 0.5rem (buttons) / 1rem (cards) — DESIGN.md rounded.
+  Gamificación = miel (`--reward`), no arcoiris.
 */
 :root {
 	--background: oklch(0.965 0.022 82);
@@ -80,34 +85,43 @@
 	--card-foreground: oklch(0.28 0.04 48);
 	--popover: oklch(0.99 0.01 85);
 	--popover-foreground: oklch(0.28 0.04 48);
-	--primary: oklch(0.42 0.09 48);
-	--primary-foreground: oklch(0.98 0.02 85);
-	--secondary: oklch(0.88 0.08 78);
-	--secondary-foreground: oklch(0.34 0.07 48);
+	--primary: #ffcd97;
+	--primary-foreground: #472a00;
+	--primary-container: #e8b06f;
+	--on-primary-container: #694209;
+	--secondary: #c9c6c2;
+	--secondary-foreground: #31302d;
 	--muted: oklch(0.94 0.025 80);
 	--muted-foreground: oklch(0.5 0.03 50);
 	--accent: oklch(0.91 0.05 62);
 	--accent-foreground: oklch(0.32 0.05 45);
 	--destructive: oklch(0.55 0.16 28);
 	--destructive-foreground: oklch(0.98 0.02 85);
-	--border: oklch(0.86 0.03 75);
-	--input: oklch(0.86 0.03 75);
-	--ring: oklch(0.5 0.1 55);
-	--chart-1: oklch(0.42 0.09 48);
-	--chart-2: oklch(0.78 0.12 78);
-	--chart-3: oklch(0.6 0.12 40);
-	--chart-4: oklch(0.7 0.08 145);
-	--chart-5: oklch(0.55 0.08 250);
-	--radius: 0.875rem;
+	--border: #504539;
+	--input: #504539;
+	--ring: #ffcd97;
+	--chart-1: #ffcd97;
+	--chart-2: #e8b06f;
+	--chart-3: #c9c6c2;
+	--chart-4: #e9d2c6;
+	--chart-5: #9d8e80;
+	--radius: 0.5rem;
 	--sidebar: oklch(0.95 0.02 78);
 	--sidebar-foreground: oklch(0.28 0.04 48);
-	--sidebar-primary: oklch(0.42 0.09 48);
-	--sidebar-primary-foreground: oklch(0.98 0.02 85);
+	--sidebar-primary: #ffcd97;
+	--sidebar-primary-foreground: #472a00;
 	--sidebar-accent: oklch(0.9 0.05 75);
 	--sidebar-accent-foreground: oklch(0.32 0.05 45);
-	--sidebar-border: oklch(0.86 0.03 75);
-	--sidebar-ring: oklch(0.5 0.1 55);
-	--font-heading: var(--font-serif);
+	--sidebar-border: #504539;
+	--sidebar-ring: #ffcd97;
+	--reward: #e8b06f;
+	--reward-foreground: #472a00;
+	--rank-1: #ffcd97;
+	--rank-2: #c9c6c2;
+	--rank-3: #e9d2c6;
+	--progress-track: #40322c;
+	--progress-fill: #ffcd97;
+	--font-heading: var(--font-literata);
 	--shadow-color: oklch(0.38 0.05 48);
 	--shadow-opacity: 0.1;
 	--shadow-blur: 16px;
@@ -135,39 +149,49 @@
 }
 
 .dark {
-	/* ── Espresso night — fondo profundo, textos crema, acentos caramelo ── */
-	--background: oklch(0.17 0.022 55);
-	--foreground: oklch(0.93 0.018 80);
-	--card: oklch(0.21 0.025 52);
-	--card-foreground: oklch(0.93 0.018 80);
-	--popover: oklch(0.22 0.026 52);
-	--popover-foreground: oklch(0.93 0.018 80);
-	--primary: oklch(0.82 0.12 75);
-	--primary-foreground: oklch(0.2 0.03 50);
-	--secondary: oklch(0.28 0.035 55);
-	--secondary-foreground: oklch(0.88 0.06 75);
-	--muted: oklch(0.25 0.028 55);
-	--muted-foreground: oklch(0.72 0.025 75);
-	--accent: oklch(0.3 0.04 55);
-	--accent-foreground: oklch(0.93 0.018 80);
-	--destructive: oklch(0.65 0.16 25);
-	--destructive-foreground: oklch(0.95 0.015 80);
-	--border: oklch(0.32 0.028 52);
-	--input: oklch(0.34 0.03 52);
-	--ring: oklch(0.82 0.12 75);
-	--chart-1: oklch(0.82 0.12 75);
-	--chart-2: oklch(0.62 0.1 40);
-	--chart-3: oklch(0.68 0.08 145);
-	--chart-4: oklch(0.55 0.08 250);
-	--chart-5: oklch(0.72 0.06 82);
-	--sidebar: oklch(0.19 0.024 55);
-	--sidebar-foreground: oklch(0.93 0.018 80);
-	--sidebar-primary: oklch(0.82 0.12 75);
-	--sidebar-primary-foreground: oklch(0.2 0.03 50);
-	--sidebar-accent: oklch(0.28 0.035 52);
-	--sidebar-accent-foreground: oklch(0.93 0.018 80);
-	--sidebar-border: oklch(0.32 0.028 52);
-	--sidebar-ring: oklch(0.82 0.12 75);
+	/* DESIGN.md — Sophisticated Lounge dark */
+	--background: #1c110c;
+	--foreground: #f5ded5;
+	--card: #291d17;
+	--card-foreground: #f5ded5;
+	--popover: #342721;
+	--popover-foreground: #f5ded5;
+	--primary: #ffcd97;
+	--primary-foreground: #472a00;
+	--primary-container: #e8b06f;
+	--on-primary-container: #694209;
+	--secondary: #c9c6c2;
+	--secondary-foreground: #31302d;
+	--muted: #40322c;
+	--muted-foreground: #d4c4b5;
+	--accent: #cdb6ab;
+	--accent-foreground: #3c2d26;
+	--destructive: #ffb4ab;
+	--destructive-foreground: #690005;
+	--border: #504539;
+	--input: #504539;
+	--ring: #ffcd97;
+	--chart-1: #ffcd97;
+	--chart-2: #e8b06f;
+	--chart-3: #c9c6c2;
+	--chart-4: #e9d2c6;
+	--chart-5: #9d8e80;
+	--sidebar: #251913;
+	--sidebar-foreground: #f5ded5;
+	--sidebar-primary: #ffcd97;
+	--sidebar-primary-foreground: #472a00;
+	--sidebar-accent: #342721;
+	--sidebar-accent-foreground: #f5ded5;
+	--sidebar-border: #504539;
+	--sidebar-ring: #ffcd97;
+	--reward: #e8b06f;
+	--reward-foreground: #472a00;
+	--rank-1: #ffcd97;
+	--rank-2: #c9c6c2;
+	--rank-3: #e9d2c6;
+	--progress-track: #40322c;
+	--progress-fill: #ffcd97;
+	--font-heading: var(--font-literata);
 	--shadow-color: oklch(0.12 0.02 55);
 	--shadow-opacity: 0.5;
 }

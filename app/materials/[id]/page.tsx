@@ -5,6 +5,7 @@ import {
 	Flag01Icon,
 	News01Icon,
 	PlayCircleIcon,
+	PlusSignIcon,
 	PodcastIcon,
 	Time01Icon,
 	Video01Icon,
@@ -20,6 +21,14 @@ import { SessionScheduler } from "@/app/materials/_components/session-scheduler"
 import { StepIndicator } from "@/app/materials/_components/step-indicator";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
 import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -116,16 +125,18 @@ export default async function MaterialDetailPage({
 						<div className="grid h-36 place-items-center bg-accent">
 							<HugeiconsIcon
 								icon={KIND_ICON[material.kind] ?? Book01Icon}
-								className="size-12 text-primary/45"
-								strokeWidth={1.2}
+								className="size-12 text-accent-foreground/60"
+								strokeWidth={1.6}
+								aria-hidden="true"
 							/>
 						</div>
 
 						<div className="flex flex-col gap-4 p-6">
-							<span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-medium">
+							<span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
 								<HugeiconsIcon
 									icon={KIND_ICON[material.kind] ?? Book01Icon}
 									className="size-3"
+									aria-hidden="true"
 								/>
 								{MATERIAL_KIND_LABELS[material.kind]}
 							</span>
@@ -140,7 +151,7 @@ export default async function MaterialDetailPage({
 							</div>
 
 							<div className="flex flex-wrap items-center gap-2">
-								<span className="w-fit rounded-full bg-secondary px-3 py-1 text-sm font-medium">
+								<span className="w-fit rounded-full bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground">
 									{MATERIAL_STATUS_LABELS[material.status]}
 								</span>
 								{material.rating_count > 0 && (
@@ -150,7 +161,6 @@ export default async function MaterialDetailPage({
 									/>
 								)}
 							</div>
-
 							{material.status !== "proposed" && (
 								<div>
 									<div className="mb-2 flex justify-between text-sm text-muted-foreground">
@@ -189,8 +199,9 @@ export default async function MaterialDetailPage({
 								{milestones.map((m) => (
 									<span
 										key={m.id}
-										className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm"
-										title={m.trigger}
+										className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground"
+										aria-label={m.name}
+										title={m.name}
 									>
 										<span aria-hidden="true">{m.emoji}</span>
 										<span>{m.name}</span>
@@ -203,8 +214,8 @@ export default async function MaterialDetailPage({
 
 				{/* ── Columna derecha: plan de sesiones ── */}
 				<div className="min-w-0 lg:col-span-8">
-					<div className="mb-7 flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-						<div>
+					<div className="mb-7 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+						<div className="max-w-prose">
 							<h2 className="text-4xl font-semibold leading-none tracking-tight">
 								Plan de Tertulias
 							</h2>
@@ -212,7 +223,34 @@ export default async function MaterialDetailPage({
 								Organiza y sigue las sesiones para completar este material.
 							</p>
 						</div>
-						<SessionForm materialId={material.id} />
+
+						<div className="shrink-0 pt-1">
+							<Dialog>
+								<DialogTrigger
+									render={
+										<Button size="lg">
+											<HugeiconsIcon
+												icon={PlusSignIcon}
+												className="mr-2 size-4"
+											/>
+											Nueva sesión
+										</Button>
+									}
+								/>
+								<DialogContent className="sm:max-w-[560px]">
+									<DialogHeader>
+										<DialogTitle className="font-heading text-2xl">
+											Nueva sesión
+										</DialogTitle>
+									</DialogHeader>
+
+									<div className="pt-2">
+										{/* Formulario de creación dentro del modal */}
+										<SessionForm materialId={material.id} />
+									</div>
+								</DialogContent>
+							</Dialog>
+						</div>
 					</div>
 
 					{chronologicalSessions.length === 0 ? (
@@ -263,6 +301,7 @@ export default async function MaterialDetailPage({
 																<HugeiconsIcon
 																	icon={Time01Icon}
 																	className="size-3.5"
+																	aria-hidden="true"
 																/>
 																{new Date(
 																	session.scheduled_at,
@@ -278,11 +317,7 @@ export default async function MaterialDetailPage({
 													</div>
 													<div className="flex shrink-0 items-center gap-2">
 														<span
-															className={`rounded-full px-3 py-1 text-xs font-medium ${
-																isActive
-																	? "bg-primary text-primary-foreground"
-																	: "bg-secondary text-muted-foreground"
-															}`}
+															className={`rounded-full px-3 py-1 text-xs font-medium ${isActive ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}
 														>
 															{SESSION_STATUS_LABELS[session.status]}
 														</span>
@@ -297,19 +332,24 @@ export default async function MaterialDetailPage({
 
 												{!isClosed && (
 													<div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-														<span className="inline-flex items-center gap-1 rounded-lg bg-accent px-2 py-1">
+														<span className="inline-flex items-center gap-1 rounded-lg bg-accent px-2 py-1 text-accent-foreground">
 															<HugeiconsIcon
 																icon={Time01Icon}
 																className="size-3"
+																aria-hidden="true"
 															/>
-															{session.scheduled_at
-																? new Date(
+															{session.scheduled_at ? (
+																<time dateTime={session.scheduled_at}>
+																	{new Date(
 																		session.scheduled_at,
 																	).toLocaleDateString("es", {
 																		day: "numeric",
 																		month: "short",
-																	})
-																: "Sin fecha"}
+																	})}
+																</time>
+															) : (
+																"Sin fecha"
+															)}
 														</span>
 														<SessionScheduler
 															materialId={material.id}

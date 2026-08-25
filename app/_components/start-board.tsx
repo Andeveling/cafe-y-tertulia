@@ -38,7 +38,7 @@ export function StartBoard({
 			{hero ? (
 				<HeroSessionCard session={hero} />
 			) : (
-				<Card>
+				<Card className="rounded-lg border-border">
 					<CardContent className="flex flex-col items-center gap-3 py-10 text-center">
 						<p className="text-sm text-muted-foreground">
 							No hay sesiones programadas ni salas abiertas.
@@ -52,11 +52,11 @@ export function StartBoard({
 				</Card>
 			)}
 			{others.length > 0 && (
-				<div className="overflow-hidden rounded-2xl border border-border/20 bg-card/30 backdrop-blur-sm">
-					<div className="border-b border-border/20 px-5 py-3 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+				<div className="overflow-hidden rounded-lg border border-border bg-card">
+					<div className="border-b border-border px-5 py-3 text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
 						También abiertas
 					</div>
-					<ul className="divide-y divide-border/20">
+					<ul className="divide-y divide-border">
 						{others.map((s) => (
 							<SessionRow key={s.id} session={s} />
 						))}

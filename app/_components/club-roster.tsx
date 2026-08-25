@@ -27,9 +27,9 @@ export function ClubRoster({
 	);
 
 	return (
-		<Card>
+		<Card className="rounded-lg border-border bg-card">
 			<CardHeader>
-				<CardTitle className="text-sm">
+				<CardTitle className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
 					Miembros ({roster.filter((m) => m.online).length} en línea)
 				</CardTitle>
 			</CardHeader>
@@ -40,7 +40,7 @@ export function ClubRoster({
 							<span className="flex min-w-0 items-center gap-2">
 								<Avatar
 									size="sm"
-									className={m.online ? undefined : "opacity-40"}
+									className={m.online ? "ring-1 ring-primary/30" : "opacity-40"}
 								>
 									<AvatarFallback>
 										{(m.display_name || "?").slice(0, 1).toUpperCase()}

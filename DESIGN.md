@@ -165,17 +165,33 @@ The shape language is consistently **Rounded**, providing a soft, approachable f
 ## Components
 
 ### Buttons
-- **Primary:** Solid Amber (#E8B06F) with Deep Brown text. High contrast, reserved for main actions like "Entrar" or "Nueva sesión."
+- **Primary:** Solid Amber (#E8B06F / `--primary-container`) with Deep Brown text. High contrast, reserved for main actions like "Entrar" or "Nueva sesión." `rounded: 0.5rem` (8px), `font: Manrope 600`.
 - **Secondary/Outline:** Transparent background with a 1px Amber border and Amber text. Used for secondary navigation or less critical actions.
-- **Ghost:** Text-only in Cream or Amber, used for utility links in sidebars.
+- **Ghost:** Text-only in Cream or Amber, used for utility links in sidebars and secondary row actions ("Entrar" en listas).
 
 ### Cards
-- **Session Cards:** Use the #2A1D16 background with 16px internal padding. Title in Literata (headline-md).
-- **Member Lists:** Simple rows with subtle 1px dividers. Use circular avatars with Amber borders for active users.
+- **Session Cards:** Use the #2A1D16 background (`surface-container`) with 16px internal padding (`rounded-lg` 16px). Title in Literata (headline-md 24px 600). Tonal layering with 1px outline `#3D2B22`/`#504539` — no heavy shadows.
+- **Member Lists:** Simple rows with subtle 1px dividers (`outline-variant`). Use circular avatars with Amber borders for active users. Status dot `8px` muted.
 
 ### Inputs & Selection
-- **Inputs:** Darker than the card surface (#140B07) with a subtle border. Focus state uses a 1px Amber glow.
-- **Chips:** Small, pill-shaped labels with a slightly lighter brown background and Amber text for "Live" or "Open" statuses.
+- **Inputs:** Darker than the card surface (#140B07 / `surface-container-lowest`) with a subtle border. Focus state uses a 1px Amber glow.
+- **Chips:** Small, pill-shaped labels (`rounded-full`) with a slightly lighter brown background and Amber text for "Live" or "Open" statuses.
 
 ### Sidebar
-- **Navigation:** Active items use a soft Amber background with a slightly darker text. Inactive items use low-opacity Cream icons and text.
+- **Navigation:** Active items use a soft Amber background (`primary-container`/`sidebar-primary`) with darker text. Inactive items use low-opacity Cream icons and text.
+
+## Gamification — Miel, no neón
+
+La gamificación usa la misma paleta Lounge, nunca colores extra. Recompensa = calidez, no arcade.
+
+- **Principio:** 1 acento lúdico = `primary/primary-container` (ámbar/miel). Resto en grises tierra (`secondary/tertiary`). Nunca compite con CTAs — vive en feedback y vitrina, no en el dashboard hero.
+- **Tokens:**
+  - `--reward` → `primary-container` #E8B06F (miel, +XP, monedas). `--reward-foreground` → `#472a00`.
+  - `--rank-1` → `#ffcd97` (primary, oro), `--rank-2` → `#c9c6c2` (secondary, plata), `--rank-3` → `#e9d2c6` (tertiary, bronce) — desaturados dentro de DESIGN.md.
+  - `--progress-track` → `surface-container-highest` #40322c, `--progress-fill` → `primary` #ffcd97.
+- **Componentes:**
+  - `LevelBadge` — texto `label-md` (Manrope 12px 600 0.05em uppercase) + barra `h-1.5 rounded-full` sobre `muted`. Siempre en header, quieto.
+  - `RewardPill` — `rounded-full px-2.5 py-0.5 bg-secondary text-secondary-foreground text-xs` con `+12` animado solo en toast/cierre.
+  - `Vitrina` — grid `gap-md` celdas `aspect-square rounded-lg border border-outline-variant bg-surface-container/60`; vacías `border-dashed` crema 20% — artesanía, no brillo.
+  - `StreakDot` / rank — `size-1.5 rounded-full` (`primary` si vivo, `outline-variant` si no). Avatares activos con `ring-1 ring-primary/40`.
+- **Reglas:** Dashboard = 0 gamificación salvo LevelBadge. Sala/Rating/Cierre = recompensa. Nunca `amber` + `chart` + `destructive` juntos en una vista. Espacio como jerarquía (`xxl` 48px entre secciones, `md/lg` 16/24px dentro de cards).

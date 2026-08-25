@@ -3,7 +3,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { cn } from "@/lib/utils";
 
 type StepVariant = "completed" | "active" | "planned";
-
 const variantStyles: Record<StepVariant, { bg: string; iconColor: string }> = {
 	completed: {
 		bg: "bg-primary",
@@ -15,10 +14,9 @@ const variantStyles: Record<StepVariant, { bg: string; iconColor: string }> = {
 	},
 	planned: {
 		bg: "bg-secondary",
-		iconColor: "text-muted-foreground",
+		iconColor: "text-secondary-foreground",
 	},
 };
-
 /**
  * Indicador circular reutilizable para steppers.
  * Muestra un icono centrado dentro de un círculo con estilo por variante.
@@ -44,6 +42,7 @@ export function StepIndicator({
 
 	return (
 		<div
+			aria-hidden="true"
 			className={cn(
 				"relative z-[1] grid shrink-0 place-items-center rounded-full",
 				sizes.container,
@@ -51,7 +50,11 @@ export function StepIndicator({
 				className,
 			)}
 		>
-			<HugeiconsIcon icon={icon} className={cn(sizes.icon, styles.iconColor)} />
+			<HugeiconsIcon
+				icon={icon}
+				className={cn(sizes.icon, styles.iconColor)}
+				aria-hidden="true"
+			/>
 		</div>
 	);
 }
