@@ -36,6 +36,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { type RosterMember, useClubPresence } from "@/hooks/use-club-presence";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -110,11 +111,16 @@ export function InicioBoard({
 	sessions,
 	materials,
 	displayName,
+	rosterMembers = [],
+	userId,
 }: {
 	sessions: BoardSession[];
 	materials: MaterialOption[];
 	displayName: string;
+	rosterMembers?: RosterMember[];
+	userId?: string;
 }) {
+	const roster = useClubPresence(userId, rosterMembers);
 	const router = useRouter();
 	const [pending, startTransition] = useTransition();
 	const [mode, setMode] = useState<"now" | "scheduled">("now");
@@ -191,18 +197,26 @@ export function InicioBoard({
 				</Button>
 			</header>
 
-			{/* Presencia */}
 			<div
 				role="group"
 				aria-label="Presencia"
-				className="flex items-center gap-2 text-sm text-muted-foreground"
+				className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
 			>
-				<AvatarGroup>
-					<Avatar size="sm">
-						<AvatarFallback />
-					</Avatar>
-				</AvatarGroup>
 				<span>En la app</span>
+				<AvatarGroup>
+					{roster.map((m) => (
+						<Avatar
+							key={m.id}
+							size="sm"
+							className={m.online ? undefined : "opacity-40"}
+							title={m.display_name || "Miembro"}
+						>
+							<AvatarFallback>
+								{(m.display_name || "?").slice(0, 1).toUpperCase()}
+							</AvatarFallback>
+						</Avatar>
+					))}
+				</AvatarGroup>
 			</div>
 
 			{/* Salas abiertas */}

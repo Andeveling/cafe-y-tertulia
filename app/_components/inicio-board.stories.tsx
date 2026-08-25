@@ -21,11 +21,17 @@ const materials = [
 	{ id: "m2", title: "Cien años de soledad" },
 ];
 
+const rosterMembers = [
+	{ id: "u1", display_name: "Ana" },
+	{ id: "u2", display_name: "Luis" },
+];
+
 export const Empty: Story = {
 	args: {
 		sessions: [],
 		materials,
 		displayName: "Ana",
+		rosterMembers,
 	},
 };
 
@@ -51,6 +57,7 @@ export const WithScheduled: Story = {
 		] satisfies BoardSession[],
 		materials,
 		displayName: "Ana",
+		rosterMembers,
 	},
 };
 
@@ -84,5 +91,6 @@ export const WithOpenSala: Story = {
 		] satisfies BoardSession[],
 		materials,
 		displayName: "Ana",
+		rosterMembers,
 	},
 };
