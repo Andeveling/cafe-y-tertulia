@@ -1,8 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -12,7 +10,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { ActionResult } from "@/lib/server-action";
+import { useRunAction } from "../_hooks/use-run-action";
 import {
 	answerTriviaAction,
 	closeTakeAction,
@@ -38,7 +36,13 @@ type Props = {
 	isModerator: boolean;
 };
 
-const ok: ActionResult = { ok: true };
+/** Lo que las secciones internas necesitan para disparar acciones. */
+type TrayActions = {
+	sessionId: string;
+	pending: boolean;
+	isModerator: boolean;
+	run: ReturnType<typeof useRunAction>["run"];
+};
 
 export function DebateToolsTray({
 	sessionId,
@@ -46,7 +50,7 @@ export function DebateToolsTray({
 	round,
 	isModerator,
 }: Props) {
-	const { pending, run } = useAct();
+	const { pending, run } = useRunAction();
 	const [takePrompt, setTakePrompt] = useState("");
 
 	const canLaunchTrivia =
@@ -54,6 +58,7 @@ export function DebateToolsTray({
 	const canLaunchTake = isModerator && !state.openTakeId && state.takeCount < 3;
 
 	const hasContent = round != null || state.takes.length > 0;
+	const actions = { sessionId, pending, isModerator, run };
 
 	return (
 		<Card>
@@ -64,31 +69,17 @@ export function DebateToolsTray({
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-5">
-				{round?.status === "live" && (
-					<TriviaLive
-						round={round}
-						sessionId={sessionId}
-						pending={pending}
-						isModerator={isModerator}
-						run={run}
-					/>
-				)}
+				{round?.status === "live" && <TriviaLive round={round} {...actions} />}
 
 				{round?.status === "board" && <Scoreboard round={round} />}
 
 				{state.takes.length > 0 && (
-					<TakesSection
-						takes={state.takes}
-						sessionId={sessionId}
-						pending={pending}
-						isModerator={isModerator}
-						run={run}
-					/>
+					<TakesSection takes={state.takes} {...actions} />
 				)}
 
 				{!hasContent && !canLaunchTrivia && !canLaunchTake && (
 					<p className="text-sm text-muted-foreground">
-						El Moderador puede animar el debate con una trivia o un take.
+						Trivia y takes aparecerán aquí durante el debate.
 					</p>
 				)}
 
@@ -153,24 +144,6 @@ export function DebateToolsTray({
 	);
 }
 
-function useAct() {
-	const router = useRouter();
-	const [pending, start] = useTransition();
-	function run(
-		action: (p: ActionResult, f: FormData) => Promise<ActionResult>,
-		fields: Record<string, string>,
-	) {
-		start(async () => {
-			const fd = new FormData();
-			for (const [k, v] of Object.entries(fields)) fd.set(k, v);
-			const r = await action(ok, fd);
-			if (!r.ok) toast.error(r.error);
-			router.refresh();
-		});
-	}
-	return { pending, run };
-}
-
 // ─── Trivia ─────────────────────────────────────────────────
 
 function TriviaLive({
@@ -179,13 +152,7 @@ function TriviaLive({
 	pending,
 	isModerator,
 	run,
-}: {
-	round: TriviaRoundSnapshot;
-	sessionId: string;
-	pending: boolean;
-	isModerator: boolean;
-	run: ReturnType<typeof useAct>["run"];
-}) {
+}: TrayActions & { round: TriviaRoundSnapshot }) {
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-sm text-muted-foreground">
@@ -292,13 +259,7 @@ function TakesSection({
 	pending,
 	isModerator,
 	run,
-}: {
-	takes: MinigameState["takes"];
-	sessionId: string;
-	pending: boolean;
-	isModerator: boolean;
-	run: ReturnType<typeof useAct>["run"];
-}) {
+}: TrayActions & { takes: MinigameState["takes"] }) {
 	return (
 		<div className="flex flex-col gap-3">
 			<p className="text-sm text-muted-foreground">
