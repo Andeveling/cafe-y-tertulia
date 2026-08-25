@@ -193,6 +193,7 @@ export function InicioBoard({
 
 			{/* Presencia */}
 			<div
+				role="group"
 				aria-label="Presencia"
 				className="flex items-center gap-2 text-sm text-muted-foreground"
 			>
