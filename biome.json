@@ -8,7 +8,10 @@
 			"**",
 			"!supabase/templates/**",
 			"!docs/prototypes/**",
-			"!biome-plugins/test-*.grit"
+			"!biome-plugins/test-*.grit",
+			"!.agents/skills/**",
+			"!.commandcode/skills/**",
+			"!.pi/skills/**"
 		]
 	},
 	"formatter": { "enabled": true, "indentStyle": "tab" },
@@ -58,7 +61,10 @@
 			"!next-env.d.ts",
 			"!docs/prototypes/**",
 			"!biome-plugins/test-*.grit",
-			"!app/globals.css"
+			"!app/globals.css",
+			"!.agents/skills/**",
+			"!.commandcode/skills/**",
+			"!.pi/skills/**"
 		]
 	},
 	"javascript": {
