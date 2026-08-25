@@ -83,7 +83,7 @@ export async function createSession(input: {
 	range?: string | null;
 	scheduledAt?: string | null;
 	material?: { title: string; kind: MaterialKind; author: string };
-}): Promise<ActionResult> {
+}): Promise<ActionResult | { ok: true; sessionId: string }> {
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase, user }) => {
@@ -108,22 +108,24 @@ export async function createSession(input: {
 				materialId = data.id;
 			}
 
-			const { error } = await supabase.rpc("create_session", {
+			const { data: sessionId, error } = await supabase.rpc("create_session", {
 				p_material_id: materialId ?? undefined,
 				p_range: input.range?.trim() || undefined,
 				p_scheduled_at: input.scheduledAt ?? undefined,
 			});
 
-			if (error) {
+			if (error || !sessionId) {
 				return {
 					ok: false,
-					error: `No se pudo crear la sesión: ${error.message}`,
+					error: `No se pudo crear la sesión: ${error?.message ?? ""}`,
 				};
 			}
+
+			revalidatePath("/");
+			if (materialId) revalidatePath(`/materials/${materialId}`);
+			return { ok: true, sessionId };
 		},
-		revalidate: async () =>
-			input.materialId ? [`/materials/${input.materialId}`, "/"] : ["/"],
-	});
+	}) as Promise<ActionResult | { ok: true; sessionId: string }>;
 }
 
 /** Actualiza la fecha programada de una sesión (o la limpia si es null). */

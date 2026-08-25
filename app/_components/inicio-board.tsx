@@ -168,8 +168,8 @@ export function InicioBoard({
 				return;
 			}
 
-			if (data.mode === "now") {
-				router.push("/room");
+			if (data.mode === "now" && "sessionId" in result && result.sessionId) {
+				router.push(`/materials/sessions/${result.sessionId}/room`);
 			} else {
 				toast.success("Sesión creada");
 				form.reset();
