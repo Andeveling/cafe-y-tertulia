@@ -178,6 +178,55 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			convocatorias: {
+				Row: {
+					created_at: string;
+					from_id: string;
+					id: string;
+					session_id: string;
+					status: Database["public"]["Enums"]["convocatoria_status"];
+					to_id: string;
+				};
+				Insert: {
+					created_at?: string;
+					from_id: string;
+					id?: string;
+					session_id: string;
+					status?: Database["public"]["Enums"]["convocatoria_status"];
+					to_id: string;
+				};
+				Update: {
+					created_at?: string;
+					from_id?: string;
+					id?: string;
+					session_id?: string;
+					status?: Database["public"]["Enums"]["convocatoria_status"];
+					to_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "convocatorias_from_id_fkey";
+						columns: ["from_id"];
+						isOneToOne: false;
+						referencedRelation: "members";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "convocatorias_session_id_fkey";
+						columns: ["session_id"];
+						isOneToOne: false;
+						referencedRelation: "sessions";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "convocatorias_to_id_fkey";
+						columns: ["to_id"];
+						isOneToOne: false;
+						referencedRelation: "members";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			counts: {
 				Row: {
 					event: Database["public"]["Enums"]["count_event"];
@@ -891,63 +940,9 @@ export type Database = {
 			};
 		};
 		Views: {
-			pg_all_foreign_keys: {
-				Row: {
-					fk_columns: unknown[] | null;
-					fk_constraint_name: unknown;
-					fk_schema_name: unknown;
-					fk_table_name: unknown;
-					fk_table_oid: unknown;
-					is_deferrable: boolean | null;
-					is_deferred: boolean | null;
-					match_type: string | null;
-					on_delete: string | null;
-					on_update: string | null;
-					pk_columns: unknown[] | null;
-					pk_constraint_name: unknown;
-					pk_index_name: unknown;
-					pk_schema_name: unknown;
-					pk_table_name: unknown;
-					pk_table_oid: unknown;
-				};
-				Relationships: [];
-			};
-			tap_funky: {
-				Row: {
-					args: string | null;
-					is_definer: boolean | null;
-					is_strict: boolean | null;
-					is_visible: boolean | null;
-					kind: unknown;
-					langoid: unknown;
-					name: unknown;
-					oid: unknown;
-					owner: unknown;
-					returns: string | null;
-					returns_set: boolean | null;
-					schema: unknown;
-					volatility: string | null;
-				};
-				Relationships: [];
-			};
+			[_ in never]: never;
 		};
 		Functions: {
-			_cleanup: { Args: never; Returns: boolean };
-			_contract_on: { Args: { "": string }; Returns: unknown };
-			_currtest: { Args: never; Returns: number };
-			_db_privs: { Args: never; Returns: unknown[] };
-			_extensions: { Args: never; Returns: unknown[] };
-			_get: { Args: { "": string }; Returns: number };
-			_get_latest: { Args: { "": string }; Returns: number[] };
-			_get_note: { Args: { "": string }; Returns: string };
-			_is_verbose: { Args: never; Returns: boolean };
-			_prokind: { Args: { p_oid: unknown }; Returns: unknown };
-			_query: { Args: { "": string }; Returns: string };
-			_refine_vol: { Args: { "": string }; Returns: string };
-			_retval: { Args: { "": string }; Returns: string };
-			_table_privs: { Args: never; Returns: unknown[] };
-			_temptypes: { Args: { "": string }; Returns: string };
-			_todo: { Args: never; Returns: string };
 			advance_intervention: {
 				Args: { target_session_id: string };
 				Returns: Database["public"]["Enums"]["assignment_state"];
@@ -992,45 +987,13 @@ export type Database = {
 				Returns: Json;
 			};
 			close_take: { Args: { target_take_id: string }; Returns: undefined };
-			col_is_null:
-				| {
-						Args: {
-							column_name: unknown;
-							description?: string;
-							schema_name: unknown;
-							table_name: unknown;
-						};
-						Returns: string;
-				  }
-				| {
-						Args: {
-							column_name: unknown;
-							description?: string;
-							table_name: unknown;
-						};
-						Returns: string;
-				  };
-			col_not_null:
-				| {
-						Args: {
-							column_name: unknown;
-							description?: string;
-							schema_name: unknown;
-							table_name: unknown;
-						};
-						Returns: string;
-				  }
-				| {
-						Args: {
-							column_name: unknown;
-							description?: string;
-							table_name: unknown;
-						};
-						Returns: string;
-				  };
 			compute_member_level: {
 				Args: { target_member_id: string };
 				Returns: Json;
+			};
+			convocar: {
+				Args: { p_session_id: string; p_to_id: string };
+				Returns: string;
 			};
 			correct_assignment_notes: {
 				Args: { new_notes: string; target_assignment_id: string };
@@ -1049,23 +1012,6 @@ export type Database = {
 				Returns: string;
 			};
 			detach_material: { Args: { p_session_id: string }; Returns: undefined };
-			diag:
-				| {
-						Args: { msg: unknown };
-						Returns: {
-							error: true;
-						} & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved";
-				  }
-				| {
-						Args: { msg: string };
-						Returns: {
-							error: true;
-						} & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved";
-				  };
-			diag_test_name: { Args: { "": string }; Returns: string };
-			do_tap:
-				| { Args: never; Returns: string[] }
-				| { Args: { "": string }; Returns: string[] };
 			draw_lobby_summary: {
 				Args: { target_session_id: string };
 				Returns: Json;
@@ -1087,31 +1033,20 @@ export type Database = {
 				};
 			};
 			execute_draw: { Args: { target_session_id: string }; Returns: string };
-			fail:
-				| { Args: never; Returns: string }
-				| { Args: { "": string }; Returns: string };
-			findfuncs: { Args: { "": string }; Returns: string[] };
-			finish: { Args: { exception_on_failure?: boolean }; Returns: string[] };
 			finish_trivia_round: {
 				Args: { target_round_id: string };
 				Returns: undefined;
 			};
-			format_type_string: { Args: { "": string }; Returns: string };
 			get_session_history: {
 				Args: { target_session_id: string };
 				Returns: Json;
 			};
-			has_unique: { Args: { "": string }; Returns: string };
-			in_todo: { Args: never; Returns: boolean };
-			is_empty: { Args: { "": string }; Returns: string };
 			is_member: { Args: never; Returns: boolean };
 			is_session_archived: {
 				Args: { target_session_id: string };
 				Returns: boolean;
 			};
 			is_session_moderator: { Args: { session_id: string }; Returns: boolean };
-			isnt_empty: { Args: { "": string }; Returns: string };
-			lives_ok: { Args: { "": string }; Returns: string };
 			lobby_assignments: { Args: { target_session_id: string }; Returns: Json };
 			lock_trivia_question: {
 				Args: { target_round_id: string };
@@ -1121,23 +1056,18 @@ export type Database = {
 				Args: { target_round_id: string };
 				Returns: undefined;
 			};
-			no_plan: { Args: never; Returns: boolean[] };
-			num_failed: { Args: never; Returns: number };
 			open_session_rating: {
 				Args: { target_session_id: string };
 				Returns: undefined;
 			};
-			os_name: { Args: never; Returns: string };
-			pass:
-				| { Args: never; Returns: string }
-				| { Args: { "": string }; Returns: string };
-			pg_version: { Args: never; Returns: string };
-			pg_version_num: { Args: never; Returns: number };
-			pgtap_version: { Args: never; Returns: number };
 			rating_progress: { Args: { target_session_id: string }; Returns: Json };
 			refresh_material_rating: {
 				Args: { p_material_id: string };
 				Returns: undefined;
+			};
+			responder_convocatoria: {
+				Args: { p_accept: boolean; p_id: string };
+				Returns: string;
 			};
 			reveal_next_assignment: {
 				Args: { target_session_id: string };
@@ -1159,9 +1089,6 @@ export type Database = {
 				};
 			};
 			room_snapshot: { Args: { target_session_id: string }; Returns: Json };
-			runtests:
-				| { Args: never; Returns: string[] }
-				| { Args: { "": string }; Returns: string[] };
 			save_assignment_notes: {
 				Args: { new_notes: string; target_assignment_id: string };
 				Returns: undefined;
@@ -1178,9 +1105,6 @@ export type Database = {
 				};
 				Returns: undefined;
 			};
-			skip:
-				| { Args: { "": string }; Returns: string }
-				| { Args: { how_many: number; why: string }; Returns: string };
 			stage_snapshot: { Args: { target_session_id: string }; Returns: Json };
 			start_take: {
 				Args: { p_prompt: string; target_session_id: string };
@@ -1190,16 +1114,6 @@ export type Database = {
 				Args: { target_session_id: string; target_trivia_id: string };
 				Returns: string;
 			};
-			throws_ok: { Args: { "": string }; Returns: string };
-			todo:
-				| { Args: { how_many: number }; Returns: boolean[] }
-				| { Args: { how_many: number; why: string }; Returns: boolean[] }
-				| { Args: { why: string }; Returns: boolean[] }
-				| { Args: { how_many: number; why: string }; Returns: boolean[] };
-			todo_end: { Args: never; Returns: boolean[] };
-			todo_start:
-				| { Args: never; Returns: boolean[] }
-				| { Args: { "": string }; Returns: boolean[] };
 			trivia_round_snapshot: {
 				Args: { target_round_id: string };
 				Returns: Json;
@@ -1220,6 +1134,7 @@ export type Database = {
 				| "complement"
 				| "complete";
 			badge_kind: "individual" | "collective";
+			convocatoria_status: "pending" | "accepted" | "dismissed";
 			count_event:
 				| "question_created"
 				| "session_attended"
@@ -1250,9 +1165,7 @@ export type Database = {
 			trivia_round_status: "live" | "board";
 		};
 		CompositeTypes: {
-			_time_trial_type: {
-				a_time: number | null;
-			};
+			[_ in never]: never;
 		};
 	};
 };
@@ -1391,6 +1304,7 @@ export const Constants = {
 				"complete",
 			],
 			badge_kind: ["individual", "collective"],
+			convocatoria_status: ["pending", "accepted", "dismissed"],
 			count_event: [
 				"question_created",
 				"session_attended",
