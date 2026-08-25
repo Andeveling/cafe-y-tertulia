@@ -10,6 +10,7 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import type { MaterialKind } from "@/app/materials/_lib/constants";
+import { convocarAction } from "@/app/materials/_lib/convocatoria-actions";
 import { createSession } from "@/app/materials/_lib/materials-actions";
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -39,12 +40,12 @@ import { Separator } from "@/components/ui/separator";
 import { type RosterMember, useClubPresence } from "@/hooks/use-club-presence";
 
 // ── Types ────────────────────────────────────────────────────────────────────
-
 export type BoardSession = {
 	id: string;
 	status: "lobby" | "in_progress" | "preparation";
 	scheduled_at: string | null;
 	range: string | null;
+	moderator_id: string | null;
 	moderator_name: string | null;
 	material_title: string | null;
 };
@@ -124,10 +125,12 @@ export function InicioBoard({
 	const router = useRouter();
 	const [pending, startTransition] = useTransition();
 	const [mode, setMode] = useState<"now" | "scheduled">("now");
-
 	const openSessions = sessions.filter(
 		(s) => s.status === "lobby" || s.status === "in_progress",
 	);
+	const convokeSessionId = openSessions.find(
+		(s) => s.moderator_id === userId,
+	)?.id;
 	const scheduledSessions = sessions.filter((s) => s.status === "preparation");
 
 	const form = useForm<CreateValues>({
@@ -203,20 +206,41 @@ export function InicioBoard({
 				className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
 			>
 				<span>En la app</span>
-				<AvatarGroup>
+				<ul className="flex flex-wrap items-center gap-3">
 					{roster.map((m) => (
-						<Avatar
-							key={m.id}
-							size="sm"
-							className={m.online ? undefined : "opacity-40"}
-							title={m.display_name || "Miembro"}
-						>
-							<AvatarFallback>
-								{(m.display_name || "?").slice(0, 1).toUpperCase()}
-							</AvatarFallback>
-						</Avatar>
+						<li key={m.id} className="flex items-center gap-1">
+							<Avatar
+								size="sm"
+								className={m.online ? undefined : "opacity-40"}
+								title={m.display_name || "Miembro"}
+							>
+								<AvatarFallback>
+									{(m.display_name || "?").slice(0, 1).toUpperCase()}
+								</AvatarFallback>
+							</Avatar>
+							{convokeSessionId && m.id !== userId && (
+								<Button
+									type="button"
+									variant="ghost"
+									size="xs"
+									disabled={pending}
+									onClick={() => {
+										startTransition(async () => {
+											const result = await convocarAction(
+												convokeSessionId,
+												m.id,
+											);
+											if ("error" in result) toast.error(result.error);
+											else toast.success("Convocatoria enviada");
+										});
+									}}
+								>
+									Llamar
+								</Button>
+							)}
+						</li>
 					))}
-				</AvatarGroup>
+				</ul>
 			</div>
 
 			{/* Salas abiertas */}

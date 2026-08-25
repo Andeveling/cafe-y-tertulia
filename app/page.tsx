@@ -20,7 +20,7 @@ export default async function HomePage() {
 	const { data: rawSessions } = await supabase
 		.from("sessions")
 		.select(
-			`id, status, scheduled_at, range,
+			`id, status, scheduled_at, range, moderator_id,
 			 moderator:members!sessions_moderator_id_fkey(display_name),
 			 material:materials(title)`,
 		)
@@ -33,6 +33,7 @@ export default async function HomePage() {
 			status: s.status as BoardSession["status"],
 			scheduled_at: s.scheduled_at,
 			range: s.range,
+			moderator_id: s.moderator_id,
 			moderator_name:
 				(s.moderator as { display_name: string | null } | null)?.display_name ??
 				null,

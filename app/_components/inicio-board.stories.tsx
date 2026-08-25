@@ -32,6 +32,7 @@ export const Empty: Story = {
 		materials,
 		displayName: "Ana",
 		rosterMembers,
+		userId: "u1",
 	},
 };
 
@@ -43,6 +44,7 @@ export const WithScheduled: Story = {
 				status: "preparation",
 				scheduled_at: "2026-08-29T19:00:00Z",
 				range: null,
+				moderator_id: "u2",
 				moderator_name: "Luis",
 				material_title: "El Quijote",
 			},
@@ -51,6 +53,7 @@ export const WithScheduled: Story = {
 				status: "preparation",
 				scheduled_at: null,
 				range: "Café del viernes",
+				moderator_id: "u1",
 				moderator_name: "Ana",
 				material_title: null,
 			},
@@ -58,6 +61,7 @@ export const WithScheduled: Story = {
 		materials,
 		displayName: "Ana",
 		rosterMembers,
+		userId: "u1",
 	},
 };
 
@@ -69,6 +73,7 @@ export const WithOpenSala: Story = {
 				status: "lobby",
 				scheduled_at: null,
 				range: null,
+				moderator_id: "u1",
 				moderator_name: "Ana",
 				material_title: "El Quijote",
 			},
@@ -77,6 +82,7 @@ export const WithOpenSala: Story = {
 				status: "in_progress",
 				scheduled_at: null,
 				range: "Cap. 1–5",
+				moderator_id: "u2",
 				moderator_name: "Luis",
 				material_title: null,
 			},
@@ -85,6 +91,7 @@ export const WithOpenSala: Story = {
 				status: "preparation",
 				scheduled_at: "2026-08-30T18:00:00Z",
 				range: null,
+				moderator_id: "u3",
 				moderator_name: "María",
 				material_title: "Cien años de soledad",
 			},
@@ -92,5 +99,6 @@ export const WithOpenSala: Story = {
 		materials,
 		displayName: "Ana",
 		rosterMembers,
+		userId: "u1",
 	},
 };

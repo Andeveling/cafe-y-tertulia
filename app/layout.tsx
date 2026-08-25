@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import Script from "next/script";
 import "./globals.css";
+import { ConvocatoriaInbox } from "@/app/_components/convocatoria-inbox";
 import { getMemberLevel } from "@/app/profile/_lib/gamification-actions";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -43,12 +44,14 @@ export default async function RootLayout({
 
 	let navUser: { name: string; email: string; avatar?: string | null } | null =
 		null;
+	let memberStatus: string | null = null;
 	if (user) {
 		const { data: member } = await supabase
 			.from("members")
-			.select("display_name")
+			.select("display_name, status")
 			.eq("id", user.id)
 			.maybeSingle();
+		memberStatus = member?.status ?? null;
 
 		const avatar =
 			(user.user_metadata?.avatar_url as string | undefined) ??
@@ -112,6 +115,9 @@ export default async function RootLayout({
 						</SidebarInset>
 					</SidebarProvider>
 					<Toaster />
+					{user && memberStatus === "active" && (
+						<ConvocatoriaInbox userId={user.id} />
+					)}
 				</ThemeProvider>
 			</body>
 		</html>
