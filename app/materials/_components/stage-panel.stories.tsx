@@ -21,6 +21,7 @@ const active: RoomDebateSnapshot = {
 	authorName: "Luis",
 	revealOrder: 1,
 	myNotes: null,
+	phaseStartedAt: "2026-08-25T16:00:00.000Z",
 	remainingHidden: 2,
 };
 

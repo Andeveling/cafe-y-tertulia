@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { EXTEND_SECONDS } from "@/app/materials/_lib/intervention";
+import {
+	EXTEND_SECONDS,
+	elapsedSeconds,
+} from "@/app/materials/_lib/intervention";
 import { Button } from "@/components/ui/button";
 
 function fmt(total: number) {
@@ -11,43 +14,44 @@ function fmt(total: number) {
 }
 
 type Props = {
+	/** Ancla compartida (ISO). Todos los clientes leen el mismo origen. */
+	startedAt: string;
 	suggestedSeconds: number;
 	showExtend: boolean;
 	showPause?: boolean;
 };
 
-/** Remount con key al cambiar de fase (reinicia reloj). */
 export function StageTimer({
+	startedAt,
 	suggestedSeconds,
 	showExtend,
 	showPause = false,
 }: Props) {
-	const [anchor] = useState(() => Date.now());
+	const startedMs = Date.parse(startedAt);
 	const [extra, setExtra] = useState(0);
-	const [elapsed, setElapsed] = useState(0);
+	const [elapsed, setElapsed] = useState(() =>
+		elapsedSeconds(startedMs, Date.now()),
+	);
 	const [paused, setPaused] = useState(false);
-	const [pauseOffset, setPauseOffset] = useState(0);
+	const [pauseMs, setPauseMs] = useState(0);
 
 	useEffect(() => {
 		if (paused) return;
 		const id = setInterval(() => {
-			setElapsed(Math.floor((Date.now() - anchor - pauseOffset) / 1000));
+			setElapsed(elapsedSeconds(startedMs + pauseMs, Date.now()));
 		}, 500);
 		return () => clearInterval(id);
-	}, [anchor, paused, pauseOffset]);
+	}, [startedMs, paused, pauseMs]);
 
 	function handlePause() {
 		if (!paused) {
 			setPaused(true);
-		} else {
-			// Al reanudar, compensamos el tiempo pausado.
-			const pausedAt = Date.now();
-			setPaused(false);
-			// Usamos un truco: el offset se ajusta en el próximo tick.
-			setPauseOffset(
-				(prev) => prev + (pausedAt - anchor - prev - elapsed * 1000),
-			);
+			return;
 		}
+		// ponytail: pause/extend stay local; sync if the club actually uses them
+		const frozen = elapsed;
+		setPaused(false);
+		setPauseMs(Date.now() - startedMs - frozen * 1000);
 	}
 
 	const suggested = suggestedSeconds + extra;

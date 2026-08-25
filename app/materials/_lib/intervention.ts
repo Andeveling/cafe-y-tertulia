@@ -27,3 +27,9 @@ export const SUGGESTED_SECONDS: Partial<Record<AssignmentState, number>> = {
 };
 
 export const EXTEND_SECONDS = 60;
+
+/** Segundos transcurridos desde un ancla compartida (ISO o epoch ms). */
+export function elapsedSeconds(startedAtMs: number, nowMs: number): number {
+	if (!Number.isFinite(startedAtMs) || !Number.isFinite(nowMs)) return 0;
+	return Math.max(0, Math.floor((nowMs - startedAtMs) / 1000));
+}

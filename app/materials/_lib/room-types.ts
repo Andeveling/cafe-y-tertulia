@@ -75,6 +75,7 @@ export type RoomDebateSnapshot =
 			authorName: string;
 			revealOrder: number;
 			myNotes: string | null;
+			phaseStartedAt: string;
 			remainingHidden: number;
 	  }
 	| {

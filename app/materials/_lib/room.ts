@@ -111,6 +111,7 @@ export async function getRoomSnapshot(
 				revealOrder: asNumber(debateRow.revealOrder),
 				myNotes:
 					typeof debateRow.myNotes === "string" ? debateRow.myNotes : null,
+				phaseStartedAt: asString(debateRow.phaseStartedAt),
 				remainingHidden: asNumber(debateRow.remainingHidden),
 			};
 		} else if (mode === "waiting_reveal") {

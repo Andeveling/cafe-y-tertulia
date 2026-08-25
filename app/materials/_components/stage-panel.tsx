@@ -110,6 +110,7 @@ export function StagePanel({ debate, sessionId, userId, isModerator }: Props) {
 					state === "complement") && (
 					<StageTimer
 						key={`${debate.assignmentId}-${state}`}
+						startedAt={debate.phaseStartedAt}
 						suggestedSeconds={suggested}
 						showExtend={isModerator}
 						showPause={isModerator}
