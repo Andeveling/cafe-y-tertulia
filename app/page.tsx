@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
+import type { RosterMember } from "@/hooks/use-club-presence";
 import { getCurrentMember } from "@/lib/current-member";
-import { createClient } from "@/lib/supabase/server";
 import { type BoardSession, InicioBoard } from "./_components/inicio-board";
 
 export const metadata = { title: "Inicio · Café y Tertulia" };
@@ -63,11 +63,24 @@ export default async function HomePage() {
 		title: m.title,
 	}));
 
+	// Fetch active members for the presence roster
+	const { data: rawMembers } = await supabase
+		.from("members")
+		.select("id, display_name")
+		.eq("status", "active");
+
+	const rosterMembers: RosterMember[] = (rawMembers ?? []).map((m) => ({
+		id: m.id,
+		display_name: m.display_name,
+	}));
+
 	return (
 		<InicioBoard
 			sessions={sessions}
 			materials={materials}
 			displayName={member.display_name || "Miembro"}
+			rosterMembers={rosterMembers}
+			userId={member.id}
 		/>
 	);
 }
