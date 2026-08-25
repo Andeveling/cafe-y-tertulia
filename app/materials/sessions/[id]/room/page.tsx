@@ -1,5 +1,7 @@
 import { notFound, redirect } from "next/navigation";
+import { RoomClosedView } from "@/app/materials/_components/room-closed-view";
 import { RoomPanel } from "@/app/materials/_components/room-panel";
+import { getRatingProgress } from "@/app/materials/_lib/rating";
 import { getRoomSnapshot } from "@/app/materials/_lib/room";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
@@ -21,8 +23,18 @@ export default async function RoomPage({
 	const snapshot = await getRoomSnapshot(supabase, sessionId);
 	if (!snapshot) notFound();
 
-	// La Sala vive en lobby (preguntas/presentes/sorteo) e in_progress (debate).
+	// La Sala vive en lobby (preguntas/presentes/sorteo) e in_progress (debate
+	// y cierre); cualquier otro estado técnico (preparation, closed, archived)
+	// no tiene Sala activa.
 	if (snapshot.status !== "lobby" && snapshot.status !== "in_progress") {
+		if (snapshot.status === "closed" || snapshot.status === "archived") {
+			return (
+				<RoomClosedView
+					materialId={snapshot.materialId}
+					status={snapshot.status}
+				/>
+			);
+		}
 		return (
 			<main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-6">
 				<p className="text-sm text-muted-foreground">
@@ -31,6 +43,12 @@ export default async function RoomPage({
 			</main>
 		);
 	}
+
+	// En Cierre la Sala también muestra la votación del rating.
+	const rating =
+		snapshot.roomStage === "cierre"
+			? await getRatingProgress(supabase, sessionId)
+			: null;
 
 	return (
 		<main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-6">
@@ -47,6 +65,7 @@ export default async function RoomPage({
 				snapshot={snapshot}
 				userId={user.id}
 				isModerator={snapshot.moderatorId === user.id}
+				rating={rating}
 			/>
 		</main>
 	);

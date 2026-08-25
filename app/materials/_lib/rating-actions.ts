@@ -7,14 +7,13 @@ import {
 } from "@/lib/server-action";
 
 /**
- * Rutas que muestra el rating: la propia, el escenario y la página del material.
+ * Rutas que muestran el rating: la Sala (etapa Cierre) y la página del material.
  * El material se deriva de la Sesión (nunca del formulario).
  */
 function ratingRevalidate(sessionId: string) {
 	return async ({ supabase }: ActionContext): Promise<string[]> => {
 		const paths = [
-			`/materials/sessions/${sessionId}/rating`,
-			`/materials/sessions/${sessionId}/stage`,
+			`/materials/sessions/${sessionId}/room`,
 			`/materials/sessions/${sessionId}`,
 		];
 		const { data } = await supabase

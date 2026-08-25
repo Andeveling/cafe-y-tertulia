@@ -19,3 +19,11 @@ export const Presence: Story = {
 export const Draw: Story = {
 	args: { current: "draw" },
 };
+
+export const Debate: Story = {
+	args: { current: "debate" },
+};
+
+export const Cierre: Story = {
+	args: { current: "cierre" },
+};

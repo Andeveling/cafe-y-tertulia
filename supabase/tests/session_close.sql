@@ -30,7 +30,10 @@ insert into public.sessions (id, material_id, range, status, moderator_id, sched
 	('c1000000-0000-0000-0000-000000000003', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '3', 'in_progress', '11111111-1111-1111-1111-111111111111', null), -- take abierto
 	('c1000000-0000-0000-0000-000000000004', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '4', 'in_progress', '11111111-1111-1111-1111-111111111111', null), -- draw no revelado
 	('c1000000-0000-0000-0000-000000000005', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '5', 'in_progress', '11111111-1111-1111-1111-111111111111', null), -- rating abierto
-	('c1000000-0000-0000-0000-000000000006', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '6', 'closed',    '11111111-1111-1111-1111-111111111111', '2026-08-01 10:00:00+00'),
+	-- La sesión 6 nace in_progress: los guards congelan a las tablas hijas en
+	-- closed, así que sus fixtures (draw/questions/assignment) se insertan
+	-- antes de cerrarla más abajo.
+	('c1000000-0000-0000-0000-000000000006', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '6', 'in_progress', '11111111-1111-1111-1111-111111111111', '2026-08-01 10:00:00+00'),
 	('c1000000-0000-0000-0000-000000000007', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '7', 'archived',  '11111111-1111-1111-1111-111111111111', null);
 
 -- Fixtures de minijuegos/draw para las sesiones que bloquean el cierre
@@ -50,6 +53,9 @@ insert into public.questions (id, session_id, material_id, author_id, text) valu
 	('e1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000006', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', '¿Pregunta?');
 insert into public.assignments (id, session_id, question_id, assignee_id, reveal_order, state, notes, draw_id) values
 	('f1000000-0000-0000-0000-000000000001', 'c1000000-0000-0000-0000-000000000006', 'e1000000-0000-0000-0000-000000000001', '22222222-2222-2222-2222-222222222222', 1, 'complete', 'typo', 'd1000000-0000-0000-0000-000000000005');
+
+-- Con las fixtures hijas en su lugar, cerramos la sesión 6 (postgres pasa el guard).
+update public.sessions set status = 'closed' where id = 'c1000000-0000-0000-0000-000000000006';
 
 -- Rating abierto + votos individuales para la sesión 5 (material A)
 insert into public.session_participants (session_id, member_id) values

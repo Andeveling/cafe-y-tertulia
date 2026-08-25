@@ -7,6 +7,7 @@ import type {
 	DrawStatus,
 	ParticipantRole,
 	RoomAssignment,
+	RoomCierreSnapshot,
 	RoomDebateSnapshot,
 	RoomDraw,
 	RoomParticipant,
@@ -137,5 +138,16 @@ export async function getRoomSnapshot(
 		draw,
 		assignments,
 		debate,
+		cierre: parseCierre(row.cierre),
+	};
+}
+
+/** Pendientes del checklist de Cierre — null cuando roomStage !== 'cierre'. */
+function parseCierre(row: Json | undefined | null): RoomCierreSnapshot | null {
+	if (!row || typeof row !== "object" || Array.isArray(row)) return null;
+	const c = row as Record<string, Json | undefined>;
+	return {
+		openTrivia: asNumber(c.open_trivia),
+		openTakes: asNumber(c.open_takes),
 	};
 }

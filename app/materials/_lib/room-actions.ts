@@ -183,3 +183,22 @@ export async function saveNotes(
 		revalidate: async () => [roomPath(sessionId)],
 	});
 }
+
+// ─── Cierre actions ─────────────────────────────────────────
+
+/**
+ * Cierre consolidado de la Sesión (RPC close_session): congela el rating,
+ * valida pendientes y pasa la Sesión a cerrada. Solo Moderador.
+ */
+export async function closeSession(sessionId: string): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			const { error } = await supabase.rpc("close_session", {
+				target_session_id: sessionId,
+			});
+			if (error) return { ok: false, error: error.message };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}

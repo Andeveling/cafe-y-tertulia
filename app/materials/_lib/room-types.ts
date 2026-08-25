@@ -4,9 +4,13 @@
  */
 import type { Database } from "@/lib/supabase/database.types";
 
-// TODO: quitar el cast cuando se regeneren los tipos de DB tras la migración
-// 20260823000000_debate_en_sala.sql (agrega 'debate' a room_stage).
-export type RoomStage = Database["public"]["Enums"]["room_stage"] | "debate";
+// TODO: quitar el cast cuando se regeneren los tipos de DB tras las migraciones
+// 20260823000000_debate_en_sala.sql ('debate') y
+// 20260825000000_cierre_en_sala.sql ('cierre') sobre room_stage.
+export type RoomStage =
+	| Database["public"]["Enums"]["room_stage"]
+	| "debate"
+	| "cierre";
 export type ParticipantRole = Database["public"]["Enums"]["participant_role"];
 export type DrawStatus = Database["public"]["Enums"]["draw_status"];
 export type AssignmentState = Database["public"]["Enums"]["assignment_state"];
@@ -16,6 +20,7 @@ export const ROOM_STAGE_ORDER: RoomStage[] = [
 	"presence",
 	"draw",
 	"debate",
+	"cierre",
 ];
 
 export const ROOM_STAGE_LABELS: Record<RoomStage, string> = {
@@ -23,6 +28,7 @@ export const ROOM_STAGE_LABELS: Record<RoomStage, string> = {
 	presence: "Presentes",
 	draw: "Sorteo",
 	debate: "Debate",
+	cierre: "Cierre",
 };
 
 export type RoomParticipant = {
@@ -94,6 +100,12 @@ export type RoomAssignment = {
 	questionVisible: boolean;
 };
 
+/** Snapshot del cierre — solo presente cuando roomStage = 'cierre'. */
+export type RoomCierreSnapshot = {
+	openTrivia: number;
+	openTakes: number;
+};
+
 export type RoomSnapshot = {
 	sessionId: string;
 	materialId: string;
@@ -108,4 +120,6 @@ export type RoomSnapshot = {
 	assignments: RoomAssignment[];
 	/** Datos del debate — null cuando roomStage !== 'debate'. */
 	debate: RoomDebateSnapshot | null;
+	/** Pendientes del checklist — null cuando roomStage !== 'cierre'. */
+	cierre: RoomCierreSnapshot | null;
 };

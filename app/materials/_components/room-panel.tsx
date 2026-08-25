@@ -2,9 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
+import { CierreStage } from "@/app/materials/_components/cierre-stage";
 import { StageBar } from "@/app/materials/_components/stage-bar";
 import { StagePanel } from "@/app/materials/_components/stage-panel";
 import { useRoomRealtime } from "@/app/materials/_hooks/use-room-realtime";
+import type { RatingProgress } from "@/app/materials/_lib/rating";
 import {
 	advanceRoomStage,
 	confirmPresence,
@@ -50,9 +52,11 @@ type Props = {
 	snapshot: RoomSnapshot;
 	userId: string;
 	isModerator: boolean;
+	/** Progreso del rating — presente cuando la Sala está en Cierre. */
+	rating: RatingProgress | null;
 };
 
-export function RoomPanel({ snapshot, userId, isModerator }: Props) {
+export function RoomPanel({ snapshot, userId, isModerator, rating }: Props) {
 	useRoomRealtime(snapshot.sessionId);
 
 	return (
@@ -63,6 +67,7 @@ export function RoomPanel({ snapshot, userId, isModerator }: Props) {
 				snapshot={snapshot}
 				userId={userId}
 				isModerator={isModerator}
+				rating={rating}
 			/>
 
 			{isModerator && <ModeratorNav snapshot={snapshot} />}
@@ -76,10 +81,12 @@ function StageContent({
 	snapshot,
 	userId,
 	isModerator,
+	rating,
 }: {
 	snapshot: RoomSnapshot;
 	userId: string;
 	isModerator: boolean;
+	rating: RatingProgress | null;
 }) {
 	switch (snapshot.roomStage) {
 		case "questions":
@@ -120,6 +127,16 @@ function StageContent({
 					isModerator={isModerator}
 				/>
 			);
+		case "cierre":
+			if (!snapshot.cierre) return null;
+			return (
+				<CierreStage
+					sessionId={snapshot.sessionId}
+					rating={rating}
+					cierre={snapshot.cierre}
+					isModerator={isModerator}
+				/>
+			);
 	}
 }
 
@@ -132,13 +149,22 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 
 	if (!nextStage) return null;
 
-	// Calcular quién no está Listo (para "Comenzar de todos modos").
+	// Adelantar con faltantes pide confirmación explícita que los nombra:
+	// hacia Debate, quiénes no están Listos; hacia Cierre, cuántas
+	// Intervenciones quedan sin completar.
 	const members = snapshot.participants.filter((p) => p.role === "member");
 	const notReady = members.filter(
 		(p) => !snapshot.questions.some((q) => q.authorId === p.memberId),
 	);
-	const advancingToDebate = nextStage === "debate";
-	const showConfirmDialog = advancingToDebate && notReady.length > 0;
+	const remainingInterventions = snapshot.assignments.filter(
+		(a) => a.state !== "complete",
+	).length;
+	const advanceWarning: string[] | null =
+		nextStage === "debate" && notReady.length > 0
+			? notReady.map((p) => p.displayName)
+			: nextStage === "cierre" && remainingInterventions > 0
+				? [`${remainingInterventions} intervención(es) sin completar`]
+				: null;
 
 	function handleAdvance() {
 		start(async () => {
@@ -152,13 +178,13 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 			size="sm"
 			variant="outline"
 			disabled={pending}
-			onClick={showConfirmDialog ? undefined : handleAdvance}
+			onClick={advanceWarning ? undefined : handleAdvance}
 		>
 			Ir a {ROOM_STAGE_LABELS[nextStage!]} →
 		</Button>
 	);
 
-	if (!showConfirmDialog) {
+	if (!advanceWarning) {
 		return <div className="flex justify-end">{button}</div>;
 	}
 
@@ -168,15 +194,15 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 				<DialogTrigger render={button} />
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Comenzar de todos modos</DialogTitle>
-						<DialogDescription>
-							Estos participantes no están Listos (sin pregunta registrada):
-						</DialogDescription>
+						<DialogTitle>
+							Ir a {ROOM_STAGE_LABELS[nextStage!]} de todos modos
+						</DialogTitle>
+						<DialogDescription>Pendientes:</DialogDescription>
 					</DialogHeader>
 					<ul className="flex flex-col gap-1 py-2">
-						{notReady.map((p) => (
-							<li key={p.memberId} className="text-sm">
-								{p.displayName}
+						{advanceWarning.map((label) => (
+							<li key={label} className="text-sm">
+								{label}
 							</li>
 						))}
 					</ul>
@@ -189,7 +215,7 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 								<Button size="sm" disabled={pending} onClick={handleAdvance} />
 							}
 						>
-							Comenzar de todos modos
+							Avanzar de todos modos
 						</DialogClose>
 					</DialogFooter>
 				</DialogContent>

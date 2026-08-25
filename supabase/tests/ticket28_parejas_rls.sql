@@ -154,9 +154,12 @@ select ok(
 --    (Simulamos reseteando el estado a hidden para esta prueba.)
 set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
 
--- Reset: ponemos la assignment de vuelta a hidden
+-- Reset: ponemos la assignment de vuelta a hidden (como postgres: las
+-- asignaciones no son actualizables directamente por authenticated).
+reset role;
 update public.assignments set state = 'hidden'
 where session_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+set local role authenticated;
 
 select ok(
 	(
@@ -186,9 +189,12 @@ select is(
 
 -- 10. Tras revelar, el texto es visible para todos en el RPC.
 set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
--- Revealed state: set assignment to exposition (como si el mod hubiera avanzado)
+-- Revealed state: set assignment to exposition (como si el mod hubiera avanzado;
+-- como postgres: las asignaciones no son actualizables directamente por authenticated)
+reset role;
 update public.assignments set state = 'exposition'
 where session_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+set local role authenticated;
 
 set local request.jwt.claim.sub = '33333333-3333-3333-3333-333333333333';
 
