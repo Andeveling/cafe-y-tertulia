@@ -69,6 +69,14 @@
 	--text-2xl--line-height: 1.25;
 	--text-3xl: 2rem;
 	--text-3xl--line-height: 1.2;
+	/*
+	  Control density — lounge/gamified, not dashboard-compact.
+	  Button/Input read these. Do not bump --spacing-* (that also scales gap/p/m).
+	*/
+	--control-height-xs: 1.75rem;
+	--control-height-sm: 2.25rem;
+	--control-height: 2.5rem;
+	--control-height-lg: 2.75rem;
 }
 
 /*
