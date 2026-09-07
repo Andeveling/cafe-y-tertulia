@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { ArrowRight01Icon, PencilEdit01Icon, TrashIcon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { CierreStage } from "@/app/materials/_components/cierre-stage";
 import { DebateToolsTray } from "@/app/materials/_components/debate-tools-tray";
@@ -11,6 +13,8 @@ import type { RatingProgress } from "@/app/materials/_lib/rating";
 import {
 	advanceRoomStage,
 	confirmPresence,
+	deleteQuestion,
+	editQuestion,
 	executeDraw,
 	saveQuestion,
 	toggleOptOut,
@@ -27,6 +31,7 @@ import {
 	ROOM_STAGE_LABELS,
 	ROOM_STAGE_ORDER,
 } from "@/app/materials/_lib/room-types";
+import { InfoButton } from "@/components/info-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -206,11 +211,17 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 	const button = (
 		<Button
 			size="sm"
-			variant="outline"
+			variant="default"
 			disabled={pending}
 			onClick={advanceWarning ? undefined : handleAdvance}
 		>
-			Ir a {ROOM_STAGE_LABELS[nextStage!]} →
+			Continuar a {ROOM_STAGE_LABELS[nextStage!]}
+			<HugeiconsIcon
+				icon={ArrowRight01Icon}
+				strokeWidth={2}
+				data-icon="inline-end"
+				aria-hidden="true"
+			/>
 		</Button>
 	);
 
@@ -271,9 +282,22 @@ function QuestionsStage({
 }) {
 	const [pending, start] = useTransition();
 	const [text, setText] = useState("");
+	const [editingId, setEditingId] = useState<string | null>(null);
+	const [draft, setDraft] = useState("");
+	const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(
+		null,
+	);
+	const editRef = useRef<HTMLTextAreaElement | null>(null);
 
 	const myQuestions = questions.filter((q) => q.isMine);
 	const myCount = myQuestions.length;
+
+	useEffect(() => {
+		if (editingId && editRef.current) {
+			editRef.current.focus();
+			editRef.current.select();
+		}
+	}, [editingId]);
 
 	function handleSubmit() {
 		const trimmed = text.trim();
@@ -289,14 +313,70 @@ function QuestionsStage({
 		});
 	}
 
+	function handleStartEdit(q: RoomQuestion) {
+		setEditingId(q.id);
+		setDraft(q.text ?? "");
+	}
+
+	function handleCancelEdit() {
+		setEditingId(null);
+		setDraft("");
+	}
+
+	function handleSaveEdit(q: RoomQuestion) {
+		const trimmed = draft.trim();
+		if (!trimmed || trimmed === q.text) {
+			handleCancelEdit();
+			return;
+		}
+		start(async () => {
+			const r = await editQuestion(q.id, sessionId, trimmed);
+			if (!r.ok) {
+				toast.error(r.error);
+			} else {
+				handleCancelEdit();
+				toast.success("Pregunta actualizada");
+			}
+		});
+	}
+
+	function handleConfirmDelete() {
+		const id = confirmingDeleteId;
+		if (!id) return;
+		start(async () => {
+			const r = await deleteQuestion(id, sessionId);
+			if (!r.ok) {
+				toast.error(r.error);
+			} else {
+				toast.success("Pregunta borrada");
+			}
+			setConfirmingDeleteId(null);
+		});
+	}
+
+	function handleEditKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+		if (e.key === "Escape") {
+			e.preventDefault();
+			handleCancelEdit();
+		} else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+			e.preventDefault();
+			// Resolve la pregunta actual del closure del map.
+			const q = myQuestions.find((item) => item.id === editingId);
+			if (q) handleSaveEdit(q);
+		}
+	}
+
 	return (
 		<div className="flex flex-col gap-4">
 			<Card>
 				<CardHeader>
-					<CardTitle>Escribe tu pregunta</CardTitle>
-					<CardDescription>
-						Tu texto es privado. Los demás solo ven que enviaste una.
-					</CardDescription>
+					<div className="flex items-center gap-1.5">
+						<CardTitle>Escribe tu pregunta</CardTitle>
+						<InfoButton
+							title="¿Quién ve tu pregunta?"
+							description="Tu texto es privado. Los demás solo ven que enviaste una."
+						/>
+					</div>
 				</CardHeader>
 				<CardContent className="flex flex-col gap-3">
 					<Textarea
@@ -330,18 +410,118 @@ function QuestionsStage({
 					</CardHeader>
 					<CardContent>
 						<ul className="flex flex-col gap-2">
-							{myQuestions.map((q) => (
-								<li
-									key={q.id}
-									className="rounded-md border border-border p-3 text-sm"
-								>
-									{q.text}
-								</li>
-							))}
+							{myQuestions.map((q) => {
+								const isEditing = editingId === q.id;
+								return (
+									<li
+										key={q.id}
+										className="rounded-md border border-border p-3 text-sm"
+									>
+										{isEditing ? (
+											<div className="flex flex-col gap-2">
+												<Textarea
+													ref={editRef}
+													value={draft}
+													onChange={(e) => setDraft(e.target.value)}
+													onKeyDown={handleEditKeyDown}
+													rows={3}
+													disabled={pending}
+												/>
+												<div className="flex justify-end gap-2">
+													<Button
+														variant="ghost"
+														size="xs"
+														disabled={pending}
+														onClick={handleCancelEdit}
+													>
+														Cancelar
+													</Button>
+													<Button
+														size="xs"
+														disabled={pending || !draft.trim()}
+														onClick={() => handleSaveEdit(q)}
+													>
+														Guardar
+													</Button>
+												</div>
+											</div>
+										) : (
+											<div className="flex items-start justify-between gap-2">
+												<span className="flex-1 whitespace-pre-wrap">
+													{q.text}
+												</span>
+												<div className="flex shrink-0 gap-1">
+													<Button
+														variant="ghost"
+														size="icon-xs"
+														disabled={pending}
+														aria-label="Editar pregunta"
+														onClick={() => handleStartEdit(q)}
+													>
+														<HugeiconsIcon
+															icon={PencilEdit01Icon}
+															strokeWidth={2}
+															aria-hidden="true"
+														/>
+													</Button>
+													<Button
+														variant="ghost"
+														size="icon-xs"
+														disabled={pending}
+														aria-label="Borrar pregunta"
+														className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+														onClick={() => setConfirmingDeleteId(q.id)}
+													>
+														<HugeiconsIcon
+															icon={TrashIcon}
+															strokeWidth={2}
+															aria-hidden="true"
+														/>
+													</Button>
+												</div>
+											</div>
+										)}
+									</li>
+								);
+							})}
 						</ul>
 					</CardContent>
 				</Card>
 			)}
+
+			<Dialog
+				open={confirmingDeleteId !== null}
+				onOpenChange={(open) => {
+					if (!open) setConfirmingDeleteId(null);
+				}}
+			>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>¿Borrar la pregunta?</DialogTitle>
+						<DialogDescription>
+							No se puede deshacer. Si la Sala ya pasó a la etapa de
+							Presentes, el borrado se rechaza.
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<DialogClose
+							render={
+								<Button variant="outline" size="sm" disabled={pending} />
+							}
+						>
+							Cancelar
+						</DialogClose>
+						<Button
+							variant="destructive"
+							size="sm"
+							disabled={pending}
+							onClick={handleConfirmDelete}
+						>
+							Borrar
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			<Card>
 				<CardHeader>

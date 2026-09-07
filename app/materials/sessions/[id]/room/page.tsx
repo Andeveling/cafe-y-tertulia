@@ -69,7 +69,7 @@ export default async function RoomPage({
 	}
 
 	return (
-		<main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-6">
+		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-6 md:max-w-4xl md:px-8 md:py-8 lg:max-w-5xl lg:py-10">
 			<header className="flex flex-col gap-2">
 				<div className="flex flex-wrap gap-2">
 					<Badge variant="outline">Sala</Badge>

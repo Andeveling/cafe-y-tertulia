@@ -35,6 +35,74 @@ export async function saveQuestion(
 	});
 }
 
+/**
+ * Edita el texto de una Pregunta propia mientras la Sala esté en
+ * room_stage='questions'. El RLS `questions_update_author` ya filtra por
+ * autor + etapa; el `eq('author_id', user.id)` redundante da un error
+ * legible si la RLS cambió o si la pregunta ya no es del usuario.
+ */
+export async function editQuestion(
+	questionId: string,
+	sessionId: string,
+	text: string,
+): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase, user }) => {
+			const trimmed = text.trim();
+			if (!trimmed) {
+				return { ok: false, error: "La pregunta no puede estar vacía." };
+			}
+
+			const { error, count } = await supabase
+				.from("questions")
+				.update({ text: trimmed }, { count: "exact" })
+				.eq("id", questionId)
+				.eq("author_id", user!.id);
+
+			if (error) return { ok: false, error: error.message };
+			if (!count) {
+				return {
+					ok: false,
+					error:
+						"No se puede editar esta pregunta (puede que ya no sea tuya o la Sala avanzó de etapa).",
+				};
+			}
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
+/**
+ * Borra una Pregunta propia mientras la Sala esté en room_stage='questions'.
+ * Mismo criterio de defensa en profundidad que `editQuestion`.
+ */
+export async function deleteQuestion(
+	questionId: string,
+	sessionId: string,
+): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase, user }) => {
+			const { error, count } = await supabase
+				.from("questions")
+				.delete({ count: "exact" })
+				.eq("id", questionId)
+				.eq("author_id", user!.id);
+
+			if (error) return { ok: false, error: error.message };
+			if (!count) {
+				return {
+					ok: false,
+					error:
+						"No se puede borrar esta pregunta (puede que ya no sea tuya o la Sala avanzó de etapa).",
+				};
+			}
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
 /** Confirma presencia: upsert session_participant como member. */
 export async function confirmPresence(
 	sessionId: string,

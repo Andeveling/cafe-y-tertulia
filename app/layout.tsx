@@ -100,7 +100,7 @@ export default async function RootLayout({
 				>
 					<SidebarProvider defaultOpen={defaultSidebarOpen}>
 						<AppSidebar user={navUser} />
-						<SidebarInset>
+						<SidebarInset className="w-full">
 							<AppHeader level={memberLevel} />
 							<div className="flex flex-1 flex-col">{children}</div>
 						</SidebarInset>

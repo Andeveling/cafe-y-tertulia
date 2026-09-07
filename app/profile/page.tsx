@@ -28,7 +28,7 @@ export default async function ProfilePage({
 	const { badges, recognitions } = await getMemberBadges(member.id);
 
 	return (
-		<div className="mx-auto w-full max-w-xl flex-1 px-4 py-8">
+		<div className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 md:max-w-4xl md:px-8 md:py-10 lg:max-w-5xl">
 			<div className="space-y-2">
 				<h1 className="text-2xl font-semibold tracking-tight">Tu perfil</h1>
 				<p className="text-sm text-muted-foreground">
