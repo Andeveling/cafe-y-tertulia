@@ -75,6 +75,7 @@ export async function getRoomSnapshot(
 	const draw: RoomDraw = {
 		done: asBool(drawRow?.done),
 		status: (drawRow?.status as DrawStatus) ?? null,
+		createdAt: asNullString(drawRow?.created_at),
 	};
 
 	const assignments = asArray<Record<string, Json | undefined>>(
@@ -82,6 +83,8 @@ export async function getRoomSnapshot(
 	).map((a) => ({
 		assignmentId: asString(a.assignment_id),
 		questionId: asString(a.question_id),
+		authorId: asString(a.author_id),
+		assigneeId: asString(a.assignee_id),
 		authorName: asString(a.author_name),
 		assigneeName: asString(a.assignee_name),
 		state: (a.state as AssignmentState) ?? "hidden",

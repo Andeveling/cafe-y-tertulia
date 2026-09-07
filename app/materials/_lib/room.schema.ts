@@ -63,17 +63,21 @@ const DrawSchema = z
 	.object({
 		done: jBool,
 		status: jNullString,
+		created_at: jNullString,
 	})
 	.transform((r) => ({
 		done: r.done,
 		status: r.status as string | null,
+		createdAt: r.created_at,
 	}))
-	.catch({ done: false, status: null });
+	.catch({ done: false, status: null, createdAt: null });
 
 const AssignmentSchema = z
 	.object({
 		assignment_id: jString,
 		question_id: jString,
+		author_id: jString,
+		assignee_id: jString,
 		author_name: jString,
 		assignee_name: jString,
 		state: jString,
@@ -84,6 +88,8 @@ const AssignmentSchema = z
 	.transform((r) => ({
 		assignmentId: r.assignment_id,
 		questionId: r.question_id,
+		authorId: r.author_id,
+		assigneeId: r.assignee_id,
 		authorName: r.author_name,
 		assigneeName: r.assignee_name,
 		state: r.state as

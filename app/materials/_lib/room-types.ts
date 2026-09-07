@@ -61,6 +61,8 @@ export type RoomReadiness = {
 export type RoomDraw = {
 	done: boolean;
 	status: DrawStatus | null;
+	/** Reloj del sorteo — todos los clientes cuentan 3-2-1 desde aquí. */
+	createdAt: string | null;
 };
 
 /** Snapshot del debate — solo presente cuando roomStage = 'debate'. */
@@ -93,6 +95,8 @@ export type RoomDebateSnapshot =
 export type RoomAssignment = {
 	assignmentId: string;
 	questionId: string;
+	authorId: string;
+	assigneeId: string;
 	authorName: string;
 	assigneeName: string;
 	state: AssignmentState;
