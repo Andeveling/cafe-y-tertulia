@@ -1,12 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { RoomClosedView } from "@/app/materials/_components/room-closed-view";
 import { RoomPanel } from "@/app/materials/_components/room-panel";
-import {
-	getMinigameState,
-	getTriviaRoundSnapshot,
-	type MinigameState,
-	type TriviaRoundSnapshot,
-} from "@/app/materials/_lib/minigames";
 import { getRatingProgress } from "@/app/materials/_lib/rating";
 import { getRoomSnapshot } from "@/app/materials/_lib/room";
 import { Badge } from "@/components/ui/badge";
@@ -56,18 +50,6 @@ export default async function RoomPage({
 			? await getRatingProgress(supabase, sessionId)
 			: null;
 
-	// Bandeja de herramientas del Debate (ticket #31): solo en etapa debate.
-	let minigameState: MinigameState | null = null;
-	let round: TriviaRoundSnapshot | null = null;
-	if (snapshot.roomStage === "debate") {
-		minigameState = await getMinigameState(supabase, sessionId);
-		const roundId =
-			minigameState?.liveRoundId ?? minigameState?.lastBoardRoundId ?? null;
-		if (roundId) {
-			round = await getTriviaRoundSnapshot(supabase, roundId);
-		}
-	}
-
 	return (
 		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-6 md:max-w-4xl md:px-8 md:py-8 lg:max-w-5xl lg:py-10">
 			<header className="flex flex-col gap-2">
@@ -84,7 +66,6 @@ export default async function RoomPage({
 				userId={user.id}
 				isModerator={snapshot.moderatorId === user.id}
 				rating={rating}
-				tools={minigameState ? { state: minigameState, round } : null}
 			/>
 		</main>
 	);

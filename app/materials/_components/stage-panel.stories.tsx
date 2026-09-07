@@ -11,7 +11,7 @@ const waiting: RoomDebateSnapshot = {
 	remainingHidden: 3,
 };
 
-const active: RoomDebateSnapshot = {
+const active: Extract<RoomDebateSnapshot, { mode: "active" }> = {
 	mode: "active",
 	assignmentId: "asg-1",
 	state: "exposition",
@@ -33,6 +33,7 @@ const meta = {
 		sessionId: "ses-1",
 		userId: "u-marta",
 		isModerator: true,
+		authorId: "u-luis",
 	},
 } satisfies Meta<typeof StagePanel>;
 
@@ -43,32 +44,53 @@ export const WaitingRevealModerator: Story = {
 	play: async ({ canvas }) => {
 		await expect(canvas.getByText("Ana")).toBeVisible();
 		await expect(
-			canvas.getByRole("button", { name: /revelar/i }),
+			canvas.getByRole("button", { name: /revelar pregunta/i }),
 		).toBeEnabled();
 	},
 };
 
 export const WaitingRevealMember: Story = {
 	args: { userId: "u-ana", isModerator: false },
+	play: async ({ canvas }) => {
+		await expect(canvas.getByText("Te toca en un momento.")).toBeVisible();
+	},
 };
 
-export const ActiveExposition: Story = {
-	args: { debate: active },
+export const AudienceListens: Story = {
+	args: { debate: active, isModerator: false, userId: "u-marta" },
+	play: async ({ canvas }) => {
+		await expect(canvas.getByText(/escuchas a ana/i)).toBeVisible();
+		await expect(
+			canvas.getByText(/ana responde la pregunta de luis/i),
+		).toBeVisible();
+		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
+	},
 };
 
-export const AssigneeNotes: Story = {
-	args: {
-		debate: { ...active, state: "preparation", myNotes: "Llevar el epígrafe" },
-		userId: "u-ana",
-		isModerator: false,
+export const YouSpeak: Story = {
+	args: { debate: active, userId: "u-ana", isModerator: false },
+	play: async ({ canvas }) => {
+		await expect(canvas.getByText("Te toca hablar.")).toBeVisible();
+		await expect(
+			canvas.getByText(/ana responde la pregunta de luis/i),
+		).toBeVisible();
+	},
+};
+
+export const ModeratorTimer: Story = {
+	args: { debate: active, isModerator: true, userId: "u-marta" },
+	play: async ({ canvas }) => {
+		await expect(
+			canvas.getByRole("button", { name: /\+1 min/i }),
+		).toBeVisible();
+		await expect(
+			canvas.getByRole("button", { name: /siguiente/i }),
+		).toBeVisible();
 	},
 };
 
 export const Done: Story = {
 	args: {
-		debate: {
-			mode: "done",
-			remainingHidden: 0,
-		},
+		debate: { mode: "done", remainingHidden: 0 },
 	},
 };

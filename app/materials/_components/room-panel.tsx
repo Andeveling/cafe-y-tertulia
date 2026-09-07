@@ -1,13 +1,23 @@
 "use client";
 
-import { ArrowRight01Icon, PencilEdit01Icon, TrashIcon } from "@hugeicons/core-free-icons";
+import {
+	ArrowRight01Icon,
+	Clock01Icon,
+	EyeIcon,
+	MinusSignIcon,
+	PencilEdit01Icon,
+	Tick01Icon,
+	TrashIcon,
+	UserIcon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { CierreStage } from "@/app/materials/_components/cierre-stage";
-import { DebateToolsTray } from "@/app/materials/_components/debate-tools-tray";
+import { DrawCeremonyView } from "@/app/materials/_components/draw-ceremony-view";
 import { StageBar } from "@/app/materials/_components/stage-bar";
 import { StagePanel } from "@/app/materials/_components/stage-panel";
+import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import { useRoomRealtime } from "@/app/materials/_hooks/use-room-realtime";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import {
@@ -20,7 +30,6 @@ import {
 	toggleOptOut,
 } from "@/app/materials/_lib/room-actions";
 import type {
-	RoomAssignment,
 	RoomParticipant,
 	RoomQuestion,
 	RoomReadiness,
@@ -51,14 +60,15 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { ActionResult } from "@/lib/server-action";
-import type { MinigameState, TriviaRoundSnapshot } from "../_lib/minigames";
-
-type RoomTools = {
-	state: MinigameState;
-	round: TriviaRoundSnapshot | null;
-};
 
 type Props = {
 	snapshot: RoomSnapshot;
@@ -66,17 +76,49 @@ type Props = {
 	isModerator: boolean;
 	/** Progreso del rating — presente cuando la Sala está en Cierre. */
 	rating: RatingProgress | null;
-	/** Estado de la bandeja de herramientas — presente solo en etapa Debate. */
-	tools?: RoomTools | null;
 };
 
-export function RoomPanel({
-	snapshot,
-	userId,
-	isModerator,
-	rating,
-	tools,
-}: Props) {
+/**
+ * Texto del tooltip del ModeratorNav por etapa. Cada entrada describe:
+ *  - `description`: en qué consiste la etapa actual.
+ *  - `nextCondition`: qué tiene que estar dado para avanzar.
+ * La `key` es la etapa actual; la etapa siguiente sale del `ROOM_STAGE_ORDER`.
+ */
+const STAGE_HELP: Record<
+	RoomStage,
+	{ description: string; nextCondition: string }
+> = {
+	questions: {
+		description:
+			"Cada miembro escribe su pregunta en privado. Los demás solo ven que la enviaron.",
+		nextCondition:
+			"Todos los miembros deben tener al menos 1 pregunta enviada.",
+	},
+	presence: {
+		description:
+			"Los miembros confirman que están en la tertulia. Listo = presente + al menos 1 pregunta.",
+		nextCondition:
+			"Todos los miembros deben estar Listos para ejecutar el Sorteo.",
+	},
+	draw: {
+		description:
+			"Las parejas se asignan al azar; la pregunta se revela recién en el debate.",
+		nextCondition:
+			"Todos los miembros deben estar Listos (el guard lo verifica).",
+	},
+	debate: {
+		description:
+			"Las parejas exponen y complementan por turno. El moderador revela y avanza cada intervención.",
+		nextCondition: "Todas las intervenciones deben estar completas.",
+	},
+	cierre: {
+		description:
+			"Fin de la tertulia. El moderador cierra la sesión cuando no queda nada pendiente.",
+		nextCondition: "",
+	},
+};
+
+export function RoomPanel({ snapshot, userId, isModerator, rating }: Props) {
 	useRoomRealtime(snapshot.sessionId);
 
 	return (
@@ -88,7 +130,6 @@ export function RoomPanel({
 				userId={userId}
 				isModerator={isModerator}
 				rating={rating}
-				tools={tools}
 			/>
 
 			{isModerator && <ModeratorNav snapshot={snapshot} />}
@@ -103,13 +144,11 @@ function StageContent({
 	userId,
 	isModerator,
 	rating,
-	tools,
 }: {
 	snapshot: RoomSnapshot;
 	userId: string;
 	isModerator: boolean;
 	rating: RatingProgress | null;
-	tools?: RoomTools | null;
 }) {
 	switch (snapshot.roomStage) {
 		case "questions":
@@ -127,9 +166,9 @@ function StageContent({
 				<PresenceStage
 					sessionId={snapshot.sessionId}
 					participants={snapshot.participants}
+					questions={snapshot.questions}
 					readiness={snapshot.readiness}
 					userId={userId}
-					isModerator={isModerator}
 				/>
 			);
 		case "draw":
@@ -140,28 +179,24 @@ function StageContent({
 					isModerator={isModerator}
 				/>
 			);
-		case "debate":
+		case "debate": {
 			if (!snapshot.debate) return null;
+			const activeId =
+				snapshot.debate.mode === "active" ? snapshot.debate.assignmentId : null;
+			const authorId = activeId
+				? (snapshot.assignments.find((a) => a.assignmentId === activeId)
+						?.authorId ?? null)
+				: null;
 			return (
-				<>
-					{/* Foco central: turno + temporizador intactos. */}
-					<StagePanel
-						debate={snapshot.debate}
-						sessionId={snapshot.sessionId}
-						userId={userId}
-						isModerator={isModerator}
-					/>
-					{/* Bandeja de herramientas (ticket #31). */}
-					{tools && (
-						<DebateToolsTray
-							sessionId={snapshot.sessionId}
-							state={tools.state}
-							round={tools.round}
-							isModerator={isModerator}
-						/>
-					)}
-				</>
+				<StagePanel
+					debate={snapshot.debate}
+					sessionId={snapshot.sessionId}
+					userId={userId}
+					isModerator={isModerator}
+					authorId={authorId}
+				/>
 			);
+		}
 		case "cierre":
 			if (!snapshot.cierre) return null;
 			return (
@@ -178,7 +213,7 @@ function StageContent({
 // ─── Moderator Navigation ───────────────────────────────────
 
 function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
-	const [pending, start] = useTransition();
+	const { pending, run } = useRoomMutation();
 	const currentIdx = ROOM_STAGE_ORDER.indexOf(snapshot.roomStage);
 	const nextStage = ROOM_STAGE_ORDER[currentIdx + 1] as RoomStage | undefined;
 
@@ -202,15 +237,11 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 				: null;
 
 	function handleAdvance() {
-		start(async () => {
-			const r = await advanceRoomStage(snapshot.sessionId, nextStage!);
-			if (!r.ok) toast.error(r.error);
-		});
+		run(() => advanceRoomStage(snapshot.sessionId, nextStage!));
 	}
 
 	const button = (
 		<Button
-			size="sm"
 			variant="default"
 			disabled={pending}
 			onClick={advanceWarning ? undefined : handleAdvance}
@@ -225,8 +256,37 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 		</Button>
 	);
 
+	const help = STAGE_HELP[snapshot.roomStage];
+
 	if (!advanceWarning) {
-		return <div className="flex justify-end">{button}</div>;
+		return (
+			<div className="flex justify-end">
+				<Tooltip>
+					<TooltipTrigger render={button} />
+					<TooltipContent
+						side="top"
+						align="end"
+						sideOffset={8}
+						className="max-w-sm"
+					>
+						<div className="flex flex-col gap-1.5 text-left">
+							<p className="font-medium">
+								Estás en {ROOM_STAGE_LABELS[snapshot.roomStage]}
+							</p>
+							<p className="text-background/80">{help.description}</p>
+							{help.nextCondition && (
+								<p className="mt-0.5 border-t border-background/20 pt-1.5 text-background/80">
+									<span className="font-medium">
+										Para ir a {ROOM_STAGE_LABELS[nextStage!]}:
+									</span>{" "}
+									{help.nextCondition}
+								</p>
+							)}
+						</div>
+					</TooltipContent>
+				</Tooltip>
+			</div>
+		);
 	}
 
 	return (
@@ -392,11 +452,7 @@ function QuestionsStage({
 								? `${myCount} pregunta${myCount > 1 ? "s" : ""} enviada${myCount > 1 ? "s" : ""}`
 								: "Ninguna enviada aún"}
 						</span>
-						<Button
-							size="sm"
-							disabled={pending || !text.trim()}
-							onClick={handleSubmit}
-						>
+						<Button disabled={pending || !text.trim()} onClick={handleSubmit}>
 							Enviar pregunta
 						</Button>
 					</div>
@@ -410,12 +466,12 @@ function QuestionsStage({
 					</CardHeader>
 					<CardContent>
 						<ul className="flex flex-col gap-2">
-							{myQuestions.map((q) => {
+							{myQuestions.map((q, idx) => {
 								const isEditing = editingId === q.id;
 								return (
 									<li
 										key={q.id}
-										className="rounded-md border border-border p-3 text-sm"
+										className="rounded-md border border-border border-l-4 border-l-primary/60 bg-card/40 p-4 text-sm"
 									>
 										{isEditing ? (
 											<div className="flex flex-col gap-2">
@@ -499,15 +555,13 @@ function QuestionsStage({
 					<DialogHeader>
 						<DialogTitle>¿Borrar la pregunta?</DialogTitle>
 						<DialogDescription>
-							No se puede deshacer. Si la Sala ya pasó a la etapa de
-							Presentes, el borrado se rechaza.
+							No se puede deshacer. Si la Sala ya pasó a la etapa de Presentes,
+							el borrado se rechaza.
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
 						<DialogClose
-							render={
-								<Button variant="outline" size="sm" disabled={pending} />
-							}
+							render={<Button variant="outline" size="sm" disabled={pending} />}
 						>
 							Cancelar
 						</DialogClose>
@@ -563,122 +617,292 @@ function QuestionsStage({
 
 // ─── Presence Stage ─────────────────────────────────────────
 
+function StatusIcon({
+	ok,
+	okLabel,
+	pendingLabel,
+}: {
+	ok: boolean;
+	okLabel: string;
+	pendingLabel: string;
+}) {
+	return (
+		<Tooltip>
+			<TooltipTrigger
+				render={
+					<span
+						tabIndex={0}
+						className={
+							ok
+								? "inline-flex text-primary"
+								: "inline-flex text-muted-foreground/50"
+						}
+					/>
+				}
+			>
+				<HugeiconsIcon
+					icon={ok ? Tick01Icon : MinusSignIcon}
+					strokeWidth={2}
+					className="size-4"
+					aria-hidden="true"
+				/>
+			</TooltipTrigger>
+			<TooltipContent>{ok ? okLabel : pendingLabel}</TooltipContent>
+		</Tooltip>
+	);
+}
+
+function SessionMarker() {
+	return (
+		<Tooltip>
+			<TooltipTrigger
+				render={
+					<span
+						tabIndex={0}
+						className="inline-flex text-primary"
+						aria-label="Sesión activa"
+					/>
+				}
+			>
+				<HugeiconsIcon
+					icon={UserIcon}
+					strokeWidth={2}
+					className="size-3.5"
+					aria-hidden="true"
+				/>
+			</TooltipTrigger>
+			<TooltipContent>Sesión activa</TooltipContent>
+		</Tooltip>
+	);
+}
+
+type WaitingKind =
+	| "spectator"
+	| "self-pending"
+	| "waiting-others"
+	| "all-ready";
+
+function WaitingBanner({
+	kind,
+	missingCount,
+	ready,
+	total,
+}: {
+	kind: WaitingKind;
+	missingCount: number;
+	ready: number;
+	total: number;
+}) {
+	if (kind === "self-pending") return null;
+
+	const config: Record<
+		Exclude<WaitingKind, "self-pending">,
+		{
+			icon: typeof Clock01Icon;
+			title: string;
+			description: string;
+			tone: "primary" | "muted";
+		}
+	> = {
+		spectator: {
+			icon: EyeIcon,
+			title: "Estás mirando como espectador",
+			description:
+				"Los miembros confirman asistencia. El sorteo empieza cuando todos estén listos.",
+			tone: "muted",
+		},
+		"waiting-others": {
+			icon: Clock01Icon,
+			title: "Esperando que todos confirmen",
+			description: `Falta${missingCount === 1 ? "" : "n"} ${missingCount} para que los ${total} miembros estén listos (${ready}/${total} ahora).`,
+			tone: "muted",
+		},
+		"all-ready": {
+			icon: Clock01Icon,
+			title: "Esperando al moderador",
+			description:
+				"Todos listos. El moderador ejecuta el sorteo a continuación.",
+			tone: "primary",
+		},
+	};
+
+	const c = config[kind];
+
+	return (
+		<div
+			className={
+				c.tone === "primary"
+					? "flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/10 p-4"
+					: "flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-4"
+			}
+			role="status"
+			aria-live="polite"
+		>
+			<HugeiconsIcon
+				icon={c.icon}
+				strokeWidth={1.75}
+				className={
+					c.tone === "primary"
+						? "mt-0.5 size-5 shrink-0 text-primary"
+						: "mt-0.5 size-5 shrink-0 text-muted-foreground"
+				}
+				aria-hidden="true"
+			/>
+			<div className="flex flex-col gap-0.5">
+				<p className="font-medium">{c.title}</p>
+				<p className="text-sm text-muted-foreground">{c.description}</p>
+			</div>
+		</div>
+	);
+}
+
 function PresenceStage({
 	sessionId,
 	participants,
+	questions,
 	readiness,
 	userId,
-	isModerator,
 }: {
 	sessionId: string;
 	participants: RoomParticipant[];
+	questions: RoomQuestion[];
 	readiness: RoomReadiness;
 	userId: string;
-	isModerator: boolean;
 }) {
-	const [pending, start] = useTransition();
+	const { pending, run } = useRoomMutation();
 	const me = participants.find((p) => p.memberId === userId);
 	const members = participants.filter((p) => p.role === "member");
 	const spectators = participants.filter((p) => p.role === "spectator");
 
+	const waitingKind: WaitingKind = !me
+		? "self-pending"
+		: me.role === "spectator"
+			? "spectator"
+			: readiness.allReady
+				? "all-ready"
+				: "waiting-others";
+
+	const missingCount = readiness.total - readiness.ready;
+
 	function handleConfirm() {
-		start(async () => {
-			const r = await confirmPresence(sessionId);
-			if (!r.ok) toast.error(r.error);
-		});
+		run(() => confirmPresence(sessionId));
 	}
 
-	function handleToggleOptOut() {
+	function handleSorteo(inDraw: boolean) {
 		if (!me) return;
-		start(async () => {
-			const r = await toggleOptOut(sessionId, me.optOut);
-			if (!r.ok) toast.error(r.error);
-		});
+		const shouldOptOut = !inDraw;
+		if (shouldOptOut === me.optOut) return;
+		run(() => toggleOptOut(sessionId, me.optOut));
 	}
 
 	return (
-		<div className="flex flex-col gap-4">
-			<Card>
-				<CardHeader>
-					<CardTitle>Presentes</CardTitle>
-					<CardDescription>
-						Confirma tu asistencia. Listo = presente + al menos 1 pregunta.
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="flex flex-col gap-4">
-					{/* Readiness indicator */}
-					<div className="flex items-center gap-3 rounded-lg bg-muted p-4">
-						<span className="text-2xl font-heading font-semibold">
-							{readiness.ready}/{readiness.total}
-						</span>
-						<span className="text-sm text-muted-foreground">Listos</span>
-						{readiness.allReady && (
-							<Badge variant="default" className="ml-auto">
-								Todos listos
-							</Badge>
-						)}
+		<TooltipProvider>
+			<div className="flex flex-col gap-6">
+				<header className="flex items-end justify-between gap-4">
+					<div className="flex items-center gap-1.5">
+						<h2 className="font-heading text-xl font-semibold">Presentes</h2>
+						<InfoButton
+							title="Listo"
+							description="Listo: asistencia confirmada y al menos una pregunta enviada. El sorteo espera a que todos los miembros estén listos."
+						/>
 					</div>
+					<p className="text-sm tabular-nums text-muted-foreground">
+						{readiness.ready}/{readiness.total} listos
+					</p>
+				</header>
 
-					{/* Members list */}
-					<ul className="flex flex-col gap-2">
-						{members.map((p) => (
-							<li
-								key={p.memberId}
-								className="flex items-center justify-between text-sm"
-							>
-								<span>
-									{p.displayName}
-									{p.memberId === userId && " · Vos"}
-								</span>
-								<div className="flex gap-2">
-									{p.optOut && <Badge variant="outline">Sin sorteo</Badge>}
-								</div>
-							</li>
-						))}
-					</ul>
+				<WaitingBanner
+					kind={waitingKind}
+					missingCount={missingCount}
+					ready={readiness.ready}
+					total={readiness.total}
+				/>
 
-					{spectators.length > 0 && (
-						<div>
-							<p className="text-xs text-muted-foreground mb-2">
-								Espectadores:
-							</p>
-							<ul className="flex flex-col gap-1">
-								{spectators.map((p) => (
-									<li
+				{!me && (
+					<Button disabled={pending} onClick={handleConfirm}>
+						Confirmar asistencia
+					</Button>
+				)}
+
+				<div className="overflow-x-auto">
+					<table className="w-full text-sm">
+						<thead>
+							<tr className="border-b border-border text-left">
+								<th className="py-2 pr-4 font-medium">Nombre</th>
+								<th className="py-2 pr-4 font-medium">Listo</th>
+								<th className="py-2 font-medium">
+									<span className="inline-flex items-center gap-1">
+										Sorteo
+										<InfoButton
+											title="Sorteo"
+											description="El sorteo asigna una pregunta a cada miembro. Quien quede fuera sigue en la tertulia, sin pregunta asignada."
+										/>
+									</span>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{members.map((p, i) => {
+								const isYou = p.memberId === userId;
+								const hasQuestion = questions.some(
+									(q) => q.authorId === p.memberId,
+								);
+								return (
+									<tr
 										key={p.memberId}
-										className="text-sm text-muted-foreground"
+										className={
+											isYou
+												? "bg-primary/5"
+												: i % 2 === 1
+													? "bg-foreground/[0.03]"
+													: undefined
+										}
 									>
-										{p.displayName}
-									</li>
-								))}
-							</ul>
-						</div>
-					)}
+										<td className="py-3 pr-4">
+											<span className="inline-flex items-center gap-1.5">
+												{p.displayName}
+												{isYou && <SessionMarker />}
+											</span>
+										</td>
+										<td className="py-3 pr-4">
+											<StatusIcon
+												ok={hasQuestion}
+												okLabel="Pregunta enviada"
+												pendingLabel="Sin pregunta"
+											/>
+										</td>
+										<td className="py-3">
+											{isYou && me?.role === "member" ? (
+												<label className="inline-flex items-center gap-2">
+													<Switch
+														size="sm"
+														checked={!me.optOut}
+														disabled={pending}
+														onCheckedChange={handleSorteo}
+													/>
+												</label>
+											) : (
+												<StatusIcon
+													ok={!p.optOut}
+													okLabel="Entra al sorteo"
+													pendingLabel="Fuera del sorteo"
+												/>
+											)}
+										</td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
+				</div>
 
-					{/* Actions */}
-					<div className="flex flex-wrap gap-2 pt-2">
-						{!me ? (
-							<Button size="sm" disabled={pending} onClick={handleConfirm}>
-								Estoy presente
-							</Button>
-						) : (
-							<>
-								{me.role === "member" && (
-									<Button
-										size="sm"
-										variant="outline"
-										disabled={pending}
-										onClick={handleToggleOptOut}
-									>
-										{me.optOut ? "Entrar al sorteo" : "Sin sorteo"}
-									</Button>
-								)}
-							</>
-						)}
-					</div>
-				</CardContent>
-			</Card>
-		</div>
+				{spectators.length > 0 && (
+					<p className="text-xs text-muted-foreground">
+						Espectadores · {spectators.map((s) => s.displayName).join(" · ")}
+					</p>
+				)}
+			</div>
+		</TooltipProvider>
 	);
 }
 
@@ -693,117 +917,18 @@ function DrawStage({
 	userId: string;
 	isModerator: boolean;
 }) {
-	const [pending, start] = useTransition();
-	const { draw, assignments, readiness } = snapshot;
-
-	function handleDraw() {
-		start(async () => {
-			const r = await executeDraw(snapshot.sessionId);
-			if (!r.ok) toast.error(r.error);
-		});
-	}
-
-	if (draw.done) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Sorteo</CardTitle>
-					<CardDescription>
-						Parejas visibles. El texto se revela en el debate.
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="flex flex-col gap-3">
-					{assignments.length > 0 ? (
-						<ul className="flex flex-col gap-2">
-							{assignments.map((a) => (
-								<AssignmentRow key={a.assignmentId} assignment={a} />
-							))}
-						</ul>
-					) : (
-						<p className="text-sm text-muted-foreground">
-							Sorteo listo · sin asignaciones.
-						</p>
-					)}
-				</CardContent>
-			</Card>
-		);
-	}
+	const { pending, run } = useRoomMutation();
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle>Sorteo</CardTitle>
-				<CardDescription>
-					Una sola vez. El texto se revela durante el debate.
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="flex flex-col gap-3">
-				<div className="flex items-center gap-3 rounded-lg bg-muted p-4">
-					<span className="text-2xl font-heading font-semibold">
-						{readiness.ready}/{readiness.total}
-					</span>
-					<span className="text-sm text-muted-foreground">Listos</span>
-					{readiness.allReady && (
-						<Badge variant="default" className="ml-auto">
-							Todos listos
-						</Badge>
-					)}
-				</div>
-
-				{isModerator ? (
-					<Button
-						disabled={pending || !readiness.allReady}
-						onClick={handleDraw}
-					>
-						Ejecutar sorteo
-					</Button>
-				) : (
-					<p className="text-sm text-muted-foreground">
-						Espera a que el moderador ejecute el sorteo.
-					</p>
-				)}
-			</CardContent>
-		</Card>
-	);
-}
-
-// ─── Assignment Row ─────────────────────────────────────────
-
-function AssignmentRow({ assignment }: { assignment: RoomAssignment }) {
-	const stateLabels: Record<string, string> = {
-		hidden: "Oculta",
-		preparation: "Revelando",
-		exposition: "Revelando",
-		complement: "Revelando",
-		complete: "Revelada",
-	};
-	const stateVariants: Record<string, "secondary" | "outline" | "default"> = {
-		hidden: "outline",
-		preparation: "secondary",
-		exposition: "secondary",
-		complement: "secondary",
-		complete: "default",
-	};
-
-	return (
-		<li className="flex flex-col gap-1 rounded-md border border-border p-3 text-sm">
-			<div className="flex items-center justify-between gap-2">
-				<span>
-					{assignment.authorName} → {assignment.assigneeName}
-				</span>
-				<Badge variant={stateVariants[assignment.state] ?? "outline"}>
-					{stateLabels[assignment.state] ?? assignment.state}
-				</Badge>
-			</div>
-			{assignment.questionVisible && assignment.questionText ? (
-				<p className="text-xs text-muted-foreground">
-					{assignment.questionText}
-				</p>
-			) : (
-				<p className="text-xs text-muted-foreground italic">
-					Pregunta oculta hasta el debate
-				</p>
-			)}
-		</li>
+		<DrawCeremonyView
+			done={snapshot.draw.done}
+			createdAt={snapshot.draw.createdAt}
+			assignments={snapshot.assignments}
+			readiness={snapshot.readiness}
+			userId={userId}
+			isModerator={isModerator}
+			pending={pending}
+			onExecute={() => run(() => executeDraw(snapshot.sessionId))}
+		/>
 	);
 }
