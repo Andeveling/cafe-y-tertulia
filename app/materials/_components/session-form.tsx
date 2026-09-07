@@ -19,7 +19,13 @@ const sessionFormSchema = z.object({
 
 type SessionFormValues = z.infer<typeof sessionFormSchema>;
 
-export function SessionForm({ materialId }: { materialId: string }) {
+export function SessionForm({
+	materialId,
+	onSuccess,
+}: {
+	materialId: string;
+	onSuccess?: () => void;
+}) {
 	const [isPending, startTransition] = useTransition();
 	const [scheduledAt, setScheduledAt] = useState<Date | undefined>(undefined);
 	const form = useForm<SessionFormValues>({
@@ -42,6 +48,7 @@ export function SessionForm({ materialId }: { materialId: string }) {
 				toast.success("Sesión creada");
 				form.reset();
 				setScheduledAt(undefined);
+				onSuccess?.();
 			}
 		});
 	}
