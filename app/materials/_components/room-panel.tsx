@@ -132,7 +132,10 @@ export function RoomPanel({ snapshot, userId, isModerator, rating }: Props) {
 				rating={rating}
 			/>
 
-			{isModerator && <ModeratorNav snapshot={snapshot} />}
+			{isModerator &&
+				!(snapshot.roomStage === "debate" && snapshot.debate?.mode === "done") && (
+					<ModeratorNav snapshot={snapshot} />
+				)}
 		</div>
 	);
 }

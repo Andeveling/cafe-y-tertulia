@@ -28,10 +28,24 @@ export default async function RoomPage({
 	// no tiene Sala activa.
 	if (snapshot.status !== "lobby" && snapshot.status !== "in_progress") {
 		if (snapshot.status === "closed" || snapshot.status === "archived") {
+			const rating = await getRatingProgress(supabase, sessionId);
+			const moderatorName =
+				snapshot.participants.find(
+					(p) => p.memberId === snapshot.moderatorId,
+				)?.displayName ?? null;
 			return (
 				<RoomClosedView
 					materialId={snapshot.materialId}
 					status={snapshot.status}
+					range={snapshot.range}
+					moderatorName={moderatorName}
+					participantsCount={snapshot.participants.length}
+					questionsCount={snapshot.questions.length}
+					rating={
+						rating
+							? { avg: rating.ratingAvg, count: rating.ratingCount }
+							: null
+					}
 				/>
 			);
 		}

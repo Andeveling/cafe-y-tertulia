@@ -1,5 +1,10 @@
 "use client";
 
+import {
+	ArrowRight01Icon,
+	Tick01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { type ReactNode, useEffect, useState } from "react";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
@@ -9,6 +14,7 @@ import {
 	SUGGESTED_SECONDS,
 } from "@/app/materials/_lib/intervention";
 import {
+	advanceRoomStage,
 	continueIntervention,
 	revealNext,
 } from "@/app/materials/_lib/room-actions";
@@ -36,11 +42,7 @@ export function StagePanel({
 }: Props) {
 	if (debate.mode === "done") {
 		return (
-			<Enter>
-				<p className="py-10 text-center text-muted-foreground">
-					No quedan turnos. Pueden seguir hablando.
-				</p>
-			</Enter>
+			<DebateDone sessionId={sessionId} isModerator={isModerator} />
 		);
 	}
 
@@ -63,6 +65,57 @@ export function StagePanel({
 			isModerator={isModerator}
 			authorId={authorId}
 		/>
+	);
+}
+
+function DebateDone({
+	sessionId,
+	isModerator,
+}: {
+	sessionId: string;
+	isModerator: boolean;
+}) {
+	const { pending, run } = useRoomMutation();
+
+	return (
+		<Enter>
+			<div
+				className="flex flex-col items-center gap-6 py-12 text-center"
+				role="status"
+				aria-live="polite"
+			>
+				<HugeiconsIcon
+					icon={Tick01Icon}
+					strokeWidth={1.5}
+					className="size-12 text-primary"
+					aria-hidden="true"
+				/>
+				<div className="flex max-w-md flex-col gap-2">
+					<p className="font-heading text-2xl font-medium lg:text-3xl">
+						Debate terminado
+					</p>
+					<p className="text-sm text-muted-foreground">
+						{isModerator
+							? "Todas las intervenciones se completaron. En Cierre se califica el material y se cierra la sesión: ahí se actualiza el nivel de cada miembro."
+							: "Todas las intervenciones se completaron. El nivel se actualiza cuando el moderador cierra la sesión en Cierre."}
+					</p>
+				</div>
+				{isModerator && (
+					<Button
+						disabled={pending}
+						onClick={() => run(() => advanceRoomStage(sessionId, "cierre"))}
+					>
+						Continuar a Cierre
+						<HugeiconsIcon
+							icon={ArrowRight01Icon}
+							strokeWidth={2}
+							data-icon="inline-end"
+							aria-hidden="true"
+						/>
+					</Button>
+				)}
+			</div>
+		</Enter>
 	);
 }
 
