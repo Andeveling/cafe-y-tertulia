@@ -80,9 +80,8 @@ export const YouSpeak: Story = {
 export const ModeratorTimer: Story = {
 	args: { debate: active, isModerator: true, userId: "u-marta" },
 	play: async ({ canvas }) => {
-		await expect(
-			canvas.getByRole("button", { name: /\+1 min/i }),
-		).toBeVisible();
+		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
+		await expect(canvas.getByText(/orientativo · no corta/i)).toBeVisible();
 		await expect(
 			canvas.getByRole("button", { name: /siguiente/i }),
 		).toBeVisible();

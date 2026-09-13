@@ -7,9 +7,10 @@ import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import {
-	EXTEND_SECONDS,
-	elapsedSeconds,
+	formatClock,
+	interventionNextLabel,
 	PHASE_LABELS,
+	remainingSeconds,
 	SUGGESTED_SECONDS,
 } from "@/app/materials/_lib/intervention";
 import {
@@ -169,29 +170,23 @@ function PairLine({ debate }: { debate: Active }) {
 	);
 }
 
-function fmt(total: number) {
-	const n = Math.max(0, total);
-	return `${Math.floor(n / 60)}:${(n % 60).toString().padStart(2, "0")}`;
-}
-
-function useRemaining(startedAt: string, suggested: number) {
+/**
+ * Reloj compartido del Escenario: deriva del ancla `phaseStartedAt` que
+ * emite el servidor, sin offsets locales — Moderador y Participantes ven
+ * lo mismo. Orientativo: nunca fuerza transiciones (ADR 0002).
+ */
+function useSharedClock(startedAt: string, suggested: number) {
 	const startedMs = Date.parse(startedAt);
-	const [extra, setExtra] = useState(0);
-	const [elapsed, setElapsed] = useState(() =>
-		elapsedSeconds(startedMs, Date.now()),
-	);
+	const [nowMs, setNowMs] = useState(() => Date.now());
 
 	useEffect(() => {
 		const id = setInterval(() => {
-			setElapsed(elapsedSeconds(startedMs, Date.now()));
+			setNowMs(Date.now());
 		}, 500);
 		return () => clearInterval(id);
-	}, [startedMs]);
+	}, []);
 
-	return {
-		remaining: Math.max(0, suggested + extra - elapsed),
-		extend: () => setExtra((e) => e + EXTEND_SECONDS),
-	};
+	return remainingSeconds(startedMs, suggested, nowMs);
 }
 
 function Enter({ children }: { children: ReactNode }) {
@@ -261,19 +256,6 @@ function WaitingReveal({
 	);
 }
 
-function nextStepLabel(state: Active["state"]): string {
-	switch (state) {
-		case "preparation":
-			return "Comenzar exposición";
-		case "exposition":
-			return "Avanzar intervención";
-		case "complement":
-			return "Completar intervención";
-		default:
-			return "Siguiente";
-	}
-}
-
 function ActiveTurn({
 	debate,
 	sessionId,
@@ -290,7 +272,7 @@ function ActiveTurn({
 	progress?: { current: number; total: number } | null;
 }) {
 	const copy = turnCopy(debate, userId, authorId);
-	const timer = useRemaining(
+	const remaining = useSharedClock(
 		debate.phaseStartedAt,
 		SUGGESTED_SECONDS[debate.state] ?? 120,
 	);
@@ -376,22 +358,14 @@ function ActiveTurn({
 						<p
 							className={cn(
 								"font-heading text-5xl tabular-nums tracking-tight lg:text-7xl",
-								timer.remaining === 0
-									? "text-muted-foreground"
-									: "text-foreground",
+								remaining === 0 ? "text-muted-foreground" : "text-foreground",
 							)}
 						>
-							{fmt(timer.remaining)}
+							{formatClock(remaining)}
 						</p>
-						{isModerator && (
-							<Button
-								variant="ghost"
-								onClick={timer.extend}
-								title="Ajuste solo en tu vista, no se sincroniza"
-							>
-								+1 min · solo tu vista
-							</Button>
-						)}
+						<p className="text-xs text-muted-foreground">
+							Orientativo · no corta
+						</p>
 					</div>
 
 					{isModerator && (
@@ -400,7 +374,7 @@ function ActiveTurn({
 								disabled={pending}
 								onClick={() => run(() => continueIntervention(sessionId))}
 							>
-								{nextStepLabel(debate.state)}
+								{interventionNextLabel(debate.state)}
 							</Button>
 						</div>
 					)}
