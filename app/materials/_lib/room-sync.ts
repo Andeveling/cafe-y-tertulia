@@ -60,6 +60,12 @@ export function shouldApplyRefresh(
 /**
  * Éxito → onSuccess (opcional) y refresh del actor.
  * Error → onError y no se toma el camino de éxito.
+ *
+ * Único camino de mutación de la Sala: tanto la mutación directa
+ * (`() => Promise<ActionResult>`, p. ej. guardar Pregunta o avanzar de
+ * Etapa) como la acción con formulario (`RoomFormAction` + campos, p. ej.
+ * trivia y takes) resuelven por aquí. El realtime cubre al resto de
+ * dispositivos; este refresh cubre al que actúa.
  */
 export function applyRoomMutationResult(
 	result: RoomActionResult,
@@ -75,6 +81,27 @@ export function applyRoomMutationResult(
 	}
 	handlers.onSuccess?.();
 	handlers.refresh();
+}
+
+/**
+ * Acción de servidor con campos sueltos: recibe un resultado dummy y un
+ * FormData (trivia, takes, rating). Misma forma que `ServerActionFn`.
+ */
+export type RoomFormAction = (
+	prev: RoomActionResult,
+	formData: FormData,
+) => Promise<RoomActionResult>;
+
+/** Resultado dummy para las acciones con formulario: solo leen el FormData. */
+export const ROOM_OK_RESULT: RoomActionResult = { ok: true };
+
+/** Arma el FormData de una acción con campos sueltos. */
+export function roomFormData(fields: Record<string, string>): FormData {
+	const formData = new FormData();
+	for (const [key, value] of Object.entries(fields)) {
+		formData.set(key, value);
+	}
+	return formData;
 }
 
 /**

@@ -11,18 +11,11 @@ import {
 } from "@/app/materials/_lib/room-sync";
 import { createClient } from "@/lib/supabase/client";
 
-export {
-	pickLatestRoomFrame,
-	ROOM_LIVE_HEARTBEAT_MS,
-	ROOM_OFFLINE_REFETCH_MS,
-	roomChannelIsLive,
-	roomRefreshIntervalMs,
-	roomSurface,
-	shouldApplyRefresh,
-	shouldApplySnapshot,
-	shouldRefetchOnChannelStatus,
-	shouldRefetchOnVisibility,
-} from "@/app/materials/_lib/room-sync";
+/**
+ * Única interfaz de sincronización de la Sala (`room-sync`): este hook solo
+ * suscribe el canal realtime y refresca; las mutaciones van por
+ * `useRoomMutation` / `useRunAction`, que resuelven por el mismo seam.
+ */
 
 /**
  * Tablas por-participante que refrescan la Sala al cambiar. Filtro

@@ -10,7 +10,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useRunAction } from "../_hooks/use-run-action";
+import { useRoomMutation } from "../_hooks/use-room-mutation";
 import {
 	answerTriviaAction,
 	closeTakeAction,
@@ -22,6 +22,11 @@ import {
 	voteTakeAction,
 } from "../_lib/minigame-actions";
 import type { MinigameState, TriviaRoundSnapshot } from "../_lib/minigames";
+import {
+	ROOM_OK_RESULT,
+	type RoomFormAction,
+	roomFormData,
+} from "../_lib/room-sync";
 
 /**
  * Bandeja de herramientas del Debate: trivia y takes viven dentro de la Sala.
@@ -41,7 +46,7 @@ type TrayActions = {
 	sessionId: string;
 	pending: boolean;
 	isModerator: boolean;
-	run: ReturnType<typeof useRunAction>["run"];
+	run: (action: RoomFormAction, fields: Record<string, string>) => void;
 };
 
 export function DebateToolsTray({
@@ -50,15 +55,20 @@ export function DebateToolsTray({
 	round,
 	isModerator,
 }: Props) {
-	const { pending, run } = useRunAction();
+	const { pending, run } = useRoomMutation();
 	const [takePrompt, setTakePrompt] = useState("");
+
+	/** Acciones con formulario sobre el camino único de mutación de la Sala. */
+	function runFields(action: RoomFormAction, fields: Record<string, string>) {
+		run(() => action(ROOM_OK_RESULT, roomFormData(fields)));
+	}
 
 	const canLaunchTrivia =
 		isModerator && !state.liveRoundId && state.triviaRoundCount < 2;
 	const canLaunchTake = isModerator && !state.openTakeId && state.takeCount < 3;
 
 	const hasContent = round != null || state.takes.length > 0;
-	const actions = { sessionId, pending, isModerator, run };
+	const actions = { sessionId, pending, isModerator, run: runFields };
 
 	return (
 		<Card>
@@ -102,7 +112,7 @@ export function DebateToolsTray({
 											size="sm"
 											disabled={pending}
 											onClick={() =>
-												run(startTriviaAction, {
+												runFields(startTriviaAction, {
 													session_id: sessionId,
 													trivia_id: t.id,
 												})
@@ -126,7 +136,7 @@ export function DebateToolsTray({
 									size="sm"
 									disabled={pending || !takePrompt.trim()}
 									onClick={() => {
-										run(startTakeAction, {
+										runFields(startTakeAction, {
 											session_id: sessionId,
 											prompt: takePrompt,
 										});

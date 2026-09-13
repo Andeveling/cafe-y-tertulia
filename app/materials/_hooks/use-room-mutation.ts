@@ -12,6 +12,10 @@ export { applyRoomMutationResult } from "@/app/materials/_lib/room-sync";
  * Mutación de la Sala: corre la acción y refresca el RSC.
  * El realtime cubre al resto de dispositivos; este refresh cubre al que actúa
  * (mismo patrón que StagePanel en Debate).
+ *
+ * Único camino de mutación junto a `useRunAction`: ambos resuelven por
+ * `applyRoomMutationResult` en `room-sync` (éxito → refresh, error → toast
+ * sin refresh). `useRunAction` solo añade el armado del FormData.
  */
 export function useRoomMutation() {
 	const router = useRouter();
