@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { CierreStage } from "@/app/materials/_components/cierre-stage";
 import { DebateToolsTray } from "@/app/materials/_components/debate-tools-tray";
 import { DrawCeremonyView } from "@/app/materials/_components/draw-ceremony-view";
+import { PresenceInvite } from "@/app/materials/_components/presence-invite";
 import { StageBar } from "@/app/materials/_components/stage-bar";
 import { StagePanel } from "@/app/materials/_components/stage-panel";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
@@ -25,6 +26,7 @@ import type {
 	MinigameState,
 	TriviaRoundSnapshot,
 } from "@/app/materials/_lib/minigames";
+import type { InviteRosterMember } from "@/app/materials/_lib/presence-invite";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import {
 	advanceRoomStage,
@@ -84,6 +86,8 @@ type Props = {
 	rating: RatingProgress | null;
 	minigameState?: MinigameState | null;
 	round?: TriviaRoundSnapshot | null;
+	rosterMembers?: InviteRosterMember[];
+	pendingIds?: string[];
 };
 
 /**
@@ -133,6 +137,8 @@ export function RoomPanel({
 	rating,
 	minigameState = null,
 	round = null,
+	rosterMembers = [],
+	pendingIds = [],
 }: Props) {
 	const { live } = useRoomRealtime(snapshot.sessionId);
 	// La vista derivada se calcula una sola vez: Listo, mesa y debate
@@ -141,7 +147,18 @@ export function RoomPanel({
 
 	return (
 		<div className="flex flex-col gap-4">
-			{!live && (
+			{live ? (
+				<p
+					role="status"
+					className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
+				>
+					<span
+						aria-hidden="true"
+						className="size-1.5 rounded-full bg-primary"
+					/>
+					En vivo
+				</p>
+			) : (
 				<p role="status" className="text-xs text-muted-foreground">
 					Reconectando…
 				</p>
@@ -156,6 +173,8 @@ export function RoomPanel({
 				rating={rating}
 				minigameState={minigameState}
 				round={round}
+				rosterMembers={rosterMembers}
+				pendingIds={pendingIds}
 			/>
 
 			{isModerator &&
@@ -172,6 +191,8 @@ type EtapaProps = {
 	snapshot: RoomSnapshot;
 	view: SalaView;
 	userId: string;
+	rosterMembers?: InviteRosterMember[];
+	pendingIds?: string[];
 };
 
 function StageContent({
@@ -182,6 +203,8 @@ function StageContent({
 	rating,
 	minigameState,
 	round,
+	rosterMembers = [],
+	pendingIds = [],
 }: EtapaProps & {
 	isModerator: boolean;
 	rating: RatingProgress | null;
@@ -200,6 +223,8 @@ function StageContent({
 					view={view}
 					userId={userId}
 					isModerator={isModerator}
+					rosterMembers={rosterMembers}
+					pendingIds={pendingIds}
 				/>
 			);
 		case "draw":
@@ -860,6 +885,8 @@ function PresenceStage({
 	view,
 	userId,
 	isModerator,
+	rosterMembers = [],
+	pendingIds = [],
 }: EtapaProps & { isModerator: boolean }) {
 	const { sessionId, participants, readiness, moderatorId } = snapshot;
 	const { pending, run } = useRoomMutation();
@@ -868,6 +895,34 @@ function PresenceStage({
 	const spectators = view.spectators;
 	const moderatorName = view.moderatorName;
 	const drawDone = snapshot.draw.done;
+	const prevPresence = useRef<{
+		ids: Set<string>;
+		readyIds: Set<string>;
+	} | null>(null);
+
+	useEffect(() => {
+		const ids = new Set(members.map((p) => p.memberId));
+		const readyIds = new Set(view.questionAuthorIds);
+		const prev = prevPresence.current;
+		if (prev) {
+			for (const m of members) {
+				if (m.memberId === userId) continue;
+				if (!prev.ids.has(m.memberId)) {
+					toast.success(`${m.displayName} se unió`);
+				}
+			}
+			for (const id of readyIds) {
+				if (id === userId) continue;
+				if (!prev.readyIds.has(id)) {
+					const name = members.find((m) => m.memberId === id)?.displayName;
+					if (name && prev.ids.has(id)) {
+						toast.success(`${name} está listo`);
+					}
+				}
+			}
+		}
+		prevPresence.current = { ids, readyIds };
+	}, [members, userId, view.questionAuthorIds]);
 
 	const waitingKind: WaitingKind = !me
 		? "self-pending"
@@ -945,6 +1000,16 @@ function PresenceStage({
 					<Button disabled={pending} onClick={handleConfirm}>
 						Confirmar asistencia
 					</Button>
+				)}
+
+				{isModerator && (
+					<PresenceInvite
+						sessionId={sessionId}
+						userId={userId}
+						rosterMembers={rosterMembers}
+						participantIds={participants.map((p) => p.memberId)}
+						pendingIds={pendingIds}
+					/>
 				)}
 
 				<div className="overflow-x-auto">

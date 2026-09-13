@@ -6,6 +6,10 @@ import {
 } from "@/app/materials/_lib/minigames";
 import { getRatingProgress } from "@/app/materials/_lib/rating";
 import { getRoomSnapshot } from "@/app/materials/_lib/room";
+import {
+	getPendingConvocatoriaIds,
+	getRoomRosterMembers,
+} from "@/app/materials/_lib/room-roster";
 import { roomSurface } from "@/app/materials/_lib/room-sync";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,6 +30,16 @@ export default async function RoomPage({
 
 	const snapshot = await getRoomSnapshot(supabase, sessionId);
 	if (!snapshot) notFound();
+
+	const isModerator = snapshot.moderatorId === user.id;
+	const [rosterMembers, pendingIds] = isModerator
+		? await Promise.all([
+				getRoomRosterMembers(supabase).catch(() => []),
+				getPendingConvocatoriaIds(supabase, sessionId).catch(
+					() => [] as string[],
+				),
+			])
+		: [[], [] as string[]];
 
 	const surface = roomSurface(snapshot.status);
 	const rating =
@@ -52,6 +66,8 @@ export default async function RoomPage({
 			userId={user.id}
 			minigameState={minigameState}
 			round={round}
+			rosterMembers={rosterMembers}
+			pendingIds={pendingIds}
 		/>
 	);
 }
