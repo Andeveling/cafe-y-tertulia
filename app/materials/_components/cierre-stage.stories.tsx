@@ -25,6 +25,7 @@ const meta = {
 		rating: openVote,
 		cierre: { openTrivia: 0, openTakes: 0 },
 		isModerator: true,
+		hasMaterial: true,
 	},
 } satisfies Meta<typeof CierreStage>;
 
@@ -67,5 +68,21 @@ export const Participante: Story = {
 		await expect(
 			canvas.queryByRole("button", { name: /cerrar sesión/i }),
 		).toBeNull();
+	},
+};
+
+export const SinMaterial: Story = {
+	args: {
+		rating: null,
+		hasMaterial: false,
+	},
+	play: async ({ canvas }) => {
+		await expect(canvas.getByText("Sin material")).toBeVisible();
+		await expect(
+			canvas.queryByRole("button", { name: /abrir votación/i }),
+		).toBeNull();
+		await expect(
+			canvas.getByRole("button", { name: /^cerrar sesión$/i }),
+		).toBeEnabled();
 	},
 };

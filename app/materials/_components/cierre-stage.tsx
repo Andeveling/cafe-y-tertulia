@@ -32,6 +32,8 @@ type Props = {
 	rating: RatingProgress | null;
 	cierre: RoomCierreSnapshot;
 	isModerator: boolean;
+	/** false cuando la sesión no tiene material: no hay votación. */
+	hasMaterial: boolean;
 };
 
 /**
@@ -39,17 +41,23 @@ type Props = {
  * modificable hasta cerrar), checklist de pendientes para el Moderador y
  * "Cerrar sesión" con confirmación.
  */
-export function CierreStage({ sessionId, rating, cierre, isModerator }: Props) {
+export function CierreStage({
+	sessionId,
+	rating,
+	cierre,
+	isModerator,
+	hasMaterial,
+}: Props) {
 	const router = useRouter();
-	const ratingFailed = !rating;
+	const ratingFailed = hasMaterial && !rating;
 	const blocked =
 		ratingFailed ||
-		(rating?.ratingOpen ?? false) ||
+		(hasMaterial && (rating?.ratingOpen ?? false)) ||
 		cierre.openTrivia > 0 ||
 		cierre.openTakes > 0;
 	const blockReason = ratingFailed
 		? "No se pudo cargar el rating. Reintenta antes de cerrar."
-		: rating?.ratingOpen
+		: hasMaterial && rating?.ratingOpen
 			? "Cierra la votación del rating antes de cerrar."
 			: cierre.openTrivia > 0
 				? "Cierra la trivia en curso antes de cerrar."
@@ -69,7 +77,17 @@ export function CierreStage({ sessionId, rating, cierre, isModerator }: Props) {
 				</CardHeader>
 			</Card>
 
-			{rating ? (
+			{!hasMaterial ? (
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-base">Sin material</CardTitle>
+						<CardDescription>
+							Esta tertulia no califica material: no hay votación y puedes
+							cerrar cuando quieras.
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			) : rating ? (
 				<RatingPanel progress={rating} />
 			) : (
 				<Card>
@@ -103,6 +121,7 @@ export function CierreStage({ sessionId, rating, cierre, isModerator }: Props) {
 					<PendingChecklist
 						ratingOpen={rating?.ratingOpen ?? false}
 						ratingFailed={ratingFailed}
+						showRating={hasMaterial}
 						openTrivia={cierre.openTrivia}
 						openTakes={cierre.openTakes}
 					/>
@@ -127,21 +146,27 @@ type PendingItem = {
 function PendingChecklist({
 	ratingOpen,
 	ratingFailed,
+	showRating,
 	openTrivia,
 	openTakes,
 }: {
 	ratingOpen: boolean;
 	ratingFailed: boolean;
+	showRating: boolean;
 	openTrivia: number;
 	openTakes: number;
 }) {
 	const items: PendingItem[] = [
-		{
-			label: ratingFailed
-				? "Rating sin cargar (reintenta)"
-				: "Rating del material abierto",
-			pending: ratingFailed || ratingOpen,
-		},
+		...(showRating
+			? [
+					{
+						label: ratingFailed
+							? "Rating sin cargar (reintenta)"
+							: "Rating del material abierto",
+						pending: ratingFailed || ratingOpen,
+					},
+				]
+			: []),
 		{
 			label:
 				openTrivia > 0 ? `Trivia en curso (${openTrivia})` : "Trivia en curso",

@@ -246,6 +246,7 @@ function StageContent({
 					rating={rating}
 					cierre={snapshot.cierre}
 					isModerator={isModerator}
+					hasMaterial={snapshot.materialId !== null}
 				/>
 			);
 	}
@@ -766,7 +767,8 @@ type WaitingKind =
 	| "spectator"
 	| "self-pending"
 	| "waiting-others"
-	| "all-ready";
+	| "all-ready"
+	| "all-ready-mod";
 
 function WaitingBanner({
 	kind,
@@ -815,6 +817,12 @@ function WaitingBanner({
 				"Todos listos. El moderador ejecuta el sorteo a continuación.",
 			tone: "primary",
 		},
+		"all-ready-mod": {
+			icon: Clock01Icon,
+			title: "Todos listos",
+			description: "Ejecuta el sorteo para continuar.",
+			tone: "primary",
+		},
 	};
 
 	const c = config[kind];
@@ -853,8 +861,7 @@ function PresenceStage({
 	userId,
 	isModerator,
 }: EtapaProps & { isModerator: boolean }) {
-	const { sessionId, participants, questions, readiness, moderatorId } =
-		snapshot;
+	const { sessionId, participants, readiness, moderatorId } = snapshot;
 	const { pending, run } = useRoomMutation();
 	const me = participants.find((p) => p.memberId === userId);
 	const members = view.members;
@@ -867,7 +874,9 @@ function PresenceStage({
 		: me.role === "spectator"
 			? "spectator"
 			: readiness.allReady
-				? "all-ready"
+				? isModerator
+					? "all-ready-mod"
+					: "all-ready"
 				: "waiting-others";
 
 	const missingCount = readiness.total - readiness.ready;
