@@ -1,10 +1,10 @@
 import { notFound, redirect } from "next/navigation";
-import { getStageSnapshot } from "@/app/materials/_lib/stage";
+import { getRoomSnapshot } from "@/app/materials/_lib/room";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Escenario · Café y Tertulia" };
 
-/** /stage redirige a /room (ticket #30 — Debate dentro de la Sala). */
+/** /stage redirige a /room (ticket #44 — el debate vive en la Sala). */
 export default async function StagePage({
 	params,
 }: {
@@ -17,9 +17,9 @@ export default async function StagePage({
 	} = await supabase.auth.getUser();
 	if (!user) redirect("/auth/login");
 
-	// Verificar que la sesión existe antes de redirigir.
-	const stage = await getStageSnapshot(supabase, sessionId);
-	if (!stage) notFound();
+	// La Sala es la única fuente (getRoomSnapshot, 1 RPC): aquí solo existe.
+	const snapshot = await getRoomSnapshot(supabase, sessionId);
+	if (!snapshot) notFound();
 
 	redirect(`/materials/sessions/${sessionId}/room`);
 }
