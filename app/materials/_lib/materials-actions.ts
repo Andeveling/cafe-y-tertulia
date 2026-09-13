@@ -185,7 +185,7 @@ export async function rescheduleSession(input: {
  * La transición también está protegida por los triggers de la base de datos.
  */
 export async function advanceSession(input: {
-	materialId: string;
+	materialId: string | null;
 	sessionId: string;
 }): Promise<ActionResult> {
 	return runServerAction({
@@ -238,7 +238,8 @@ export async function advanceSession(input: {
 				};
 			}
 		},
-		revalidate: async () => [`/materials/${input.materialId}`],
+		revalidate: async () =>
+			input.materialId ? [`/materials/${input.materialId}`] : [],
 	});
 }
 
@@ -249,7 +250,7 @@ export async function advanceSession(input: {
  * una votación o el Sorteo sin terminar.
  */
 export async function closeSessionAction(input: {
-	materialId: string;
+	materialId: string | null;
 	sessionId: string;
 }): Promise<ActionResult> {
 	return runServerAction({
@@ -263,7 +264,7 @@ export async function closeSessionAction(input: {
 			}
 		},
 		revalidate: async () => [
-			`/materials/${input.materialId}`,
+			...(input.materialId ? [`/materials/${input.materialId}`] : []),
 			`/materials/sessions/${input.sessionId}/stage`,
 			`/materials/sessions/${input.sessionId}/rating`,
 			`/materials/sessions/${input.sessionId}`,

@@ -12,7 +12,6 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AdvanceButton } from "@/app/materials/_components/advance-button";
 import { MaterialCover } from "@/app/materials/_components/material-cover";
 import { MaterialQuestionsSection } from "@/app/materials/_components/material-questions-section";
 import { NewSessionDialog } from "@/app/materials/_components/new-session-dialog";
@@ -21,7 +20,6 @@ import { SessionScheduler } from "@/app/materials/_components/session-scheduler"
 import { StepIndicator } from "@/app/materials/_components/step-indicator";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
 import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
-import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import {
 	getClubMilestones,
@@ -189,14 +187,6 @@ export default async function MaterialDetailPage({
 									</div>
 								</div>
 							)}
-
-							{/* Temporalmente desabilitado porque no encontramos valor en darle clcik a este boton */}
-							{/* {material.status !== "finished" && (
-								<>
-									<Separator />
-									<AdvanceButton kind="material" id={material.id} />
-								</>
-							)} */}
 						</div>
 					</article>
 
@@ -342,12 +332,6 @@ export default async function MaterialDetailPage({
 															sessionId={session.id}
 															scheduledAt={session.scheduled_at}
 														/>
-														<AdvanceButton
-															kind="session"
-															id={session.id}
-															materialId={material.id}
-															status={session.status}
-														/>
 													</div>
 												)}
 
@@ -365,7 +349,7 @@ export default async function MaterialDetailPage({
 															href={`/materials/sessions/${session.id}/lobby`}
 															className="font-medium text-primary underline-offset-4 hover:underline"
 														>
-															Ir al lobby
+															Ir a la sala
 														</Link>
 													)}
 													{session.status === "in_progress" && (

@@ -14,12 +14,18 @@ import {
 	advanceSession,
 	closeSessionAction,
 } from "@/app/materials/_lib/materials-actions";
+import { SESSION_LIFECYCLE_LABELS } from "@/app/materials/_lib/session-lifecycle";
 import { Button } from "@/components/ui/button";
 import type { ActionResult } from "@/lib/server-action";
 
 type Props =
 	| { kind: "material"; id: string }
-	| { kind: "session"; id: string; materialId: string; status: SessionStatus };
+	| {
+			kind: "session";
+			id: string;
+			materialId: string | null;
+			status: SessionStatus;
+	  };
 
 /** Una acción por estado de Sesión: qué hace, cómo se ve y qué confirma. */
 type SessionAction = {
@@ -28,7 +34,7 @@ type SessionAction = {
 	success: string;
 	run: (input: {
 		sessionId: string;
-		materialId: string;
+		materialId: string | null;
 	}) => Promise<ActionResult>;
 };
 
@@ -44,21 +50,21 @@ const SESSION_ACTIONS: Record<
 	SessionAction
 > = {
 	preparation: {
-		label: "Avanzar",
+		label: SESSION_LIFECYCLE_LABELS.preparation,
 		...BASE_ADVANCE,
 	},
 	lobby: {
-		label: "Iniciar sesión",
+		label: SESSION_LIFECYCLE_LABELS.lobby,
 		...BASE_ADVANCE,
 	},
 	in_progress: {
-		label: "Cerrar sesión",
+		label: SESSION_LIFECYCLE_LABELS.in_progress,
 		icon: CircleLock01Icon,
 		success: "Sesión cerrada",
 		run: closeSessionAction,
 	},
 	closed: {
-		label: "Archivar",
+		label: SESSION_LIFECYCLE_LABELS.closed,
 		icon: ArchiveIcon,
 		success: "Sesión archivada",
 		run: advanceSession,

@@ -2,6 +2,7 @@ import { CheckmarkBadge01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 
+import { AdvanceButton } from "@/app/materials/_components/advance-button";
 import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ type Rating = {
 
 type Props = {
 	materialId: string | null;
+	sessionId?: string;
+	isModerator?: boolean;
 	status: "closed" | "archived";
 	range: string | null;
 	moderatorName: string | null;
@@ -29,6 +32,8 @@ type Props = {
  */
 export function RoomClosedView({
 	materialId,
+	sessionId,
+	isModerator = false,
 	status,
 	range,
 	moderatorName,
@@ -86,9 +91,7 @@ export function RoomClosedView({
 						className="text-foreground"
 					/>
 				) : (
-					<p className="text-sm text-muted-foreground/60">
-						Sin votos
-					</p>
+					<p className="text-sm text-muted-foreground/60">Sin votos</p>
 				)}
 			</section>
 
@@ -115,6 +118,14 @@ export function RoomClosedView({
 					Volver al club
 				</Button>
 			</div>
+			{status === "closed" && isModerator && sessionId && (
+				<AdvanceButton
+					kind="session"
+					id={sessionId}
+					materialId={materialId}
+					status={status}
+				/>
+			)}
 		</main>
 	);
 }
