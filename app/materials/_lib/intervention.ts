@@ -85,10 +85,44 @@ export function interventionNextLabel(state: AssignmentState): string {
 		case "preparation":
 			return "Comenzar exposición";
 		case "exposition":
-			return "Avanzar intervención";
+			return "Terminar exposición";
 		case "complement":
-			return "Completar intervención";
+			return "Terminar complemento";
 		default:
 			return "Siguiente";
 	}
+}
+
+/** Nombre corto de fase para la línea única de progreso. */
+export const PHASE_SHORT_LABELS: Record<AssignmentState, string> = {
+	hidden: "Oculta",
+	preparation: "Preparación",
+	exposition: "Exposición",
+	complement: "Complemento",
+	complete: "Completa",
+};
+
+/** Línea única: Intervención X de Y · Fase. */
+export function interventionProgressLine(
+	current: number,
+	total: number,
+	state?: AssignmentState,
+): string {
+	const base = `Intervención ${current} de ${total}`;
+	if (!state || state === "hidden") return base;
+	return `${base} · ${PHASE_SHORT_LABELS[state]}`;
+}
+
+/** Etiqueta del reloj: fase + presupuesto sugerido. */
+export function phaseClockLabel(state: AssignmentState): string {
+	const suggested = SUGGESTED_SECONDS[state];
+	if (suggested == null) return PHASE_SHORT_LABELS[state];
+	return `${PHASE_SHORT_LABELS[state]} · sugerido ${formatClock(suggested)}`;
+}
+
+/** Sublínea del reloj. A 0 deja claro que no corta. */
+export function phaseClockCaption(remaining: number): string {
+	return remaining === 0
+		? "Tiempo sugerido cumplido · no corta, el moderador avanza cuando quiera"
+		: "No corta, el moderador avanza";
 }

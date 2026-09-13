@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect } from "storybook/test";
+import { expect, waitFor } from "storybook/test";
 import type { RoomDebateSnapshot } from "../_lib/room-types";
 import { StagePanel } from "./stage-panel";
 
@@ -21,9 +21,23 @@ const active: Extract<RoomDebateSnapshot, { mode: "active" }> = {
 	authorName: "Luis",
 	revealOrder: 1,
 	myNotes: null,
-	phaseStartedAt: "2026-08-25T16:00:00.000Z",
+	phaseStartedAt: new Date().toISOString(),
 	remainingHidden: 2,
 };
+
+const preparing: Extract<RoomDebateSnapshot, { mode: "active" }> = {
+	...active,
+	state: "preparation",
+	assignmentId: "asg-prep",
+};
+
+const expired: Extract<RoomDebateSnapshot, { mode: "active" }> = {
+	...active,
+	assignmentId: "asg-expired",
+	phaseStartedAt: "2020-01-01T00:00:00.000Z",
+};
+
+const progress = { current: 1, total: 2 };
 
 const meta = {
 	component: StagePanel,
@@ -34,6 +48,7 @@ const meta = {
 		userId: "u-marta",
 		isModerator: true,
 		authorId: "u-luis",
+		progress,
 	},
 } satisfies Meta<typeof StagePanel>;
 
@@ -42,7 +57,7 @@ type Story = StoryObj<typeof meta>;
 
 export const WaitingRevealModerator: Story = {
 	play: async ({ canvas }) => {
-		await expect(canvas.getByText("Ana")).toBeVisible();
+		await waitFor(() => expect(canvas.getByText("Ana")).toBeVisible());
 		await expect(
 			canvas.getByRole("button", { name: /revelar pregunta/i }),
 		).toBeEnabled();
@@ -52,39 +67,77 @@ export const WaitingRevealModerator: Story = {
 export const WaitingRevealMember: Story = {
 	args: { userId: "u-ana", isModerator: false },
 	play: async ({ canvas }) => {
-		await expect(canvas.getByText("Te toca en un momento.")).toBeVisible();
+		await waitFor(() =>
+			expect(canvas.getByText("Te toca en un momento.")).toBeVisible(),
+		);
 	},
 };
 
 export const AudienceListens: Story = {
 	args: { debate: active, isModerator: false, userId: "u-marta" },
 	play: async ({ canvas }) => {
-		await expect(canvas.getByText(/escuchas a ana/i)).toBeVisible();
-		await expect(
-			canvas.getByText(/ana responde la pregunta de luis/i),
-		).toBeVisible();
+		await waitFor(() =>
+			expect(canvas.getByText(/escuchas a ana/i)).toBeVisible(),
+		);
+		await expect(canvas.getByText(/responde la pregunta de/i)).toBeVisible();
 		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
+		await expect(
+			canvas.getByText("Intervención 1 de 2 · Exposición"),
+		).toBeVisible();
 	},
 };
 
 export const YouSpeak: Story = {
 	args: { debate: active, userId: "u-ana", isModerator: false },
 	play: async ({ canvas }) => {
-		await expect(canvas.getByText("Te toca hablar.")).toBeVisible();
+		await waitFor(() =>
+			expect(canvas.getByText("Te toca hablar.")).toBeVisible(),
+		);
+		await expect(canvas.getByText(/responde la pregunta de/i)).toBeVisible();
+		await expect(canvas.queryByText("Moderación")).toBeNull();
+	},
+};
+
+export const YouPrepare: Story = {
+	args: { debate: preparing, userId: "u-ana", isModerator: false },
+	play: async ({ canvas }) => {
+		await waitFor(() => expect(canvas.getByText("Te toca.")).toBeVisible());
 		await expect(
-			canvas.getByText(/ana responde la pregunta de luis/i),
+			canvas.getByLabelText(/tus notas de respuesta/i),
 		).toBeVisible();
+		await expect(
+			canvas.getByText("Intervención 1 de 2 · Preparación"),
+		).toBeVisible();
+		await expect(canvas.getByText("Preparación · sugerido 2:00")).toBeVisible();
 	},
 };
 
 export const ModeratorTimer: Story = {
 	args: { debate: active, isModerator: true, userId: "u-marta" },
 	play: async ({ canvas }) => {
+		await waitFor(() =>
+			expect(canvas.getByText(/no corta, el moderador avanza/i)).toBeVisible(),
+		);
 		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
-		await expect(canvas.getByText(/orientativo · no corta/i)).toBeVisible();
 		await expect(
-			canvas.getByRole("button", { name: /siguiente/i }),
+			canvas.getByRole("button", { name: /terminar exposición/i }),
 		).toBeVisible();
+		await expect(canvas.getByText("Moderación")).toBeVisible();
+		await expect(canvas.getByText("Exposición · sugerido 3:00")).toBeVisible();
+	},
+};
+
+export const ClockExpired: Story = {
+	args: { debate: expired, isModerator: true, userId: "u-marta" },
+	play: async ({ canvas }) => {
+		await waitFor(() =>
+			expect(
+				canvas.getByText(
+					/tiempo sugerido cumplido · no corta, el moderador avanza cuando quiera/i,
+				),
+			).toBeVisible(),
+		);
+		await expect(canvas.getByText("0:00")).toBeVisible();
 	},
 };
 

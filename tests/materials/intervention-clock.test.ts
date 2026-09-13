@@ -3,8 +3,12 @@ import {
 	formatClock,
 	INTERVENTION_ORDER,
 	interventionNextLabel,
+	interventionProgressLine,
 	nextInterventionState,
 	PHASE_LABELS,
+	PHASE_SHORT_LABELS,
+	phaseClockCaption,
+	phaseClockLabel,
 	remainingSeconds,
 } from "@/app/materials/_lib/intervention";
 
@@ -52,7 +56,29 @@ describe("ciclo de la Intervención", () => {
 
 	it("ofrece la acción de conducción de cada fase", () => {
 		expect(interventionNextLabel("preparation")).toBe("Comenzar exposición");
-		expect(interventionNextLabel("exposition")).toBe("Avanzar intervención");
-		expect(interventionNextLabel("complement")).toBe("Completar intervención");
+		expect(interventionNextLabel("exposition")).toBe("Terminar exposición");
+		expect(interventionNextLabel("complement")).toBe("Terminar complemento");
+	});
+
+	it("nombra corto cada fase para la línea única de progreso", () => {
+		expect(PHASE_SHORT_LABELS.preparation).toBe("Preparación");
+		expect(PHASE_SHORT_LABELS.exposition).toBe("Exposición");
+		expect(PHASE_SHORT_LABELS.complement).toBe("Complemento");
+	});
+
+	it("compone una sola línea de progreso", () => {
+		expect(interventionProgressLine(1, 2)).toBe("Intervención 1 de 2");
+		expect(interventionProgressLine(1, 2, "preparation")).toBe(
+			"Intervención 1 de 2 · Preparación",
+		);
+	});
+
+	it("etiqueta el reloj con fase y presupuesto", () => {
+		expect(phaseClockLabel("preparation")).toBe("Preparación · sugerido 2:00");
+		expect(phaseClockLabel("exposition")).toBe("Exposición · sugerido 3:00");
+		expect(phaseClockCaption(45)).toBe("No corta, el moderador avanza");
+		expect(phaseClockCaption(0)).toBe(
+			"Tiempo sugerido cumplido · no corta, el moderador avanza cuando quiera",
+		);
 	});
 });

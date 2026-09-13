@@ -1,15 +1,17 @@
 "use client";
 
-import { ArrowRight01Icon, Tick01Icon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import {
 	formatClock,
 	interventionNextLabel,
-	PHASE_LABELS,
+	interventionProgressLine,
+	phaseClockCaption,
+	phaseClockLabel,
 	remainingSeconds,
 	SUGGESTED_SECONDS,
 } from "@/app/materials/_lib/intervention";
@@ -20,7 +22,6 @@ import {
 	saveNotes,
 } from "@/app/materials/_lib/room-actions";
 import type { RoomDebateSnapshot } from "@/app/materials/_lib/room-types";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -86,39 +87,33 @@ function DebateDone({
 	return (
 		<Enter>
 			<div
-				className="flex flex-col items-center gap-6 py-12 text-center"
+				className="flex flex-col items-start gap-4 py-8 text-left"
 				role="status"
 				aria-live="polite"
 			>
-				<HugeiconsIcon
-					icon={Tick01Icon}
-					strokeWidth={1.5}
-					className="size-12 text-primary"
-					aria-hidden="true"
-				/>
-				<div className="flex max-w-md flex-col gap-2">
-					<p className="font-heading text-2xl font-medium lg:text-3xl">
-						Debate terminado
-					</p>
-					<p className="text-sm text-muted-foreground">
-						{isModerator
-							? "Todas las intervenciones se completaron. En Cierre se califica el material y se cierra la sesión: ahí se actualizan conteos e insignias."
-							: "Todas las intervenciones se completaron. Los conteos e insignias se actualizan cuando el moderador cierra la sesión en Cierre."}
-					</p>
-				</div>
+				<p className="font-heading text-2xl font-medium lg:text-3xl">
+					Debate terminado
+				</p>
+				<p className="max-w-md text-sm text-muted-foreground">
+					{isModerator
+						? "Todas las intervenciones se completaron. En Cierre se califica el material y se cierra la sesión: ahí se actualizan conteos e insignias."
+						: "Todas las intervenciones se completaron. Los conteos e insignias se actualizan cuando el moderador cierra la sesión en Cierre."}
+				</p>
 				{isModerator && (
-					<Button
-						disabled={pending}
-						onClick={() => run(() => advanceRoomStage(sessionId, "cierre"))}
-					>
-						Continuar a Cierre
-						<HugeiconsIcon
-							icon={ArrowRight01Icon}
-							strokeWidth={2}
-							data-icon="inline-end"
-							aria-hidden="true"
-						/>
-					</Button>
+					<ModeratorZone>
+						<Button
+							disabled={pending}
+							onClick={() => run(() => advanceRoomStage(sessionId, "cierre"))}
+						>
+							Continuar a Cierre
+							<HugeiconsIcon
+								icon={ArrowRight01Icon}
+								strokeWidth={2}
+								data-icon="inline-end"
+								aria-hidden="true"
+							/>
+						</Button>
+					</ModeratorZone>
 				)}
 			</div>
 		</Enter>
@@ -189,12 +184,23 @@ function useSharedClock(startedAt: string, suggested: number) {
 	return remainingSeconds(startedMs, suggested, nowMs);
 }
 
+function ModeratorZone({ children }: { children: ReactNode }) {
+	return (
+		<div className="flex w-full flex-col items-start gap-2 border-t border-border/60 pt-4">
+			<p className="text-xs font-medium">Moderación</p>
+			<p className="text-xs text-muted-foreground">Solo tú ves esto.</p>
+			{children}
+		</div>
+	);
+}
+
 function Enter({ children }: { children: ReactNode }) {
+	const reduce = useReducedMotion();
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: 16, filter: "blur(10px)" }}
+			initial={reduce ? false : { opacity: 0, y: 16, filter: "blur(10px)" }}
 			animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-			exit={{ opacity: 0, filter: "blur(8px)" }}
+			exit={reduce ? undefined : { opacity: 0, filter: "blur(8px)" }}
 			transition={{
 				type: "spring",
 				visualDuration: 0.5,
@@ -226,16 +232,16 @@ function WaitingReveal({
 
 	return (
 		<Enter>
-			<div className="flex min-h-64 flex-col items-center justify-center gap-4 py-12 text-center">
+			<div className="flex flex-col items-start gap-3 py-8 text-left">
 				{progress && progress.total > 0 && (
 					<p className="text-xs tabular-nums text-muted-foreground">
-						Intervención {progress.current} de {progress.total}
+						{interventionProgressLine(progress.current, progress.total)}
 					</p>
 				)}
 				<p className="text-sm text-muted-foreground">
 					{youNext ? "Te toca en un momento." : "Espera."}
 				</p>
-				<p className="font-heading text-4xl font-semibold">
+				<p className="font-heading text-3xl font-semibold lg:text-4xl">
 					{debate.nextAssigneeName}
 				</p>
 				{!isModerator && !youNext && (
@@ -244,12 +250,14 @@ function WaitingReveal({
 					</p>
 				)}
 				{isModerator && (
-					<Button
-						disabled={pending}
-						onClick={() => run(() => revealNext(sessionId))}
-					>
-						Revelar pregunta
-					</Button>
+					<ModeratorZone>
+						<Button
+							disabled={pending}
+							onClick={() => run(() => revealNext(sessionId))}
+						>
+							Revelar pregunta
+						</Button>
+					</ModeratorZone>
 				)}
 			</div>
 		</Enter>
@@ -272,10 +280,8 @@ function ActiveTurn({
 	progress?: { current: number; total: number } | null;
 }) {
 	const copy = turnCopy(debate, userId, authorId);
-	const remaining = useSharedClock(
-		debate.phaseStartedAt,
-		SUGGESTED_SECONDS[debate.state] ?? 120,
-	);
+	const suggested = SUGGESTED_SECONDS[debate.state] ?? 120;
+	const remaining = useSharedClock(debate.phaseStartedAt, suggested);
 	const { pending, run } = useRoomMutation();
 	const isAssignee = debate.assigneeId === userId;
 	const isPreparation = debate.state === "preparation";
@@ -295,16 +301,17 @@ function ActiveTurn({
 	return (
 		<AnimatePresence mode="wait">
 			<Enter key={`${debate.assignmentId}-${debate.state}`}>
-				<div className="flex flex-col gap-10 py-2 lg:gap-16 lg:py-6">
-					<header className="flex flex-col gap-2">
-						<div className="flex flex-wrap items-center gap-2">
-							<Badge variant="outline">{PHASE_LABELS[debate.state]}</Badge>
-							{progress && progress.total > 0 && (
-								<span className="text-xs tabular-nums text-muted-foreground">
-									{progress.current} de {progress.total}
-								</span>
-							)}
-						</div>
+				<div className="flex max-w-3xl flex-col items-start gap-8 py-2 text-left lg:py-4">
+					<header className="flex flex-col items-start gap-1.5">
+						{progress && progress.total > 0 && (
+							<p className="text-xs tabular-nums text-muted-foreground">
+								{interventionProgressLine(
+									progress.current,
+									progress.total,
+									debate.state,
+								)}
+							</p>
+						)}
 						<p
 							className={cn(
 								"text-sm",
@@ -316,12 +323,12 @@ function ActiveTurn({
 						<PairLine debate={debate} />
 					</header>
 
-					<p className="font-heading mx-auto max-w-3xl text-center text-2xl font-medium text-pretty leading-snug lg:text-4xl">
+					<p className="font-heading max-w-3xl text-left text-2xl font-medium text-pretty leading-snug lg:text-3xl">
 						{debate.questionText}
 					</p>
 
 					{isAssignee && isPreparation && (
-						<div className="mx-auto flex w-full max-w-xl flex-col gap-2">
+						<div className="flex w-full max-w-xl flex-col items-start gap-1.5">
 							<label htmlFor="notas-respuesta" className="text-sm font-medium">
 								Tus notas de respuesta
 							</label>
@@ -336,7 +343,7 @@ function ActiveTurn({
 								placeholder="Ideas principales, palabras clave…"
 								disabled={pending}
 							/>
-							<div className="flex justify-end">
+							<div className="flex justify-start">
 								<Button
 									size="sm"
 									disabled={pending || !notesDraft.trim()}
@@ -349,34 +356,40 @@ function ActiveTurn({
 					)}
 
 					{isAssignee && !isPreparation && debate.myNotes && (
-						<p className="mx-auto w-full max-w-xl rounded-md border border-border bg-muted/30 p-3 text-sm whitespace-pre-wrap">
-							{debate.myNotes}
-						</p>
+						<div className="flex w-full max-w-xl flex-col items-start gap-1.5">
+							<p className="text-sm font-medium">Tus notas</p>
+							<p className="w-full rounded-md border border-border bg-muted/30 p-3 text-sm whitespace-pre-wrap">
+								{debate.myNotes}
+							</p>
+						</div>
 					)}
 
-					<div className="flex flex-col items-center gap-3">
+					<div className="flex flex-col items-start gap-1">
+						<p className="text-xs text-muted-foreground">
+							{phaseClockLabel(debate.state)}
+						</p>
 						<p
 							className={cn(
-								"font-heading text-5xl tabular-nums tracking-tight lg:text-7xl",
+								"font-heading text-4xl tabular-nums tracking-tight lg:text-5xl",
 								remaining === 0 ? "text-muted-foreground" : "text-foreground",
 							)}
 						>
 							{formatClock(remaining)}
 						</p>
 						<p className="text-xs text-muted-foreground">
-							Orientativo · no corta
+							{phaseClockCaption(remaining)}
 						</p>
 					</div>
 
 					{isModerator && (
-						<div className="pt-4">
+						<ModeratorZone>
 							<Button
 								disabled={pending}
 								onClick={() => run(() => continueIntervention(sessionId))}
 							>
 								{interventionNextLabel(debate.state)}
 							</Button>
-						</div>
+						</ModeratorZone>
 					)}
 				</div>
 			</Enter>
