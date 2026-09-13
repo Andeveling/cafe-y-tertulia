@@ -5,7 +5,6 @@ import {
 	Flag01Icon,
 	News01Icon,
 	PlayCircleIcon,
-	PlusSignIcon,
 	PodcastIcon,
 	Time01Icon,
 	Video01Icon,
@@ -16,20 +15,12 @@ import { notFound } from "next/navigation";
 import { AdvanceButton } from "@/app/materials/_components/advance-button";
 import { MaterialCover } from "@/app/materials/_components/material-cover";
 import { MaterialQuestionsSection } from "@/app/materials/_components/material-questions-section";
+import { NewSessionDialog } from "@/app/materials/_components/new-session-dialog";
 import { RatingDisplay } from "@/app/materials/_components/rating-display";
-import { SessionForm } from "@/app/materials/_components/session-form";
 import { SessionScheduler } from "@/app/materials/_components/session-scheduler";
 import { StepIndicator } from "@/app/materials/_components/step-indicator";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
 import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
-import { Button } from "@/components/ui/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -244,31 +235,7 @@ export default async function MaterialDetailPage({
 						</div>
 
 						<div className="shrink-0 pt-1">
-							<Dialog>
-								<DialogTrigger
-									render={
-										<Button size="lg">
-											<HugeiconsIcon
-												icon={PlusSignIcon}
-												className="mr-2 size-4"
-											/>
-											Nueva sesión
-										</Button>
-									}
-								/>
-								<DialogContent className="sm:max-w-[560px]">
-									<DialogHeader>
-										<DialogTitle className="font-heading text-2xl">
-											Nueva sesión
-										</DialogTitle>
-									</DialogHeader>
-
-									<div className="pt-2">
-										{/* Formulario de creación dentro del modal */}
-										<SessionForm materialId={material.id} />
-									</div>
-								</DialogContent>
-							</Dialog>
+							<NewSessionDialog materialId={material.id} />
 						</div>
 					</div>
 
