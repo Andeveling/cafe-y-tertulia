@@ -38,9 +38,7 @@ import {
 	transferModerator,
 } from "@/app/materials/_lib/room-actions";
 import type {
-	RoomParticipant,
 	RoomQuestion,
-	RoomReadiness,
 	RoomSnapshot,
 	RoomStage,
 } from "@/app/materials/_lib/room-types";
@@ -48,6 +46,7 @@ import {
 	ROOM_STAGE_LABELS,
 	ROOM_STAGE_ORDER,
 } from "@/app/materials/_lib/room-types";
+import { deriveSalaView, type SalaView } from "@/app/materials/_lib/room-view";
 import { InfoButton } from "@/components/info-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -136,6 +135,9 @@ export function RoomPanel({
 	round = null,
 }: Props) {
 	const { live } = useRoomRealtime(snapshot.sessionId);
+	// La vista derivada se calcula una sola vez: Listo, mesa y debate
+	// llegan hechos a cada Etapa.
+	const view = deriveSalaView(snapshot);
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -148,6 +150,7 @@ export function RoomPanel({
 
 			<StageContent
 				snapshot={snapshot}
+				view={view}
 				userId={userId}
 				isModerator={isModerator}
 				rating={rating}
@@ -158,82 +161,62 @@ export function RoomPanel({
 			{isModerator &&
 				!(
 					snapshot.roomStage === "debate" && snapshot.debate?.mode === "done"
-				) && <ModeratorNav snapshot={snapshot} />}
+				) && <ModeratorNav snapshot={snapshot} view={view} />}
 		</div>
 	);
 }
 
 // ─── Stage Router ───────────────────────────────────────────
 
+type EtapaProps = {
+	snapshot: RoomSnapshot;
+	view: SalaView;
+	userId: string;
+};
+
 function StageContent({
 	snapshot,
+	view,
 	userId,
 	isModerator,
 	rating,
 	minigameState,
 	round,
-}: {
-	snapshot: RoomSnapshot;
-	userId: string;
+}: EtapaProps & {
 	isModerator: boolean;
 	rating: RatingProgress | null;
 	minigameState?: MinigameState | null;
 	round?: TriviaRoundSnapshot | null;
 }) {
+	const { pending, run } = useRoomMutation();
+
 	switch (snapshot.roomStage) {
 		case "questions":
-			return (
-				<QuestionsStage
-					sessionId={snapshot.sessionId}
-					materialId={snapshot.materialId}
-					questions={snapshot.questions}
-					participants={snapshot.participants}
-					userId={userId}
-					moderatorId={snapshot.moderatorId}
-				/>
-			);
+			return <QuestionsStage snapshot={snapshot} view={view} userId={userId} />;
 		case "presence":
 			return (
 				<PresenceStage
-					sessionId={snapshot.sessionId}
-					participants={snapshot.participants}
-					questions={snapshot.questions}
-					readiness={snapshot.readiness}
+					snapshot={snapshot}
+					view={view}
 					userId={userId}
 					isModerator={isModerator}
-					moderatorId={snapshot.moderatorId}
-					drawDone={snapshot.draw.done}
 				/>
 			);
 		case "draw":
 			return (
-				<DrawStage
-					snapshot={snapshot}
+				<DrawCeremonyView
+					done={snapshot.draw.done}
+					createdAt={snapshot.draw.createdAt}
+					assignments={snapshot.assignments}
+					readiness={snapshot.readiness}
 					userId={userId}
 					isModerator={isModerator}
+					pending={pending}
+					onExecute={() => run(() => executeDraw(snapshot.sessionId))}
 				/>
 			);
 		case "debate": {
 			if (!snapshot.debate) return null;
-			const activeId =
-				snapshot.debate.mode === "active" ? snapshot.debate.assignmentId : null;
-			const authorId = activeId
-				? (snapshot.assignments.find((a) => a.assignmentId === activeId)
-						?.authorId ?? null)
-				: null;
-			const total = snapshot.assignments.length;
-			const progress =
-				total > 0
-					? {
-							current:
-								snapshot.debate.mode === "active"
-									? (snapshot.debate.revealOrder ?? 1)
-									: snapshot.debate.mode === "waiting_reveal"
-										? (snapshot.debate.revealOrder ?? 1)
-										: total,
-							total,
-						}
-					: null;
 			return (
 				<div className="flex flex-col gap-4">
 					<StagePanel
@@ -241,8 +224,8 @@ function StageContent({
 						sessionId={snapshot.sessionId}
 						userId={userId}
 						isModerator={isModerator}
-						authorId={authorId}
-						progress={progress}
+						authorId={view.debateAuthorId}
+						progress={view.debateProgress}
 					/>
 					{minigameState && (
 						<DebateToolsTray
@@ -270,7 +253,13 @@ function StageContent({
 
 // ─── Moderator Navigation ───────────────────────────────────
 
-function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
+function ModeratorNav({
+	snapshot,
+	view,
+}: {
+	snapshot: RoomSnapshot;
+	view: SalaView;
+}) {
 	const { pending, run } = useRoomMutation();
 	const currentIdx = ROOM_STAGE_ORDER.indexOf(snapshot.roomStage);
 	const nextStage = ROOM_STAGE_ORDER[currentIdx + 1] as RoomStage | undefined;
@@ -280,7 +269,7 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 
 	if (!nextStage) return null;
 
-	const members = snapshot.participants.filter((p) => p.role === "member");
+	const members = view.members;
 	// Presentes es el paso de unirse: sin members se puede ir ahí.
 	// Sorteo y Debate sí exigen al menos un participante.
 	const isEmpty =
@@ -292,15 +281,11 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 		snapshot.draw.done &&
 		(prevStage === "questions" || prevStage === "presence");
 	const showBack = !!prevStage && !backBlocked;
-	const notReady = members.filter(
-		(p) => !snapshot.questions.some((q) => q.authorId === p.memberId),
-	);
-	const remainingInterventions = snapshot.assignments.filter(
-		(a) => a.state !== "complete",
-	).length;
+	const notReady = view.notReadyNames;
+	const remainingInterventions = view.remainingInterventions;
 	const advanceWarning: string[] | null =
 		nextStage === "debate" && notReady.length > 0
-			? notReady.map((p) => p.displayName)
+			? notReady
 			: nextStage === "cierre" && remainingInterventions > 0
 				? [`${remainingInterventions} intervención(es) sin completar`]
 				: null;
@@ -441,21 +426,9 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 
 // ─── Questions Stage ────────────────────────────────────────
 
-function QuestionsStage({
-	sessionId,
-	materialId,
-	questions,
-	participants,
-	userId,
-	moderatorId,
-}: {
-	sessionId: string;
-	materialId: string | null;
-	questions: RoomQuestion[];
-	participants: RoomParticipant[];
-	userId: string;
-	moderatorId: string | null;
-}) {
+function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
+	const { sessionId, materialId, questions, participants, moderatorId } =
+		snapshot;
 	const { pending, run } = useRoomMutation();
 	const [text, setText] = useState("");
 	const [editingId, setEditingId] = useState<string | null>(null);
@@ -694,9 +667,7 @@ function QuestionsStage({
 				<CardContent>
 					<ul className="flex flex-col gap-2">
 						{participants.map((p) => {
-							const hasQuestion = questions.some(
-								(q) => q.authorId === p.memberId,
-							);
+							const hasQuestion = view.questionAuthorIds.has(p.memberId);
 							return (
 								<li
 									key={p.memberId}
@@ -877,30 +848,19 @@ function WaitingBanner({
 }
 
 function PresenceStage({
-	sessionId,
-	participants,
-	questions,
-	readiness,
+	snapshot,
+	view,
 	userId,
 	isModerator,
-	moderatorId,
-	drawDone,
-}: {
-	sessionId: string;
-	participants: RoomParticipant[];
-	questions: RoomQuestion[];
-	readiness: RoomReadiness;
-	userId: string;
-	isModerator: boolean;
-	moderatorId: string | null;
-	drawDone: boolean;
-}) {
+}: EtapaProps & { isModerator: boolean }) {
+	const { sessionId, participants, questions, readiness, moderatorId } =
+		snapshot;
 	const { pending, run } = useRoomMutation();
 	const me = participants.find((p) => p.memberId === userId);
-	const members = participants.filter((p) => p.role === "member");
-	const spectators = participants.filter((p) => p.role === "spectator");
-	const moderatorName =
-		participants.find((p) => p.memberId === moderatorId)?.displayName ?? null;
+	const members = view.members;
+	const spectators = view.spectators;
+	const moderatorName = view.moderatorName;
+	const drawDone = snapshot.draw.done;
 
 	const waitingKind: WaitingKind = !me
 		? "self-pending"
@@ -999,9 +959,7 @@ function PresenceStage({
 						<tbody>
 							{members.map((p, i) => {
 								const isYou = p.memberId === userId;
-								const hasQuestion = questions.some(
-									(q) => q.authorId === p.memberId,
-								);
+								const hasQuestion = view.questionAuthorIds.has(p.memberId);
 								return (
 									<tr
 										key={p.memberId}
@@ -1125,32 +1083,5 @@ function PresenceStage({
 				)}
 			</div>
 		</TooltipProvider>
-	);
-}
-
-// ─── Draw Stage ─────────────────────────────────────────────
-
-function DrawStage({
-	snapshot,
-	userId,
-	isModerator,
-}: {
-	snapshot: RoomSnapshot;
-	userId: string;
-	isModerator: boolean;
-}) {
-	const { pending, run } = useRoomMutation();
-
-	return (
-		<DrawCeremonyView
-			done={snapshot.draw.done}
-			createdAt={snapshot.draw.createdAt}
-			assignments={snapshot.assignments}
-			readiness={snapshot.readiness}
-			userId={userId}
-			isModerator={isModerator}
-			pending={pending}
-			onExecute={() => run(() => executeDraw(snapshot.sessionId))}
-		/>
 	);
 }
