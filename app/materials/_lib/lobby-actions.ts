@@ -32,7 +32,15 @@ export async function joinLobby(sessionId: string): Promise<ActionResult> {
 				{ onConflict: "session_id,member_id" },
 			);
 
-			if (error) return { ok: false, error: error.message };
+			if (error) {
+				// La policy participants_insert_member exige sesión en lobby;
+				// si avanzó entre el chequeo y el upsert, PostgREST devuelve
+				// el RLS en inglés — lo traducimos al mensaje de dominio.
+				if (error.code === "42501") {
+					return { ok: false, error: "El lobby no está abierto." };
+				}
+				return { ok: false, error: error.message };
+			}
 		},
 		revalidate: async () => [lobbyPath(sessionId), roomPath(sessionId)],
 	});

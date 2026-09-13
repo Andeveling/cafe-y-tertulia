@@ -1,0 +1,106 @@
+/**
+ * Contrato de sincronización de la Sala: mutación del actor, apply-latest
+ * de snapshots solapados, y cuándo refetch al recuperar el canal.
+ */
+
+export type RoomActionResult = { ok: true } | { ok: false; error: string };
+
+export type RoomChannelStatus =
+	| "SUBSCRIBED"
+	| "CHANNEL_ERROR"
+	| "TIMED_OUT"
+	| "CLOSED"
+	| "JOINING"
+	| string;
+
+/**
+ * Reloj del snapshot: se toma al empezar el fetch, no al terminar, para que
+ * un RSC más lento que leyó datos viejos no pise uno más nuevo.
+ */
+export function snapshotAsOf(nowMs = Date.now()): number {
+	return nowMs;
+}
+
+/** Un snapshot más viejo o del mismo reloj no pisa uno ya aplicado. */
+export function shouldApplySnapshot(
+	appliedAsOf: number,
+	incomingAsOf: number,
+): boolean {
+	return incomingAsOf > appliedAsOf;
+}
+
+export function pickLatestRoomFrame<T extends { asOf: number }>(
+	held: T,
+	incoming: T,
+): T {
+	return shouldApplySnapshot(held.asOf, incoming.asOf) ? incoming : held;
+}
+
+export type RoomSurface = "open" | "closed" | "inactive";
+
+/** Rama de la Sala: viva, finalizada, u otra. */
+export function roomSurface(status: string): RoomSurface {
+	if (status === "lobby" || status === "in_progress") return "open";
+	if (status === "closed" || status === "archived") return "closed";
+	return "inactive";
+}
+
+export function nextRefreshGeneration(current: number): number {
+	return current + 1;
+}
+
+/** Una generación anterior no pisa una más nueva ya aplicada. */
+export function shouldApplyRefresh(
+	appliedGeneration: number,
+	incomingGeneration: number,
+): boolean {
+	return incomingGeneration >= appliedGeneration;
+}
+
+/**
+ * Éxito → onSuccess (opcional) y refresh del actor.
+ * Error → onError y no se toma el camino de éxito.
+ */
+export function applyRoomMutationResult(
+	result: RoomActionResult,
+	handlers: {
+		refresh: () => void;
+		onError: (error: string) => void;
+		onSuccess?: () => void;
+	},
+): void {
+	if (!result.ok) {
+		handlers.onError(result.error);
+		return;
+	}
+	handlers.onSuccess?.();
+	handlers.refresh();
+}
+
+/**
+ * Refetch en todo SUBSCRIBED: el join inicial puede llegar después de un
+ * cambio de Etapa, y un re-subscribe recupera eventos perdidos en el corte.
+ */
+export function shouldRefetchOnChannelStatus(
+	status: RoomChannelStatus,
+	_previousStatus?: RoomChannelStatus | null,
+): boolean {
+	return status === "SUBSCRIBED";
+}
+
+/** Mientras el canal no está vivo, el actor y el observador no se congelan. */
+export const ROOM_OFFLINE_REFETCH_MS = 4_000;
+/** Backstop while live: un evento de postgres_changes perdido no congela la Sala. */
+export const ROOM_LIVE_HEARTBEAT_MS = 5_000;
+
+export function roomRefreshIntervalMs(joined: boolean, live: boolean): number {
+	return !joined || !live ? ROOM_OFFLINE_REFETCH_MS : ROOM_LIVE_HEARTBEAT_MS;
+}
+
+export function shouldRefetchOnVisibility(visibilityState: string): boolean {
+	return visibilityState === "visible";
+}
+
+export function roomChannelIsLive(status: RoomChannelStatus): boolean {
+	return status === "SUBSCRIBED";
+}

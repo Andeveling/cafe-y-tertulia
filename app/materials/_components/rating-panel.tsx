@@ -69,6 +69,34 @@ export function RatingPanel({ progress }: Props) {
 					</Card>
 				)}
 
+			{!progress.ratingOpen && !frozen && (
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-base">Votación del material</CardTitle>
+						<CardDescription>
+							{progress.isModerator
+								? "Aún cerrada. Ábrela para que el club vote."
+								: progress.isParticipant
+									? "En espera. El moderador abre la votación en Cierre."
+									: "Solo votan los participantes. Puedes mirar el cierre."}
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			)}
+
+			{progress.ratingOpen &&
+				!progress.isModerator &&
+				!progress.isParticipant && (
+					<Card>
+						<CardHeader>
+							<CardTitle className="text-base">Votación en curso</CardTitle>
+							<CardDescription>
+								Los participantes votan de forma anónima. El resultado aparece
+								al cerrar.
+							</CardDescription>
+						</CardHeader>
+					</Card>
+				)}
 			{progress.ratingOpen && (
 				<>
 					{progress.isModerator && (

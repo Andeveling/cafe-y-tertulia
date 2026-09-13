@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	ArrowLeft01Icon,
 	ArrowRight01Icon,
 	Clock01Icon,
 	EyeIcon,
@@ -11,14 +12,19 @@ import {
 	UserIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CierreStage } from "@/app/materials/_components/cierre-stage";
+import { DebateToolsTray } from "@/app/materials/_components/debate-tools-tray";
 import { DrawCeremonyView } from "@/app/materials/_components/draw-ceremony-view";
 import { StageBar } from "@/app/materials/_components/stage-bar";
 import { StagePanel } from "@/app/materials/_components/stage-panel";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import { useRoomRealtime } from "@/app/materials/_hooks/use-room-realtime";
+import type {
+	MinigameState,
+	TriviaRoundSnapshot,
+} from "@/app/materials/_lib/minigames";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import {
 	advanceRoomStage,
@@ -27,7 +33,9 @@ import {
 	editQuestion,
 	executeDraw,
 	saveQuestion,
+	setSpectator,
 	toggleOptOut,
+	transferModerator,
 } from "@/app/materials/_lib/room-actions";
 import type {
 	RoomParticipant,
@@ -68,7 +76,6 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { ActionResult } from "@/lib/server-action";
 
 type Props = {
 	snapshot: RoomSnapshot;
@@ -76,6 +83,8 @@ type Props = {
 	isModerator: boolean;
 	/** Progreso del rating — presente cuando la Sala está en Cierre. */
 	rating: RatingProgress | null;
+	minigameState?: MinigameState | null;
+	round?: TriviaRoundSnapshot | null;
 };
 
 /**
@@ -118,11 +127,23 @@ const STAGE_HELP: Record<
 	},
 };
 
-export function RoomPanel({ snapshot, userId, isModerator, rating }: Props) {
-	useRoomRealtime(snapshot.sessionId);
+export function RoomPanel({
+	snapshot,
+	userId,
+	isModerator,
+	rating,
+	minigameState = null,
+	round = null,
+}: Props) {
+	const { live } = useRoomRealtime(snapshot.sessionId);
 
 	return (
 		<div className="flex flex-col gap-4">
+			{!live && (
+				<p role="status" className="text-xs text-muted-foreground">
+					Reconectando…
+				</p>
+			)}
 			<StageBar current={snapshot.roomStage} />
 
 			<StageContent
@@ -130,12 +151,14 @@ export function RoomPanel({ snapshot, userId, isModerator, rating }: Props) {
 				userId={userId}
 				isModerator={isModerator}
 				rating={rating}
+				minigameState={minigameState}
+				round={round}
 			/>
 
 			{isModerator &&
-				!(snapshot.roomStage === "debate" && snapshot.debate?.mode === "done") && (
-					<ModeratorNav snapshot={snapshot} />
-				)}
+				!(
+					snapshot.roomStage === "debate" && snapshot.debate?.mode === "done"
+				) && <ModeratorNav snapshot={snapshot} />}
 		</div>
 	);
 }
@@ -147,11 +170,15 @@ function StageContent({
 	userId,
 	isModerator,
 	rating,
+	minigameState,
+	round,
 }: {
 	snapshot: RoomSnapshot;
 	userId: string;
 	isModerator: boolean;
 	rating: RatingProgress | null;
+	minigameState?: MinigameState | null;
+	round?: TriviaRoundSnapshot | null;
 }) {
 	switch (snapshot.roomStage) {
 		case "questions":
@@ -162,6 +189,7 @@ function StageContent({
 					questions={snapshot.questions}
 					participants={snapshot.participants}
 					userId={userId}
+					moderatorId={snapshot.moderatorId}
 				/>
 			);
 		case "presence":
@@ -172,6 +200,9 @@ function StageContent({
 					questions={snapshot.questions}
 					readiness={snapshot.readiness}
 					userId={userId}
+					isModerator={isModerator}
+					moderatorId={snapshot.moderatorId}
+					drawDone={snapshot.draw.done}
 				/>
 			);
 		case "draw":
@@ -190,14 +221,38 @@ function StageContent({
 				? (snapshot.assignments.find((a) => a.assignmentId === activeId)
 						?.authorId ?? null)
 				: null;
+			const total = snapshot.assignments.length;
+			const progress =
+				total > 0
+					? {
+							current:
+								snapshot.debate.mode === "active"
+									? (snapshot.debate.revealOrder ?? 1)
+									: snapshot.debate.mode === "waiting_reveal"
+										? (snapshot.debate.revealOrder ?? 1)
+										: total,
+							total,
+						}
+					: null;
 			return (
-				<StagePanel
-					debate={snapshot.debate}
-					sessionId={snapshot.sessionId}
-					userId={userId}
-					isModerator={isModerator}
-					authorId={authorId}
-				/>
+				<div className="flex flex-col gap-4">
+					<StagePanel
+						debate={snapshot.debate}
+						sessionId={snapshot.sessionId}
+						userId={userId}
+						isModerator={isModerator}
+						authorId={authorId}
+						progress={progress}
+					/>
+					{minigameState && (
+						<DebateToolsTray
+							sessionId={snapshot.sessionId}
+							state={minigameState}
+							round={round ?? null}
+							isModerator={isModerator}
+						/>
+					)}
+				</div>
 			);
 		}
 		case "cierre":
@@ -219,13 +274,24 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 	const { pending, run } = useRoomMutation();
 	const currentIdx = ROOM_STAGE_ORDER.indexOf(snapshot.roomStage);
 	const nextStage = ROOM_STAGE_ORDER[currentIdx + 1] as RoomStage | undefined;
+	const prevStage = (
+		currentIdx > 0 ? ROOM_STAGE_ORDER[currentIdx - 1] : undefined
+	) as RoomStage | undefined;
 
 	if (!nextStage) return null;
 
-	// Adelantar con faltantes pide confirmación explícita que los nombra:
-	// hacia Debate, quiénes no están Listos; hacia Cierre, cuántas
-	// Intervenciones quedan sin completar.
 	const members = snapshot.participants.filter((p) => p.role === "member");
+	// Presentes es el paso de unirse: sin members se puede ir ahí.
+	// Sorteo y Debate sí exigen al menos un participante.
+	const isEmpty =
+		members.length === 0 && (nextStage === "draw" || nextStage === "debate");
+	// Con sorteo ya ejecutado no se vuelve a preguntas/presentes (el guard
+	// SQL lo rechaza; aquí ni se ofrece).
+	const backBlocked =
+		!!prevStage &&
+		snapshot.draw.done &&
+		(prevStage === "questions" || prevStage === "presence");
+	const showBack = !!prevStage && !backBlocked;
 	const notReady = members.filter(
 		(p) => !snapshot.questions.some((q) => q.authorId === p.memberId),
 	);
@@ -241,6 +307,49 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 
 	function handleAdvance() {
 		run(() => advanceRoomStage(snapshot.sessionId, nextStage!));
+	}
+
+	function handleBack() {
+		if (!prevStage) return;
+		run(() => advanceRoomStage(snapshot.sessionId, prevStage));
+	}
+
+	const backButton = showBack ? (
+		<Button variant="outline" disabled={pending} onClick={handleBack}>
+			<HugeiconsIcon
+				icon={ArrowLeft01Icon}
+				strokeWidth={2}
+				data-icon="inline-start"
+				aria-hidden="true"
+			/>
+			Volver a {ROOM_STAGE_LABELS[prevStage!]}
+		</Button>
+	) : (
+		<span />
+	);
+
+	// Sin participantes el avance queda bloqueado del todo: sin diálogo de
+	// "avanzar de todos modos".
+	if (isEmpty) {
+		return (
+			<div className="flex items-center justify-between gap-2">
+				{backButton}
+				<div className="flex flex-col items-end gap-1">
+					<Button variant="default" disabled>
+						Continuar a {ROOM_STAGE_LABELS[nextStage!]}
+						<HugeiconsIcon
+							icon={ArrowRight01Icon}
+							strokeWidth={2}
+							data-icon="inline-end"
+							aria-hidden="true"
+						/>
+					</Button>
+					<p className="text-xs text-muted-foreground">
+						Se necesita al menos un participante para avanzar.
+					</p>
+				</div>
+			</div>
+		);
 	}
 
 	const button = (
@@ -263,7 +372,8 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 
 	if (!advanceWarning) {
 		return (
-			<div className="flex justify-end">
+			<div className="flex items-center justify-between gap-2">
+				{backButton}
 				<Tooltip>
 					<TooltipTrigger render={button} />
 					<TooltipContent
@@ -293,7 +403,8 @@ function ModeratorNav({ snapshot }: { snapshot: RoomSnapshot }) {
 	}
 
 	return (
-		<div className="flex justify-end">
+		<div className="flex items-center justify-between gap-2">
+			{backButton}
 			<Dialog>
 				<DialogTrigger render={button} />
 				<DialogContent>
@@ -336,14 +447,16 @@ function QuestionsStage({
 	questions,
 	participants,
 	userId,
+	moderatorId,
 }: {
 	sessionId: string;
 	materialId: string | null;
 	questions: RoomQuestion[];
 	participants: RoomParticipant[];
 	userId: string;
+	moderatorId: string | null;
 }) {
-	const [pending, start] = useTransition();
+	const { pending, run } = useRoomMutation();
 	const [text, setText] = useState("");
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [draft, setDraft] = useState("");
@@ -365,15 +478,13 @@ function QuestionsStage({
 	function handleSubmit() {
 		const trimmed = text.trim();
 		if (!trimmed) return;
-		start(async () => {
-			const r = await saveQuestion(sessionId, materialId, trimmed);
-			if (!r.ok) {
-				toast.error(r.error);
-			} else {
+		run(
+			() => saveQuestion(sessionId, materialId, trimmed),
+			() => {
 				setText("");
 				toast.success(`Pregunta ${myCount + 1} enviada`);
-			}
-		});
+			},
+		);
 	}
 
 	function handleStartEdit(q: RoomQuestion) {
@@ -392,29 +503,25 @@ function QuestionsStage({
 			handleCancelEdit();
 			return;
 		}
-		start(async () => {
-			const r = await editQuestion(q.id, sessionId, trimmed);
-			if (!r.ok) {
-				toast.error(r.error);
-			} else {
+		run(
+			() => editQuestion(q.id, sessionId, trimmed),
+			() => {
 				handleCancelEdit();
 				toast.success("Pregunta actualizada");
-			}
-		});
+			},
+		);
 	}
 
 	function handleConfirmDelete() {
 		const id = confirmingDeleteId;
 		if (!id) return;
-		start(async () => {
-			const r = await deleteQuestion(id, sessionId);
-			if (!r.ok) {
-				toast.error(r.error);
-			} else {
+		run(
+			() => deleteQuestion(id, sessionId),
+			() => {
 				toast.success("Pregunta borrada");
-			}
-			setConfirmingDeleteId(null);
-		});
+				setConfirmingDeleteId(null);
+			},
+		);
 	}
 
 	function handleEditKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -597,6 +704,11 @@ function QuestionsStage({
 								>
 									<span>
 										{p.displayName}
+										{p.memberId === moderatorId && (
+											<Badge variant="secondary" className="ml-2">
+												Modera
+											</Badge>
+										)}
 										{p.role === "spectator" && (
 											<Badge variant="outline" className="ml-2">
 												Espectador
@@ -696,10 +808,8 @@ function WaitingBanner({
 	ready: number;
 	total: number;
 }) {
-	if (kind === "self-pending") return null;
-
 	const config: Record<
-		Exclude<WaitingKind, "self-pending">,
+		WaitingKind,
 		{
 			icon: typeof Clock01Icon;
 			title: string;
@@ -707,6 +817,13 @@ function WaitingBanner({
 			tone: "primary" | "muted";
 		}
 	> = {
+		"self-pending": {
+			icon: Clock01Icon,
+			title: "Únete a la mesa",
+			description:
+				"Confirma tu asistencia para entrar al sorteo. Listo = presente + al menos 1 pregunta.",
+			tone: "muted",
+		},
 		spectator: {
 			icon: EyeIcon,
 			title: "Estás mirando como espectador",
@@ -765,17 +882,25 @@ function PresenceStage({
 	questions,
 	readiness,
 	userId,
+	isModerator,
+	moderatorId,
+	drawDone,
 }: {
 	sessionId: string;
 	participants: RoomParticipant[];
 	questions: RoomQuestion[];
 	readiness: RoomReadiness;
 	userId: string;
+	isModerator: boolean;
+	moderatorId: string | null;
+	drawDone: boolean;
 }) {
 	const { pending, run } = useRoomMutation();
 	const me = participants.find((p) => p.memberId === userId);
 	const members = participants.filter((p) => p.role === "member");
 	const spectators = participants.filter((p) => p.role === "spectator");
+	const moderatorName =
+		participants.find((p) => p.memberId === moderatorId)?.displayName ?? null;
 
 	const waitingKind: WaitingKind = !me
 		? "self-pending"
@@ -798,6 +923,26 @@ function PresenceStage({
 		run(() => toggleOptOut(sessionId, me.optOut));
 	}
 
+	function handleSpectator(memberId: string, makeSpectator: boolean) {
+		run(
+			() => setSpectator(sessionId, memberId, makeSpectator),
+			() => {
+				toast.success(
+					makeSpectator ? "Pasado a espectador" : "Espectador retirado",
+				);
+			},
+		);
+	}
+
+	function handleTransfer(newModeratorId: string) {
+		run(
+			() => transferModerator(sessionId, newModeratorId),
+			() => {
+				toast.success("Moderación cedida");
+			},
+		);
+	}
+
 	return (
 		<TooltipProvider>
 			<div className="flex flex-col gap-6">
@@ -813,6 +958,12 @@ function PresenceStage({
 						{readiness.ready}/{readiness.total} listos
 					</p>
 				</header>
+
+				{moderatorName && (
+					<p className="text-sm text-muted-foreground">
+						Modera {moderatorName}
+					</p>
+				)}
 
 				<WaitingBanner
 					kind={waitingKind}
@@ -842,6 +993,7 @@ function PresenceStage({
 										/>
 									</span>
 								</th>
+								{isModerator && <th className="py-2 font-medium">Mesa</th>}
 							</tr>
 						</thead>
 						<tbody>
@@ -862,17 +1014,25 @@ function PresenceStage({
 										}
 									>
 										<td className="py-3 pr-4">
-											<span className="inline-flex items-center gap-1.5">
+											<span className="inline-flex flex-wrap items-center gap-1.5">
 												{p.displayName}
 												{isYou && <SessionMarker />}
+												{p.memberId === moderatorId && (
+													<Badge variant="secondary">Modera</Badge>
+												)}
 											</span>
 										</td>
 										<td className="py-3 pr-4">
-											<StatusIcon
-												ok={hasQuestion}
-												okLabel="Pregunta enviada"
-												pendingLabel="Sin pregunta"
-											/>
+											<span className="inline-flex items-center gap-1.5">
+												<StatusIcon
+													ok={hasQuestion}
+													okLabel="Pregunta enviada"
+													pendingLabel="Sin pregunta"
+												/>
+												<span className="text-xs text-muted-foreground">
+													{hasQuestion ? "enviada" : "sin pregunta"}
+												</span>
+											</span>
 										</td>
 										<td className="py-3">
 											{isYou && me?.role === "member" ? (
@@ -882,16 +1042,53 @@ function PresenceStage({
 														checked={!me.optOut}
 														disabled={pending}
 														onCheckedChange={handleSorteo}
+														aria-label="Entrar al sorteo"
 													/>
+													<span className="text-xs text-muted-foreground">
+														{me.optOut ? "Sin sorteo" : "En sorteo"}
+													</span>
 												</label>
 											) : (
-												<StatusIcon
-													ok={!p.optOut}
-													okLabel="Entra al sorteo"
-													pendingLabel="Fuera del sorteo"
-												/>
+												<span className="inline-flex items-center gap-1.5">
+													<StatusIcon
+														ok={!p.optOut}
+														okLabel="Entra al sorteo"
+														pendingLabel="Fuera del sorteo"
+													/>
+													<span className="text-xs text-muted-foreground">
+														{p.optOut ? "Sin sorteo" : "En sorteo"}
+													</span>
+												</span>
 											)}
 										</td>
+										{isModerator && (
+											<td className="py-3">
+												<div className="flex flex-wrap gap-1">
+													{!isYou && !drawDone && (
+														<Button
+															variant="ghost"
+															size="xs"
+															disabled={pending}
+															onClick={() => handleSpectator(p.memberId, true)}
+														>
+															A espectador
+														</Button>
+													)}
+													{!isYou &&
+														!drawDone &&
+														p.memberId !== moderatorId && (
+															<Button
+																variant="ghost"
+																size="xs"
+																disabled={pending}
+																onClick={() => handleTransfer(p.memberId)}
+															>
+																Ceder moderación
+															</Button>
+														)}
+												</div>
+											</td>
+										)}
 									</tr>
 								);
 							})}
@@ -900,9 +1097,31 @@ function PresenceStage({
 				</div>
 
 				{spectators.length > 0 && (
-					<p className="text-xs text-muted-foreground">
-						Espectadores · {spectators.map((s) => s.displayName).join(" · ")}
-					</p>
+					<div className="flex flex-col gap-2">
+						<p className="text-xs text-muted-foreground">
+							Espectadores · {spectators.map((s) => s.displayName).join(" · ")}
+						</p>
+						{isModerator && (
+							<ul className="flex flex-col gap-1">
+								{spectators.map((s) => (
+									<li
+										key={s.memberId}
+										className="flex items-center justify-between text-sm"
+									>
+										<span>{s.displayName}</span>
+										<Button
+											variant="ghost"
+											size="xs"
+											disabled={pending}
+											onClick={() => handleSpectator(s.memberId, false)}
+										>
+											Retirar
+										</Button>
+									</li>
+								))}
+							</ul>
+						)}
+					</div>
 				)}
 			</div>
 		</TooltipProvider>

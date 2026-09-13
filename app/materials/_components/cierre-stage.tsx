@@ -1,8 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { RatingPanel } from "@/app/materials/_components/rating-panel";
+import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import { closeSession } from "@/app/materials/_lib/room-actions";
 import type { RoomCierreSnapshot } from "@/app/materials/_lib/room-types";
@@ -40,6 +40,23 @@ type Props = {
  * "Cerrar sesión" con confirmación.
  */
 export function CierreStage({ sessionId, rating, cierre, isModerator }: Props) {
+	const router = useRouter();
+	const ratingFailed = !rating;
+	const blocked =
+		ratingFailed ||
+		(rating?.ratingOpen ?? false) ||
+		cierre.openTrivia > 0 ||
+		cierre.openTakes > 0;
+	const blockReason = ratingFailed
+		? "No se pudo cargar el rating. Reintenta antes de cerrar."
+		: rating?.ratingOpen
+			? "Cierra la votación del rating antes de cerrar."
+			: cierre.openTrivia > 0
+				? "Cierra la trivia en curso antes de cerrar."
+				: cierre.openTakes > 0
+					? "Cierra los takes abiertos antes de cerrar."
+					: null;
+
 	return (
 		<div className="flex flex-col gap-4">
 			<Card>
@@ -52,16 +69,48 @@ export function CierreStage({ sessionId, rating, cierre, isModerator }: Props) {
 				</CardHeader>
 			</Card>
 
-			{rating && <RatingPanel progress={rating} />}
+			{rating ? (
+				<RatingPanel progress={rating} />
+			) : (
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-base">Rating no disponible</CardTitle>
+						<CardDescription>
+							No se pudo cargar la votación. Reintenta para ver el estado real
+							antes de cerrar.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => router.refresh()}
+						>
+							Reintentar
+						</Button>
+					</CardContent>
+				</Card>
+			)}
+
+			{!isModerator && (
+				<p role="status" className="text-sm text-muted-foreground">
+					Esperando al moderador para cerrar la sesión.
+				</p>
+			)}
 
 			{isModerator && (
 				<>
 					<PendingChecklist
 						ratingOpen={rating?.ratingOpen ?? false}
+						ratingFailed={ratingFailed}
 						openTrivia={cierre.openTrivia}
 						openTakes={cierre.openTakes}
 					/>
-					<CloseSessionDialog sessionId={sessionId} />
+					<CloseSessionDialog
+						sessionId={sessionId}
+						blocked={blocked}
+						blockReason={blockReason}
+					/>
 				</>
 			)}
 		</div>
@@ -77,15 +126,22 @@ type PendingItem = {
 
 function PendingChecklist({
 	ratingOpen,
+	ratingFailed,
 	openTrivia,
 	openTakes,
 }: {
 	ratingOpen: boolean;
+	ratingFailed: boolean;
 	openTrivia: number;
 	openTakes: number;
 }) {
 	const items: PendingItem[] = [
-		{ label: "Rating del material abierto", pending: ratingOpen },
+		{
+			label: ratingFailed
+				? "Rating sin cargar (reintenta)"
+				: "Rating del material abierto",
+			pending: ratingFailed || ratingOpen,
+		},
 		{
 			label:
 				openTrivia > 0 ? `Trivia en curso (${openTrivia})` : "Trivia en curso",
@@ -129,28 +185,40 @@ function PendingChecklist({
 
 // ─── Cerrar sesión con confirmación ─────────────────────────
 
-function CloseSessionDialog({ sessionId }: { sessionId: string }) {
-	const [pending, start] = useTransition();
+function CloseSessionDialog({
+	sessionId,
+	blocked,
+	blockReason,
+}: {
+	sessionId: string;
+	blocked: boolean;
+	blockReason: string | null;
+}) {
+	const { pending, run } = useRoomMutation();
 
 	function handleClose() {
-		start(async () => {
-			const r = await closeSession(sessionId);
-			if (!r.ok) toast.error(r.error);
-		});
+		run(() => closeSession(sessionId));
 	}
 
 	return (
-		<div className="flex justify-end">
+		<div className="flex flex-col items-end gap-1">
+			{blockReason && (
+				<p role="status" className="text-xs text-muted-foreground">
+					{blockReason}
+				</p>
+			)}
 			<Dialog>
-				<DialogTrigger render={<Button variant="destructive" size="sm" />}>
+				<DialogTrigger
+					render={<Button variant="destructive" size="sm" disabled={blocked} />}
+				>
 					Cerrar sesión
 				</DialogTrigger>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>¿Cerrar la sesión?</DialogTitle>
 						<DialogDescription>
-							Se consolidan los datos de la tertulia y el rating se congela. La
-							acción no se puede deshacer.
+							Se consolidan los datos de la tertulia y el rating se congela.
+							Después solo caben correcciones puntuales del moderador.
 						</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>

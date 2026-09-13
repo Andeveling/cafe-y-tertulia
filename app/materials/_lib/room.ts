@@ -8,6 +8,7 @@ import {
 	asNumber,
 	asString,
 } from "./json-helpers";
+import { snapshotAsOf } from "./room-sync";
 import type {
 	AssignmentState,
 	DrawStatus,
@@ -33,6 +34,7 @@ export async function getRoomSnapshot(
 	supabase: RoomClient,
 	sessionId: string,
 ): Promise<RoomSnapshot | null> {
+	const asOf = snapshotAsOf();
 	const { data, error } = await supabase.rpc("room_snapshot", {
 		target_session_id: sessionId,
 	});
@@ -139,6 +141,7 @@ export async function getRoomSnapshot(
 		range: asNullString(row.range),
 		status: row.status as Database["public"]["Enums"]["session_status"],
 		moderatorId: typeof row.moderator_id === "string" ? row.moderator_id : null,
+		asOf,
 		roomStage:
 			(row.room_stage as Database["public"]["Enums"]["room_stage"]) ??
 			"questions",

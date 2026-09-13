@@ -201,6 +201,25 @@ export async function setSpectator(
 	});
 }
 
+/** El Moderador cede la moderación a otro participante (lobby, pre-sorteo). */
+export async function transferModerator(
+	sessionId: string,
+	newModeratorId: string,
+): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			const { error } = await supabase.rpc("transfer_moderator", {
+				target_session_id: sessionId,
+				new_moderator_id: newModeratorId,
+			});
+
+			if (error) return { ok: false, error: error.message };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
 // ─── Debate actions (consolidadas de stage-actions.ts) ──────
 
 /** Revela la siguiente asignación oculta (solo Moderador). */

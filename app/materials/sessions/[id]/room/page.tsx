@@ -1,12 +1,16 @@
 import { notFound, redirect } from "next/navigation";
-import { RoomClosedView } from "@/app/materials/_components/room-closed-view";
-import { RoomPanel } from "@/app/materials/_components/room-panel";
+import { RoomSessionView } from "@/app/materials/_components/room-session-view";
+import {
+	getMinigameState,
+	getTriviaRoundSnapshot,
+} from "@/app/materials/_lib/minigames";
 import { getRatingProgress } from "@/app/materials/_lib/rating";
 import { getRoomSnapshot } from "@/app/materials/_lib/room";
-import { Badge } from "@/components/ui/badge";
+import { roomSurface } from "@/app/materials/_lib/room-sync";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Sala · Café y Tertulia" };
+export const dynamic = "force-dynamic";
 
 export default async function RoomPage({
 	params,
@@ -23,64 +27,31 @@ export default async function RoomPage({
 	const snapshot = await getRoomSnapshot(supabase, sessionId);
 	if (!snapshot) notFound();
 
-	// La Sala vive en lobby (preguntas/presentes/sorteo) e in_progress (debate
-	// y cierre); cualquier otro estado técnico (preparation, closed, archived)
-	// no tiene Sala activa.
-	if (snapshot.status !== "lobby" && snapshot.status !== "in_progress") {
-		if (snapshot.status === "closed" || snapshot.status === "archived") {
-			const rating = await getRatingProgress(supabase, sessionId);
-			const moderatorName =
-				snapshot.participants.find(
-					(p) => p.memberId === snapshot.moderatorId,
-				)?.displayName ?? null;
-			return (
-				<RoomClosedView
-					materialId={snapshot.materialId}
-					status={snapshot.status}
-					range={snapshot.range}
-					moderatorName={moderatorName}
-					participantsCount={snapshot.participants.length}
-					questionsCount={snapshot.questions.length}
-					rating={
-						rating
-							? { avg: rating.ratingAvg, count: rating.ratingCount }
-							: null
-					}
-				/>
-			);
-		}
-		return (
-			<main className="mx-auto flex w-full max-w-lg flex-col gap-6 p-6">
-				<p className="text-sm text-muted-foreground">
-					Esta sesión no está activa.
-				</p>
-			</main>
-		);
-	}
-
-	// En Cierre la Sala también muestra la votación del rating.
+	const surface = roomSurface(snapshot.status);
 	const rating =
-		snapshot.roomStage === "cierre"
-			? await getRatingProgress(supabase, sessionId)
+		surface === "closed" ||
+		snapshot.roomStage === "cierre" ||
+		snapshot.roomStage === "debate"
+			? await getRatingProgress(supabase, sessionId).catch(() => null)
 			: null;
 
-	return (
-		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-6 md:max-w-4xl md:px-8 md:py-8 lg:max-w-5xl lg:py-10">
-			<header className="flex flex-col gap-2">
-				<div className="flex flex-wrap gap-2">
-					<Badge variant="outline">Sala</Badge>
-				</div>
-				<h1 className="font-heading text-2xl font-semibold">
-					{snapshot.range || "Sesión"}
-				</h1>
-			</header>
+	const minigameState =
+		surface === "open" && snapshot.roomStage === "debate"
+			? await getMinigameState(supabase, sessionId).catch(() => null)
+			: null;
+	const roundId =
+		minigameState?.liveRoundId ?? minigameState?.lastBoardRoundId ?? null;
+	const round = roundId
+		? await getTriviaRoundSnapshot(supabase, roundId).catch(() => null)
+		: null;
 
-			<RoomPanel
-				snapshot={snapshot}
-				userId={user.id}
-				isModerator={snapshot.moderatorId === user.id}
-				rating={rating}
-			/>
-		</main>
+	return (
+		<RoomSessionView
+			snapshot={snapshot}
+			rating={rating}
+			userId={user.id}
+			minigameState={minigameState}
+			round={round}
+		/>
 	);
 }

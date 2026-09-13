@@ -134,6 +134,7 @@ function WaitingDraw({
 	pending: boolean;
 	onExecute?: () => void;
 }) {
+	const isEmpty = readiness.total === 0;
 	return (
 		<div className="flex flex-col items-center gap-8 py-10 text-center">
 			<div className="flex size-16 items-center justify-center rounded-2xl bg-primary/15 text-primary">
@@ -160,12 +161,21 @@ function WaitingDraw({
 				<span className="text-muted-foreground">/{readiness.total} listos</span>
 			</p>
 			{isModerator ? (
-				<Button disabled={pending} onClick={onExecute}>
-					Sortear
-				</Button>
+				isEmpty ? (
+					<div className="flex flex-col items-center gap-1">
+						<Button disabled>Sortear</Button>
+						<p className="text-xs text-muted-foreground">
+							Se necesita al menos un participante para sortear.
+						</p>
+					</div>
+				) : (
+					<Button disabled={pending} onClick={onExecute}>
+						Sortear
+					</Button>
+				)
 			) : (
 				<p className="text-sm text-muted-foreground">
-					Espera a que el moderador sorteé.
+					Espera a que el moderador haga el sorteo.
 				</p>
 			)}
 		</div>

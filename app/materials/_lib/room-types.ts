@@ -117,6 +117,11 @@ export type RoomSnapshot = {
 	range: string | null;
 	status: Database["public"]["Enums"]["session_status"];
 	moderatorId: string | null;
+	/**
+	 * Reloj del fetch (ms). Un RSC más lento con asOf menor no pisa uno
+	 * más nuevo ya aplicado en el cliente.
+	 */
+	asOf: number;
 	roomStage: RoomStage;
 	participants: RoomParticipant[];
 	questions: RoomQuestion[];

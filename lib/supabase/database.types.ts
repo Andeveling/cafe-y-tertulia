@@ -1118,6 +1118,10 @@ export type Database = {
 				Args: { target_round_id: string };
 				Returns: Json;
 			};
+			transfer_moderator: {
+				Args: { new_moderator_id: string; target_session_id: string };
+				Returns: undefined;
+			};
 			vote_take: {
 				Args: {
 					p_position: Database["public"]["Enums"]["take_position"];
