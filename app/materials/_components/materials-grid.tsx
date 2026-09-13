@@ -6,6 +6,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
+import { MaterialCover } from "@/app/materials/_components/material-cover";
 import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,8 @@ type MaterialWithSessionsCount = {
 	author: string;
 	status: string;
 	created_at: string;
+	image_url: string | null;
+	source_url: string | null;
 	sessions_count: number;
 	rating_avg: number | null;
 	rating_count: number;
@@ -57,15 +60,25 @@ export function MaterialsGrid({
 				<li key={m.id}>
 					<Link href={`/materials/${m.id}`} className="block group h-full">
 						<Card className="h-full overflow-hidden py-0 gap-0 hover:shadow-md transition-all hover:-translate-y-0.5">
-							<div className="h-28 bg-gradient-to-br from-secondary via-secondary/60 to-accent/60 p-4 flex items-start justify-between">
-								<HugeiconsIcon
-									icon={KIND_ICON[m.kind] ?? Book01Icon}
-									className="size-10 text-primary/40"
-									aria-hidden="true"
-								/>
+							<div className="relative h-28 overflow-hidden bg-gradient-to-br from-secondary via-secondary/60 to-accent/60">
+								<div className="absolute inset-0">
+									<MaterialCover
+										src={m.image_url}
+										alt=""
+										fallback={
+											<div className="flex h-full w-full items-start p-4">
+												<HugeiconsIcon
+													icon={KIND_ICON[m.kind] ?? Book01Icon}
+													className="size-10 text-primary/40"
+													aria-hidden="true"
+												/>
+											</div>
+										}
+									/>
+								</div>
 								<Badge
 									variant={m.status === "in_progress" ? "default" : "secondary"}
-									className="text-xs"
+									className="absolute top-4 right-4 text-xs"
 								>
 									{MATERIAL_STATUS_LABELS[m.status]}
 								</Badge>

@@ -333,9 +333,11 @@ export type Database = {
 					created_at: string;
 					created_by: string;
 					id: string;
+					image_url: string | null;
 					kind: Database["public"]["Enums"]["material_kind"];
 					rating_avg: number | null;
 					rating_count: number;
+					source_url: string | null;
 					status: Database["public"]["Enums"]["material_status"];
 					title: string;
 				};
@@ -344,9 +346,11 @@ export type Database = {
 					created_at?: string;
 					created_by: string;
 					id?: string;
+					image_url?: string | null;
 					kind: Database["public"]["Enums"]["material_kind"];
 					rating_avg?: number | null;
 					rating_count?: number;
+					source_url?: string | null;
 					status?: Database["public"]["Enums"]["material_status"];
 					title: string;
 				};
@@ -355,9 +359,11 @@ export type Database = {
 					created_at?: string;
 					created_by?: string;
 					id?: string;
+					image_url?: string | null;
 					kind?: Database["public"]["Enums"]["material_kind"];
 					rating_avg?: number | null;
 					rating_count?: number;
+					source_url?: string | null;
 					status?: Database["public"]["Enums"]["material_status"];
 					title?: string;
 				};

@@ -28,6 +28,8 @@ export type MaterialWithSessionsCount = {
 	author: string;
 	status: MaterialStatus;
 	created_at: string;
+	image_url: string | null;
+	source_url: string | null;
 	sessions_count: number;
 	rating_avg: number | null;
 	rating_count: number;
@@ -40,6 +42,8 @@ export type MaterialDetail = {
 	author: string;
 	status: MaterialStatus;
 	created_at: string;
+	image_url: string | null;
+	source_url: string | null;
 	rating_avg: number | null;
 	rating_count: number;
 	sessions: Omit<
@@ -64,7 +68,7 @@ export async function getMaterials(
 	const { data, error } = await supabase
 		.from("materials")
 		.select(
-			"id, title, kind, author, status, created_at, rating_avg, rating_count, sessions(id)",
+			"id, title, kind, author, status, created_at, image_url, source_url, rating_avg, rating_count, sessions(id)",
 		)
 		.order("created_at", { ascending: false });
 
@@ -77,6 +81,8 @@ export async function getMaterials(
 		author: material.author,
 		status: material.status,
 		created_at: material.created_at,
+		image_url: material.image_url,
+		source_url: material.source_url,
 		sessions_count: material.sessions?.length ?? 0,
 		rating_avg: material.rating_avg,
 		rating_count: material.rating_count,
@@ -94,7 +100,7 @@ export async function getMaterial(
 	const { data, error } = await supabase
 		.from("materials")
 		.select(
-			"id, title, kind, author, status, created_at, rating_avg, rating_count, sessions(id, range, status, scheduled_at, created_at, rating_avg, rating_count)",
+			"id, title, kind, author, status, created_at, image_url, source_url, rating_avg, rating_count, sessions(id, range, status, scheduled_at, created_at, rating_avg, rating_count)",
 		)
 		.eq("id", id)
 		.single();
@@ -108,6 +114,8 @@ export async function getMaterial(
 		author: data.author,
 		status: data.status,
 		created_at: data.created_at,
+		image_url: data.image_url,
+		source_url: data.source_url,
 		rating_avg: data.rating_avg,
 		rating_count: data.rating_count,
 		sessions: [...(data.sessions ?? [])].sort((a, b) =>

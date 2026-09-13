@@ -7,6 +7,7 @@ import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { optionalHttpsUrl } from "@/app/materials/_lib/material-urls";
 import { createMaterial } from "@/app/materials/_lib/materials-actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +42,8 @@ const materialFormSchema = z.object({
 	title: z.string().trim().min(1, "El título es obligatorio."),
 	author: z.string().trim().min(1, "El autor es obligatorio."),
 	kind: z.enum(MATERIAL_KIND_OPTIONS),
+	imageUrl: optionalHttpsUrl("La imagen").optional(),
+	sourceUrl: optionalHttpsUrl("La fuente").optional(),
 });
 
 type MaterialFormValues = z.infer<typeof materialFormSchema>;
@@ -53,12 +56,20 @@ export function MaterialForm({ onSuccess }: { onSuccess?: () => void } = {}) {
 			title: "",
 			author: "",
 			kind: "book",
+			imageUrl: "",
+			sourceUrl: "",
 		},
 	});
 
 	function onSubmit(data: MaterialFormValues) {
 		startTransition(async () => {
-			const result = await createMaterial(data);
+			const result = await createMaterial({
+				title: data.title,
+				kind: data.kind,
+				author: data.author,
+				imageUrl: data.imageUrl,
+				sourceUrl: data.sourceUrl,
+			});
 			if ("error" in result) {
 				toast.error(result.error);
 			} else {
@@ -144,6 +155,43 @@ export function MaterialForm({ onSuccess }: { onSuccess?: () => void } = {}) {
 									</SelectGroup>
 								</SelectContent>
 							</Select>
+							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+						</Field>
+					)}
+				/>
+				<Controller
+					name="imageUrl"
+					control={form.control}
+					render={({ field, fieldState }) => (
+						<Field data-invalid={fieldState.invalid}>
+							<FieldLabel htmlFor={field.name}>Imagen (opcional)</FieldLabel>
+							<Input
+								{...field}
+								value={field.value ?? ""}
+								id={field.name}
+								inputMode="url"
+								placeholder="https://…"
+								aria-invalid={fieldState.invalid}
+							/>
+							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+						</Field>
+					)}
+				/>
+
+				<Controller
+					name="sourceUrl"
+					control={form.control}
+					render={({ field, fieldState }) => (
+						<Field data-invalid={fieldState.invalid}>
+							<FieldLabel htmlFor={field.name}>Fuente (opcional)</FieldLabel>
+							<Input
+								{...field}
+								value={field.value ?? ""}
+								id={field.name}
+								inputMode="url"
+								placeholder="https://…"
+								aria-invalid={fieldState.invalid}
+							/>
 							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
 						</Field>
 					)}

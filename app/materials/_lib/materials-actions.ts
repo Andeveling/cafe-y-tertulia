@@ -5,19 +5,40 @@ import { redirect } from "next/navigation";
 import { type ActionResult, runServerAction } from "@/lib/server-action";
 import type { MaterialKind, SessionStatus } from "./constants";
 import { SESSION_NEXT_STATUS } from "./constants";
+import { isValidMaterialUrl, toNullableUrl } from "./material-urls";
 
-export async function createMaterial(input: {
+export type MaterialInput = {
 	title: string;
 	kind: MaterialKind;
 	author: string;
-}): Promise<ActionResult> {
+	imageUrl?: string | null;
+	sourceUrl?: string | null;
+};
+
+function materialUrlsOrError(input: MaterialInput): ActionResult | null {
+	if (!isValidMaterialUrl(input.imageUrl)) {
+		return { ok: false, error: "La imagen debe empezar por https://" };
+	}
+	if (!isValidMaterialUrl(input.sourceUrl)) {
+		return { ok: false, error: "La fuente debe empezar por https://" };
+	}
+	return null;
+}
+
+export async function createMaterial(
+	input: MaterialInput,
+): Promise<ActionResult> {
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase, user }) => {
+			const urlError = materialUrlsOrError(input);
+			if (urlError) return urlError;
 			const { error } = await supabase.from("materials").insert({
 				title: input.title.trim(),
 				kind: input.kind,
 				author: input.author.trim(),
+				image_url: toNullableUrl(input.imageUrl),
+				source_url: toNullableUrl(input.sourceUrl),
 				created_by: user!.id,
 			});
 
@@ -82,19 +103,23 @@ export async function createSession(input: {
 	materialId?: string | null;
 	range?: string | null;
 	scheduledAt?: string | null;
-	material?: { title: string; kind: MaterialKind; author: string };
+	material?: MaterialInput;
 }): Promise<ActionResult | { ok: true; sessionId: string }> {
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase, user }) => {
 			let materialId = input.materialId ?? null;
 			if (input.material) {
+				const urlError = materialUrlsOrError(input.material);
+				if (urlError) return urlError;
 				const { data, error } = await supabase
 					.from("materials")
 					.insert({
 						title: input.material.title.trim(),
 						kind: input.material.kind,
 						author: input.material.author.trim(),
+						image_url: toNullableUrl(input.material.imageUrl),
+						source_url: toNullableUrl(input.material.sourceUrl),
 						created_by: user!.id,
 					})
 					.select("id")

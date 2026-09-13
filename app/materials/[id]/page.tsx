@@ -14,6 +14,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdvanceButton } from "@/app/materials/_components/advance-button";
+import { MaterialCover } from "@/app/materials/_components/material-cover";
 import { MaterialQuestionsSection } from "@/app/materials/_components/material-questions-section";
 import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { SessionForm } from "@/app/materials/_components/session-form";
@@ -122,12 +123,20 @@ export default async function MaterialDetailPage({
 				{/* ── Columna izquierda: info del material ── */}
 				<div className="flex flex-col gap-5 lg:col-span-4">
 					<article className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-						<div className="grid h-36 place-items-center bg-accent">
-							<HugeiconsIcon
-								icon={KIND_ICON[material.kind] ?? Book01Icon}
-								className="size-12 text-accent-foreground/60"
-								strokeWidth={1.6}
-								aria-hidden="true"
+						<div className="relative h-36 overflow-hidden bg-accent">
+							<MaterialCover
+								src={material.image_url}
+								alt=""
+								fallback={
+									<div className="grid h-full w-full place-items-center">
+										<HugeiconsIcon
+											icon={KIND_ICON[material.kind] ?? Book01Icon}
+											className="size-12 text-accent-foreground/60"
+											strokeWidth={1.6}
+											aria-hidden="true"
+										/>
+									</div>
+								}
 							/>
 						</div>
 
@@ -148,6 +157,16 @@ export default async function MaterialDetailPage({
 								<p className="mt-1 italic text-muted-foreground">
 									{material.author}
 								</p>
+								{material.source_url && (
+									<a
+										href={material.source_url}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="mt-2 inline-flex font-medium text-primary underline-offset-4 hover:underline"
+									>
+										Ver recurso ↗
+									</a>
+								)}
 							</div>
 
 							<div className="flex flex-wrap items-center gap-2">
