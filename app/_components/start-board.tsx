@@ -4,7 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { RosterMember } from "@/hooks/use-club-presence";
-import { type BoardSession, splitSessions } from "./board-helpers";
+import {
+	type BoardSession,
+	othersHeading,
+	splitSessions,
+} from "./board-helpers";
 import { ClubRoster } from "./club-roster";
 import { HeroSessionCard } from "./hero-session-card";
 import { SessionCreateDialog } from "./session-create-dialog";
@@ -54,7 +58,7 @@ export function StartBoard({
 			{others.length > 0 && (
 				<div className="overflow-hidden rounded-lg border border-border bg-card">
 					<div className="border-b border-border px-5 py-3 text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-						También abiertas
+						{othersHeading(others)}
 					</div>
 					<ul className="divide-y divide-border">
 						{others.map((s) => (

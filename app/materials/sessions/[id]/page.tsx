@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { HistoryAwards } from "@/app/materials/_components/history-awards";
 import { HistoryMinigames } from "@/app/materials/_components/history-minigames";
 import { HistoryParticipants } from "@/app/materials/_components/history-participants";
@@ -21,6 +21,9 @@ export default async function SessionHistoryPage({
 	const supabase = await createClient();
 	const session = await getSessionHistory(supabase, (await params).id);
 	if (!session) notFound();
+	if (session.status !== "closed" && session.status !== "archived") {
+		redirect(`/materials/sessions/${session.id}/room`);
+	}
 
 	return (
 		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">

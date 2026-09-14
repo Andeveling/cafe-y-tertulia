@@ -6,13 +6,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
 	type BoardSession,
+	sessionCta,
+	sessionHref,
 	sessionTitle,
-	statusMeta,
 	whenLabel,
 } from "./board-helpers";
 
 export function SessionRow({ session }: { session: BoardSession }) {
-	const meta = statusMeta(session.status);
 	return (
 		<li className="flex items-center justify-between gap-3 px-5 py-3.5">
 			<div className="flex min-w-0 items-center gap-3">
@@ -40,17 +40,9 @@ export function SessionRow({ session }: { session: BoardSession }) {
 				variant="ghost"
 				className="shrink-0"
 				nativeButton={false}
-				render={
-					<Link
-						href={
-							meta.live
-								? `/materials/sessions/${session.id}/room`
-								: `/materials/sessions/${session.id}`
-						}
-					/>
-				}
+				render={<Link href={sessionHref(session)} />}
 			>
-				{meta.live ? "Entrar" : "Ver"}
+				{sessionCta(session.status, "row")}
 			</Button>
 		</li>
 	);

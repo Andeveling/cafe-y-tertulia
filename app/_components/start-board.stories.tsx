@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect } from "storybook/test";
 import { type BoardSession, StartBoard } from "./start-board";
 
 const meta = {
@@ -100,5 +101,13 @@ export const WithOpenSala: Story = {
 		displayName: "Ana",
 		rosterMembers,
 		userId: "u1",
+	},
+	play: async ({ canvas }) => {
+		const open = canvas.getAllByRole("button", { name: "Abrir sala" })[0];
+		await expect(open).toHaveAttribute("href", "/materials/sessions/s5/room");
+		await expect(canvas.getAllByText("Otras")[0]).toBeVisible();
+		await expect(
+			canvas.queryByRole("button", { name: "Ver" }),
+		).toBeNull();
 	},
 };

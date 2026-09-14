@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
 	type BoardSession,
+	sessionCta,
+	sessionHref,
 	sessionTitle,
 	statusMeta,
 	whenLabel,
@@ -45,17 +47,9 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 					size="lg"
 					className="w-full shrink-0 sm:w-auto"
 					nativeButton={false}
-					render={
-						<Link
-							href={
-								meta.live
-									? `/materials/sessions/${session.id}/room`
-									: `/materials/sessions/${session.id}`
-							}
-						/>
-					}
+					render={<Link href={sessionHref(session)} />}
 				>
-					{meta.live ? "Entrar a la sala" : "Ver detalle"}
+					{sessionCta(session.status, "hero")}
 				</Button>
 			</CardContent>
 		</Card>

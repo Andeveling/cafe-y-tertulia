@@ -28,6 +28,28 @@ export function statusMeta(status: BoardSession["status"]) {
 	}
 }
 
+/** Toda sesión del tablero entra a la Sala. Histórico es otra ruta. */
+export function sessionHref(s: Pick<BoardSession, "id" | "status">): string {
+	return `/materials/sessions/${s.id}/room`;
+}
+
+export function sessionCta(
+	status: BoardSession["status"],
+	variant: "hero" | "row",
+): string {
+	if (status === "preparation") return "Abrir sala";
+	return variant === "hero" ? "Entrar a la sala" : "Entrar";
+}
+
+export function othersHeading(others: BoardSession[]): string {
+	const live = others.filter(
+		(s) => s.status === "lobby" || s.status === "in_progress",
+	);
+	if (live.length === others.length) return "También abiertas";
+	if (live.length === 0) return "Programadas";
+	return "Otras";
+}
+
 export function whenLabel(iso: string | null): string {
 	if (!iso) return "Sin fecha";
 	const d = new Date(iso);
