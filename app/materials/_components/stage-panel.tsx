@@ -5,6 +5,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { type ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { WaitingRevealView } from "@/app/materials/_components/waiting-reveal-view";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import {
 	formatClock,
@@ -229,37 +230,28 @@ function WaitingReveal({
 }) {
 	const { pending, run } = useRoomMutation();
 	const youNext = debate.nextAssigneeId === userId;
+	const progressText =
+		progress && progress.total > 0
+			? interventionProgressLine(progress.current, progress.total)
+			: null;
+	const revealLabel =
+		progress && progress.total > 0
+			? `Revelar pregunta ${progress.current} para ${debate.nextAssigneeName}`
+			: `Revelar pregunta para ${debate.nextAssigneeName}`;
 
 	return (
 		<Enter>
-			<div className="flex flex-col items-start gap-3 py-8 text-left">
-				{progress && progress.total > 0 && (
-					<p className="text-xs tabular-nums text-muted-foreground">
-						{interventionProgressLine(progress.current, progress.total)}
-					</p>
-				)}
-				<p className="text-sm text-muted-foreground">
-					{youNext ? "Te toca en un momento." : "Espera."}
-				</p>
-				<p className="font-heading text-3xl font-semibold lg:text-4xl">
-					{debate.nextAssigneeName}
-				</p>
-				{!isModerator && !youNext && (
-					<p className="max-w-sm text-sm text-muted-foreground">
-						El moderador revela la siguiente pregunta.
-					</p>
-				)}
-				{isModerator && (
-					<ModeratorZone>
-						<Button
-							disabled={pending}
-							onClick={() => run(() => revealNext(sessionId))}
-						>
-							Revelar pregunta
-						</Button>
-					</ModeratorZone>
-				)}
-			</div>
+			<WaitingRevealView
+				nextAssigneeName={debate.nextAssigneeName}
+				youNext={youNext}
+				isModerator={isModerator}
+				progressText={progressText}
+				revealLabel={revealLabel}
+				pending={pending}
+				onReveal={
+					isModerator ? () => run(() => revealNext(sessionId)) : undefined
+				}
+			/>
 		</Enter>
 	);
 }

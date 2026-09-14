@@ -325,16 +325,59 @@ function ModeratorNav({
 		run(() => advanceRoomStage(snapshot.sessionId, prevStage));
 	}
 
+	// En Debate la conducción vive en el Escenario (revelar/continuar);
+	// esta nav queda sutil abajo y Volver pide confirmación.
+	const isDebate = snapshot.roomStage === "debate";
+	const navClass = isDebate
+		? "flex items-center justify-between gap-2 border-t border-border/40 pt-3 opacity-80"
+		: "flex items-center justify-between gap-2";
+
 	const backButton = showBack ? (
-		<Button variant="outline" disabled={pending} onClick={handleBack}>
-			<HugeiconsIcon
-				icon={ArrowLeft01Icon}
-				strokeWidth={2}
-				data-icon="inline-start"
-				aria-hidden="true"
-			/>
-			Volver a {ROOM_STAGE_LABELS[prevStage!]}
-		</Button>
+		isDebate ? (
+			<Dialog>
+				<DialogTrigger
+					render={
+						<Button variant="ghost" size="sm" disabled={pending}>
+							<HugeiconsIcon
+								icon={ArrowLeft01Icon}
+								strokeWidth={2}
+								data-icon="inline-start"
+								aria-hidden="true"
+							/>
+							Volver a {ROOM_STAGE_LABELS[prevStage!]}
+						</Button>
+					}
+				/>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>
+							¿Volver a {ROOM_STAGE_LABELS[prevStage!]}?
+						</DialogTitle>
+						<DialogDescription>
+							Las intervenciones ya reveladas quedan como están.
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<DialogClose render={<Button variant="outline" size="sm" />}>
+							Cancelar
+						</DialogClose>
+						<Button size="sm" disabled={pending} onClick={handleBack}>
+							Volver de todos modos
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+		) : (
+			<Button variant="outline" disabled={pending} onClick={handleBack}>
+				<HugeiconsIcon
+					icon={ArrowLeft01Icon}
+					strokeWidth={2}
+					data-icon="inline-start"
+					aria-hidden="true"
+				/>
+				Volver a {ROOM_STAGE_LABELS[prevStage!]}
+			</Button>
+		)
 	) : (
 		<span />
 	);
@@ -365,7 +408,8 @@ function ModeratorNav({
 
 	const button = (
 		<Button
-			variant="default"
+			variant={isDebate ? "ghost" : "default"}
+			size={isDebate ? "sm" : undefined}
 			disabled={pending}
 			onClick={advanceWarning ? undefined : handleAdvance}
 		>
@@ -383,7 +427,9 @@ function ModeratorNav({
 
 	if (!advanceWarning) {
 		return (
-			<div className="flex items-center justify-between gap-2">
+			<div
+				className={navClass}
+			>
 				{backButton}
 				<Tooltip>
 					<TooltipTrigger render={button} />
@@ -414,7 +460,9 @@ function ModeratorNav({
 	}
 
 	return (
-		<div className="flex items-center justify-between gap-2">
+		<div
+			className={navClass}
+		>
 			{backButton}
 			<Dialog>
 				<DialogTrigger render={button} />

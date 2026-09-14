@@ -68,10 +68,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** El Moderador ve los lanzadores dentro de los límites (1–2 rondas, ≤3 takes). */
+/** El Moderador ve una línea colapsada y expande los lanzadores con Ver más. */
 export const ModeratorLaunchers: Story = {
 	args: { isModerator: true },
-	play: async ({ canvas }) => {
+	play: async ({ canvas, userEvent }) => {
+		expect(
+			canvas.getByText(/sin minijuegos en este material/i),
+		).toBeVisible();
+		expect(
+			canvas.queryByRole("textbox", { name: /frase disparadora/i }),
+		).toBeNull();
+		await userEvent.click(
+			canvas.getByRole("button", { name: /ver más/i }),
+		);
 		await expect(
 			canvas.getByRole("button", { name: /historia del café/i }),
 		).toBeEnabled();
@@ -81,7 +90,7 @@ export const ModeratorLaunchers: Story = {
 	},
 };
 
-/** Un Participante no ve controles de lanzamiento. */
+/** Un Participante no ve controles de lanzamiento, solo una línea sutil. */
 export const ParticipantIdle: Story = {
 	play: async ({ canvas }) => {
 		expect(
@@ -90,6 +99,7 @@ export const ParticipantIdle: Story = {
 		expect(
 			canvas.queryByRole("textbox", { name: /frase disparadora/i }),
 		).toBeNull();
+		expect(canvas.getByText(/sin minijuegos por ahora/i)).toBeVisible();
 	},
 };
 

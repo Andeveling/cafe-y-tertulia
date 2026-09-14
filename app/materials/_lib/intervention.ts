@@ -102,13 +102,13 @@ export const PHASE_SHORT_LABELS: Record<AssignmentState, string> = {
 	complete: "Completa",
 };
 
-/** Línea única: Intervención X de Y · Fase. */
+/** Línea única: Turno X de Y · Fase. */
 export function interventionProgressLine(
 	current: number,
 	total: number,
 	state?: AssignmentState,
 ): string {
-	const base = `Intervención ${current} de ${total}`;
+	const base = `Turno ${current} de ${total}`;
 	if (!state || state === "hidden") return base;
 	return `${base} · ${PHASE_SHORT_LABELS[state]}`;
 }

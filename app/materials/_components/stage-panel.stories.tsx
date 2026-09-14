@@ -59,8 +59,12 @@ export const WaitingRevealModerator: Story = {
 	play: async ({ canvas }) => {
 		await waitFor(() => expect(canvas.getByText("Ana")).toBeVisible());
 		await expect(
-			canvas.getByRole("button", { name: /revelar pregunta/i }),
+			canvas.getByRole("button", { name: /revelar pregunta 1 para ana/i }),
 		).toBeEnabled();
+		await expect(
+			canvas.getByText(/la verán todos\. no se puede des-revelar/i),
+		).toBeVisible();
+		await expect(canvas.queryByText("Moderación")).toBeNull();
 	},
 };
 
@@ -68,7 +72,7 @@ export const WaitingRevealMember: Story = {
 	args: { userId: "u-ana", isModerator: false },
 	play: async ({ canvas }) => {
 		await waitFor(() =>
-			expect(canvas.getByText("Te toca en un momento.")).toBeVisible(),
+			expect(canvas.getByText(/te toca en un momento/i)).toBeVisible(),
 		);
 	},
 };
@@ -82,7 +86,7 @@ export const AudienceListens: Story = {
 		await expect(canvas.getByText(/responde la pregunta de/i)).toBeVisible();
 		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
 		await expect(
-			canvas.getByText("Intervención 1 de 2 · Exposición"),
+			canvas.getByText("Turno 1 de 2 · Exposición"),
 		).toBeVisible();
 	},
 };
@@ -106,7 +110,7 @@ export const YouPrepare: Story = {
 			canvas.getByLabelText(/tus notas de respuesta/i),
 		).toBeVisible();
 		await expect(
-			canvas.getByText("Intervención 1 de 2 · Preparación"),
+			canvas.getByText("Turno 1 de 2 · Preparación"),
 		).toBeVisible();
 		await expect(canvas.getByText("Preparación · sugerido 2:00")).toBeVisible();
 	},

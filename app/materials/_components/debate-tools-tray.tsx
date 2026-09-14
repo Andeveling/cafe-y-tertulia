@@ -57,6 +57,7 @@ export function DebateToolsTray({
 }: Props) {
 	const { pending, run } = useRoomMutation();
 	const [takePrompt, setTakePrompt] = useState("");
+	const [expanded, setExpanded] = useState(false);
 
 	/** Acciones con formulario sobre el camino único de mutación de la Sala. */
 	function runFields(action: RoomFormAction, fields: Record<string, string>) {
@@ -88,16 +89,38 @@ export function DebateToolsTray({
 				)}
 
 				{!hasContent && !canLaunchTrivia && !canLaunchTake && (
-					<p className="text-sm text-muted-foreground">
-						Trivia y takes aparecerán aquí durante el debate.
+					<p className="text-xs text-muted-foreground">
+						Sin minijuegos por ahora.
 					</p>
 				)}
 
-				{(canLaunchTrivia || canLaunchTake) && (
-					<div className="flex flex-col gap-3 border-t border-border pt-4">
-						<p className="text-xs uppercase tracking-wide text-muted-foreground">
-							Lanzar · máx. 2 trivias y 3 takes por sesión
+				{!hasContent && (canLaunchTrivia || canLaunchTake) && !expanded && (
+					<div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
+						<p className="text-xs text-muted-foreground">
+							Sin minijuegos en este material — puedes seguir sin esto.
 						</p>
+						<Button variant="ghost" size="sm" onClick={() => setExpanded(true)}>
+							Ver más
+						</Button>
+					</div>
+				)}
+
+				{(canLaunchTrivia || canLaunchTake) && (hasContent || expanded) && (
+					<div className="flex flex-col gap-3 border-t border-border pt-4">
+						<div className="flex flex-wrap items-center justify-between gap-2">
+							<p className="text-xs uppercase tracking-wide text-muted-foreground">
+								Lanzar · máx. 2 trivias y 3 takes por sesión
+							</p>
+							{!hasContent && (
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={() => setExpanded(false)}
+								>
+									Ver menos
+								</Button>
+							)}
+						</div>
 						{canLaunchTrivia &&
 							(state.bank.length === 0 ? (
 								<p className="text-sm text-muted-foreground">
