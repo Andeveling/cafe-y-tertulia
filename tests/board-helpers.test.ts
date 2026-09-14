@@ -4,6 +4,7 @@ import {
 	othersHeading,
 	sessionCta,
 	sessionHref,
+	sessionOpensSala,
 } from "@/app/_components/board-helpers";
 
 const prep: BoardSession = {
@@ -13,6 +14,7 @@ const prep: BoardSession = {
 	range: "Capitulo 10",
 	moderator_id: "u1",
 	moderator_name: "Andrés",
+	material_id: "m-hyper",
 	material_title: "Hyperfocus",
 };
 
@@ -42,6 +44,8 @@ describe("sessionCta", () => {
 	it("preparation ofrece Abrir sala, no Ver", () => {
 		expect(sessionCta(prep.status, "row")).toBe("Abrir sala");
 		expect(sessionCta(prep.status, "hero")).toBe("Abrir sala");
+		expect(sessionOpensSala("preparation")).toBe(true);
+		expect(sessionOpensSala("lobby")).toBe(false);
 	});
 
 	it("sala viva ofrece Entrar", () => {

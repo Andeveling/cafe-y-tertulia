@@ -46,6 +46,7 @@ export const WithScheduled: Story = {
 				scheduled_at: "2026-08-29T19:00:00Z",
 				range: null,
 				moderator_id: "u2",
+				material_id: null,
 				moderator_name: "Luis",
 				material_title: "El Quijote",
 			},
@@ -55,6 +56,7 @@ export const WithScheduled: Story = {
 				scheduled_at: null,
 				range: "Café del viernes",
 				moderator_id: "u1",
+				material_id: null,
 				moderator_name: "Ana",
 				material_title: null,
 			},
@@ -75,6 +77,7 @@ export const WithOpenSala: Story = {
 				scheduled_at: null,
 				range: null,
 				moderator_id: "u1",
+				material_id: null,
 				moderator_name: "Ana",
 				material_title: "El Quijote",
 			},
@@ -84,6 +87,7 @@ export const WithOpenSala: Story = {
 				scheduled_at: null,
 				range: "Cap. 1–5",
 				moderator_id: "u2",
+				material_id: null,
 				moderator_name: "Luis",
 				material_title: null,
 			},
@@ -93,6 +97,7 @@ export const WithOpenSala: Story = {
 				scheduled_at: "2026-08-30T18:00:00Z",
 				range: null,
 				moderator_id: "u3",
+				material_id: null,
 				moderator_name: "María",
 				material_title: "Cien años de soledad",
 			},
@@ -104,7 +109,7 @@ export const WithOpenSala: Story = {
 	},
 	play: async ({ canvas }) => {
 		const open = canvas.getAllByRole("button", { name: "Abrir sala" })[0];
-		await expect(open).toHaveAttribute("href", "/materials/sessions/s5/room");
+		await expect(open).not.toHaveAttribute("href");
 		await expect(canvas.getAllByText("Otras")[0]).toBeVisible();
 		await expect(
 			canvas.queryByRole("button", { name: "Ver" }),

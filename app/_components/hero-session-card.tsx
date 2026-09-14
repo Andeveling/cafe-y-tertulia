@@ -1,16 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
 	type BoardSession,
-	sessionCta,
-	sessionHref,
 	sessionTitle,
 	statusMeta,
 	whenLabel,
 } from "./board-helpers";
+import { BoardSessionAction } from "./board-session-action";
 
 export function HeroSessionCard({ session }: { session: BoardSession }) {
 	const meta = statusMeta(session.status);
@@ -43,14 +40,7 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 						Modera {session.moderator_name ?? "—"}
 					</p>
 				</div>
-				<Button
-					size="lg"
-					className="w-full shrink-0 sm:w-auto"
-					nativeButton={false}
-					render={<Link href={sessionHref(session)} />}
-				>
-					{sessionCta(session.status, "hero")}
-				</Button>
+				<BoardSessionAction session={session} variant="hero" />
 			</CardContent>
 		</Card>
 	);

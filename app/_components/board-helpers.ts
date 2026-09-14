@@ -8,6 +8,7 @@ export type BoardSession = {
 	range: string | null;
 	moderator_id: string | null;
 	moderator_name: string | null;
+	material_id: string | null;
 	material_title: string | null;
 };
 
@@ -39,6 +40,11 @@ export function sessionCta(
 ): string {
 	if (status === "preparation") return "Abrir sala";
 	return variant === "hero" ? "Entrar a la sala" : "Entrar";
+}
+
+/** preparation abre de verdad; lobby/en curso solo entran. */
+export function sessionOpensSala(status: BoardSession["status"]): boolean {
+	return status === "preparation";
 }
 
 export function othersHeading(others: BoardSession[]): string {

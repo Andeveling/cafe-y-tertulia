@@ -238,8 +238,11 @@ export async function advanceSession(input: {
 				};
 			}
 		},
-		revalidate: async () =>
-			input.materialId ? [`/materials/${input.materialId}`] : [],
+		revalidate: async () => {
+			const paths = ["/", `/materials/sessions/${input.sessionId}/room`];
+			if (input.materialId) paths.push(`/materials/${input.materialId}`);
+			return paths;
+		},
 	});
 }
 

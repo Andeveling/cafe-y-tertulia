@@ -2,15 +2,12 @@
 
 import { Clock01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
 	type BoardSession,
-	sessionCta,
-	sessionHref,
 	sessionTitle,
 	whenLabel,
 } from "./board-helpers";
+import { BoardSessionAction } from "./board-session-action";
 
 export function SessionRow({ session }: { session: BoardSession }) {
 	return (
@@ -35,15 +32,7 @@ export function SessionRow({ session }: { session: BoardSession }) {
 					)}
 				</div>
 			</div>
-			<Button
-				size="sm"
-				variant="ghost"
-				className="shrink-0"
-				nativeButton={false}
-				render={<Link href={sessionHref(session)} />}
-			>
-				{sessionCta(session.status, "row")}
-			</Button>
+			<BoardSessionAction session={session} variant="row" />
 		</li>
 	);
 }

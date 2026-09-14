@@ -11,7 +11,7 @@ export async function getOpenSessions(
 	const { data: rawSessions } = await supabase
 		.from("sessions")
 		.select(
-			`id, status, scheduled_at, range, moderator_id,
+			`id, status, scheduled_at, range, moderator_id, material_id,
 			 moderator:members!sessions_moderator_id_fkey(display_name),
 			 material:materials(title)`,
 		)
@@ -29,6 +29,7 @@ export async function getOpenSessions(
 				moderator_name:
 					(s.moderator as unknown as { display_name: string | null } | null)
 						?.display_name ?? null,
+				material_id: s.material_id,
 				material_title:
 					(s.material as unknown as { title: string | null } | null)?.title ??
 					null,
