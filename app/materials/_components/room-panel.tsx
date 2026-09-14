@@ -120,8 +120,8 @@ const STAGE_HELP: Record<
 	},
 	debate: {
 		description:
-			"Las parejas exponen y complementan por turno. El moderador revela y avanza cada intervención.",
-		nextCondition: "Todas las intervenciones deben estar completas.",
+			"Las parejas exponen y complementan por turno. El moderador revela y avanza cada turno.",
+		nextCondition: "Todos los turnos deben estar completos.",
 	},
 	cierre: {
 		description:
@@ -279,6 +279,51 @@ function StageContent({
 
 // ─── Moderator Navigation ───────────────────────────────────
 
+/** Volver atrás dentro del Debate: ghost sutil + confirmación. */
+function DebateBackConfirm({
+	prevLabel,
+	pending,
+	onConfirm,
+}: {
+	prevLabel: string;
+	pending: boolean;
+	onConfirm: () => void;
+}) {
+	return (
+		<Dialog>
+			<DialogTrigger
+				render={
+					<Button variant="ghost" size="sm" disabled={pending}>
+						<HugeiconsIcon
+							icon={ArrowLeft01Icon}
+							strokeWidth={2}
+							data-icon="inline-start"
+							aria-hidden="true"
+						/>
+						Volver a {prevLabel}
+					</Button>
+				}
+			/>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>¿Volver a {prevLabel}?</DialogTitle>
+					<DialogDescription>
+						Los turnos ya revelados quedan como están.
+					</DialogDescription>
+				</DialogHeader>
+				<DialogFooter>
+					<DialogClose render={<Button variant="outline" size="sm" />}>
+						Cancelar
+					</DialogClose>
+					<Button size="sm" disabled={pending} onClick={onConfirm}>
+						Volver de todos modos
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
 function ModeratorNav({
 	snapshot,
 	view,
@@ -313,7 +358,7 @@ function ModeratorNav({
 		nextStage === "debate" && notReady.length > 0
 			? notReady
 			: nextStage === "cierre" && remainingInterventions > 0
-				? [`${remainingInterventions} intervención(es) sin completar`]
+				? [`${remainingInterventions} turno(s) sin completar`]
 				: null;
 
 	function handleAdvance() {
@@ -334,39 +379,11 @@ function ModeratorNav({
 
 	const backButton = showBack ? (
 		isDebate ? (
-			<Dialog>
-				<DialogTrigger
-					render={
-						<Button variant="ghost" size="sm" disabled={pending}>
-							<HugeiconsIcon
-								icon={ArrowLeft01Icon}
-								strokeWidth={2}
-								data-icon="inline-start"
-								aria-hidden="true"
-							/>
-							Volver a {ROOM_STAGE_LABELS[prevStage!]}
-						</Button>
-					}
-				/>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>
-							¿Volver a {ROOM_STAGE_LABELS[prevStage!]}?
-						</DialogTitle>
-						<DialogDescription>
-							Las intervenciones ya reveladas quedan como están.
-						</DialogDescription>
-					</DialogHeader>
-					<DialogFooter>
-						<DialogClose render={<Button variant="outline" size="sm" />}>
-							Cancelar
-						</DialogClose>
-						<Button size="sm" disabled={pending} onClick={handleBack}>
-							Volver de todos modos
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<DebateBackConfirm
+				prevLabel={ROOM_STAGE_LABELS[prevStage!]}
+				pending={pending}
+				onConfirm={handleBack}
+			/>
 		) : (
 			<Button variant="outline" disabled={pending} onClick={handleBack}>
 				<HugeiconsIcon

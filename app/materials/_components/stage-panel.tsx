@@ -97,8 +97,8 @@ function DebateDone({
 				</p>
 				<p className="max-w-md text-sm text-muted-foreground">
 					{isModerator
-						? "Todas las intervenciones se completaron. En Cierre se califica el material y se cierra la sesión: ahí se actualizan conteos e insignias."
-						: "Todas las intervenciones se completaron. Los conteos e insignias se actualizan cuando el moderador cierra la sesión en Cierre."}
+						? "Todos los turnos se completaron. En Cierre se califica el material y se cierra la sesión: ahí se actualizan conteos e insignias."
+						: "Todos los turnos se completaron. Los conteos e insignias se actualizan cuando el moderador cierra la sesión en Cierre."}
 				</p>
 				{isModerator && (
 					<ModeratorZone>
