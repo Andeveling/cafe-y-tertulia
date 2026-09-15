@@ -36,7 +36,7 @@ export function RatingDisplay({
 }: RatingDisplayProps) {
 	if (count <= 0) {
 		return (
-			<span className={cn("text-xs text-muted-foreground/60", className)}>
+			<span className={cn("text-xs text-muted-foreground", className)}>
 				sin votos
 			</span>
 		);
@@ -77,9 +77,7 @@ export function RatingDisplay({
 							size={config.iconSize}
 							strokeWidth={1.75}
 							className={cn(
-								isFull || isHalf
-									? "text-secondary-foreground"
-									: "text-muted-foreground/25",
+								isFull || isHalf ? "text-foreground" : "text-muted-foreground",
 							)}
 						/>
 					);

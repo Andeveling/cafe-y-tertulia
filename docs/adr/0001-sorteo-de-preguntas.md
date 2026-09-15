@@ -1,6 +1,6 @@
 # Sorteo de preguntas: reglas y casos borde
 
-## Status: accepted
+## Status: superseded by ADR-0008
 
 ## Decision
 

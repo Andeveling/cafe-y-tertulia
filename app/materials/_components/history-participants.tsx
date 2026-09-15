@@ -46,11 +46,14 @@ export function HistoryParticipants({
 						<li key={p.member_id}>
 							<Link
 								href={`/members/${p.member_id}`}
-								className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-sm transition-colors hover:bg-secondary/80"
+								className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-sm font-medium text-secondary-foreground underline-offset-4 transition-colors hover:bg-secondary/80 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
 							>
 								<span>{p.display_name}</span>
 								{p.opt_out && (
-									<Badge variant="outline" className="text-xs">
+									<Badge
+										variant="outline"
+										className="border-secondary-foreground/30 text-xs text-secondary-foreground"
+									>
 										sin sorteo
 									</Badge>
 								)}
