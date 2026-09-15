@@ -1,9 +1,11 @@
 /**
  * Candidatos a invitar desde Presentes: Miembros activos menos los ya
- * presentes, ordenados llamables primero. Puro y testeable sin React.
+ * presentes, ordenados llamables primero. Delega la regla de Llamar en
+ * Convocatoria (ADR 0010).
  */
 
-import { type EstadoPresencia, puedeLlamar } from "@/lib/presencia/estado";
+import { resuelveConvocatoria } from "@/app/_lib/convocatoria";
+import type { EstadoPresencia } from "@/lib/presencia/estado";
 
 export type InviteRosterMember = {
 	id: string;
@@ -20,6 +22,8 @@ export type InviteCandidate = {
 	/** Acepta Convocatoria: solo En línea y Ausente (ADR 0010). */
 	llamable: boolean;
 	pending: boolean;
+	/** En sesión: etiqueta, sin botón. */
+	enOtraSala: boolean;
 };
 
 const ORDEN_INVITE: Record<EstadoPresencia, number> = {
@@ -43,11 +47,6 @@ export function buildInviteCandidates(args: {
 		args.participantIds instanceof Set
 			? args.participantIds
 			: new Set(args.participantIds);
-	const pending = args.pendingIds
-		? args.pendingIds instanceof Set
-			? args.pendingIds
-			: new Set(args.pendingIds)
-		: new Set<string>();
 
 	const estadoDe = (id: string): EstadoPresencia => {
 		if (args.estados) {
@@ -58,25 +57,33 @@ export function buildInviteCandidates(args: {
 		return online.has(id) ? "en_linea" : "desconectado";
 	};
 
-	const out: InviteCandidate[] = [];
-	for (const m of args.roster) {
-		if (args.selfId && m.id === args.selfId) continue;
-		if (participants.has(m.id)) continue;
-		const estado = estadoDe(m.id);
-		out.push({
+	const roster = args.roster
+		.filter((m) => !participants.has(m.id))
+		.map((m) => ({
 			id: m.id,
-			displayName: m.display_name,
-			online: estado !== "desconectado",
-			estado,
-			llamable: puedeLlamar(estado),
-			pending: pending.has(m.id),
-		});
-	}
+			display_name: m.display_name,
+			estado: estadoDe(m.id),
+		}));
 
-	out.sort((a, b) => {
-		if (a.estado !== b.estado)
-			return ORDEN_INVITE[a.estado] - ORDEN_INVITE[b.estado];
-		return a.displayName.localeCompare(b.displayName);
+	const filas = resuelveConvocatoria({
+		roster,
+		pendingIds: args.pendingIds,
+		selfId: args.selfId,
 	});
-	return out;
+
+	return [...filas]
+		.sort((a, b) => {
+			if (a.estado !== b.estado)
+				return ORDEN_INVITE[a.estado] - ORDEN_INVITE[b.estado];
+			return a.displayName.localeCompare(b.displayName);
+		})
+		.map((f) => ({
+			id: f.id,
+			displayName: f.displayName,
+			online: f.estado !== "desconectado",
+			estado: f.estado,
+			llamable: f.llamable,
+			pending: f.pending,
+			enOtraSala: f.enOtraSala,
+		}));
 }

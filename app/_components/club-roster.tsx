@@ -2,8 +2,9 @@
 
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useTransition } from "react";
+import { useMemo, useTransition } from "react";
 import { toast } from "sonner";
+import { resuelveConvocatoria } from "@/app/_lib/convocatoria";
 import { convocarAction } from "@/app/materials/_lib/convocatoria-actions";
 import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -36,52 +37,71 @@ export function ClubRoster({
 			s.moderator_id === userId &&
 			(s.status === "lobby" || s.status === "in_progress"),
 	);
+	const convocatoriaPorId = useMemo(() => {
+		const filas = resuelveConvocatoria({
+			roster: roster.map((m) => ({
+				id: m.id,
+				display_name: m.display_name,
+				estado: m.estado,
+			})),
+			selfId: userId,
+		});
+		return new Map(filas.map((f) => [f.id, f]));
+	}, [roster, userId]);
 
 	const title = `Miembros · ${online} en línea`;
 
 	const list = (
 		<ul className="flex flex-col">
-			{roster.map((m, i) => (
-				<li key={m.id}>
-					{i > 0 && <Separator />}
-					<div className="flex items-center justify-between gap-2 py-2">
-						<span className="flex min-w-0 items-center gap-2">
-							<Avatar
-								size="sm"
-								className={m.online ? "ring-1 ring-primary/30" : "opacity-40"}
-							>
-								<AvatarFallback>
-									{(m.display_name || "?").slice(0, 1).toUpperCase()}
-								</AvatarFallback>
-								{m.online && <AvatarBadge />}
-							</Avatar>
-							<span className="truncate text-sm">{m.display_name}</span>
-						</span>
-						{canLlamar && m.online && m.id !== userId && (
-							<Button
-								size="xs"
-								variant="ghost"
-								disabled={pending}
-								onClick={() => {
-									const convokeId = sessions.find(
-										(s) =>
-											s.moderator_id === userId &&
-											(s.status === "lobby" || s.status === "in_progress"),
-									)?.id;
-									if (!convokeId) return;
-									startTransition(async () => {
-										const r = await convocarAction(convokeId, m.id);
-										if ("error" in r) toast.error(r.error);
-										else toast.success("Convocatoria enviada");
-									});
-								}}
-							>
-								Llamar
-							</Button>
-						)}
-					</div>
-				</li>
-			))}
+			{roster.map((m, i) => {
+				const fila = convocatoriaPorId.get(m.id);
+				return (
+					<li key={m.id}>
+						{i > 0 && <Separator />}
+						<div className="flex items-center justify-between gap-2 py-2">
+							<span className="flex min-w-0 items-center gap-2">
+								<Avatar
+									size="sm"
+									className={m.online ? "ring-1 ring-primary/30" : "opacity-40"}
+								>
+									<AvatarFallback>
+										{(m.display_name || "?").slice(0, 1).toUpperCase()}
+									</AvatarFallback>
+									{m.online && <AvatarBadge />}
+								</Avatar>
+								<span className="truncate text-sm">{m.display_name}</span>
+							</span>
+							{canLlamar &&
+								(fila?.llamable ? (
+									<Button
+										size="xs"
+										variant="ghost"
+										disabled={pending}
+										onClick={() => {
+											const convokeId = sessions.find(
+												(s) =>
+													s.moderator_id === userId &&
+													(s.status === "lobby" || s.status === "in_progress"),
+											)?.id;
+											if (!convokeId) return;
+											startTransition(async () => {
+												const r = await convocarAction(convokeId, m.id);
+												if ("error" in r) toast.error(r.error);
+												else toast.success("Convocatoria enviada");
+											});
+										}}
+									>
+										Llamar
+									</Button>
+								) : fila?.enOtraSala ? (
+									<span className="text-xs text-muted-foreground">
+										En otra sala
+									</span>
+								) : null)}
+						</div>
+					</li>
+				);
+			})}
 		</ul>
 	);
 

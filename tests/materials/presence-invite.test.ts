@@ -57,7 +57,10 @@ describe("buildInviteCandidates", () => {
 		expect(out.map((c) => c.id)).toEqual(["m-1", "m-2", "m-3", "m-4"]);
 		expect(out.find((c) => c.id === "m-1")?.llamable).toBe(true);
 		expect(out.find((c) => c.id === "m-2")?.llamable).toBe(true);
-		expect(out.find((c) => c.id === "m-3")?.llamable).toBe(false);
+		expect(out.find((c) => c.id === "m-3")).toMatchObject({
+			llamable: false,
+			enOtraSala: true,
+		});
 		expect(out.find((c) => c.id === "m-4")?.llamable).toBe(false);
 	});
 });
