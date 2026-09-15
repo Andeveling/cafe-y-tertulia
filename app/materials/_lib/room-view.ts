@@ -1,4 +1,9 @@
-import type { RoomParticipant, RoomSnapshot } from "./room-types";
+import {
+	ROOM_STAGE_ORDER,
+	type RoomParticipant,
+	type RoomSnapshot,
+	type RoomStage,
+} from "./room-types";
 
 export type DebateProgress = { current: number; total: number };
 
@@ -22,6 +27,16 @@ export type SalaView = {
 	debateProgress: DebateProgress | null;
 	/** Siguiente en exponer — primera oculta por revealOrder en `active`. */
 	debateNextAssigneeName: string | null;
+	/** Siguiente Etapa — null en Cierre. */
+	next: RoomStage | null;
+	/** Etapa anterior — null en Preguntas. */
+	prev: RoomStage | null;
+	/** Volver a Preguntas/Presentes queda bloqueado tras el Sorteo. */
+	backBlocked: boolean;
+	/** Mesa sin members — bloquea avanzar a Sorteo o Debate. */
+	empty: boolean;
+	/** Avisos de avance (Listos faltantes, Intervenciones pendientes). */
+	warnings: string[];
 };
 
 export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
@@ -66,6 +81,22 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 		}
 	}
 
+	const currentIdx = ROOM_STAGE_ORDER.indexOf(snapshot.roomStage);
+	const next = ROOM_STAGE_ORDER[currentIdx + 1] ?? null;
+	const prev =
+		currentIdx > 0 ? (ROOM_STAGE_ORDER[currentIdx - 1] ?? null) : null;
+	const backBlocked =
+		!!prev &&
+		snapshot.draw.done &&
+		(prev === "questions" || prev === "presence");
+	const empty = members.length === 0 && (next === "draw" || next === "debate");
+	const warnings =
+		next === "debate" && notReadyNames.length > 0
+			? notReadyNames
+			: next === "cierre" && remainingInterventions > 0
+				? [`${remainingInterventions} turno(s) sin completar`]
+				: [];
+
 	return {
 		members,
 		spectators,
@@ -76,5 +107,10 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 		debateAuthorId,
 		debateProgress,
 		debateNextAssigneeName,
+		next,
+		prev,
+		backBlocked,
+		empty,
+		warnings,
 	};
 }

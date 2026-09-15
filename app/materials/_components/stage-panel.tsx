@@ -28,9 +28,11 @@ import {
 	extendExposition,
 	revealNext,
 } from "@/app/materials/_lib/room-actions";
-import type {
-	RoomDebateSnapshot,
-	RoomParticipant,
+import {
+	ROOM_STAGE_LABELS,
+	type RoomDebateSnapshot,
+	type RoomParticipant,
+	type RoomStage,
 } from "@/app/materials/_lib/room-types";
 import { sharedNow } from "@/app/materials/_lib/shared-now";
 import { Button } from "@/components/ui/button";
@@ -56,6 +58,10 @@ type Props = {
 	asOf?: number;
 	/** Congela el reloj — stories / tests. */
 	nowMs?: number;
+	/** Avance derivado — Nav y Debate → Cierre consumen lo mismo. */
+	next?: RoomStage | null;
+	empty?: boolean;
+	warnings?: string[];
 };
 
 export function StagePanel({
@@ -69,9 +75,20 @@ export function StagePanel({
 	nextAssigneeName = null,
 	asOf,
 	nowMs,
+	next = null,
+	empty = false,
+	warnings = [],
 }: Props) {
 	if (debate.mode === "done") {
-		return <DebateDone sessionId={sessionId} isModerator={isModerator} />;
+		return (
+			<DebateDone
+				sessionId={sessionId}
+				isModerator={isModerator}
+				next={next}
+				empty={empty}
+				warnings={warnings}
+			/>
+		);
 	}
 
 	if (debate.mode === "waiting_reveal") {
@@ -105,11 +122,22 @@ export function StagePanel({
 function DebateDone({
 	sessionId,
 	isModerator,
+	next,
+	empty,
+	warnings,
 }: {
 	sessionId: string;
 	isModerator: boolean;
+	next: RoomStage | null;
+	empty: boolean;
+	warnings: string[];
 }) {
 	const { pending, run } = useRoomMutation();
+
+	function handleAdvance() {
+		if (!next || empty) return;
+		run(() => advanceRoomStage(sessionId, next));
+	}
 
 	return (
 		<Enter>
@@ -126,13 +154,10 @@ function DebateDone({
 						? "Todos los turnos se completaron. En Cierre se califica el material y se cierra la sesión: ahí se actualizan conteos e insignias."
 						: "Todos los turnos se completaron. Los conteos e insignias se actualizan cuando el moderador cierra la sesión en Cierre."}
 				</p>
-				{isModerator && (
+				{isModerator && next && (
 					<ModeratorZone>
-						<Button
-							disabled={pending}
-							onClick={() => run(() => advanceRoomStage(sessionId, "cierre"))}
-						>
-							Continuar a Cierre
+						<Button disabled={pending || empty} onClick={handleAdvance}>
+							Continuar a {ROOM_STAGE_LABELS[next]}
 							<HugeiconsIcon
 								icon={ArrowRight01Icon}
 								strokeWidth={2}
@@ -140,6 +165,20 @@ function DebateDone({
 								aria-hidden="true"
 							/>
 						</Button>
+						{empty && (
+							<p className="text-xs text-muted-foreground">
+								Se necesita al menos un participante para avanzar.
+							</p>
+						)}
+						{warnings.length > 0 && (
+							<ul className="flex flex-col gap-1">
+								{warnings.map((label) => (
+									<li key={label} className="text-sm text-muted-foreground">
+										{label}
+									</li>
+								))}
+							</ul>
+						)}
 					</ModeratorZone>
 				)}
 			</div>
