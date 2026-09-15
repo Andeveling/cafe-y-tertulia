@@ -4,13 +4,13 @@ import { z } from "zod";
 import type { Json } from "@/lib/supabase/database.types";
 
 // ---------------------------------------------------------------------------
-// Primitivas Zod que reemplazan a `json-helpers.ts`.
+// Primitivas Zod del seam de decodificación (Json → dominio o nulo).
 //
 // Cada una acepta `Json | undefined` (lo que devuelve Supabase RPC) y
 // produce el tipo de dominio con fallback. Usar `.catch(fallback)` en vez
 // de `.default()` para que valores del tipo incorrecto (p. ej. número donde
 // se esperaba string) también caigan al fallback en lugar de lanzar.
-// La interfaz es pequeña (5 primitivas + 1 decodificador); la
+// La interfaz es pequeña (6 primitivas + 1 decodificador); la
 // implementación (validación, coerción, mensajes con ruta) es profunda.
 // ---------------------------------------------------------------------------
 
@@ -25,6 +25,12 @@ export const jNullString = z
 
 /** Number con fallback 0 — reemplaza `asNumber(v)` */
 export const jNumber = z.number().catch(0);
+
+/** Number | null con fallback null — reemplaza `typeof v === "number" ? v : null` */
+export const jNullNumber = z
+	.number()
+	.nullable()
+	.catch(null) as unknown as z.ZodType<number | null>;
 
 /** Boolean con fallback false — reemplaza `asBool(v)` */
 export const jBool = z.boolean().catch(false);

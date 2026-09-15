@@ -711,13 +711,7 @@
 			"hash": "ee5060caeff20c5a",
 			"subject": "333c396034afd2b1"
 		},
-		{
-			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
-			"file": "app/materials/_lib/json-helpers.ts",
-			"line": 1,
-			"hash": "7e5d2f2ad7e63980",
-			"subject": "6301e231373d7e54"
-		},
+
 		{
 			"rule": "that reside in folder matching \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\" should only import from \"/home/andresp/Projects/personal/cafe-y-tertulia/app/materials/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/_lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/app/layout.tsx\", \"/home/andresp/Projects/personal/cafe-y-tertulia/lib/**\", \"/home/andresp/Projects/personal/cafe-y-tertulia/components/**\"",
 			"file": "app/materials/_lib/lobby.ts",
