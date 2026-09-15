@@ -37,12 +37,12 @@ module.exports = {
 			to: { path: "app/.*/_lib/(?!constants)" },
 		},
 
-		// ── Regla 4: json-helpers.ts es hoja ────────────────────────────────
+		// ── Regla 4: snapshot-codec.ts es hoja ──────────────────────────────
 		{
-			name: "json-helpers-is-leaf",
+			name: "snapshot-codec-is-leaf",
 			severity: "error",
-			from: { path: "app/.*/_lib/json-helpers\\.ts$" },
-			to: { path: "app/.*/_lib/(?!json-helpers)" },
+			from: { path: "app/.*/_lib/snapshot-codec\\.ts$" },
+			to: { path: "app/.*/_lib/(?!snapshot-codec)" },
 		},
 
 		// ── Regla 5: actions no importa de components ───────────────────────
