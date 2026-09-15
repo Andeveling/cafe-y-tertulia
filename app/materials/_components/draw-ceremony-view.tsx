@@ -245,6 +245,17 @@ function FanfareBeat() {
 	);
 }
 
+function initials(name: string) {
+	const parts = name.trim().split(/\s+/);
+	const first = parts[0]?.[0] ?? "";
+	const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
+	return (first + last).toUpperCase();
+}
+
+function pad2(n: number) {
+	return String(n).padStart(2, "0");
+}
+
 function ResultsBeat({
 	visible,
 	total,
@@ -260,8 +271,19 @@ function ResultsBeat({
 }) {
 	const asAssignee = visible.find((a) => a.assigneeId === userId);
 	const asAuthor = visible.find((a) => a.authorId === userId);
-	const showHero = Boolean(asAssignee || asAuthor);
+	const answersOwn =
+		asAuthor && asAuthor.assignmentId !== asAssignee?.assignmentId
+			? asAuthor
+			: undefined;
+	const showHero = Boolean(asAssignee || answersOwn);
 	const item = reduced ? resultsItemQuiet : resultsItem;
+	const exposeTurn = asAssignee
+		? visible.findIndex((a) => a.assignmentId === asAssignee.assignmentId) + 1
+		: 0;
+	const answerTurn = answersOwn
+		? visible.findIndex((a) => a.assignmentId === answersOwn.assignmentId) + 1
+		: 0;
+	const missionCount = (asAssignee ? 1 : 0) + (answersOwn ? 1 : 0);
 
 	return (
 		<motion.div
@@ -272,30 +294,76 @@ function ResultsBeat({
 			className="flex flex-col gap-8"
 		>
 			{showHero && (
-				<motion.div
-					variants={item}
-					className="flex flex-col gap-6 rounded-xl bg-primary/10 px-6 py-8 ring-1 ring-primary/25"
-				>
-					{asAssignee && (
-						<div className="flex flex-col gap-1">
-							<p className="text-sm text-muted-foreground">Te tocó</p>
-							<p className="font-heading text-3xl font-semibold text-balance">
-								{asAssignee.authorName}
-							</p>
-							<p className="text-sm text-muted-foreground">
-								Tú expones su pregunta. El texto espera al debate.
-							</p>
-						</div>
-					)}
-					{asAuthor && asAuthor.assignmentId !== asAssignee?.assignmentId && (
-						<div className="flex flex-col gap-1">
-							<p className="text-sm text-muted-foreground">Tu pregunta</p>
-							<p className="font-heading text-xl font-semibold text-balance">
-								La responde {asAuthor.assigneeName}
-							</p>
-						</div>
-					)}
-				</motion.div>
+				<section aria-label="Tu misión">
+					<div className="mb-3 flex items-baseline justify-between gap-4">
+						<h2 className="font-heading text-xl font-semibold">Tu misión</h2>
+						<span className="text-xs text-muted-foreground">
+							{missionCount} intervención{missionCount > 1 ? "es" : ""}
+						</span>
+					</div>
+					<div className="grid gap-3 sm:grid-cols-2">
+						{asAssignee && (
+							<motion.article
+								variants={item}
+								aria-label={`Te toca exponer la pregunta de ${asAssignee.authorName}`}
+								className="flex flex-col gap-3 rounded-xl bg-primary/10 px-6 py-6 ring-1 ring-primary/25"
+							>
+								<div className="flex items-center justify-between gap-3">
+									<p className="text-[11px] font-bold tracking-[0.1em] text-primary uppercase">
+										Tú expones
+									</p>
+									<span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-primary ring-1 ring-primary/25">
+										Intervención {exposeTurn}/{total}
+									</span>
+								</div>
+								<p className="font-heading text-3xl font-semibold text-balance">
+									{asAssignee.authorName}
+								</p>
+								<p className="font-heading text-lg text-muted-foreground italic">
+									Expones su pregunta.
+								</p>
+								<div aria-hidden="true" className="h-px bg-primary/25" />
+								<p className="flex items-center gap-2 text-xs text-muted-foreground">
+									<span
+										aria-hidden="true"
+										className="size-1.5 shrink-0 rounded-full bg-primary"
+									/>
+									El texto se revela al abrir Debate.
+								</p>
+							</motion.article>
+						)}
+						{answersOwn && (
+							<motion.article
+								variants={item}
+								aria-label={`Tu pregunta la responde ${answersOwn.assigneeName}`}
+								className="flex flex-col gap-3 rounded-xl px-6 py-6 ring-1 ring-foreground/10"
+							>
+								<div className="flex items-center justify-between gap-3">
+									<p className="text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
+										Tu pregunta
+									</p>
+									<span className="rounded-full bg-foreground/[0.05] px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground ring-1 ring-foreground/15">
+										Intervención {answerTurn}/{total}
+									</span>
+								</div>
+								<p className="font-heading text-xl font-semibold text-balance">
+									{answersOwn.assigneeName}
+								</p>
+								<p className="font-heading text-lg text-muted-foreground italic">
+									La responde por ti.
+								</p>
+								<div aria-hidden="true" className="h-px bg-foreground/10" />
+								<p className="flex items-center gap-2 text-xs text-muted-foreground">
+									<span
+										aria-hidden="true"
+										className="size-1.5 shrink-0 rounded-full bg-muted-foreground/50"
+									/>
+									Expone tu pregunta en su turno.
+								</p>
+							</motion.article>
+						)}
+					</div>
+				</section>
 			)}
 
 			{!showHero && settled && (
@@ -304,34 +372,100 @@ function ResultsBeat({
 				</motion.p>
 			)}
 
-			<motion.ul className="flex flex-col gap-2" variants={resultsContainer}>
-				{visible.map((a, i) => {
-					const mine = a.assigneeId === userId || a.authorId === userId;
-					return (
-						<motion.li
-							key={a.assignmentId}
-							variants={item}
-							className={cn(
-								"flex items-center justify-between gap-3 rounded-lg px-4 py-3 text-sm ring-1 ring-foreground/10",
-								mine && "bg-primary/10 ring-primary/30",
-							)}
-						>
-							<span>
-								<span className="font-medium">{a.authorName}</span>
-								<span className="text-muted-foreground"> → </span>
-								<span className="font-medium">{a.assigneeName}</span>
-							</span>
-							{a.assigneeId === userId ? (
-								<Badge>Tú</Badge>
-							) : (
-								<span className="text-xs text-muted-foreground tabular-nums">
-									{i + 1}/{total}
+			<section aria-label="Orden de intervención">
+				<div className="mb-3 flex items-baseline justify-between gap-4">
+					<h2 className="font-heading text-xl font-semibold">
+						Orden de intervención
+					</h2>
+					<span className="text-xs text-muted-foreground tabular-nums">
+						{total} turno{total > 1 ? "s" : ""}
+					</span>
+				</div>
+				<motion.ol className="flex flex-col gap-2" variants={resultsContainer}>
+					{visible.map((a, i) => {
+						const mine = a.assigneeId === userId || a.authorId === userId;
+						const iExpose = a.assigneeId === userId;
+						const authorIsMe = a.authorId === userId;
+						const assigneeIsMe = a.assigneeId === userId;
+						return (
+							<motion.li
+								key={a.assignmentId}
+								variants={item}
+								className={cn(
+									"grid grid-cols-[2.5rem_1fr_auto] items-center gap-3 rounded-xl px-4 py-3 ring-1",
+									mine ? "bg-primary/10 ring-primary/30" : "ring-foreground/10",
+								)}
+							>
+								<span
+									className={cn(
+										"font-heading text-2xl tabular-nums",
+										mine ? "text-primary" : "text-muted-foreground/60",
+									)}
+								>
+									{pad2(i + 1)}
 								</span>
-							)}
-						</motion.li>
-					);
-				})}
-			</motion.ul>
+								<span className="flex min-w-0 items-center gap-2 text-sm">
+									<span
+										aria-hidden="true"
+										className={cn(
+											"grid size-8 shrink-0 place-items-center rounded-full text-xs font-semibold ring-1",
+											authorIsMe
+												? "bg-primary/10 text-primary ring-primary/30"
+												: "bg-foreground/[0.04] text-foreground ring-foreground/15",
+										)}
+									>
+										{initials(a.authorName)}
+									</span>
+									<span className="min-w-0 truncate font-medium">
+										{a.authorName}
+									</span>
+									<span
+										aria-hidden="true"
+										className="shrink-0 text-muted-foreground"
+									>
+										→
+									</span>
+									<span
+										aria-hidden="true"
+										className={cn(
+											"grid size-8 shrink-0 place-items-center rounded-full text-xs font-semibold ring-1",
+											assigneeIsMe
+												? "bg-primary/10 text-primary ring-primary/30"
+												: "bg-foreground/[0.04] text-foreground ring-foreground/15",
+										)}
+									>
+										{initials(a.assigneeName)}
+									</span>
+									<span className="min-w-0 truncate font-medium">
+										{a.assigneeName}
+									</span>
+								</span>
+								<span className="flex shrink-0 flex-col items-end gap-1">
+									{mine ? (
+										<Badge>Tú</Badge>
+									) : (
+										<span className="text-xs text-muted-foreground tabular-nums">
+											{i + 1}/{total}
+										</span>
+									)}
+									{mine && (
+										<span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+											{iExpose ? "Expones" : "Te responden"}
+										</span>
+									)}
+								</span>
+							</motion.li>
+						);
+					})}
+				</motion.ol>
+				<p className="mt-2 flex items-center gap-2 rounded-lg bg-muted/30 px-3 py-2 text-xs text-muted-foreground ring-1 ring-foreground/10">
+					<span
+						aria-hidden="true"
+						className="size-1.5 shrink-0 rounded-full bg-muted-foreground/50"
+					/>
+					Los textos se ocultan hasta el debate.
+				</p>
+			</section>
 		</motion.div>
 	);
 }

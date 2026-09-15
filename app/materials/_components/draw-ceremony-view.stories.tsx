@@ -108,8 +108,9 @@ export const SettledYours: Story = {
 		reducedMotion: true,
 	},
 	play: async ({ canvas }) => {
-		await expect(canvas.getByText("Te tocó")).toBeVisible();
+		await expect(canvas.getByText("Tú expones")).toBeVisible();
 		await expect(canvas.getByText("Ana")).toBeVisible();
+		await expect(canvas.getByText("Orden de intervención")).toBeVisible();
 		await expect(canvas.getByText("Tú")).toBeVisible();
 	},
 };

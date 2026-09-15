@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PROTOTYPE — Sorteo Minijuego · Café y Tertulias</title>
+<style>
+  :root {
+    --bg: #1a1410;
+    --bg-warm: #231c14;
+    --surface: #2a2218;
+    --surface-light: #3a3024;
+    --border: #4a3c2e;
+    --gold: #d4a843;
+    --gold-dim: #a07d2e;
+    --gold-glow: #d4a84340;
+    --cream: #f5e6c8;
+    --cream-dim: #b8a48a;
+    --accent: #c0583a;
+    --accent-glow: #c0583a40;
+    --success: #5a9a5a;
+    --fg: #f0e4d0;
+    --muted: #8a7a66;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Ambient particles ── */
+  #particles {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Layout ── */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    width: 100%;
+  }
+  .badge {
+    display: inline-block;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    background: var(--accent);
+    color: var(--cream);
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -.01em;
+    color: var(--gold);
+    text-shadow: 0 0 30px var(--gold-glow);
+  }
+  .header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* ── Phase indicator ── */
+  .phases {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  .phase-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all .4s ease;
+  }
+  .phase-dot.active {
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold-glow);
+    transform: scale(1.3);
+  }
+  .phase-dot.done {
+    background: var(--success);
+  }
+  .phase-label {
+    color: var(--muted);
+    transition: color .3s;
+  }
+  .phase-label.active { color: var(--gold); }
+
+  /* ── Tómbola (drum) ── */
+  .tombola-wrap {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tombola-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid var(--border);
+    transition: border-color .5s;
+  }
+  .tombola-ring.spinning {
+    border-color: var(--gold);
+    box-shadow: 0 0 40px var(--gold-glow), inset 0 0 40px var(--gold-glow);
+  }
+  .tombola-inner {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, var(--surface-light), var(--surface));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid var(--border);
+  }
+  .tombola-inner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 25%, rgba(255,255,255,.06), transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Spinning names inside drum */
+  .drum-names {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+  }
+  .drum-name {
+    position: absolute;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--cream-dim);
+    white-space: nowrap;
+    left: 50%;
+    top: 50%;
+    transform-origin: 0 0;
+    transition: opacity .3s;
+  }
+  .drum-name.highlight {
+    color: var(--gold);
+    font-weight: 600;
+    text-shadow: 0 0 8px var(--gold-glow);
+  }
+  .drum-name.used {
+    opacity: .25;
+    text-decoration: line-through;
+  }
+
+  /* Center display */
+  .drum-display {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .drum-display .icon { font-size: 40px; }
+  .drum-display .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── Lever (action button) ── */
+  .lever-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .lever {
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 14px 32px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    color: var(--bg);
+    box-shadow: 0 4px 20px var(--gold-glow), 0 0 0 2px var(--gold-dim);
+    transition: all .2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .lever::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,.15));
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .lever:hover::after { opacity: 1; }
+  .lever:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px var(--gold-glow), 0 0 0 2px var(--gold);
+  }
+  .lever:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px var(--gold-glow);
+  }
+  .lever:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .lever-hint {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .04em;
+  }
+
+  /* ── Slot Machine (pair reveal) ── */
+  .slot-machine {
+    width: 100%;
+    max-width: 480px;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .slot-machine.visible { display: flex; }
+
+  .slot-frame {
+    width: 100%;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .slot-frame::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .slot-frame.active::before { opacity: 1; }
+
+  .slot-label {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .slot-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .slot-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-warm);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    opacity: 0;
+    transform: translateY(10px) scale(.97);
+    transition: all .5s cubic-bezier(.23,1,.32,1);
+  }
+  .slot-row.revealed {
+    opacity: 1;
+    transform: none;
+  }
+  .slot-row.current {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px var(--gold-glow);
+  }
+
+  .slot-name {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    overflow: hidden;
+  }
+  .slot-name.left { text-align: right; }
+  .slot-name.right { text-align: left; }
+
+  /* Spinning text effect */
+  .slot-name.spinning {
+    position: relative;
+  }
+  .slot-name.spinning::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, var(--bg-warm) 0%, transparent 30%, transparent 70%, var(--bg-warm) 100%);
+    pointer-events: none;
+  }
+  .slot-name .spin-stack {
+    display: flex;
+    flex-direction: column;
+    animation: slotSpin .1s linear infinite;
+  }
+  .slot-name.slowng .spin-stack {
+    animation-duration: .25s;
+  }
+  .slot-name.stopped .spin-stack {
+    animation: none;
+  }
+  @keyframes slotSpin {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-20px); }
+  }
+
+  .slot-arrow {
+    color: var(--gold);
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity .4s;
+  }
+  .slot-row.revealed .slot-arrow { opacity: 1; }
+
+  /* Current pair highlight */
+  .pair-spotlight {
+    text-align: center;
+    padding: 16px;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .pair-spotlight .who {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .pair-spotlight .names {
+    font-size: 20px;
+    color: var(--gold);
+  }
+
+  /* ── Results grid ── */
+  .results {
+    width: 100%;
+    max-width: 480px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .results.visible { display: flex; }
+
+  .results-title {
+    text-align: center;
+    font-size: 22px;
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold-glow);
+  }
+
+  .result-card {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all .5s cubic-bezier(.23,1,.32,1);
+  }
+  .result-card.visible {
+    opacity: 1;
+    transform: none;
+  }
+  .result-card.is-you {
+    border-color: var(--gold);
+    background: linear-gradient(135deg, var(--surface), rgba(212,168,67,.08));
+  }
+  .result-card .r-name {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 14px;
+  }
+  .result-card .r-name.you { color: var(--gold); font-weight: 600; }
+  .result-card .r-arrow {
+    color: var(--muted);
+    font-size: 16px;
+  }
+  .result-card .r-question {
+    grid-column: 1 / -1;
+    font-size: 13px;
+    color: var(--cream-dim);
+    font-style: italic;
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+    margin-top: 2px;
+  }
+
+  /* ── Confetti canvas ── */
+  #confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* ── Countdown overlay ── */
+  .countdown-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(26,20,16,.9);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s;
+  }
+  .countdown-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .countdown-number {
+    font-size: 120px;
+    color: var(--gold);
+    text-shadow: 0 0 60px var(--gold-glow), 0 0 120px var(--gold-glow);
+    animation: countPulse 1s ease-out;
+  }
+  @keyframes countPulse {
+    0% { transform: scale(2); opacity: 0; filter: blur(10px); }
+    50% { opacity: 1; }
+    100% { transform: scale(1); opacity: 1; filter: blur(0); }
+  }
+
+  /* ── Status text ── */
+  .status {
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    min-height: 20px;
+  }
+
+  /* ── Config panel ── */
+  .config {
+    width: 100%;
+    max-width: 480px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 13px;
+  }
+  .config summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .config-inner {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .config label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .config label span:first-child { color: var(--cream-dim); }
+  .config input[type="text"], .config input[type="number"] {
+    background: var(--bg-warm);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    padding: 4px 8px;
+    font-size: 12px;
+    font-family: ui-monospace, monospace;
+    width: 180px;
+  }
+  .config textarea {
+    background: var(--bg-warm);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--fg);
+    padding: 6px 8px;
+    font-size: 12px;
+    font-family: ui-monospace, monospace;
+    width: 100%;
+    min-height: 60px;
+    resize: vertical;
+  }
+  .config .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .config button {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--bg-warm);
+    color: var(--cream-dim);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+  }
+  .config button:hover { border-color: var(--gold-dim); color: var(--cream); }
+
+  /* ── Drum shake ── */
+  @keyframes drumShake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-3deg); }
+    75% { transform: rotate(3deg); }
+  }
+  .tombola-inner.shaking {
+    animation: drumShake .08s linear infinite;
+  }
+
+  /* ── Glow pulse ── */
+  @keyframes glowPulse {
+    0%, 100% { box-shadow: 0 0 20px var(--gold-glow); }
+    50% { box-shadow: 0 0 50px var(--gold-glow), 0 0 80px var(--accent-glow); }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .tombola-wrap { width: 220px; height: 220px; }
+    .tombola-inner { width: 170px; height: 170px; }
+    .header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<canvas id="confetti"></canvas>
+
+<div class="countdown-overlay" id="countdownOverlay">
+  <div class="countdown-number" id="countdownNumber">3</div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="badge">Prototype — throwaway</div>
+    <h1>La Tómbola del Café</h1>
+    <p>Sorteo interactivo — cada pareja se revela con suspense</p>
+  </div>
+
+  <div class="phases" id="phases">
+    <div class="phase-dot active" data-phase="0"></div>
+    <span class="phase-label active">Preparar</span>
+    <div class="phase-dot" data-phase="1"></div>
+    <span class="phase-label">Sortear</span>
+    <div class="phase-dot" data-phase="2"></div>
+    <span class="phase-label">Resultado</span>
+  </div>
+
+  <!-- Tómbola -->
+  <div class="tombola-wrap" id="tombolaWrap">
+    <div class="tombola-ring" id="tombolaRing"></div>
+    <div class="tombola-inner" id="tombolaInner">
+      <div class="drum-names" id="drumNames"></div>
+      <div class="drum-display">
+        <div class="icon">☕</div>
+        <div class="label">Tómbola</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="status" id="status">Preparando el sorteo...</div>
+
+  <!-- Action button -->
+  <div class="lever-area" id="leverArea">
+    <button class="lever" id="lever" disabled>Iniciar Sorteo</button>
+    <div class="lever-hint" id="leverHint">Agrega participantes para comenzar</div>
+  </div>
+
+  <!-- Slot machine for pair reveals -->
+  <div class="slot-machine" id="slotMachine">
+    <div class="slot-frame" id="slotFrame">
+      <div class="slot-label">Parejas sorteadas</div>
+      <div class="pair-spotlight" id="pairSpotlight">
+        <div class="who">Revelando...</div>
+        <div class="names">—</div>
+      </div>
+      <div class="slot-rows" id="slotRows"></div>
+    </div>
+  </div>
+
+  <!-- Final results -->
+  <div class="results" id="results">
+    <div class="results-title">~ Parejas del Sorteo ~</div>
+    <div id="resultCards"></div>
+  </div>
+
+  <!-- Config -->
+  <details class="config">
+    <summary>Configuración del prototipo</summary>
+    <div class="config-inner">
+      <label>
+        <span>Participantes (uno por línea)</span>
+      </label>
+      <textarea id="cfgNames">Ana
+Bruno
+Carla
+Diego
+Elena
+Fabián
+Greta
+Hugo</textarea>
+      <label>
+        <span>Duración del giro (ms)</span>
+        <input type="number" id="cfgSpin" value="2500" min="500" max="8000" step="100" />
+      </label>
+      <label>
+        <span>Nombre "tú"</span>
+        <input type="text" id="cfgYou" value="Ana" />
+      </label>
+      <div class="btn-row">
+        <button onclick="resetProto()">Reiniciar</button>
+      </div>
+    </div>
+  </details>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────
+// PROTOTYPE: La Tómbola del Café
+// Throwaway — explores minigame UX for the draw ceremony
+// ─────────────────────────────────────────────────
+
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+// ── State ──
+let phase = 0; // 0=prep, 1=drawing, 2=done
+let participants = [];
+let assignments = [];
+let currentPairIdx = -1;
+let spinning = false;
+
+// ── Ambient particles ──
+const pCanvas = $('#particles');
+const pCtx = pCanvas.getContext('2d');
+let particlesArr = [];
+
+function initParticles() {
+  pCanvas.width = window.innerWidth;
+  pCanvas.height = window.innerHeight;
+  particlesArr = [];
+  for (let i = 0; i < 30; i++) {
+    particlesArr.push({
+      x: Math.random() * pCanvas.width,
+      y: Math.random() * pCanvas.height,
+      r: Math.random() * 2 + .5,
+      vx: (Math.random() - .5) * .3,
+      vy: -Math.random() * .4 - .1,
+      alpha: Math.random() * .3 + .1,
+    });
+  }
+}
+
+function drawParticles() {
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+  for (const p of particlesArr) {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.y < -10) { p.y = pCanvas.height + 10; p.x = Math.random() * pCanvas.width; }
+    if (p.x < -10) p.x = pCanvas.width + 10;
+    if (p.x > pCanvas.width + 10) p.x = -10;
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    pCtx.fillStyle = `rgba(212,168,67,${p.alpha})`;
+    pCtx.fill();
+  }
+  requestAnimationFrame(drawParticles);
+}
+
+initParticles();
+drawParticles();
+window.addEventListener('resize', initParticles);
+
+// ── Confetti ──
+const cCanvas = $('#confetti');
+const cCtx = cCanvas.getContext('2d');
+let confettiArr = [];
+let confettiAnim = null;
+
+function fireConfetti(intensity = 60) {
+  cCanvas.width = window.innerWidth;
+  cCanvas.height = window.innerHeight;
+  const colors = ['#d4a843', '#c0583a', '#f5e6c8', '#5a9a5a', '#e8b94a', '#ff6b4a'];
+  for (let i = 0; i < intensity; i++) {
+    confettiArr.push({
+      x: cCanvas.width / 2 + (Math.random() - .5) * 200,
+      y: cCanvas.height / 2,
+      vx: (Math.random() - .5) * 12,
+      vy: -Math.random() * 14 - 4,
+      w: Math.random() * 8 + 4,
+      h: Math.random() * 4 + 2,
+      rot: Math.random() * Math.PI * 2,
+      vr: (Math.random() - .5) * .3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 1,
+    });
+  }
+  if (!confettiAnim) animConfetti();
+}
+
+function animConfetti() {
+  cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+  confettiArr = confettiArr.filter(c => {
+    c.x += c.vx;
+    c.y += c.vy;
+    c.vy += .3;
+    c.vx *= .99;
+    c.rot += c.vr;
+    c.life -= .008;
+    if (c.life <= 0) return false;
+    cCtx.save();
+    cCtx.translate(c.x, c.y);
+    cCtx.rotate(c.rot);
+    cCtx.globalAlpha = c.life;
+    cCtx.fillStyle = c.color;
+    cCtx.fillRect(-c.w/2, -c.h/2, c.w, c.h);
+    cCtx.restore();
+    return true;
+  });
+  if (confettiArr.length) {
+    confettiAnim = requestAnimationFrame(animConfetti);
+  } else {
+    confettiAnim = null;
+    cCtx.clearRect(0, 0, cCanvas.width, cCanvas.height);
+  }
+}
+
+// ── Drum names ──
+function renderDrumNames() {
+  const container = $('#drumNames');
+  container.innerHTML = '';
+  const cx = 110, cy = 110, radius = 75;
+  participants.forEach((p, i) => {
+    const angle = (i / participants.length) * Math.PI * 2 - Math.PI / 2;
+    const x = cx + Math.cos(angle) * radius;
+    const y = cy + Math.sin(angle) * radius;
+    const el = document.createElement('div');
+    el.className = 'drum-name';
+    el.textContent = p.name;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.transform = `translate(-50%, -50%) rotate(${angle + Math.PI/2}rad)`;
+    el.dataset.name = p.name;
+    container.appendChild(el);
+  });
+}
+
+let drumAngle = 0;
+let drumSpinInterval = null;
+
+function startDrumSpin() {
+  const ring = $('#tombolaRing');
+  const inner = $('#tombolaInner');
+  ring.classList.add('spinning');
+  inner.classList.add('shaking');
+  drumAngle = 0;
+  drumSpinInterval = setInterval(() => {
+    drumAngle += 3;
+    $('#drumNames').style.transform = `rotate(${drumAngle}deg)`;
+  }, 30);
+}
+
+function stopDrumSpin() {
+  const ring = $('#tombolaRing');
+  const inner = $('#tombolaInner');
+  ring.classList.remove('spinning');
+  inner.classList.remove('shaking');
+  clearInterval(drumSpinInterval);
+  $('#drumNames').style.transform = '';
+}
+
+function highlightDrumName(name) {
+  $$('.drum-name').forEach(el => {
+    el.classList.toggle('highlight', el.dataset.name === name);
+  });
+}
+
+function markDrumNameUsed(name) {
+  $$('.drum-name').forEach(el => {
+    if (el.dataset.name === name) el.classList.add('used');
+  });
+}
+
+// ── Slot machine effect ──
+function createSpinStack(names, targetName) {
+  const stack = [];
+  const count = 8 + Math.floor(Math.random() * 6);
+  for (let i = 0; i < count; i++) {
+    stack.push(names[Math.floor(Math.random() * names.length)]);
+  }
+  stack.push(targetName);
+  return stack;
+}
+
+async function slotSpin(el, targetName, allNames, duration) {
+  el.classList.add('spinning');
+  const stack = createSpinStack(allNames, targetName);
+  const spinStack = el.querySelector('.spin-stack') || document.createElement('div');
+  spinStack.className = 'spin-stack';
+  spinStack.innerHTML = stack.map(n => `<div>${n}</div>`).join('');
+  if (!el.querySelector('.spin-stack')) el.appendChild(spinStack);
+
+  // Phase 1: fast spin
+  await sleep(duration * .6);
+  el.classList.remove('spinning');
+  el.classList.add('slowing');
+
+  // Phase 2: slow down
+  await sleep(duration * .3);
+  el.classList.remove('slowing');
+  el.classList.add('stopped');
+
+  // Phase 3: land
+  spinStack.innerHTML = `<div style="color:var(--gold);font-weight:600">${targetName}</div>`;
+  await sleep(200);
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+// ── Slot rows ──
+function createSlotRow(pair, index) {
+  const row = document.createElement('div');
+  row.className = 'slot-row';
+  row.innerHTML = `
+    <div class="slot-name left" data-idx="${index}"><span class="spin-stack">${pair.author}</span></div>
+    <div class="slot-arrow">→</div>
+    <div class="slot-name right" data-idx="${index}"><span class="spin-stack">${pair.assignee}</span></div>
+  `;
+  return row;
+}
+
+async function revealPair(pair, index, allNames) {
+  const rows = $('#slotRows');
+  const row = createSlotRow(pair, index);
+  rows.prepend(row);
+
+  // Brief delay then reveal with animation
+  await sleep(100);
+  row.classList.add('revealed', 'current');
+
+  // Slot spin effect on names
+  const leftEl = row.querySelector('.slot-name.left');
+  const rightEl = row.querySelector('.slot-name.right');
+  const spinDuration = parseInt($('#cfgSpin').value) || 2500;
+
+  // Spin both names simultaneously
+  const spotlight = $('#pairSpotlight');
+  spotlight.querySelector('.who').textContent = `Pareja ${index + 1}`;
+  spotlight.querySelector('.names').textContent = '...';
+
+  await Promise.all([
+    slotSpin(leftEl, pair.author, allNames, spinDuration),
+    slotSpin(rightEl, pair.assignee, allNames, spinDuration),
+  ]);
+
+  spotlight.querySelector('.names').innerHTML =
+    `<span style="color:var(--cream)">${pair.author}</span> → <span style="color:var(--gold)">${pair.assignee}</span>`;
+
+  // Mark used names
+  markDrumNameUsed(pair.author);
+  markDrumNameUsed(pair.assignee);
+
+  // Mini confetti burst
+  fireConfetti(15);
+
+  row.classList.remove('current');
+  await sleep(600);
+}
+
+// ── Phase management ──
+function setPhase(p) {
+  phase = p;
+  $$('.phase-dot').forEach((dot, i) => {
+    dot.classList.remove('active', 'done');
+    if (i < p) dot.classList.add('done');
+    if (i === p) dot.classList.add('active');
+  });
+  $$('.phase-label').forEach((lbl, i) => {
+    lbl.classList.remove('active');
+    if (i === p) lbl.classList.add('active');
+  });
+}
+
+// ── Countdown ──
+async function showCountdown() {
+  const overlay = $('#countdownOverlay');
+  const numEl = $('#countdownNumber');
+  overlay.classList.add('visible');
+  for (let i = 3; i >= 1; i--) {
+    numEl.textContent = i;
+    numEl.style.animation = 'none';
+    void numEl.offsetWidth;
+    numEl.style.animation = '';
+    await sleep(900);
+  }
+  numEl.textContent = '☕';
+  numEl.style.animation = 'none';
+  void numEl.offsetWidth;
+  numEl.style.animation = '';
+  await sleep(600);
+  overlay.classList.remove('visible');
+}
+
+// ── Draw algorithm (simplified from execute_draw) ──
+function executeDraw(names) {
+  const shuffled = [...names].sort(() => Math.random() - .5);
+  const pairs = [];
+  for (let i = 0; i < shuffled.length; i += 2) {
+    if (i + 1 < shuffled.length) {
+      // Randomize direction
+      if (Math.random() > .5) {
+        pairs.push({ author: shuffled[i], assignee: shuffled[i + 1] });
+      } else {
+        pairs.push({ author: shuffled[i + 1], assignee: shuffled[i] });
+      }
+    }
+  }
+  return pairs;
+}
+
+// ── Main flow ──
+async function startSorteo() {
+  const btn = $('#lever');
+  btn.disabled = true;
+  setPhase(1);
+  $('#status').textContent = 'Mezclando nombres...';
+
+  // Start drum spinning
+  startDrumSpin();
+
+  await sleep(1500);
+
+  // Countdown
+  stopDrumSpin();
+  await showCountdown();
+
+  // Start drawing
+  startDrumSpin();
+  $('#status').textContent = '¡Sorteando parejas!';
+  $('#slotMachine').classList.add('visible');
+
+  const allNames = participants.map(p => p.name);
+
+  for (let i = 0; i < assignments.length; i++) {
+    currentPairIdx = i;
+
+    // Highlight the names about to be drawn
+    highlightDrumName(assignments[i].author);
+    await sleep(400);
+    highlightDrumName(assignments[i].assignee);
+    await sleep(300);
+
+    stopDrumSpin();
+    await revealPair(assignments[i], i, allNames);
+
+    if (i < assignments.length - 1) {
+      startDrumSpin();
+      await sleep(500);
+    }
+  }
+
+  // Done!
+  setPhase(2);
+  $('#status').textContent = `¡${assignments.length} parejas sorteadas!`;
+  highlightDrumName('');
+
+  // Big confetti
+  fireConfetti(120);
+
+  // Show final results
+  await sleep(800);
+  showResults();
+  btn.textContent = 'Nuevo Sorteo';
+  btn.disabled = false;
+}
+
+function showResults() {
+  const container = $('#resultCards');
+  container.innerHTML = '';
+  const you = $('#cfgYou').value.trim();
+  const results = $('#results');
+  results.classList.add('visible');
+
+  assignments.forEach((pair, i) => {
+    const card = document.createElement('div');
+    const isYou = pair.author === you || pair.assignee === you;
+    card.className = `result-card${isYou ? ' is-you' : ''}`;
+    card.innerHTML = `
+      <div class="r-name${pair.author === you ? ' you' : ''}">${pair.author}</div>
+      <div class="r-arrow">→</div>
+      <div class="r-name${pair.assignee === you ? ' you' : ''}">${pair.assignee}</div>
+    `;
+    container.appendChild(card);
+    setTimeout(() => card.classList.add('visible'), i * 120 + 100);
+  });
+}
+
+// ── Init / Reset ──
+function getParticipants() {
+  const raw = $('#cfgNames').value.split('\n').map(s => s.trim()).filter(Boolean);
+  return raw.map(name => ({ name }));
+}
+
+function initDrum() {
+  participants = getParticipants();
+  renderDrumNames();
+  const btn = $('#lever');
+  if (participants.length >= 2) {
+    btn.disabled = false;
+    btn.textContent = 'Iniciar Sorteo';
+    $('#leverHint').textContent = `${participants.length} participantes listos`;
+    $('#status').textContent = `${participants.length} participantes en la tómbola`;
+  } else {
+    btn.disabled = true;
+    $('#leverHint').textContent = 'Mínimo 2 participantes';
+    $('#status').textContent = 'Agrega participantes para comenzar';
+  }
+}
+
+function resetProto() {
+  phase = 0;
+  assignments = [];
+  currentPairIdx = -1;
+  spinning = false;
+  stopDrumSpin();
+  setPhase(0);
+  $('#slotMachine').classList.remove('visible');
+  $('#results').classList.remove('visible');
+  $('#slotRows').innerHTML = '';
+  $('#resultCards').innerHTML = '';
+  $('#pairSpotlight').querySelector('.who').textContent = 'Revelando...';
+  $('#pairSpotlight').querySelector('.names').textContent = '—';
+  initDrum();
+}
+
+$('#lever').addEventListener('click', async () => {
+  if (phase === 2) {
+    resetProto();
+    return;
+  }
+  participants = getParticipants();
+  if (participants.length < 2) return;
+  assignments = executeDraw(participants.map(p => p.name));
+  await startSorteo();
+});
+
+// Listen for config changes
+$('#cfgNames').addEventListener('input', () => {
+  if (phase === 0) initDrum();
+});
+
+// Init
+initDrum();
+</script>
+</body>
+</html>
