@@ -21,6 +21,7 @@ export const Mixed: Story = {
 				status: "pending",
 				created_at: new Date(now - 6 * hour).toISOString(),
 				expires_at: new Date(now + 18 * hour).toISOString(),
+				url: "http://127.0.0.1:3000/auth/invite?token=demo",
 			},
 			{
 				id: "2",

@@ -13,7 +13,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
 	play: async ({ canvas, userEvent }) => {
 		await userEvent.click(
-			canvas.getByRole("button", { name: /enviar invitación/i }),
+			canvas.getByRole("button", { name: /crear enlace/i }),
 		);
 		await expect(canvas.getByText(/ese email no parece válido/i)).toBeVisible();
 	},

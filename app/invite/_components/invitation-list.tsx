@@ -13,6 +13,7 @@ import {
 	invitationProgress,
 } from "../_lib/invitation-time";
 import { revoke } from "../_lib/invite-actions";
+import { CopyLinkButton } from "./copy-link-button";
 
 const STATUS_VARIANT: Record<
 	InvitationDisplayStatus,
@@ -62,6 +63,9 @@ export function InvitationList({
 									<Badge variant={STATUS_VARIANT[status]}>
 										{INVITATION_STATUS_LABELS[status]}
 									</Badge>
+									{status === "pending" && inv.url && (
+										<CopyLinkButton url={inv.url} variant="ghost" />
+									)}
 									{status === "pending" && (
 										<form action={revoke}>
 											<input type="hidden" name="id" value={inv.id} />
