@@ -24,14 +24,20 @@ insert into public.materials (id, title, kind, author, created_by) values
 	('ee000000-0000-0000-0000-0000000000e1', 'Libro de prueba', 'book', 'A', 'aa000000-0000-0000-0000-000000000001');
 
 insert into public.sessions (id, material_id, range, status, moderator_id, room_stage) values
-	('ee000000-0000-0000-0000-0000000000s1', 'ee000000-0000-0000-0000-0000000000e1', 'Cap. 1', 'lobby', 'aa000000-0000-0000-0000-000000000003', 'questions'),
-	('ee000000-0000-0000-0000-0000000000s2', 'ee000000-0000-0000-0000-0000000000e1', 'Cap. 2', 'lobby', 'aa000000-0000-0000-0000-000000000003', 'presence'),
-	('ee000000-0000-0000-0000-0000000000s3', 'ee000000-0000-0000-0000-0000000000e1', 'Cap. 3', 'closed', 'aa000000-0000-0000-0000-000000000003', 'questions');
+	('ee000000-0000-0000-0000-0000000000a1', 'ee000000-0000-0000-0000-0000000000e1', 'Cap. 1', 'lobby', 'aa000000-0000-0000-0000-000000000003', 'questions'),
+	('ee000000-0000-0000-0000-0000000000a2', 'ee000000-0000-0000-0000-0000000000e1', 'Cap. 2', 'lobby', 'aa000000-0000-0000-0000-000000000003', 'presence'),
+	('ee000000-0000-0000-0000-0000000000a3', 'ee000000-0000-0000-0000-0000000000e1', 'Cap. 3', 'lobby', 'aa000000-0000-0000-0000-000000000003', 'questions');
 
 insert into public.questions (id, session_id, material_id, author_id, text) values
-	('ee000000-0000-0000-0000-0000000000q1', 'ee000000-0000-0000-0000-0000000000s1', 'ee000000-0000-0000-0000-0000000000e1', 'aa000000-0000-0000-0000-000000000001', 'Original en questions'),
-	('ee000000-0000-0000-0000-0000000000q2', 'ee000000-0000-0000-0000-0000000000s2', 'ee000000-0000-0000-0000-0000000000e1', 'aa000000-0000-0000-0000-000000000001', 'Original en presence'),
-	('ee000000-0000-0000-0000-0000000000q3', 'ee000000-0000-0000-0000-0000000000s3', 'ee000000-0000-0000-0000-0000000000e1', 'aa000000-0000-0000-0000-000000000001', 'Original en sesión cerrada');
+	('ee000000-0000-0000-0000-0000000000b1', 'ee000000-0000-0000-0000-0000000000a1', 'ee000000-0000-0000-0000-0000000000e1', 'aa000000-0000-0000-0000-000000000001', 'Original en questions'),
+	('ee000000-0000-0000-0000-0000000000b2', 'ee000000-0000-0000-0000-0000000000a2', 'ee000000-0000-0000-0000-0000000000e1', 'aa000000-0000-0000-0000-000000000001', 'Original en presence'),
+	('ee000000-0000-0000-0000-0000000000b3', 'ee000000-0000-0000-0000-0000000000a3', 'ee000000-0000-0000-0000-0000000000e1', 'aa000000-0000-0000-0000-000000000001', 'Original en sesión cerrada');
+
+-- Cierra s3 tras crear sus fixtures: el frozen_guard bloquea insertar
+-- preguntas directamente en una sesión cerrada, así que se avanza por el
+-- ciclo de vida permitido (lobby → in_progress → closed).
+update public.sessions set status = 'in_progress' where id = 'ee000000-0000-0000-0000-0000000000a3';
+update public.sessions set status = 'closed' where id = 'ee000000-0000-0000-0000-0000000000a3';
 
 -- ============================================================
 -- Tests
@@ -43,20 +49,20 @@ set local request.jwt.claim.sub = 'aa000000-0000-0000-0000-000000000001';
 
 update public.questions
 set text = 'Editada en questions'
-where id = 'ee000000-0000-0000-0000-0000000000q1';
+where id = 'ee000000-0000-0000-0000-0000000000b1';
 
 select is(
-	(select text from public.questions where id = 'ee000000-0000-0000-0000-0000000000q1'),
+	(select text from public.questions where id = 'ee000000-0000-0000-0000-0000000000b1'),
 	'Editada en questions',
 	'1. El autor edita su pregunta en room_stage=questions'
 );
 
 -- 2. El autor puede borrar su propia pregunta en questions.
 delete from public.questions
-where id = 'ee000000-0000-0000-0000-0000000000q1';
+where id = 'ee000000-0000-0000-0000-0000000000b1';
 
 select is(
-	(select count(*)::int from public.questions where id = 'ee000000-0000-0000-0000-0000000000q1'),
+	(select count(*)::int from public.questions where id = 'ee000000-0000-0000-0000-0000000000b1'),
 	0,
 	'2. El autor borra su pregunta en room_stage=questions'
 );
@@ -66,7 +72,7 @@ do $$
 begin
 	update public.questions
 	set text = 'Intento en presence'
-	where id = 'ee000000-0000-0000-0000-0000000000q2';
+	where id = 'ee000000-0000-0000-0000-0000000000b2';
 	raise exception 'update should have been blocked by RLS';
 exception
 	when others then
@@ -74,7 +80,7 @@ exception
 end $$;
 
 select is(
-	(select text from public.questions where id = 'ee000000-0000-0000-0000-0000000000q2'),
+	(select text from public.questions where id = 'ee000000-0000-0000-0000-0000000000b2'),
 	'Original en presence',
 	'3. El autor NO edita su pregunta en room_stage=presence'
 );
@@ -83,7 +89,7 @@ select is(
 do $$
 begin
 	delete from public.questions
-	where id = 'ee000000-0000-0000-0000-0000000000q2';
+	where id = 'ee000000-0000-0000-0000-0000000000b2';
 	raise exception 'delete should have been blocked by RLS';
 exception
 	when others then
@@ -91,7 +97,7 @@ exception
 end $$;
 
 select is(
-	(select count(*)::int from public.questions where id = 'ee000000-0000-0000-0000-0000000000q2'),
+	(select count(*)::int from public.questions where id = 'ee000000-0000-0000-0000-0000000000b2'),
 	1,
 	'4. El autor NO borra su pregunta en room_stage=presence'
 );
@@ -103,7 +109,7 @@ do $$
 begin
 	update public.questions
 	set text = 'Peer edita ajeno'
-	where id = 'ee000000-0000-0000-0000-0000000000q2';
+	where id = 'ee000000-0000-0000-0000-0000000000b2';
 	raise exception 'update should have been blocked by RLS';
 exception
 	when others then
@@ -111,7 +117,7 @@ exception
 end $$;
 
 select is(
-	(select text from public.questions where id = 'ee000000-0000-0000-0000-0000000000q2'),
+	(select text from public.questions where id = 'ee000000-0000-0000-0000-0000000000b2'),
 	'Original en presence',
 	'5. Otro Miembro no edita una pregunta ajena'
 );
@@ -125,7 +131,7 @@ do $$
 begin
 	update public.questions
 	set text = 'Moderador edita texto'
-	where id = 'ee000000-0000-0000-0000-0000000000q2';
+	where id = 'ee000000-0000-0000-0000-0000000000b2';
 	raise exception 'update should have been blocked by RLS';
 exception
 	when others then
@@ -133,7 +139,7 @@ exception
 end $$;
 
 select is(
-	(select text from public.questions where id = 'ee000000-0000-0000-0000-0000000000q2'),
+	(select text from public.questions where id = 'ee000000-0000-0000-0000-0000000000b2'),
 	'Original en presence',
 	'6. El Moderador no edita el texto de una pregunta ajena (su policy solo cubre outside_draw)'
 );
@@ -144,7 +150,7 @@ set local request.jwt.claim.sub = 'aa000000-0000-0000-0000-000000000001';
 do $$
 begin
 	delete from public.questions
-	where id = 'ee000000-0000-0000-0000-0000000000q3';
+	where id = 'ee000000-0000-0000-0000-0000000000b3';
 	raise exception 'delete should have been blocked by frozen_guard';
 exception
 	when others then
@@ -152,7 +158,7 @@ exception
 end $$;
 
 select is(
-	(select count(*)::int from public.questions where id = 'ee000000-0000-0000-0000-0000000000q3'),
+	(select count(*)::int from public.questions where id = 'ee000000-0000-0000-0000-0000000000b3'),
 	1,
 	'7. Sesión cerrada sigue inmutable (frozen_guard)'
 );
