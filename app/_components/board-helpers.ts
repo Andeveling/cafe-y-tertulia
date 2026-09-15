@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 
 export type BoardSession = {
@@ -16,6 +16,43 @@ export function sessionTitle(s: BoardSession): string {
 	if (s.range) return s.range;
 	if (s.material_title) return s.material_title;
 	return `Sesión de ${s.moderator_name ?? "alguien"}`;
+}
+
+/** Título editorial: el libro/material manda; el rango va al subtítulo. */
+export function editorialTitle(s: BoardSession): string {
+	return s.material_title?.trim() || sessionTitle(s);
+}
+
+export function sessionSubtitle(s: BoardSession): string | null {
+	const title = editorialTitle(s);
+	if (s.range?.trim() && s.range !== title) return s.range;
+	return null;
+}
+
+export function splitHeadline(title: string): {
+	lead: string;
+	accent: string | null;
+} {
+	const idx = title.indexOf(": ");
+	if (idx <= 0) return { lead: title, accent: null };
+	const accent = title.slice(idx + 2).trim();
+	return { lead: `${title.slice(0, idx)}:`, accent: accent || null };
+}
+
+export function startedAgo(iso: string | null): string | null {
+	if (!iso) return null;
+	const d = new Date(iso);
+	if (Number.isNaN(d.getTime()) || d.getTime() > Date.now()) return null;
+	return `empezó hace ${formatDistanceToNow(d, { locale: es })}`;
+}
+
+export type SessionFilter = "all" | "live" | "scheduled";
+
+export function matchesFilter(s: BoardSession, filter: SessionFilter): boolean {
+	if (filter === "live")
+		return s.status === "lobby" || s.status === "in_progress";
+	if (filter === "scheduled") return s.status === "preparation";
+	return true;
 }
 
 export function statusMeta(status: BoardSession["status"]) {

@@ -3,11 +3,7 @@
 import { usePathname } from "next/navigation";
 import type { MemberLevel } from "@/app/profile/_lib/gamification-actions";
 import { ThemeToggle } from "@/components/theme-toggle";
-import {
-	Progress,
-	ProgressLabel,
-	ProgressValue,
-} from "@/components/ui/progress";
+import { Progress } from "@/components/ui/progress";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useSidebarPreference } from "@/hooks/use-sidebar-preference";
 
@@ -27,19 +23,19 @@ function MemberLevelBar({ level }: { level: MemberLevel }) {
 			: 100;
 
 	return (
-		<div className="hidden shrink-0 md:flex" data-slot="member-level">
+		<div
+			className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 md:flex"
+			data-slot="member-level"
+		>
+			<span className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+				{level.title}
+				<span className="text-foreground"> · {progress}%</span>
+			</span>
 			<Progress
 				value={progress}
-				className="w-36 gap-1"
+				className="w-16 gap-0"
 				aria-label={`Nivel ${level.level}: ${level.title}`}
-			>
-				<div className="flex w-full items-center justify-between gap-2">
-					<ProgressLabel className="truncate text-xs font-medium text-muted-foreground">
-						{level.title}
-					</ProgressLabel>
-					<ProgressValue className="shrink-0 text-xs" />
-				</div>
-			</Progress>
+			/>
 		</div>
 	);
 }

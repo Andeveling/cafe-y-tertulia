@@ -110,9 +110,9 @@ export function ClubRoster({
 							/>
 						}
 					>
-						<CardTitle className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+						<span className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
 							{title}
-						</CardTitle>
+						</span>
 						<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-end" />
 					</CollapsibleTrigger>
 				</CardHeader>

@@ -1,38 +1,45 @@
-"use client";
-
-import { Clock01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { Badge } from "@/components/ui/badge";
+import {
+	Card,
+	CardAction,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import {
 	type BoardSession,
-	sessionTitle,
+	editorialTitle,
+	sessionSubtitle,
+	statusMeta,
 	whenLabel,
 } from "./board-helpers";
 import { BoardSessionAction } from "./board-session-action";
 
 export function SessionRow({ session }: { session: BoardSession }) {
+	const meta = statusMeta(session.status);
+	const when = session.scheduled_at ? whenLabel(session.scheduled_at) : null;
+	const subtitle = sessionSubtitle(session);
+
 	return (
-		<li className="flex items-center justify-between gap-3 px-5 py-3.5">
-			<div className="flex min-w-0 items-center gap-3">
-				<span className="flex size-7 shrink-0 items-center justify-center rounded-full border border-border bg-transparent">
-					<HugeiconsIcon
-						icon={Clock01Icon}
-						className="size-3.5 text-muted-foreground"
-						strokeWidth={1.6}
-						aria-hidden="true"
-					/>
-				</span>
-				<div className="min-w-0">
-					<span className="block truncate text-sm font-normal leading-tight">
-						{sessionTitle(session)}
-					</span>
-					{session.scheduled_at && (
-						<span className="text-xs font-light text-muted-foreground">
-							{whenLabel(session.scheduled_at)}
-						</span>
-					)}
-				</div>
-			</div>
-			<BoardSessionAction session={session} variant="row" />
+		<li>
+			<Card size="sm" className="transition-colors hover:ring-primary/40">
+				<CardHeader>
+					<div className="flex flex-wrap gap-1.5">
+						<Badge variant={meta.live ? "default" : "outline"}>
+							{meta.label}
+						</Badge>
+						{when && <Badge variant="outline">{when}</Badge>}
+					</div>
+					<CardTitle className="text-lg">{editorialTitle(session)}</CardTitle>
+					<CardDescription>
+						{subtitle ? `${subtitle} · ` : ""}
+						Modera {session.moderator_name ?? "—"}
+					</CardDescription>
+					<CardAction>
+						<BoardSessionAction session={session} variant="row" />
+					</CardAction>
+				</CardHeader>
+			</Card>
 		</li>
 	);
 }

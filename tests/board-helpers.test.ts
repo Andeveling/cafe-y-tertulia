@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
 	type BoardSession,
+	editorialTitle,
+	matchesFilter,
 	othersHeading,
 	sessionCta,
 	sessionHref,
 	sessionOpensSala,
+	sessionSubtitle,
+	splitHeadline,
 } from "@/app/_components/board-helpers";
 
 const prep: BoardSession = {
@@ -27,9 +31,7 @@ const live: BoardSession = {
 
 describe("sessionHref", () => {
 	it("preparation va a la Sala, no al Histórico", () => {
-		expect(sessionHref(prep)).toBe(
-			"/materials/sessions/cap-10/room",
-		);
+		expect(sessionHref(prep)).toBe("/materials/sessions/cap-10/room");
 	});
 
 	it("lobby e in_progress también van a la Sala", () => {
@@ -65,5 +67,44 @@ describe("othersHeading", () => {
 
 	it("dice Otras si mezcla vivas y programadas", () => {
 		expect(othersHeading([live, prep])).toBe("Otras");
+	});
+});
+
+describe("editorialTitle", () => {
+	it("prioriza el material sobre el rango", () => {
+		expect(editorialTitle(prep)).toBe("Hyperfocus");
+		expect(sessionSubtitle(prep)).toBe("Capitulo 10");
+	});
+
+	it("cae al rango si no hay material", () => {
+		expect(editorialTitle({ ...prep, material_title: null })).toBe(
+			"Capitulo 10",
+		);
+		expect(sessionSubtitle({ ...prep, material_title: null })).toBeNull();
+	});
+});
+
+describe("splitHeadline", () => {
+	it("separa el acento después de dos puntos", () => {
+		expect(splitHeadline("El olvido que seremos: memoria y perdón")).toEqual({
+			lead: "El olvido que seremos:",
+			accent: "memoria y perdón",
+		});
+	});
+
+	it("sin dos puntos deja el título entero", () => {
+		expect(splitHeadline("Hyperfocus")).toEqual({
+			lead: "Hyperfocus",
+			accent: null,
+		});
+	});
+});
+
+describe("matchesFilter", () => {
+	it("live solo deja salas abiertas", () => {
+		expect(matchesFilter(live, "live")).toBe(true);
+		expect(matchesFilter(prep, "live")).toBe(false);
+		expect(matchesFilter(prep, "scheduled")).toBe(true);
+		expect(matchesFilter(live, "all")).toBe(true);
 	});
 });
