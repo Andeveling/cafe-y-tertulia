@@ -118,9 +118,7 @@ export function PresenceInvite({
 										<span className="truncate text-sm">{c.displayName}</span>
 										<PresenceEstado
 											estado={c.estado}
-											detalle={
-												c.estado === "en_sesion" ? "En otra sala" : undefined
-											}
+											detalle={c.enOtraSala ? "En otra sala" : undefined}
 										/>
 									</span>
 								</span>
@@ -137,7 +135,7 @@ export function PresenceInvite({
 									</Button>
 								) : (
 									<span className="text-xs text-muted-foreground">
-										{c.estado === "en_sesion" ? "En otra sala" : "offline"}
+										{c.enOtraSala ? "En otra sala" : "offline"}
 									</span>
 								)}
 							</li>
