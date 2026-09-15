@@ -7,13 +7,12 @@
  * fuerza transiciones. Todos los dispositivos derivan el tiempo del mismo
  * ancla (`phaseStartedAt`), así Moderador y Participantes comparten un solo
  * reloj del Escenario, sin offsets locales.
+ *
+ * El display — texto, overtime, caption, porcentaje — vive aquí, no en el
+ * Escenario. El tick / asOf es `sharedNow`.
  */
 
-export type AssignmentState =
-	| "hidden"
-	| "exposition"
-	| "complement"
-	| "complete";
+import type { AssignmentState } from "./room-types";
 
 /** Orden del ciclo de la Intervención. */
 export const INTERVENTION_ORDER: readonly AssignmentState[] = [
@@ -129,4 +128,62 @@ export function overtimeSeconds(
 		? Math.max(0, Math.floor(suggestedSeconds))
 		: 0;
 	return Math.max(0, Math.floor(elapsed) - budget);
+}
+
+/** Lo que esta Intervención muestra ahora. */
+export type InterventionDisplay = {
+	text: string;
+	overtime: boolean;
+	caption: string;
+	pct: number;
+};
+
+/**
+ * Reloj de la Intervención: Exposición cuenta atrás y luego overtime;
+ * Complemento cuenta arriba, sin overtime. Nunca corta (ADR 0002).
+ */
+export function interventionDisplay(
+	state: AssignmentState,
+	phaseStartedAt: string,
+	now: number,
+): InterventionDisplay {
+	const startedAtMs = Date.parse(phaseStartedAt);
+	const suggested = SUGGESTED_SECONDS[state] ?? 0;
+	const elapsed = elapsedSeconds(startedAtMs, now);
+	const pct = Math.min(
+		100,
+		Math.round((elapsed / Math.max(1, suggested)) * 100),
+	);
+	if (state === "complement") {
+		return {
+			text: formatClock(elapsed),
+			overtime: false,
+			caption: "Tiempo transcurrido · el moderador cierra cuando quiera",
+			pct,
+		};
+	}
+	if (state !== "exposition") {
+		return {
+			text: "0:00",
+			overtime: false,
+			caption: "No corta, el moderador avanza",
+			pct: 0,
+		};
+	}
+	const remaining = remainingSeconds(startedAtMs, suggested, now);
+	const extra = overtimeSeconds(elapsed, suggested);
+	if (extra > 0) {
+		return {
+			text: `+${formatClock(extra)}`,
+			overtime: true,
+			caption: "Pasado el sugerido · no corta, el moderador decide",
+			pct: 100,
+		};
+	}
+	return {
+		text: formatClock(remaining),
+		overtime: false,
+		caption: phaseClockCaption(remaining),
+		pct,
+	};
 }

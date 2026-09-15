@@ -12,15 +12,10 @@ import { toast } from "sonner";
 import { WaitingRevealView } from "@/app/materials/_components/waiting-reveal-view";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import {
-	elapsedSeconds,
-	formatClock,
+	interventionDisplay,
 	interventionNextLabel,
 	interventionProgressLine,
-	overtimeSeconds,
-	phaseClockCaption,
 	phaseClockLabel,
-	remainingSeconds,
-	SUGGESTED_SECONDS,
 } from "@/app/materials/_lib/intervention";
 import {
 	advanceRoomStage,
@@ -249,19 +244,11 @@ function buildSeats(
 }
 
 /**
- * Reloj compartido del Escenario: deriva del ancla `phaseStartedAt` que
- * emite el servidor, sin offsets locales — Moderador y Participantes ven
- * lo mismo. Orientativo: nunca fuerza transiciones (ADR 0002).
- *
+ * Tick del reloj compartido. El display lo arma `interventionDisplay`.
  * No lee Date.now() en el render inicial: SSR e hidratación usan `asOf`.
- * Tras montar, todos tictaquean el mismo reloj de pared.
+ * Tras montar, todos tictaquean el mismo reloj de pared (`sharedNow`).
  */
-function useSharedClock(
-	startedAt: string,
-	suggested: number,
-	asOf?: number,
-	frozen?: number,
-) {
+function useSharedClock(startedAt: string, asOf?: number, frozen?: number) {
 	const startedMs = Date.parse(startedAt);
 	const [wallNow, setWallNow] = useState<number | null>(null);
 
@@ -272,16 +259,12 @@ function useSharedClock(
 		return () => clearInterval(id);
 	}, [frozen]);
 
-	const nowMs = sharedNow({
+	return sharedNow({
 		frozen,
 		wallNow,
 		asOf,
 		fallback: startedMs,
 	});
-	return {
-		elapsed: elapsedSeconds(startedMs, nowMs),
-		remaining: remainingSeconds(startedMs, suggested, nowMs),
-	};
 }
 
 function ModeratorZone({ children }: { children: ReactNode }) {
@@ -423,7 +406,7 @@ function TurnSpotlight({
 	questionText: string;
 	clockLabel: string;
 	clockText: string;
-	overtime: number;
+	overtime: boolean;
 	timerPct: number;
 	clockCaption: string;
 	timerAction?: ReactNode;
@@ -480,7 +463,7 @@ function TurnSpotlight({
 					<p
 						className={cn(
 							"font-heading text-5xl tabular-nums tracking-tight",
-							overtime > 0 ? "text-destructive" : "text-foreground",
+							overtime ? "text-destructive" : "text-foreground",
 						)}
 					>
 						{clockText}
@@ -494,9 +477,9 @@ function TurnSpotlight({
 					<div
 						className={cn(
 							"h-full rounded-full",
-							overtime > 0 ? "bg-destructive" : "bg-reward",
+							overtime ? "bg-destructive" : "bg-reward",
 						)}
-						style={{ width: `${overtime > 0 ? 100 : timerPct}%` }}
+						style={{ width: `${timerPct}%` }}
 					/>
 				</div>
 				<p className="mt-2 text-xs text-muted-foreground">{clockCaption}</p>
@@ -534,27 +517,10 @@ function ActiveTurn({
 	nowMs?: number;
 }) {
 	const copy = turnCopy(debate, userId, authorId);
-	const suggested = SUGGESTED_SECONDS[debate.state] ?? 120;
-	const { elapsed, remaining } = useSharedClock(
-		debate.phaseStartedAt,
-		suggested,
-		asOf,
-		nowMs,
-	);
+	const now = useSharedClock(debate.phaseStartedAt, asOf, nowMs);
+	const clock = interventionDisplay(debate.state, debate.phaseStartedAt, now);
 	const { pending, run } = useRoomMutation();
 	const isComplement = debate.state === "complement";
-	// Overtime: pasado el sugerido el reloj sigue en rojo y nunca corta.
-	const overtime = isComplement ? 0 : overtimeSeconds(elapsed, suggested);
-	const clockText = isComplement
-		? formatClock(elapsed)
-		: overtime > 0
-			? `+${formatClock(overtime)}`
-			: formatClock(remaining);
-	const clockCaption = isComplement
-		? "Tiempo transcurrido · el moderador cierra cuando quiera"
-		: overtime > 0
-			? "Pasado el sugerido · no corta, el moderador decide"
-			: phaseClockCaption(remaining);
 	const speakerName = isComplement ? debate.authorName : debate.assigneeName;
 	const speakerVerb = isComplement ? "COMPLEMENTA" : "EXPONE";
 	const seats = buildSeats(debate, members, authorId, userId);
@@ -562,10 +528,6 @@ function ActiveTurn({
 	const progressPct = showProgress
 		? Math.min(100, Math.round((progress.current / progress.total) * 100))
 		: 0;
-	const timerPct = Math.min(
-		100,
-		Math.round((elapsed / Math.max(1, suggested)) * 100),
-	);
 
 	function handleExtend() {
 		run(
@@ -611,10 +573,10 @@ function ActiveTurn({
 			authorName={debate.authorName}
 			questionText={debate.questionText}
 			clockLabel={phaseClockLabel(debate.state)}
-			clockText={clockText}
-			overtime={overtime}
-			timerPct={timerPct}
-			clockCaption={clockCaption}
+			clockText={clock.text}
+			overtime={clock.overtime}
+			timerPct={clock.pct}
+			clockCaption={clock.caption}
 			timerAction={extendBtn}
 			showExtendHint={isModerator && !isComplement}
 		/>

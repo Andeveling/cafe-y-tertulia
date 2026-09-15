@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	formatClock,
 	INTERVENTION_ORDER,
+	interventionDisplay,
 	interventionNextLabel,
 	interventionProgressLine,
 	nextInterventionState,
@@ -86,5 +87,78 @@ describe("ciclo de la Intervención", () => {
 		expect(overtimeSeconds(300, 300)).toBe(0);
 		expect(overtimeSeconds(337, 300)).toBe(37);
 		expect(remainingSeconds(T0, 300, T0 + 337_000)).toBe(0);
+	});
+});
+
+const STARTED_AT = "2026-08-25T16:00:00.000Z";
+
+describe("display de la Intervención", () => {
+	it("Exposición cuenta atrás en m:ss", () => {
+		const shown = interventionDisplay("exposition", STARTED_AT, T0 + 45_000);
+		expect(shown.text).toBe("4:15");
+		expect(shown.overtime).toBe(false);
+		expect(shown.caption).toBe("No corta, el moderador avanza");
+	});
+
+	it("Exposición muestra overtime visible pasado el sugerido", () => {
+		const shown = interventionDisplay("exposition", STARTED_AT, T0 + 337_000);
+		expect(shown.text).toBe("+0:37");
+		expect(shown.overtime).toBe(true);
+		expect(shown.caption).toBe(
+			"Pasado el sugerido · no corta, el moderador decide",
+		);
+	});
+
+	it("Complemento cuenta arriba y no entra en overtime", () => {
+		const shown = interventionDisplay("complement", STARTED_AT, T0 + 45_000);
+		expect(shown.text).toBe("0:45");
+		expect(shown.overtime).toBe(false);
+		expect(shown.caption).toBe(
+			"Tiempo transcurrido · el moderador cierra cuando quiera",
+		);
+	});
+
+	it("Complemento pasado el sugerido sigue contando arriba, sin +", () => {
+		const shown = interventionDisplay("complement", STARTED_AT, T0 + 150_000);
+		expect(shown.text).toBe("2:30");
+		expect(shown.overtime).toBe(false);
+	});
+
+	it("a 0:00 el reloj no corta: muestra 0:00 y al segundo siguiente overtime", () => {
+		const atBudget = interventionDisplay(
+			"exposition",
+			STARTED_AT,
+			T0 + 300_000,
+		);
+		expect(atBudget.text).toBe("0:00");
+		expect(atBudget.overtime).toBe(false);
+
+		const past = interventionDisplay("exposition", STARTED_AT, T0 + 301_000);
+		expect(past.text).toBe("+0:01");
+		expect(past.overtime).toBe(true);
+	});
+
+	it("Oculta y Completa no heredan el overtime de Exposición", () => {
+		expect(
+			interventionDisplay("hidden", STARTED_AT, T0 + 45_000).overtime,
+		).toBe(false);
+		expect(
+			interventionDisplay("complete", STARTED_AT, T0 + 45_000).overtime,
+		).toBe(false);
+	});
+
+	it("el porcentaje llena el sugerido, nunca más de 100", () => {
+		expect(interventionDisplay("exposition", STARTED_AT, T0 + 45_000).pct).toBe(
+			15,
+		);
+		expect(
+			interventionDisplay("exposition", STARTED_AT, T0 + 337_000).pct,
+		).toBe(100);
+		expect(interventionDisplay("complement", STARTED_AT, T0 + 45_000).pct).toBe(
+			38,
+		);
+		expect(
+			interventionDisplay("complement", STARTED_AT, T0 + 150_000).pct,
+		).toBe(100);
 	});
 });
