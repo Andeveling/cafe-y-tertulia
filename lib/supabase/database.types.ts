@@ -383,6 +383,7 @@ export type Database = {
 					display_name: string;
 					id: string;
 					invited_by: string | null;
+					last_seen: string | null;
 					status: Database["public"]["Enums"]["member_status"];
 				};
 				Insert: {
@@ -390,6 +391,7 @@ export type Database = {
 					display_name?: string;
 					id: string;
 					invited_by?: string | null;
+					last_seen?: string | null;
 					status?: Database["public"]["Enums"]["member_status"];
 				};
 				Update: {
@@ -397,6 +399,7 @@ export type Database = {
 					display_name?: string;
 					id?: string;
 					invited_by?: string | null;
+					last_seen?: string | null;
 					status?: Database["public"]["Enums"]["member_status"];
 				};
 				Relationships: [

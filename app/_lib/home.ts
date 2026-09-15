@@ -60,13 +60,17 @@ export async function getMaterialOptions(
 	return data ?? [];
 }
 
+export type LastSeenRosterMember = RosterMember & {
+	last_seen: string | null;
+};
+
 export async function getRosterMembers(
 	supabase: SupabaseClient,
-): Promise<RosterMember[]> {
+): Promise<LastSeenRosterMember[]> {
 	const { data } = await supabase
 		.from("members")
-		.select("id, display_name")
+		.select("id, display_name, last_seen")
 		.eq("status", "active");
 
-	return data ?? [];
+	return (data ?? []) as LastSeenRosterMember[];
 }

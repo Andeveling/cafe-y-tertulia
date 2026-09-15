@@ -7,6 +7,7 @@ import {
 	buildInviteCandidates,
 	type InviteRosterMember,
 } from "@/app/materials/_lib/presence-invite";
+import { PresenceEstado } from "@/components/presence-estado";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,13 +29,15 @@ export function PresenceInvite({
 	participantIds,
 	pendingIds,
 }: Props) {
-	const presenceRoster = useClubPresence(userId, rosterMembers);
+	const presenceRoster = useClubPresence(userId, rosterMembers, {
+		salaId: sessionId,
+	});
 	const [calling, startCalling] = useTransition();
 	const [callingId, setCallingId] = useState<string | null>(null);
 	const [sentIds, setSentIds] = useState<Set<string>>(new Set());
 
-	const onlineIds = useMemo(
-		() => new Set(presenceRoster.filter((m) => m.online).map((m) => m.id)),
+	const estados = useMemo(
+		() => Object.fromEntries(presenceRoster.map((m) => [m.id, m.estado])),
 		[presenceRoster],
 	);
 
@@ -48,15 +51,23 @@ export function PresenceInvite({
 		() =>
 			buildInviteCandidates({
 				roster: rosterMembers,
-				onlineIds,
+				onlineIds: presenceRoster.filter((m) => m.online).map((m) => m.id),
 				participantIds: new Set(participantIds),
 				pendingIds: mergedPending,
 				selfId: userId,
+				estados,
 			}),
-		[rosterMembers, onlineIds, participantIds, mergedPending, userId],
+		[
+			rosterMembers,
+			presenceRoster,
+			participantIds,
+			mergedPending,
+			userId,
+			estados,
+		],
 	);
 
-	const onlineCount = candidates.filter((c) => c.online).length;
+	const llamables = candidates.filter((c) => c.llamable).length;
 
 	function handleCall(toId: string) {
 		setCallingId(toId);
@@ -78,7 +89,7 @@ export function PresenceInvite({
 		<Card>
 			<CardHeader>
 				<CardTitle className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-					Invitar — {onlineCount} en línea
+					Invitar — {llamables} disponibles
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
@@ -94,18 +105,28 @@ export function PresenceInvite({
 									<Avatar
 										size="sm"
 										className={
-											c.online ? "ring-1 ring-primary/30" : "opacity-40"
+											c.estado === "desconectado"
+												? "opacity-40"
+												: "ring-1 ring-primary/30"
 										}
 									>
 										<AvatarFallback>
 											{(c.displayName || "?").slice(0, 1).toUpperCase()}
 										</AvatarFallback>
 									</Avatar>
-									<span className="truncate text-sm">{c.displayName}</span>
+									<span className="flex min-w-0 flex-col">
+										<span className="truncate text-sm">{c.displayName}</span>
+										<PresenceEstado
+											estado={c.estado}
+											detalle={
+												c.estado === "en_sesion" ? "En otra sala" : undefined
+											}
+										/>
+									</span>
 								</span>
 								{c.pending ? (
 									<Badge variant="outline">Convocado</Badge>
-								) : c.online ? (
+								) : c.llamable ? (
 									<Button
 										size="xs"
 										variant="ghost"
@@ -115,7 +136,9 @@ export function PresenceInvite({
 										Llamar
 									</Button>
 								) : (
-									<span className="text-xs text-muted-foreground">offline</span>
+									<span className="text-xs text-muted-foreground">
+										{c.estado === "en_sesion" ? "En otra sala" : "offline"}
+									</span>
 								)}
 							</li>
 						))}

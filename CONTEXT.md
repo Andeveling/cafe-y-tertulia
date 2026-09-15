@@ -13,8 +13,12 @@ Un Miembro confirmado como presente en una Sesión concreta. Término de context
 _Avoid_: Asistente, integrante
 
 **Presencia**:
-Condición de un Miembro que tiene la aplicación abierta en este momento, visible para el resto del club en tiempo real.
+Condición de un Miembro que tiene la aplicación abierta en este momento, visible para el resto del club en tiempo real. Su detalle vive en el Estado de presencia.
 _Avoid_: Online, conectado, usuario en línea
+
+**Estado de presencia**:
+Detalle visible de la Presencia en este momento: `En línea`, `En sesión`, `Ausente` o `Desconectado`, con última vez al desconectarse.
+_Avoid_: Online, status, conectado, offline, away
 
 **Sala de Sesión**:
 Única vista de una Sesión activa: ocupa todo el espacio de la pantalla, cambia de contenido según la Etapa y se mantiene sincronizada en realtime para Moderador y Participantes. Durante una Sesión nadie navega a otras páginas: las transiciones ocurren dentro de la Sala. Unirse a otra Sesión por Convocatoria es salir de esta Sala. El club puede tener varias Salas abiertas a la vez. Incluye el Escenario durante la etapa Debate: la Pregunta revelada, la Intervención actual y el temporizador viven dentro de la misma vista.
@@ -109,7 +113,7 @@ Logro visible individual que recompensa participación. Los logros del club como
 _Avoid_: Badge, medalla, trofeo
 
 **Invitación**:
-Acto por el que un Miembro (padrino) suma a una nueva persona al club; quien la recibe queda como Miembro `invitado` hasta su primer ingreso. Cualquier Miembro puede invitar; no existe invitación pública. El padrino puede revocarla mientras está pendiente: el enlace deja de valer y se puede invitar de nuevo. No es llamar a un Miembro a una Sesión.
+Acto por el que un Miembro (padrino) suma a una nueva persona al club; quien la recibe queda como Miembro `invitado` hasta su primer ingreso. Se entrega como enlace compartible por cualquier canal; cualquier Miembro puede invitar, no existe invitación pública. El padrino puede revocarla mientras está pendiente: el enlace deja de valer y se puede invitar de nuevo. No es llamar a un Miembro a una Sesión.
 _Avoid_: Alta, registro, signup, reclutar, Convocatoria
 
 **Convocatoria**:

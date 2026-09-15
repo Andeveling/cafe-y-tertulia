@@ -41,4 +41,23 @@ describe("buildInviteCandidates", () => {
 		expect(out.find((c) => c.id === "m-2")?.pending).toBe(true);
 		expect(out.find((c) => c.id === "m-3")?.pending).toBe(false);
 	});
+
+	it("con estados: solo en_linea y ausente son llamables, en_sesion no", () => {
+		const out = buildInviteCandidates({
+			roster,
+			onlineIds: [],
+			participantIds: [],
+			estados: {
+				"m-1": "en_linea",
+				"m-2": "ausente",
+				"m-3": "en_sesion",
+				"m-4": "desconectado",
+			},
+		});
+		expect(out.map((c) => c.id)).toEqual(["m-1", "m-2", "m-3", "m-4"]);
+		expect(out.find((c) => c.id === "m-1")?.llamable).toBe(true);
+		expect(out.find((c) => c.id === "m-2")?.llamable).toBe(true);
+		expect(out.find((c) => c.id === "m-3")?.llamable).toBe(false);
+		expect(out.find((c) => c.id === "m-4")?.llamable).toBe(false);
+	});
 });
