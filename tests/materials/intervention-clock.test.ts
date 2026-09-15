@@ -5,11 +5,13 @@ import {
 	interventionNextLabel,
 	interventionProgressLine,
 	nextInterventionState,
+	overtimeSeconds,
 	PHASE_LABELS,
 	PHASE_SHORT_LABELS,
 	phaseClockCaption,
 	phaseClockLabel,
 	remainingSeconds,
+	SUGGESTED_SECONDS,
 } from "@/app/materials/_lib/intervention";
 
 const T0 = Date.parse("2026-08-25T16:00:00.000Z");
@@ -34,51 +36,55 @@ describe("reloj compartido del Escenario", () => {
 });
 
 describe("ciclo de la Intervención", () => {
-	it("recorre oculta → Momento de preparación → exposición → Complemento → completa", () => {
+	it("recorre oculta → exposición → Complemento → completa", () => {
 		expect([...INTERVENTION_ORDER]).toEqual([
 			"hidden",
-			"preparation",
 			"exposition",
 			"complement",
 			"complete",
 		]);
-		expect(nextInterventionState("hidden")).toBe("preparation");
-		expect(nextInterventionState("preparation")).toBe("exposition");
+		expect(nextInterventionState("hidden")).toBe("exposition");
 		expect(nextInterventionState("exposition")).toBe("complement");
 		expect(nextInterventionState("complement")).toBe("complete");
 		expect(nextInterventionState("complete")).toBeNull();
 	});
 
 	it("etiqueta fases con los términos del dominio", () => {
-		expect(PHASE_LABELS.preparation).toBe("Momento de preparación");
+		expect(PHASE_LABELS.exposition).toBe("Exposición");
 		expect(PHASE_LABELS.complement).toBe("Complemento");
 	});
 
 	it("ofrece la acción de conducción de cada fase", () => {
-		expect(interventionNextLabel("preparation")).toBe("Comenzar exposición");
 		expect(interventionNextLabel("exposition")).toBe("Terminar exposición");
 		expect(interventionNextLabel("complement")).toBe("Terminar complemento");
 	});
 
 	it("nombra corto cada fase para la línea única de progreso", () => {
-		expect(PHASE_SHORT_LABELS.preparation).toBe("Preparación");
 		expect(PHASE_SHORT_LABELS.exposition).toBe("Exposición");
 		expect(PHASE_SHORT_LABELS.complement).toBe("Complemento");
 	});
 
 	it("compone una sola línea de progreso", () => {
 		expect(interventionProgressLine(1, 2)).toBe("Turno 1 de 2");
-		expect(interventionProgressLine(1, 2, "preparation")).toBe(
-			"Turno 1 de 2 · Preparación",
+		expect(interventionProgressLine(1, 2, "exposition")).toBe(
+			"Turno 1 de 2 · Exposición",
 		);
 	});
 
 	it("etiqueta el reloj con fase y presupuesto", () => {
-		expect(phaseClockLabel("preparation")).toBe("Preparación · sugerido 2:00");
-		expect(phaseClockLabel("exposition")).toBe("Exposición · sugerido 3:00");
+		expect(SUGGESTED_SECONDS.exposition).toBe(300);
+		expect(phaseClockLabel("exposition")).toBe("Exposición · sugerido 5:00");
+		expect(phaseClockLabel("complement")).toBe("Complemento · sugerido 2:00");
 		expect(phaseClockCaption(45)).toBe("No corta, el moderador avanza");
 		expect(phaseClockCaption(0)).toBe(
 			"Tiempo sugerido cumplido · no corta, el moderador avanza cuando quiera",
 		);
+	});
+
+	it("mide overtime sin negativizar el restante", () => {
+		expect(overtimeSeconds(299, 300)).toBe(0);
+		expect(overtimeSeconds(300, 300)).toBe(0);
+		expect(overtimeSeconds(337, 300)).toBe(37);
+		expect(remainingSeconds(T0, 300, T0 + 337_000)).toBe(0);
 	});
 });

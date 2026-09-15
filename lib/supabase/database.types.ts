@@ -1039,6 +1039,10 @@ export type Database = {
 				};
 			};
 			execute_draw: { Args: { target_session_id: string }; Returns: string };
+			extend_exposition: {
+				Args: { target_assignment_id: string };
+				Returns: undefined;
+			};
 			finish_trivia_round: {
 				Args: { target_round_id: string };
 				Returns: undefined;
@@ -1095,10 +1099,6 @@ export type Database = {
 				};
 			};
 			room_snapshot: { Args: { target_session_id: string }; Returns: Json };
-			save_assignment_notes: {
-				Args: { new_notes: string; target_assignment_id: string };
-				Returns: undefined;
-			};
 			session_minigame_state: {
 				Args: { target_session_id: string };
 				Returns: Json;
@@ -1111,7 +1111,6 @@ export type Database = {
 				};
 				Returns: undefined;
 			};
-			stage_snapshot: { Args: { target_session_id: string }; Returns: Json };
 			start_take: {
 				Args: { p_prompt: string; target_session_id: string };
 				Returns: string;
@@ -1137,12 +1136,7 @@ export type Database = {
 			};
 		};
 		Enums: {
-			assignment_state:
-				| "hidden"
-				| "preparation"
-				| "exposition"
-				| "complement"
-				| "complete";
+			assignment_state: "hidden" | "exposition" | "complement" | "complete";
 			badge_kind: "individual" | "collective";
 			convocatoria_status: "pending" | "accepted" | "dismissed";
 			count_event:
@@ -1150,7 +1144,8 @@ export type Database = {
 				| "session_attended"
 				| "trivia_won"
 				| "exposition_done"
-				| "material_finished";
+				| "material_finished"
+				| "question_hot";
 			draw_status: "pending" | "hidden" | "revealing" | "revealed";
 			invitation_status: "pending" | "accepted" | "expired";
 			material_kind: "book" | "podcast" | "video" | "article";
@@ -1306,13 +1301,7 @@ export const Constants = {
 	},
 	public: {
 		Enums: {
-			assignment_state: [
-				"hidden",
-				"preparation",
-				"exposition",
-				"complement",
-				"complete",
-			],
+			assignment_state: ["hidden", "exposition", "complement", "complete"],
 			badge_kind: ["individual", "collective"],
 			convocatoria_status: ["pending", "accepted", "dismissed"],
 			count_event: [
@@ -1321,6 +1310,7 @@ export const Constants = {
 				"trivia_won",
 				"exposition_done",
 				"material_finished",
+				"question_hot",
 			],
 			draw_status: ["pending", "hidden", "revealing", "revealed"],
 			invitation_status: ["pending", "accepted", "expired"],

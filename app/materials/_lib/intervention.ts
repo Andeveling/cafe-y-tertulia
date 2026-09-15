@@ -1,17 +1,16 @@
 /**
  * Intervención y reloj compartido del Escenario (ADR 0002).
  *
- * El ciclo de una Intervención — oculta → Momento de preparación →
- * exposición → Complemento → completa — avanza siempre a mano: la app gira
- * solo cuando el Moderador pulsa continuar. El temporizador orienta el
- * ritmo pero nunca corta ni fuerza transiciones. Todos los dispositivos
- * derivan el tiempo del mismo ancla (`phaseStartedAt`), así Moderador y
- * Participantes comparten un solo reloj del Escenario, sin offsets locales.
+ * El ciclo de una Intervención — oculta → exposición → Complemento →
+ * completa — avanza siempre a mano: la app gira solo cuando el Moderador
+ * pulsa continuar. El temporizador orienta el ritmo pero nunca corta ni
+ * fuerza transiciones. Todos los dispositivos derivan el tiempo del mismo
+ * ancla (`phaseStartedAt`), así Moderador y Participantes comparten un solo
+ * reloj del Escenario, sin offsets locales.
  */
 
 export type AssignmentState =
 	| "hidden"
-	| "preparation"
 	| "exposition"
 	| "complement"
 	| "complete";
@@ -19,7 +18,6 @@ export type AssignmentState =
 /** Orden del ciclo de la Intervención. */
 export const INTERVENTION_ORDER: readonly AssignmentState[] = [
 	"hidden",
-	"preparation",
 	"exposition",
 	"complement",
 	"complete",
@@ -27,7 +25,6 @@ export const INTERVENTION_ORDER: readonly AssignmentState[] = [
 
 export const PHASE_LABELS: Record<AssignmentState, string> = {
 	hidden: "Oculta",
-	preparation: "Momento de preparación",
 	exposition: "Exposición",
 	complement: "Complemento",
 	complete: "Completa",
@@ -35,8 +32,7 @@ export const PHASE_LABELS: Record<AssignmentState, string> = {
 
 /** Segundos sugeridos por fase (orientativo, nunca corta). */
 export const SUGGESTED_SECONDS: Partial<Record<AssignmentState, number>> = {
-	preparation: 120,
-	exposition: 180,
+	exposition: 300,
 	complement: 120,
 };
 
@@ -82,8 +78,6 @@ export function nextInterventionState(
 /** Acción de conducción que el Escenario ofrece en cada fase. */
 export function interventionNextLabel(state: AssignmentState): string {
 	switch (state) {
-		case "preparation":
-			return "Comenzar exposición";
 		case "exposition":
 			return "Terminar exposición";
 		case "complement":
@@ -96,7 +90,6 @@ export function interventionNextLabel(state: AssignmentState): string {
 /** Nombre corto de fase para la línea única de progreso. */
 export const PHASE_SHORT_LABELS: Record<AssignmentState, string> = {
 	hidden: "Oculta",
-	preparation: "Preparación",
 	exposition: "Exposición",
 	complement: "Complemento",
 	complete: "Completa",
@@ -125,4 +118,15 @@ export function phaseClockCaption(remaining: number): string {
 	return remaining === 0
 		? "Tiempo sugerido cumplido · no corta, el moderador avanza cuando quiera"
 		: "No corta, el moderador avanza";
+}
+
+/** Segundos pasados del sugerido (overtime): 0 mientras queda presupuesto. */
+export function overtimeSeconds(
+	elapsed: number,
+	suggestedSeconds: number,
+): number {
+	const budget = Number.isFinite(suggestedSeconds)
+		? Math.max(0, Math.floor(suggestedSeconds))
+		: 0;
+	return Math.max(0, Math.floor(elapsed) - budget);
 }

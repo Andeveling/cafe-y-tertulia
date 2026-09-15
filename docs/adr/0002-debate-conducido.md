@@ -10,7 +10,7 @@ El avance de fases es **siempre manual**: la app gira solo cuando el moderador p
 
 ## Escenas de una Intervención
 
-Cada Asignación recorre: **oculta** ("próximo: [nombre]", Pregunta sin revelar) → **preparación** (Pregunta revelada + prompt "escribí tus ideas en tu teléfono" + temporizador) → **exposición** (Pregunta + asignado + temporizador) → **complemento** (si el autor está presente) → **completa** (siguiente de la rotación).
+Cada Asignación recorre: **oculta** ("próximo: [nombre]", Pregunta sin revelar) → **exposición** (Pregunta + asignado + cuenta regresiva de 5:00 + overtime en rojo, nunca corta) → **complemento** (si el autor está presente; count-up con sugerido 2:00) → **completa** (siguiente de la rotación). El +1 del moderador en Exposición suma 60 s y registra `question_hot` (mide lo hot + bono al autor).
 
 ## Rejected alternatives
 

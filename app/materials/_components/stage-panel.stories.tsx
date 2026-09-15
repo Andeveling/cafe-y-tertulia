@@ -25,16 +25,16 @@ const active: Extract<RoomDebateSnapshot, { mode: "active" }> = {
 	remainingHidden: 2,
 };
 
-const preparing: Extract<RoomDebateSnapshot, { mode: "active" }> = {
-	...active,
-	state: "preparation",
-	assignmentId: "asg-prep",
-};
-
 const expired: Extract<RoomDebateSnapshot, { mode: "active" }> = {
 	...active,
 	assignmentId: "asg-expired",
 	phaseStartedAt: "2020-01-01T00:00:00.000Z",
+};
+
+const complementing: Extract<RoomDebateSnapshot, { mode: "active" }> = {
+	...active,
+	state: "complement",
+	assignmentId: "asg-complement",
 };
 
 const progress = { current: 1, total: 2 };
@@ -85,9 +85,7 @@ export const AudienceListens: Story = {
 		);
 		await expect(canvas.getByText(/responde la pregunta de/i)).toBeVisible();
 		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
-		await expect(
-			canvas.getByText("Turno 1 de 2 · Exposición"),
-		).toBeVisible();
+		await expect(canvas.getByText("Turno 1 de 2 · Exposición")).toBeVisible();
 	},
 };
 
@@ -102,32 +100,20 @@ export const YouSpeak: Story = {
 	},
 };
 
-export const YouPrepare: Story = {
-	args: { debate: preparing, userId: "u-ana", isModerator: false },
-	play: async ({ canvas }) => {
-		await waitFor(() => expect(canvas.getByText("Te toca.")).toBeVisible());
-		await expect(
-			canvas.getByLabelText(/tus notas de respuesta/i),
-		).toBeVisible();
-		await expect(
-			canvas.getByText("Turno 1 de 2 · Preparación"),
-		).toBeVisible();
-		await expect(canvas.getByText("Preparación · sugerido 2:00")).toBeVisible();
-	},
-};
-
 export const ModeratorTimer: Story = {
 	args: { debate: active, isModerator: true, userId: "u-marta" },
 	play: async ({ canvas }) => {
 		await waitFor(() =>
 			expect(canvas.getByText(/no corta, el moderador avanza/i)).toBeVisible(),
 		);
-		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
+		await expect(
+			canvas.getByRole("button", { name: /\+1 min/i }),
+		).toBeVisible();
 		await expect(
 			canvas.getByRole("button", { name: /terminar exposición/i }),
 		).toBeVisible();
 		await expect(canvas.getByText("Moderación")).toBeVisible();
-		await expect(canvas.getByText("Exposición · sugerido 3:00")).toBeVisible();
+		await expect(canvas.getByText("Exposición · sugerido 5:00")).toBeVisible();
 	},
 };
 
@@ -136,12 +122,24 @@ export const ClockExpired: Story = {
 	play: async ({ canvas }) => {
 		await waitFor(() =>
 			expect(
-				canvas.getByText(
-					/tiempo sugerido cumplido · no corta, el moderador avanza cuando quiera/i,
-				),
+				canvas.getByText(/pasado el sugerido · no corta, el moderador decide/i),
 			).toBeVisible(),
 		);
-		await expect(canvas.getByText("0:00")).toBeVisible();
+		await expect(canvas.queryByText("0:00")).toBeNull();
+		await expect(
+			canvas.getByRole("button", { name: /\+1 min/i }),
+		).toBeVisible();
+	},
+};
+
+export const ComplementCountsUp: Story = {
+	args: { debate: complementing, isModerator: false, userId: "u-marta" },
+	play: async ({ canvas }) => {
+		await waitFor(() =>
+			expect(canvas.getByText(/complementa\. tú escuchas/i)).toBeVisible(),
+		);
+		await expect(canvas.getByText("Complemento · sugerido 2:00")).toBeVisible();
+		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
 	},
 };
 

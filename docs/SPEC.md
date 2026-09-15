@@ -252,14 +252,13 @@ stateDiagram-v2
 stateDiagram-v2
     direction LR
     state "oculta" as hidden
-    state "preparación" as preparation
     state "exposición" as exposition
     state "complemento" as complement
     state "completa" as complete
 
-    hidden --> preparation
-    preparation --> exposition
+    hidden --> exposition
     exposition --> complement
+    exposition --> complete
     complement --> complete
 ```
 
@@ -280,7 +279,6 @@ Tres momentos (PRD §25): **Antes de Meet** (cada quien), **Durante Meet** (pant
 ### 4.2 Durante Meet
 - **Lobby** — confirmar Participantes, marcar "Sin sorteo", ejecutar el Sorteo.
 - **Escenario del moderador** (pantalla compartida, ADR 0002 + wireframe #6): Pregunta revelada, estado de la Intervención, temporizador orientativo. Controles solo **acciones**, nunca contenido oculto.
-- **Teléfono del asignado** — Notas de respuesta en el Momento de preparación.
 - **Trivia en dispositivo** — responder; resultados agregados en la pantalla del moderador.
 - **Take** — votación rápida agregada.
 

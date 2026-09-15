@@ -25,7 +25,7 @@ Lo que la Sala muestra en cada momento y todos los dispositivos ven igual, en or
 _Avoid_: Pantalla, vista, pestaña
 
 **Listo**:
-Condición de un Participante que está presente y tiene al menos una Pregunta registrada para la Sesión. Cuando todos están Listos, la siguiente Etapa queda habilitada; el Moderador puede avanzar de todos modos y la interfaz muestra siempre quién falta y por qué.
+Condición de un Participante que no es Espectador, está presente y tiene al menos una Pregunta registrada para la Sesión. Los Espectadores no cuentan. Para avanzar a Sorteo hace falta que todos los no-Espectadores estén Listos y que haya al menos dos. La interfaz muestra quién falta y por qué.
 _Avoid_: Ready, confirmado, completo
 
 **Moderador**:
@@ -49,27 +49,19 @@ Porción del Material que aborda una Sesión concreta (ej. "Capítulos 1-3", "Ep
 _Avoid_: Capítulo (como entidad), episodio, sección
 
 **Pregunta**:
-Pregunta abierta que un Miembro aporta para una Sesión, con o sin Material. Puede escribirla días antes desde la etapa `Preguntas` de la Sala. Su texto es visible solo para su autor hasta la Intervención que la revela; los demás participantes ven autor y estado (enviada ✓), no el contenido. Tiene autor y, dentro de la Sesión, un asignado.
+Pregunta abierta que un Miembro aporta para una Sesión, con o sin Material. Puede escribirla días antes en `Preguntas` o, si no alcanzó, en `Presentes` sin volver atrás. Su texto es visible solo para su autor hasta la Intervención que la revela; los demás ven autor y estado (enviada ✓), no el contenido. Si aporta varias, elige cuál entra al Sorteo; si no elige, entra una al azar. Tiene autor y, dentro de la Sesión, un asignado.
 _Avoid_: Cuestión, interrogante
 
 **Asignación**:
 Vínculo entre una Pregunta y el Miembro que debe responderla en una Sesión concreta, resultado del Sorteo. Es donde viven las Notas de respuesta.
 _Avoid_: Turno, reparto
 
-**Momento de preparación**:
-Fase breve entre la revelación de una Pregunta y la exposición verbal del asignado, donde escribe sus ideas principales.
-_Avoid_: Tiempo de pensar, turno de notas
-
-**Notas de respuesta**:
-Ideas principales, palabras clave o argumentos que el asignado escribe durante el Momento de preparación. Pertenecen a la Asignación y pueden quedar vacías.
-_Avoid_: Respuesta escrita, ensayo, minuta
-
 **Complemento**:
-Aporte breve (unos dos minutos) que el autor de una Pregunta hace tras la exposición del asignado, cuando está presente. Si una Pregunta tiene dos asignados, el autor complementa una sola vez, tras el último.
+Aporte breve (unos dos minutos) que el autor de una Pregunta hace tras la exposición del asignado, cuando está presente.
 _Avoid_: Réplica, turno extra
 
 **Intervención**:
-Ciclo de una Asignación dentro del debate: `oculta` → Momento de preparación → `exposición` → Complemento → completa. Lo conduce el Moderador; el temporizador orienta el ritmo pero nunca corta ni fuerza transiciones — solo habilita acciones de conducción (tiempo extra, siguiente fase). La rotación de Intervenciones es la permutación aleatoria fijada por el Sorteo.
+Ciclo de una Asignación dentro del debate: `oculta` → `exposición` (5:00 regresivos + overtime visible, +1 del Moderador que suma 60 s y registra lo hot) → Complemento (count-up con sugerido 2:00) → completa. Lo conduce el Moderador; el temporizador orienta el ritmo pero nunca corta ni fuerza transiciones — solo habilita acciones de conducción (tiempo extra, siguiente fase). La rotación de Intervenciones es la permutación aleatoria fijada por el Sorteo.
 _Avoid_: Turno, intervención libre (como fase), bloque de debate
 
 **Escenario**:
@@ -77,16 +69,16 @@ Zona central de la pantalla compartida donde vive la conversación: la Pregunta 
 _Avoid_: Dashboard, panel, stage
 
 **Sorteo**:
-Asignación aleatoria de Preguntas a los participantes de la Sesión. Ejecutado el Sorteo, todos ven las parejas autor → asignado, pero el texto de cada Pregunta permanece oculto hasta la Intervención de su asignado: la sorpresa es el texto y el momento, no la pareja. Una Pregunta puede asignarse a hasta dos participantes, nunca a su autor. Estados: `pendiente` (aún no ejecutado), `oculto` (ejecutado: parejas visibles, textos ocultos), `revelando` (algunas Intervenciones completadas), `revelado` (todas completadas).
+Asignación aleatoria 1:1 entre quienes no son Espectador y están presentes: cada uno responde exactamente una Pregunta ajena y cada Pregunta entra como máximo una vez. Nadie responde la propia. Espectadores y ausentes quedan fuera; sus Preguntas no entran. Ejecutado el Sorteo, todos ven las parejas autor → asignado, pero el texto permanece oculto hasta la Intervención de su asignado: la sorpresa es el texto y el momento, no la pareja. Estados: `pendiente` (aún no ejecutado), `oculto` (ejecutado: parejas visibles, textos ocultos), `revelando` (algunas Intervenciones completadas), `revelado` (todas completadas).
 _Avoid_: Ruleta, rifa, asignación manual
 
 **Espectador**:
-Persona presente en una Sesión que esta vez no participa: no aporta Preguntas, no recibe Asignación y no cuenta para la condición de todos Listos. La agrega el Moderador a la mesa; sí cuenta como presente. No es una variante de Sin sorteo: el que está Sin sorteo aportó al club pero prefiere conversar libre.
+Participante presente que se saca del Sorteo: sus Preguntas no entran al pool, no recibe Asignación y no cuenta para Listos. Sí cuenta como presente. Lo declara cada quien con Sin sorteo; el Moderador no lo asigna.
 _Avoid_: Invitado pasivo, oyente, audiencia
 
 **Sin sorteo**:
-Opt-out que un Participante marca al confirmar en el lobby: no recibe Asignación ni llamada del Sorteo y conversa libremente. Difiere del Espectador en que quien está Sin sorteo es Miembro activo y aporta Preguntas normalmente.
-_Avoid_: No participar, espectador
+Marca propia que convierte al Participante en Espectador. Con Pregunta o sin ella: queda fuera del Sorteo y sus Preguntas no se asignan.
+_Avoid_: No participar, opt-out
 
 **Fuera de sorteo**:
 Marcado que el Moderador aplica a una Pregunta del pool para excluirla del Sorteo (duplicada o fuera de contexto).

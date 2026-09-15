@@ -252,18 +252,20 @@ export async function continueIntervention(
 	});
 }
 
-/** Guarda Notas de respuesta durante el Momento de preparación. */
-export async function saveNotes(
+/**
+ * +1 del Moderador en Exposición: suma 60 s al reloj (mueve el ancla atrás)
+ * y registra lo hot que estuvo la pregunta (evento question_hot = bono al
+ * autor). Solo Moderador, vía RPC `extend_exposition`.
+ */
+export async function extendExposition(
 	assignmentId: string,
 	sessionId: string,
-	notes: string,
 ): Promise<ActionResult> {
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase }) => {
-			const { error } = await supabase.rpc("save_assignment_notes", {
+			const { error } = await supabase.rpc("extend_exposition", {
 				target_assignment_id: assignmentId,
-				new_notes: notes,
 			});
 			if (error) return { ok: false, error: error.message };
 		},

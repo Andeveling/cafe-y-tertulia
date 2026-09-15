@@ -61,7 +61,8 @@ insert into public.questions (id, session_id, material_id, author_id, text) valu
 insert into public.assignments (id, session_id, question_id, assignee_id, draw_id, reveal_order, state) values
 	('32000000-0000-0000-0000-00000000a031', '32000000-0000-0000-0000-000000000003', '32000000-0000-0000-0000-000000000b01', '22222222-2222-2222-2222-222222222222', '32000000-0000-0000-0000-0000000000d3', 1, 'exposition'),
 	('32000000-0000-0000-0000-00000000a041', '32000000-0000-0000-0000-000000000004', '32000000-0000-0000-0000-000000000b02', '22222222-2222-2222-2222-222222222222', '32000000-0000-0000-0000-0000000000d4', 1, 'complete'),
-	('32000000-0000-0000-0000-00000000a042', '32000000-0000-0000-0000-000000000004', '32000000-0000-0000-0000-000000000b02', '11111111-1111-1111-1111-111111111111', '32000000-0000-0000-0000-0000000000d4', 2, 'preparation');
+	('32000000-0000-0000-0000-00000000a042', '32000000-0000-0000-0000-000000000004', '32000000-0000-0000-0000-000000000b02', '11111111-1111-1111-1111-111111111111', '32000000-0000-0000-0000-0000000000d4', 2, 'exposition'),
+	('32000000-0000-0000-0000-00000000a043', '32000000-0000-0000-0000-000000000004', '32000000-0000-0000-0000-000000000b02', '44444444-4444-4444-4444-444444444444', '32000000-0000-0000-0000-0000000000d4', 3, 'hidden'); -- S4 sigue con pendiente tras el avance intermedio
 
 -- Minijuegos abiertos en S5 (checklist pendiente)
 insert into public.trivias (id, material_id, author_id, title) values
@@ -115,8 +116,8 @@ select throws_ok(
 
 select is(
 	public.advance_intervention('32000000-0000-0000-0000-000000000004'),
-	'exposition'::public.assignment_state,
-	'6. La Intervención intermedia pasa a complete vía exposition (autor ausente)'
+	'complete'::public.assignment_state,
+	'6. La Intervención intermedia se completa directo (autor ausente, sin Complemento)'
 );
 
 select is(

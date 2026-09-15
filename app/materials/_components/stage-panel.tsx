@@ -8,9 +8,11 @@ import { toast } from "sonner";
 import { WaitingRevealView } from "@/app/materials/_components/waiting-reveal-view";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import {
+	elapsedSeconds,
 	formatClock,
 	interventionNextLabel,
 	interventionProgressLine,
+	overtimeSeconds,
 	phaseClockCaption,
 	phaseClockLabel,
 	remainingSeconds,
@@ -19,12 +21,11 @@ import {
 import {
 	advanceRoomStage,
 	continueIntervention,
+	extendExposition,
 	revealNext,
-	saveNotes,
 } from "@/app/materials/_lib/room-actions";
 import type { RoomDebateSnapshot } from "@/app/materials/_lib/room-types";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 type Active = Extract<RoomDebateSnapshot, { mode: "active" }>;
@@ -124,14 +125,6 @@ function DebateDone({
 function turnCopy(debate: Active, userId: string, authorId: string | null) {
 	const youAssignee = debate.assigneeId === userId;
 	const youAuthor = authorId === userId;
-	if (debate.state === "preparation") {
-		return youAssignee
-			? { you: true, line: "Te toca." }
-			: {
-					you: false,
-					line: `${debate.assigneeName} tiene la palabra. Tú escuchas.`,
-				};
-	}
 	if (debate.state === "exposition") {
 		return youAssignee
 			? { you: true, line: "Te toca hablar." }
@@ -182,7 +175,10 @@ function useSharedClock(startedAt: string, suggested: number) {
 		return () => clearInterval(id);
 	}, []);
 
-	return remainingSeconds(startedMs, suggested, nowMs);
+	return {
+		elapsed: elapsedSeconds(startedMs, nowMs),
+		remaining: remainingSeconds(startedMs, suggested, nowMs),
+	};
 }
 
 function ModeratorZone({ children }: { children: ReactNode }) {
@@ -273,22 +269,24 @@ function ActiveTurn({
 }) {
 	const copy = turnCopy(debate, userId, authorId);
 	const suggested = SUGGESTED_SECONDS[debate.state] ?? 120;
-	const remaining = useSharedClock(debate.phaseStartedAt, suggested);
+	const { elapsed, remaining } = useSharedClock(
+		debate.phaseStartedAt,
+		suggested,
+	);
 	const { pending, run } = useRoomMutation();
-	const isAssignee = debate.assigneeId === userId;
-	const isPreparation = debate.state === "preparation";
-	// Se reinicia por assignmentId vía el `key` del <Enter> padre.
-	const [notesDraft, setNotesDraft] = useState(debate.myNotes ?? "");
-
-	function handleSaveNotes() {
-		const trimmed = notesDraft.trim();
-		run(
-			() => saveNotes(debate.assignmentId, sessionId, trimmed),
-			() => {
-				toast.success("Notas guardadas");
-			},
-		);
-	}
+	const isComplement = debate.state === "complement";
+	// Overtime: pasado el sugerido el reloj sigue en rojo y nunca corta.
+	const overtime = isComplement ? 0 : overtimeSeconds(elapsed, suggested);
+	const clockText = isComplement
+		? formatClock(elapsed)
+		: overtime > 0
+			? `+${formatClock(overtime)}`
+			: formatClock(remaining);
+	const clockCaption = isComplement
+		? "Tiempo transcurrido · el moderador cierra cuando quiera"
+		: overtime > 0
+			? "Pasado el sugerido · no corta, el moderador decide"
+			: phaseClockCaption(remaining);
 
 	return (
 		<AnimatePresence mode="wait">
@@ -319,43 +317,6 @@ function ActiveTurn({
 						{debate.questionText}
 					</p>
 
-					{isAssignee && isPreparation && (
-						<div className="flex w-full max-w-xl flex-col items-start gap-1.5">
-							<label htmlFor="notas-respuesta" className="text-sm font-medium">
-								Tus notas de respuesta
-							</label>
-							<p className="text-xs text-muted-foreground">
-								Privadas. Solo tú las ves hasta exponer.
-							</p>
-							<Textarea
-								id="notas-respuesta"
-								value={notesDraft}
-								onChange={(e) => setNotesDraft(e.target.value)}
-								rows={4}
-								placeholder="Ideas principales, palabras clave…"
-								disabled={pending}
-							/>
-							<div className="flex justify-start">
-								<Button
-									size="sm"
-									disabled={pending || !notesDraft.trim()}
-									onClick={handleSaveNotes}
-								>
-									Guardar notas
-								</Button>
-							</div>
-						</div>
-					)}
-
-					{isAssignee && !isPreparation && debate.myNotes && (
-						<div className="flex w-full max-w-xl flex-col items-start gap-1.5">
-							<p className="text-sm font-medium">Tus notas</p>
-							<p className="w-full rounded-md border border-border bg-muted/30 p-3 text-sm whitespace-pre-wrap">
-								{debate.myNotes}
-							</p>
-						</div>
-					)}
-
 					<div className="flex flex-col items-start gap-1">
 						<p className="text-xs text-muted-foreground">
 							{phaseClockLabel(debate.state)}
@@ -363,24 +324,40 @@ function ActiveTurn({
 						<p
 							className={cn(
 								"font-heading text-4xl tabular-nums tracking-tight lg:text-5xl",
-								remaining === 0 ? "text-muted-foreground" : "text-foreground",
+								overtime > 0 ? "text-destructive" : "text-foreground",
 							)}
 						>
-							{formatClock(remaining)}
+							{clockText}
 						</p>
-						<p className="text-xs text-muted-foreground">
-							{phaseClockCaption(remaining)}
-						</p>
+						<p className="text-xs text-muted-foreground">{clockCaption}</p>
 					</div>
 
 					{isModerator && (
 						<ModeratorZone>
-							<Button
-								disabled={pending}
-								onClick={() => run(() => continueIntervention(sessionId))}
-							>
-								{interventionNextLabel(debate.state)}
-							</Button>
+							<div className="flex flex-wrap gap-2">
+								<Button
+									disabled={pending}
+									onClick={() => run(() => continueIntervention(sessionId))}
+								>
+									{interventionNextLabel(debate.state)}
+								</Button>
+								{!isComplement && (
+									<Button
+										variant="outline"
+										disabled={pending}
+										onClick={() =>
+											run(
+												() => extendExposition(debate.assignmentId, sessionId),
+												() => {
+													toast.success("+1 min · quedó registrado");
+												},
+											)
+										}
+									>
+										+1 min
+									</Button>
+								)}
+							</div>
 						</ModeratorZone>
 					)}
 				</div>
