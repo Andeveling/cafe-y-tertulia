@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
 import {
+	createRefreshScheduler,
 	pickLatestRoomFrame,
+	ROOM_REFRESH_DEBOUNCE_MS,
 	roomChannelIsLive,
 	roomRefreshIntervalMs,
 	shouldRefetchOnChannelStatus,
@@ -62,6 +64,10 @@ export function useRoomRealtime(sessionId: string): { live: boolean } {
 	useEffect(() => {
 		const supabase = createClient();
 		const refresh = () => startTransition(() => router.refresh());
+		// La ráfaga del Sorteo (INSERT en draws + N en assignments) colapsa
+		// en un solo refresh: N+1 round-trips solapados rompían la página.
+		const scheduler = createRefreshScheduler(refresh, ROOM_REFRESH_DEBOUNCE_MS);
+		const scheduleRefresh = () => scheduler.schedule();
 
 		const channel = supabase.channel(`room:${sessionId}`);
 		for (const table of ROOM_PARTICIPANT_TABLES) {
@@ -73,11 +79,15 @@ export function useRoomRealtime(sessionId: string): { live: boolean } {
 					table,
 					filter: `session_id=eq.${sessionId}`,
 				},
-				refresh,
+				scheduleRefresh,
 			);
 		}
 		channel
-			.on("postgres_changes", roomSessionChangeFilter(sessionId), refresh)
+			.on(
+				"postgres_changes",
+				roomSessionChangeFilter(sessionId),
+				scheduleRefresh,
+			)
 			.subscribe((status) => {
 				setLive(roomChannelIsLive(status));
 				if (status === "SUBSCRIBED") setJoined(true);
@@ -93,6 +103,7 @@ export function useRoomRealtime(sessionId: string): { live: boolean } {
 		document.addEventListener("visibilitychange", onVisibility);
 
 		return () => {
+			scheduler.cancel();
 			document.removeEventListener("visibilitychange", onVisibility);
 			supabase.removeChannel(channel);
 		};

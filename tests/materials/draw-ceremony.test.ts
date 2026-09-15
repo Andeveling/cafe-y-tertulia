@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	clampOptimisticPhase,
 	DRAW_BEAT_MS,
 	DRAW_COUNTDOWN_MS,
 	DRAW_FANFARE_MS,
@@ -42,6 +43,34 @@ describe("drawCeremonyPhase", () => {
 		});
 		expect(drawCeremonyPhase(null, T0, 4)).toEqual({ kind: "settled" });
 		expect(drawCeremonyPhase(createdAt, T0, 4, true)).toEqual({
+			kind: "settled",
+		});
+	});
+});
+
+describe("clampOptimisticPhase", () => {
+	it("congela en fanfarria el reveal/settled sin snapshot autoritativo", () => {
+		expect(
+			clampOptimisticPhase({ kind: "reveal", revealedCount: 1 }, true),
+		).toEqual({ kind: "fanfare" });
+		expect(clampOptimisticPhase({ kind: "settled" }, true)).toEqual({
+			kind: "fanfare",
+		});
+	});
+
+	it("deja pasar countdown y fanfarria optimistas", () => {
+		expect(clampOptimisticPhase({ kind: "countdown", count: 2 }, true)).toEqual(
+			{ kind: "countdown", count: 2 },
+		);
+		expect(clampOptimisticPhase({ kind: "fanfare" }, true)).toEqual({
+			kind: "fanfare",
+		});
+	});
+
+	it("no toca nada cuando el snapshot ya llegó", () => {
+		const reveal = { kind: "reveal", revealedCount: 2 } as const;
+		expect(clampOptimisticPhase(reveal, false)).toBe(reveal);
+		expect(clampOptimisticPhase({ kind: "settled" }, false)).toEqual({
 			kind: "settled",
 		});
 	});

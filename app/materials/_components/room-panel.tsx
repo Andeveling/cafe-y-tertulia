@@ -20,6 +20,7 @@ import { DrawCeremonyView } from "@/app/materials/_components/draw-ceremony-view
 import { PresenceInvite } from "@/app/materials/_components/presence-invite";
 import { StageBar } from "@/app/materials/_components/stage-bar";
 import { StagePanel } from "@/app/materials/_components/stage-panel";
+import { useDrawClock } from "@/app/materials/_hooks/use-draw-clock";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import { useRoomRealtime } from "@/app/materials/_hooks/use-room-realtime";
 import type {
@@ -212,6 +213,13 @@ function StageContent({
 	round?: TriviaRoundSnapshot | null;
 }) {
 	const { pending, run } = useRoomMutation();
+	// Reloj optimista del Sorteo: arranca el countdown con el created_at del
+	// evento realtime mientras llega el snapshot autoritativo.
+	const drawClock = useDrawClock(
+		snapshot.sessionId,
+		snapshot.draw.createdAt,
+		snapshot.roomStage === "draw" && !snapshot.draw.done,
+	);
 
 	switch (snapshot.roomStage) {
 		case "questions":
@@ -227,19 +235,25 @@ function StageContent({
 					pendingIds={pendingIds}
 				/>
 			);
-		case "draw":
+		case "draw": {
+			const optimistic =
+				!snapshot.draw.done &&
+				drawClock !== null &&
+				snapshot.draw.createdAt === null;
 			return (
 				<DrawCeremonyView
-					done={snapshot.draw.done}
-					createdAt={snapshot.draw.createdAt}
+					done={snapshot.draw.done || drawClock !== null}
+					createdAt={drawClock}
 					assignments={snapshot.assignments}
 					readiness={snapshot.readiness}
 					userId={userId}
 					isModerator={isModerator}
 					pending={pending}
 					onExecute={() => run(() => executeDraw(snapshot.sessionId))}
+					optimistic={optimistic}
 				/>
 			);
+		}
 		case "debate": {
 			if (!snapshot.debate) return null;
 			return (

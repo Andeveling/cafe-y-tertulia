@@ -4,7 +4,10 @@ import { DiceIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { drawCeremonyPhase } from "@/app/materials/_lib/draw-ceremony";
+import {
+	clampOptimisticPhase,
+	drawCeremonyPhase,
+} from "@/app/materials/_lib/draw-ceremony";
 import type {
 	RoomAssignment,
 	RoomReadiness,
@@ -58,6 +61,12 @@ type Props = {
 	isModerator: boolean;
 	pending?: boolean;
 	onExecute?: () => void;
+	/**
+	 * Reloj sin snapshot autoritativo (del evento realtime): el countdown
+	 * arranca igual, pero reveal/settled se congelan en fanfarria hasta que
+	 * lleguen las asignaciones — evita flashes de resultados vacíos.
+	 */
+	optimistic?: boolean;
 	/** Congela el reloj — stories / tests. */
 	nowMs?: number;
 	reducedMotion?: boolean;
@@ -72,6 +81,7 @@ export function DrawCeremonyView({
 	isModerator,
 	pending = false,
 	onExecute,
+	optimistic = false,
 	nowMs,
 	reducedMotion,
 }: Props) {
@@ -84,8 +94,15 @@ export function DrawCeremonyView({
 		sorted.length,
 		reduced,
 	);
+	// En optimista aún no hay asignaciones: pairCount>=1 evita que el
+	// countdown colapse a settled antes de tiempo; el clamp congela el
+	// reveal hasta el snapshot autoritativo.
+	const pairCount = optimistic ? Math.max(sorted.length, 1) : sorted.length;
 	const phase = done
-		? drawCeremonyPhase(createdAt, now, sorted.length, reduced)
+		? clampOptimisticPhase(
+				drawCeremonyPhase(createdAt, now, pairCount, reduced),
+				optimistic,
+			)
 		: null;
 
 	if (!done) {

@@ -43,3 +43,18 @@ export function drawCeremonyPhase(
 	if (revealedCount >= pairCount) return { kind: "settled" };
 	return { kind: "reveal", revealedCount };
 }
+
+/**
+ * Reloj optimista del Sorteo: con el `created_at` del evento realtime ya se
+ * puede contar 3-2-1 sin esperar al snapshot, pero reveal/settled exigen las
+ * asignaciones autoritativas — hasta que lleguen se congela en fanfarria.
+ */
+export function clampOptimisticPhase(
+	phase: DrawCeremonyPhase,
+	optimistic: boolean,
+): DrawCeremonyPhase {
+	if (optimistic && (phase.kind === "reveal" || phase.kind === "settled")) {
+		return { kind: "fanfare" };
+	}
+	return phase;
+}

@@ -119,6 +119,39 @@ export function shouldRefetchOnChannelStatus(
 export const ROOM_OFFLINE_REFETCH_MS = 4_000;
 /** Backstop while live: un evento de postgres_changes perdido no congela la Sala. */
 export const ROOM_LIVE_HEARTBEAT_MS = 5_000;
+/**
+ * Colapsa ráfagas de eventos realtime (p. ej. el INSERT en draws + N
+ * INSERTs en assignments del Sorteo) en un solo refresh trailing-edge.
+ */
+export const ROOM_REFRESH_DEBOUNCE_MS = 350;
+
+export type RefreshScheduler = {
+	schedule: () => void;
+	cancel: () => void;
+};
+
+/** Scheduler trailing-edge puro: N schedule() seguidos disparan un solo run(). */
+export function createRefreshScheduler(
+	run: () => void,
+	waitMs: number,
+): RefreshScheduler {
+	let id: ReturnType<typeof setTimeout> | null = null;
+	return {
+		schedule() {
+			if (id !== null) clearTimeout(id);
+			id = setTimeout(() => {
+				id = null;
+				run();
+			}, waitMs);
+		},
+		cancel() {
+			if (id !== null) {
+				clearTimeout(id);
+				id = null;
+			}
+		},
+	};
+}
 
 export function roomRefreshIntervalMs(joined: boolean, live: boolean): number {
 	return !joined || !live ? ROOM_OFFLINE_REFETCH_MS : ROOM_LIVE_HEARTBEAT_MS;

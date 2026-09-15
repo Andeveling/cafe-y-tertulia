@@ -125,6 +125,22 @@ export const SettledWitness: Story = {
 	},
 };
 
+/**
+ * Reloj optimista: llegó el created_at del evento realtime pero aún no el
+ * snapshot (sin asignaciones). Cuenta 3-2-1 igual y congela en fanfarria.
+ */
+export const OptimisticCountdown: Story = {
+	tags: ["!test"],
+	args: {
+		done: true,
+		createdAt,
+		assignments: [],
+		nowMs: T0 + 100,
+		reducedMotion: false,
+		optimistic: true,
+	},
+};
+
 const CEREMONY_MS =
 	DRAW_COUNTDOWN_MS + DRAW_FANFARE_MS + DRAW_STAGGER_MS * pairs.length + 800;
 
