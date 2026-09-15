@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+	assembleDrawCeremony,
 	clampOptimisticPhase,
 	DRAW_BEAT_MS,
 	DRAW_COUNTDOWN_MS,
@@ -10,9 +11,146 @@ import {
 	drawCeremonyPhase,
 	drawWheelRotationDeg,
 } from "@/app/materials/_lib/draw-ceremony";
+import type {
+	RoomAssignment,
+	RoomParticipant,
+} from "@/app/materials/_lib/room-types";
 
 const T0 = Date.parse("2026-09-07T15:00:00.000Z");
 const createdAt = "2026-09-07T15:00:00.000Z";
+
+const ana: RoomParticipant = {
+	memberId: "u-ana",
+	displayName: "Ana",
+	role: "member",
+	optOut: false,
+};
+const andres: RoomParticipant = {
+	memberId: "u-andres",
+	displayName: "Andrés",
+	role: "member",
+	optOut: false,
+};
+
+const pendingDraw = { done: false, status: null, createdAt: null } as const;
+
+describe("assembleDrawCeremony", () => {
+	it("arranca el 3-2-1 con el created_at optimista, sin snapshot autoritativo", () => {
+		const ceremony = assembleDrawCeremony(
+			{
+				draw: pendingDraw,
+				assignments: [],
+				participants: [ana, andres],
+			},
+			{ nowMs: T0 + 10, optimisticCreatedAt: createdAt },
+		);
+
+		expect(ceremony.started).toBe(true);
+		expect(ceremony.createdAt).toBe(createdAt);
+		expect(ceremony.phase).toEqual({ kind: "countdown", count: 3 });
+	});
+
+	it("congela reveal/settled en fanfarria hasta que existan Asignaciones", () => {
+		const settledAt =
+			T0 + DRAW_COUNTDOWN_MS + DRAW_FANFARE_MS + DRAW_STAGGER_MS * 4;
+		const ceremony = assembleDrawCeremony(
+			{
+				draw: pendingDraw,
+				assignments: [],
+				participants: [ana, andres],
+			},
+			{ nowMs: settledAt, optimisticCreatedAt: createdAt },
+		);
+
+		expect(ceremony.phase).toEqual({ kind: "fanfare" });
+		expect(ceremony.assignments).toEqual([]);
+	});
+
+	it("deja fuera del ciclo a Espectador y a quien se sacó", () => {
+		const spectator: RoomParticipant = {
+			memberId: "u-mia",
+			displayName: "Mia",
+			role: "spectator",
+			optOut: false,
+		};
+		const optOut: RoomParticipant = {
+			memberId: "u-luis",
+			displayName: "Luis",
+			role: "member",
+			optOut: true,
+		};
+		const ceremony = assembleDrawCeremony(
+			{
+				draw: pendingDraw,
+				assignments: [],
+				participants: [ana, spectator, optOut, andres],
+			},
+			{ nowMs: T0 + 10, optimisticCreatedAt: createdAt },
+		);
+
+		expect(ceremony.people).toEqual([
+			{ id: "u-ana", name: "Ana" },
+			{ id: "u-andres", name: "Andrés" },
+		]);
+	});
+
+	it("con Asignaciones, reveal y settled siguen el reloj autoritativo", () => {
+		const pairs: RoomAssignment[] = [
+			{
+				assignmentId: "a1",
+				questionId: "q1",
+				authorId: "u-ana",
+				assigneeId: "u-andres",
+				authorName: "Ana",
+				assigneeName: "Andrés",
+				state: "hidden",
+				revealOrder: 1,
+				questionText: null,
+				questionVisible: false,
+			},
+			{
+				assignmentId: "a2",
+				questionId: "q2",
+				authorId: "u-andres",
+				assigneeId: "u-ana",
+				authorName: "Andrés",
+				assigneeName: "Ana",
+				state: "hidden",
+				revealOrder: 2,
+				questionText: null,
+				questionVisible: false,
+			},
+		];
+		const settledAt =
+			T0 + DRAW_COUNTDOWN_MS + DRAW_FANFARE_MS + DRAW_STAGGER_MS * 4;
+		const ceremony = assembleDrawCeremony(
+			{
+				draw: { done: true, status: "hidden", createdAt },
+				assignments: pairs,
+				participants: [ana, andres],
+			},
+			{ nowMs: settledAt },
+		);
+
+		expect(ceremony.started).toBe(true);
+		expect(ceremony.phase).toEqual({ kind: "settled" });
+	});
+
+	it("sin Sorteo ni reloj, espera — no habla de fase", () => {
+		const ceremony = assembleDrawCeremony(
+			{
+				draw: pendingDraw,
+				assignments: [],
+				participants: [ana, andres],
+			},
+			{ nowMs: T0 },
+		);
+
+		expect(ceremony.started).toBe(false);
+		expect(ceremony.phase).toBeNull();
+		expect(ceremony.createdAt).toBeNull();
+	});
+});
 
 describe("drawCeremonyPhase", () => {
 	it("counts 3-2-1 from created_at so every client shares the clock", () => {

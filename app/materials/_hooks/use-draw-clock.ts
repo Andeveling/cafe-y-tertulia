@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 /**
- * Reloj optimista del Sorteo. El INSERT en `draws` trae `created_at` en el
- * payload del evento realtime, así el countdown arranca en ~200 ms sin
- * esperar al round-trip del snapshot (que tarda 1-3 s y se comía el 3-2-1).
+ * Adaptador realtime del reloj del Sorteo. El INSERT en `draws` trae
+ * `created_at` en el payload, así el countdown arranca en ~200 ms sin
+ * esperar al snapshot (1-3 s se comía el 3-2-1).
  *
  * Devuelve el reloj autoritativo del snapshot cuando ya llegó, si no el del
- * evento. El consumidor debe tratarlo como optimista (sin asignaciones) y
- * congelar reveal/settled hasta el snapshot — ver `clampOptimisticPhase`.
+ * evento. La asamblea (`assembleDrawCeremony`) congela reveal/settled hasta
+ * que existan Asignaciones.
  */
 export function useDrawClock(
 	sessionId: string,

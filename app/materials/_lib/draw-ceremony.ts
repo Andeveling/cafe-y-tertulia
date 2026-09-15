@@ -1,7 +1,16 @@
+import type {
+	RoomAssignment,
+	RoomDraw,
+	RoomParticipant,
+} from "@/app/materials/_lib/room-types";
+
 /**
  * Reloj compartido del Sorteo. Todos los dispositivos derivan la fase
  * de `draws.created_at` — no del momento en que les llegó el evento —
  * para que el ciclo gire igual en realtime.
+ *
+ * La ceremonia asamblea el reloj (optimista vs autoritativo), quién entra
+ * al ciclo y el freeze de parejas. La Sala pasa el slice + Sortear.
  */
 
 export const DRAW_BEAT_MS = 1000;
@@ -59,6 +68,64 @@ export function clampOptimisticPhase(
 		return { kind: "fanfare" };
 	}
 	return phase;
+}
+
+/** Slice de Sala que la ceremonia necesita — no flags de reloj. */
+export type DrawCeremonySlice = {
+	draw: RoomDraw;
+	assignments: RoomAssignment[];
+	participants: RoomParticipant[];
+};
+
+export type DrawCeremonyPerson = { id: string; name: string };
+
+export type DrawCeremonyAssembly = {
+	started: boolean;
+	createdAt: string | null;
+	phase: DrawCeremonyPhase | null;
+	people: DrawCeremonyPerson[];
+	assignments: RoomAssignment[];
+	/** Para el tick: ≥1 si el Sorteo ya arrancó y aún no hay parejas. */
+	pairCount: number;
+};
+
+/**
+ * Asamblea del Sorteo: el 3-2-1 arranca con el created_at del evento;
+ * reveal/settled esperan las Asignaciones.
+ */
+export function assembleDrawCeremony(
+	slice: DrawCeremonySlice,
+	opts: {
+		nowMs: number;
+		optimisticCreatedAt?: string | null;
+		reducedMotion?: boolean;
+	},
+): DrawCeremonyAssembly {
+	const createdAt = slice.draw.createdAt ?? opts.optimisticCreatedAt ?? null;
+	const started = slice.draw.done || createdAt !== null;
+	const awaitingPairs = started && slice.assignments.length === 0;
+	const pairCount = awaitingPairs ? 1 : slice.assignments.length;
+	const people = slice.participants
+		.filter((p) => p.role !== "spectator" && !p.optOut)
+		.map((p) => ({ id: p.memberId, name: p.displayName }));
+	return {
+		started,
+		createdAt,
+		phase: started
+			? clampOptimisticPhase(
+					drawCeremonyPhase(
+						createdAt,
+						opts.nowMs,
+						pairCount,
+						opts.reducedMotion ?? false,
+					),
+					awaitingPairs,
+				)
+			: null,
+		people,
+		assignments: slice.assignments,
+		pairCount,
+	};
 }
 
 /** Giro del ciclo: 8 vueltas con ease-out, anclado al reloj compartido. */

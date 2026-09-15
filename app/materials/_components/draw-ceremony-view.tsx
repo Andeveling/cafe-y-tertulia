@@ -7,7 +7,8 @@ import {
 	type DrawWheelPerson,
 } from "@/app/materials/_components/draw-wheel";
 import {
-	clampOptimisticPhase,
+	assembleDrawCeremony,
+	type DrawCeremonySlice,
 	drawCeremonyPhase,
 	drawWheelRotationDeg,
 } from "@/app/materials/_lib/draw-ceremony";
@@ -53,77 +54,70 @@ const resultsItemQuiet = {
 };
 
 type Props = {
-	done: boolean;
-	createdAt: string | null;
-	assignments: RoomAssignment[];
-	readiness: RoomReadiness;
-	people?: DrawWheelPerson[];
+	/** Slice de Sala: draw + assignments + participants. Sin flags de reloj. */
+	snapshot: DrawCeremonySlice & {
+		readiness: RoomReadiness;
+		asOf?: number;
+	};
 	userId: string;
 	isModerator: boolean;
 	pending?: boolean;
 	onExecute?: () => void;
-	/**
-	 * Reloj sin snapshot autoritativo (del evento realtime): el countdown
-	 * arranca igual, pero reveal/settled se congelan en fanfarria hasta que
-	 * lleguen las asignaciones — evita flashes de resultados vacíos.
-	 */
-	optimistic?: boolean;
+	/** Adaptador del reloj realtime — stories y DrawCeremony lo inyectan. */
+	optimisticCreatedAt?: string | null;
 	/** Congela el reloj — stories / tests. */
 	nowMs?: number;
-	/** Reloj del snapshot: primer paint idéntico en SSR e hidratación. */
-	asOf?: number;
 	reducedMotion?: boolean;
 };
 
 export function DrawCeremonyView({
-	done,
-	createdAt,
-	assignments,
-	readiness,
-	people = [],
+	snapshot,
 	userId,
 	isModerator,
 	pending = false,
 	onExecute,
-	optimistic = false,
+	optimisticCreatedAt,
 	nowMs,
-	asOf,
 	reducedMotion,
 }: Props) {
 	const reduced = usePrefersReducedMotion(reducedMotion);
-	const sorted = [...assignments].sort((a, b) => a.revealOrder - b.revealOrder);
+	const clock = assembleDrawCeremony(snapshot, {
+		nowMs: nowMs ?? 0,
+		optimisticCreatedAt,
+		reducedMotion: reduced,
+	});
 	const now = useCeremonyNow(
 		nowMs,
-		done && !reduced,
-		createdAt,
-		sorted.length,
+		clock.started && !reduced,
+		clock.createdAt,
+		clock.pairCount,
 		reduced,
-		asOf,
+		snapshot.asOf,
 	);
-	// En optimista aún no hay asignaciones: pairCount>=1 evita que el
-	// countdown colapse a settled antes de tiempo; el clamp congela el
-	// reveal hasta el snapshot autoritativo.
-	const pairCount = optimistic ? Math.max(sorted.length, 1) : sorted.length;
-	const phase = done
-		? clampOptimisticPhase(
-				drawCeremonyPhase(createdAt, now, pairCount, reduced),
-				optimistic,
-			)
-		: null;
+	const ceremony = assembleDrawCeremony(snapshot, {
+		nowMs: now,
+		optimisticCreatedAt,
+		reducedMotion: reduced,
+	});
+	const sorted = [...ceremony.assignments].sort(
+		(a, b) => a.revealOrder - b.revealOrder,
+	);
+	const phase = ceremony.phase;
+	const started = ceremony.started;
 
-	const wheelPeople = wheelPeopleFrom(people, sorted);
+	const wheelPeople = wheelPeopleFrom(ceremony.people, sorted);
 
 	const edges = sorted.map((a) => ({
 		fromId: a.authorId,
 		toId: a.assigneeId,
 	}));
-	const spinning = done && phase?.kind === "countdown";
-	const locking = done && phase?.kind === "fanfare";
+	const spinning = started && phase?.kind === "countdown";
+	const locking = started && phase?.kind === "fanfare";
 	const spinningVisual = spinning || (locking && edges.length === 0);
 	const lockedVisual = locking && edges.length > 0;
 
-	if (!done || spinning || locking) {
-		const t0 = createdAt ? Date.parse(createdAt) : 0;
+	if (!started || spinning || locking) {
+		const t0 = ceremony.createdAt ? Date.parse(ceremony.createdAt) : 0;
 		const elapsed =
 			(spinningVisual || lockedVisual) && Number.isFinite(t0)
 				? Math.max(0, now - t0)
@@ -140,7 +134,7 @@ export function DrawCeremonyView({
 						: 0
 				}
 				reduced={reduced}
-				readiness={readiness}
+				readiness={snapshot.readiness}
 				isModerator={isModerator}
 				pending={pending}
 				onExecute={onExecute}

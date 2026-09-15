@@ -16,11 +16,10 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CierreStage } from "@/app/materials/_components/cierre-stage";
 import { DebateToolsTray } from "@/app/materials/_components/debate-tools-tray";
-import { DrawCeremonyView } from "@/app/materials/_components/draw-ceremony-view";
+import { DrawCeremony } from "@/app/materials/_components/draw-ceremony";
 import { PresenceInvite } from "@/app/materials/_components/presence-invite";
 import { StageBar } from "@/app/materials/_components/stage-bar";
 import { StagePanel } from "@/app/materials/_components/stage-panel";
-import { useDrawClock } from "@/app/materials/_hooks/use-draw-clock";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import { useRoomRealtime } from "@/app/materials/_hooks/use-room-realtime";
 import type {
@@ -213,13 +212,6 @@ function StageContent({
 	round?: TriviaRoundSnapshot | null;
 }) {
 	const { pending, run } = useRoomMutation();
-	// Reloj optimista del Sorteo: arranca el countdown con el created_at del
-	// evento realtime mientras llega el snapshot autoritativo.
-	const drawClock = useDrawClock(
-		snapshot.sessionId,
-		snapshot.draw.createdAt,
-		snapshot.roomStage === "draw" && !snapshot.draw.done,
-	);
 
 	switch (snapshot.roomStage) {
 		case "questions":
@@ -235,29 +227,16 @@ function StageContent({
 					pendingIds={pendingIds}
 				/>
 			);
-		case "draw": {
-			const optimistic =
-				!snapshot.draw.done &&
-				drawClock !== null &&
-				snapshot.draw.createdAt === null;
+		case "draw":
 			return (
-				<DrawCeremonyView
-					done={snapshot.draw.done || drawClock !== null}
-					createdAt={drawClock}
-					assignments={snapshot.assignments}
-					readiness={snapshot.readiness}
-					people={snapshot.participants
-						.filter((p) => p.role !== "spectator" && !p.optOut)
-						.map((p) => ({ id: p.memberId, name: p.displayName }))}
+				<DrawCeremony
+					snapshot={snapshot}
 					userId={userId}
 					isModerator={isModerator}
 					pending={pending}
 					onExecute={() => run(() => executeDraw(snapshot.sessionId))}
-					optimistic={optimistic}
-					asOf={snapshot.asOf}
 				/>
 			);
-		}
 		case "debate": {
 			if (!snapshot.debate) return null;
 			return (
