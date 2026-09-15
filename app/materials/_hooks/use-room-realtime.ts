@@ -3,9 +3,8 @@
 import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useRef, useState } from "react";
 import {
-	createRefreshScheduler,
-	pickLatestRoomFrame,
-	ROOM_REFRESH_DEBOUNCE_MS,
+	applyLatest,
+	createSalaSync,
 	roomChannelIsLive,
 	roomRefreshIntervalMs,
 	shouldRefetchOnChannelStatus,
@@ -14,9 +13,8 @@ import {
 import { createClient } from "@/lib/supabase/client";
 
 /**
- * Única interfaz de sincronización de la Sala (`room-sync`): este hook solo
- * suscribe el canal realtime y refresca; las mutaciones van por
- * `useRoomMutation` / `useRunAction`, que resuelven por el mismo seam.
+ * Adapter de suscripción de la Sala (`createSalaSync.subscribe` +
+ * apply-latest). Las mutaciones van por `useRoomMutation` (mismo módulo).
  */
 
 /**
@@ -50,7 +48,7 @@ export function roomSessionChangeFilter(sessionId: string) {
  */
 export function useLatestSnapshot<T extends { asOf: number }>(incoming: T): T {
 	const [held, setHeld] = useState(incoming);
-	const next = pickLatestRoomFrame(held, incoming);
+	const next = applyLatest(held, incoming);
 	if (next !== held) setHeld(next);
 	return next;
 }
@@ -66,8 +64,8 @@ export function useRoomRealtime(sessionId: string): { live: boolean } {
 		const refresh = () => startTransition(() => router.refresh());
 		// La ráfaga del Sorteo (INSERT en draws + N en assignments) colapsa
 		// en un solo refresh: N+1 round-trips solapados rompían la página.
-		const scheduler = createRefreshScheduler(refresh, ROOM_REFRESH_DEBOUNCE_MS);
-		const scheduleRefresh = () => scheduler.schedule();
+		const observer = createSalaSync({ refresh }).subscribe();
+		const scheduleRefresh = () => observer.notify();
 
 		const channel = supabase.channel(`room:${sessionId}`);
 		for (const table of ROOM_PARTICIPANT_TABLES) {
@@ -103,7 +101,7 @@ export function useRoomRealtime(sessionId: string): { live: boolean } {
 		document.addEventListener("visibilitychange", onVisibility);
 
 		return () => {
-			scheduler.cancel();
+			observer.unsubscribe();
 			document.removeEventListener("visibilitychange", onVisibility);
 			supabase.removeChannel(channel);
 		};

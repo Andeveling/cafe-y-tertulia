@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { getRoomSnapshot, type RoomClient } from "@/app/materials/_lib/room";
-import { shouldApplySnapshot } from "@/app/materials/_lib/room-sync";
+import { createSalaSync } from "@/app/materials/_lib/room-sync";
 
 const row = {
 	session_id: "sess-1",
@@ -52,7 +52,8 @@ describe("getRoomSnapshot asOf", () => {
 		expect(newer).not.toBeNull();
 		expect(stale).not.toBeNull();
 		expect(newer!.asOf).toBeGreaterThan(stale!.asOf);
-		expect(shouldApplySnapshot(newer!.asOf, stale!.asOf)).toBe(false);
+		const sync = createSalaSync({ refresh: vi.fn(), onError: vi.fn() });
+		expect(sync.applyLatest(newer!, stale!)).toBe(newer!);
 		expect(stale!.roomStage).toBe("questions");
 		expect(newer!.roomStage).toBe("presence");
 	});
