@@ -113,17 +113,32 @@ export function DrawCeremonyView({
 
 	const wheelPeople = wheelPeopleFrom(people, sorted);
 
-	const spinning =
-		done && (phase?.kind === "countdown" || phase?.kind === "fanfare");
+	const edges = sorted.map((a) => ({
+		fromId: a.authorId,
+		toId: a.assigneeId,
+	}));
+	const spinning = done && phase?.kind === "countdown";
+	const locking = done && phase?.kind === "fanfare";
+	const spinningVisual = spinning || (locking && edges.length === 0);
+	const lockedVisual = locking && edges.length > 0;
 
-	if (!done || spinning) {
+	if (!done || spinning || locking) {
 		const t0 = createdAt ? Date.parse(createdAt) : 0;
-		const elapsed = spinning && Number.isFinite(t0) ? Math.max(0, now - t0) : 0;
+		const elapsed =
+			(spinningVisual || lockedVisual) && Number.isFinite(t0)
+				? Math.max(0, now - t0)
+				: 0;
 		return (
 			<WheelBeat
 				people={wheelPeople}
-				spinning={Boolean(spinning)}
-				rotationDeg={spinning && !reduced ? drawWheelRotationDeg(elapsed) : 0}
+				spinning={Boolean(spinningVisual)}
+				locked={lockedVisual}
+				edges={edges}
+				rotationDeg={
+					(spinningVisual || lockedVisual) && !reduced
+						? drawWheelRotationDeg(elapsed)
+						: 0
+				}
 				reduced={reduced}
 				readiness={readiness}
 				isModerator={isModerator}
@@ -174,6 +189,8 @@ function wheelPeopleFrom(
 function WheelBeat({
 	people,
 	spinning,
+	locked,
+	edges,
 	rotationDeg,
 	reduced,
 	readiness,
@@ -183,6 +200,8 @@ function WheelBeat({
 }: {
 	people: DrawWheelPerson[];
 	spinning: boolean;
+	locked: boolean;
+	edges: { fromId: string; toId: string }[];
 	rotationDeg: number;
 	reduced: boolean;
 	readiness: RoomReadiness;
@@ -191,30 +210,36 @@ function WheelBeat({
 	onExecute?: () => void;
 }) {
 	const isEmpty = readiness.total === 0;
+	const inMotion = spinning || locked;
 	return (
 		<div className="flex flex-col items-center gap-8 py-10 text-center">
 			<DrawWheel
 				people={people}
 				rotationDeg={rotationDeg}
 				spinning={spinning}
+				locked={locked}
+				edges={edges}
 				reduced={reduced}
-				hub={spinning ? "…" : "Listos"}
 			/>
 			<div className="flex flex-col gap-2">
 				<h2 className="font-heading text-2xl font-semibold text-balance">
-					{spinning ? "La rueda gira" : "La rueda está lista"}
+					{locked
+						? "Las parejas"
+						: spinning
+							? "Sorteando"
+							: "El sorteo está listo"}
 				</h2>
-				{spinning ? (
+				{inMotion ? (
 					<p className="sr-only" aria-live="assertive">
-						Sorteando
+						{locked ? "Las parejas" : "Sorteando"}
 					</p>
 				) : (
 					<p className="max-w-sm text-sm text-muted-foreground text-pretty">
-						Gira. Luego ves a quién te tocó — el texto espera al debate.
+						Luego ves a quién te tocó — el texto espera al debate.
 					</p>
 				)}
 			</div>
-			{spinning ? null : (
+			{inMotion ? null : (
 				<>
 					{isModerator ? (
 						isEmpty ? (
@@ -231,7 +256,7 @@ function WheelBeat({
 						)
 					) : (
 						<p className="text-sm text-muted-foreground">
-							El moderador gira la rueda.
+							Espera a que el moderador haga el sorteo.
 						</p>
 					)}
 				</>

@@ -46,7 +46,7 @@ test("crea una sesión, entra a la Sala y la cierra", async ({ page }) => {
 
 	await page.getByRole("button", { name: "Continuar a Sorteo" }).click();
 	await expect(
-		page.getByRole("heading", { name: "La rueda está lista" }),
+		page.getByRole("heading", { name: "El sorteo está listo" }),
 	).toBeVisible();
 
 	await page.getByRole("button", { name: "Sortear" }).click();

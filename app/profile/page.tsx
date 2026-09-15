@@ -1,18 +1,7 @@
 import { redirect } from "next/navigation";
-import { BadgeVitrina } from "@/app/profile/_components/badge-vitrina";
-import { LeaveClubDialog } from "@/app/profile/_components/leave-club-dialog";
-import { UpdateProfileForm } from "@/app/profile/_components/update-profile-form";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { ProfileView } from "@/app/profile/_components/profile-view";
 import { getCurrentMember } from "@/lib/current-member";
-import { getMemberBadges } from "./_lib/gamification-actions";
-import { signOut } from "./_lib/profile-actions";
+import { getMemberBadges, getMemberLevel } from "./_lib/gamification-actions";
 
 export default async function ProfilePage({
 	searchParams,
@@ -25,86 +14,20 @@ export default async function ProfilePage({
 		redirect("/auth/login");
 	}
 
-	const { badges, recognitions } = await getMemberBadges(member.id);
+	const [{ badges, recognitions }, level] = await Promise.all([
+		getMemberBadges(member.id),
+		getMemberLevel(member.id),
+	]);
 
 	return (
-		<div className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 md:max-w-4xl md:px-8 md:py-10 lg:max-w-5xl">
-			<div className="space-y-2">
-				<h1 className="text-2xl font-semibold tracking-tight">Tu perfil</h1>
-				<p className="text-sm text-muted-foreground">
-					Tu nombre visible, insignias y el estado de tu membresía.
-				</p>
-			</div>
-
-			{params.updated === "1" && (
-				<div
-					role="status"
-					className="mt-4 rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground"
-				>
-					Perfil actualizado.
-				</div>
-			)}
-
-			{params.error === "update_failed" && (
-				<div
-					role="alert"
-					className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-				>
-					No pudimos guardar los cambios. Intentá de nuevo.
-				</div>
-			)}
-
-			<Card className="mt-6">
-				<CardHeader>
-					<CardTitle>Nombre visible</CardTitle>
-					<CardDescription>
-						Es el nombre con el que te ve el resto del club.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<UpdateProfileForm defaultDisplayName={member.display_name} />
-				</CardContent>
-			</Card>
-
-			<Card className="mt-6">
-				<CardHeader>
-					<CardTitle>Tus logros y los hitos del club.</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<BadgeVitrina badges={badges} recognitions={recognitions} />
-				</CardContent>
-			</Card>
-
-			<Card className="mt-6">
-				<CardHeader>
-					<CardTitle>Membresía</CardTitle>
-					<CardDescription>
-						Estado:{" "}
-						<span className="font-medium text-foreground">
-							{member.status === "active"
-								? "activo"
-								: member.status === "invited"
-									? "invitado"
-									: "baja"}
-						</span>
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="flex flex-col gap-4">
-					<p className="text-sm text-muted-foreground">
-						Si te das de baja, tus aportes quedan como memoria del club y no
-						podrás iniciar sesión.
-					</p>
-					<LeaveClubDialog />
-				</CardContent>
-			</Card>
-
-			<div className="mt-8">
-				<form action={signOut}>
-					<Button type="submit" variant="outline">
-						Cerrar sesión
-					</Button>
-				</form>
-			</div>
-		</div>
+		<ProfileView
+			displayName={member.display_name}
+			status={member.status}
+			level={level}
+			badges={badges}
+			recognitions={recognitions}
+			updated={params.updated === "1"}
+			updateFailed={params.error === "update_failed"}
+		/>
 	);
 }

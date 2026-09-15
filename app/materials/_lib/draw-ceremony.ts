@@ -1,7 +1,7 @@
 /**
  * Reloj compartido del Sorteo. Todos los dispositivos derivan la fase
  * de `draws.created_at` — no del momento en que les llegó el evento —
- * para que la rueda gire igual en realtime.
+ * para que el ciclo gire igual en realtime.
  */
 
 export const DRAW_BEAT_MS = 1000;
@@ -61,19 +61,9 @@ export function clampOptimisticPhase(
 	return phase;
 }
 
-/** Giro de la tómbola: 8 vueltas con ease-out, anclado al reloj compartido. */
+/** Giro del ciclo: 8 vueltas con ease-out, anclado al reloj compartido. */
 export function drawWheelRotationDeg(elapsedMs: number): number {
 	const t = Math.min(1, Math.max(0, elapsedMs / DRAW_SPIN_MS));
 	const eased = 1 - (1 - t) ** 3;
 	return eased * 360 * DRAW_WHEEL_TURNS;
-}
-
-/** Con 2–3 personas la rueda se ve vacía; se repiten gajos hasta `min`. */
-export function padWheelPeople<T>(people: T[], min = 6): T[] {
-	if (people.length === 0 || people.length >= min) return people;
-	const out: T[] = [];
-	while (out.length < min) {
-		out.push(people[out.length % people.length] as T);
-	}
-	return out;
 }

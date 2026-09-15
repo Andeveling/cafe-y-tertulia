@@ -9,7 +9,6 @@ import {
 	DRAW_WHEEL_TURNS,
 	drawCeremonyPhase,
 	drawWheelRotationDeg,
-	padWheelPeople,
 } from "@/app/materials/_lib/draw-ceremony";
 
 const T0 = Date.parse("2026-09-07T15:00:00.000Z");
@@ -90,20 +89,5 @@ describe("drawWheelRotationDeg", () => {
 	it("no es lineal — más giro al inicio", () => {
 		const mid = drawWheelRotationDeg(DRAW_SPIN_MS / 2);
 		expect(mid).toBeGreaterThan((360 * DRAW_WHEEL_TURNS) / 2);
-	});
-});
-
-describe("padWheelPeople", () => {
-	it("repite gajos cuando hay pocos nombres", () => {
-		expect(padWheelPeople(["a", "b"])).toEqual(["a", "b", "a", "b", "a", "b"]);
-		expect(padWheelPeople(["a", "b", "c", "d", "e", "f"])).toEqual([
-			"a",
-			"b",
-			"c",
-			"d",
-			"e",
-			"f",
-		]);
-		expect(padWheelPeople([])).toEqual([]);
 	});
 });

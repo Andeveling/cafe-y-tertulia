@@ -1,18 +1,19 @@
 "use client";
 
 import { motion } from "motion/react";
-import type { ReactNode } from "react";
-import { padWheelPeople } from "@/app/materials/_lib/draw-ceremony";
+import { useId } from "react";
 import { cn } from "@/lib/utils";
 
 export type DrawWheelPerson = { id: string; name: string };
+export type DrawCycleEdge = { fromId: string; toId: string };
 
 type Props = {
 	people: DrawWheelPerson[];
 	rotationDeg: number;
 	spinning: boolean;
+	locked?: boolean;
+	edges?: DrawCycleEdge[];
 	reduced?: boolean;
-	hub?: ReactNode;
 };
 
 function initials(name: string) {
@@ -22,80 +23,74 @@ function initials(name: string) {
 	return (first + last).toUpperCase() || "·";
 }
 
+function firstName(name: string) {
+	return name.trim().split(/\s+/)[0] ?? "";
+}
+
 function polar(r: number, deg: number) {
 	const a = ((deg - 90) * Math.PI) / 180;
 	return [100 + r * Math.cos(a), 100 + r * Math.sin(a)] as const;
 }
 
-function slicePath(i: number, n: number) {
-	const a0 = (i / n) * 360;
-	const a1 = ((i + 1) / n) * 360;
-	const [x0, y0] = polar(100, a0);
-	const [x1, y1] = polar(100, a1);
-	const large = a1 - a0 > 180 ? 1 : 0;
-	return `M 100 100 L ${x0} ${y0} A 100 100 0 ${large} 1 ${x1} ${y1} Z`;
+function lerp(a: number, b: number, t: number) {
+	return a + (b - a) * t;
 }
 
-function sliceLabel(name: string, n: number) {
-	if (!name) return "";
-	const first = name.trim().split(/\s+/)[0] ?? "";
-	if (n <= 6 && first.length <= 8) return first;
-	return initials(name);
+function shorten(
+	from: readonly [number, number],
+	to: readonly [number, number],
+	t = 0.3,
+) {
+	return [
+		lerp(from[0], to[0], t),
+		lerp(from[1], to[1], t),
+		lerp(from[0], to[0], 1 - t),
+		lerp(from[1], to[1], 1 - t),
+	] as const;
 }
 
 export function DrawWheel({
 	people,
 	rotationDeg,
 	spinning,
+	locked = false,
+	edges = [],
 	reduced = false,
-	hub,
 }: Props) {
-	const unique = people.filter((p) => p.name);
-	const slices =
-		unique.length === 0
-			? Array.from({ length: 6 }, (_, i) => ({ id: `empty-${i}`, name: "" }))
-			: padWheelPeople(unique);
-	const n = slices.length;
-	const idle = !spinning && !reduced;
-	const countLabel = unique.length
-		? `${unique.length} ${unique.length === 1 ? "persona" : "personas"}`
-		: "vacía";
+	const markerId = useId().replace(/:/g, "");
+	const unique = people.filter((p) => p.id && p.name);
+	const n = unique.length;
+	const idle = !spinning && !locked && !reduced;
+	const indexById = new Map(unique.map((p, i) => [p.id, i]));
+	const countLabel = n ? `${n} ${n === 1 ? "persona" : "personas"}` : "vacío";
 
 	return (
 		<div
 			role="img"
 			aria-label={
 				spinning
-					? "Rueda del sorteo girando"
-					: `Rueda del sorteo, ${countLabel}`
+					? "Ciclo del sorteo girando"
+					: locked
+						? "Ciclo del sorteo, parejas"
+						: `Ciclo del sorteo, ${countLabel}`
 			}
 			className="relative mx-auto size-56 sm:size-64"
 		>
-			<motion.div
-				aria-hidden="true"
-				className="absolute -top-1 left-1/2 z-10 size-0 border-x-8 border-t-[14px] border-x-transparent border-t-primary"
-				style={{ marginLeft: -8 }}
-				animate={spinning && !reduced ? { rotate: [-7, 7] } : { rotate: 0 }}
-				transition={
-					spinning && !reduced
-						? { duration: 0.1, repeat: Infinity, repeatType: "mirror" }
-						: { duration: 0.2 }
-				}
-			/>
-
 			<div
 				className={cn(
-					"absolute inset-0 rounded-full bg-muted ring-1 ring-foreground/15",
-					spinning && "ring-primary/40",
+					"absolute inset-0 rounded-full bg-muted/40 ring-1 ring-foreground/15",
+					(spinning || locked) && "ring-primary/35",
 				)}
 			>
 				<motion.div
-					key={spinning ? "spin" : "idle"}
-					className="absolute inset-2 overflow-hidden rounded-full"
+					key={spinning ? "spin" : idle ? "idle" : "rest"}
+					className="absolute inset-0"
 					style={
-						spinning ? { transform: `rotate(${rotationDeg}deg)` } : undefined
+						spinning || locked
+							? { transform: `rotate(${rotationDeg}deg)` }
+							: undefined
 					}
-					animate={idle ? { rotate: [-5, 5] } : undefined}
+					animate={idle ? { rotate: [-4, 4] } : undefined}
 					transition={
 						idle
 							? {
@@ -108,58 +103,90 @@ export function DrawWheel({
 					}
 				>
 					<svg viewBox="0 0 200 200" className="size-full">
-						{slices.map((p, i) => {
-							const mid = ((i + 0.5) / n) * 360;
-							const [tx, ty] = polar(62, mid);
-							return (
-								<g key={`${p.id}-${i}`}>
-									<path
-										d={slicePath(i, n)}
-										className={
-											i % 2 === 0 ? "fill-primary/15" : "fill-foreground/5"
-										}
-									/>
-									{p.name ? (
-										<text
-											x={tx}
-											y={ty}
-											textAnchor="middle"
-											dominantBaseline="middle"
-											className="fill-foreground"
-											style={{
-												fontSize: n > 8 ? 8 : 11,
-												fontWeight: 700,
-												letterSpacing: "0.04em",
-											}}
-										>
-											{sliceLabel(p.name, n)}
-										</text>
-									) : null}
-								</g>
-							);
-						})}
+						<defs>
+							<marker
+								id={markerId}
+								markerWidth="7"
+								markerHeight="7"
+								refX="6"
+								refY="3.5"
+								orient="auto"
+							>
+								<path d="M0,0 L7,3.5 L0,7 Z" className="fill-primary" />
+							</marker>
+						</defs>
 						<circle
 							cx="100"
 							cy="100"
-							r="99"
+							r="68"
 							fill="none"
-							className="stroke-foreground/10"
-							strokeWidth="2"
+							className="stroke-foreground/15"
+							strokeWidth="1.5"
 						/>
+						{locked
+							? edges.map((e) => {
+									const i = indexById.get(e.fromId);
+									const j = indexById.get(e.toId);
+									if (i == null || j == null || n === 0) return null;
+									const a0 = (i / n) * 360;
+									const a1 = (j / n) * 360;
+									const [x1, y1, x2, y2] = shorten(
+										polar(68, a0),
+										polar(68, a1),
+									);
+									return (
+										<line
+											key={`${e.fromId}-${e.toId}`}
+											x1={x1}
+											y1={y1}
+											x2={x2}
+											y2={y2}
+											className="stroke-primary"
+											strokeWidth="1.75"
+											markerEnd={`url(#${markerId})`}
+										/>
+									);
+								})
+							: null}
+						{unique.map((p, i) => {
+							const deg = n === 0 ? 0 : (i / n) * 360;
+							const [cx, cy] = polar(68, deg);
+							const [tx, ty] = polar(92, deg);
+							return (
+								<g key={p.id}>
+									<circle
+										cx={cx}
+										cy={cy}
+										r="14"
+										className="fill-background stroke-primary/40"
+										strokeWidth="1.5"
+									/>
+									<text
+										x={cx}
+										y={cy}
+										textAnchor="middle"
+										dominantBaseline="middle"
+										className="fill-foreground"
+										style={{ fontSize: 8, fontWeight: 700 }}
+									>
+										{initials(p.name)}
+									</text>
+									<text
+										x={tx}
+										y={ty}
+										textAnchor="middle"
+										dominantBaseline="middle"
+										className="fill-foreground"
+										style={{ fontSize: 9, fontWeight: 600 }}
+										transform={`rotate(${-rotationDeg} ${tx} ${ty})`}
+									>
+										{firstName(p.name)}
+									</text>
+								</g>
+							);
+						})}
 					</svg>
 				</motion.div>
-			</div>
-
-			<div className="absolute inset-[31%] z-10 grid place-items-center rounded-full bg-background ring-1 ring-primary/30">
-				{spinning && !reduced ? (
-					<span
-						aria-hidden="true"
-						className="absolute -inset-1.5 animate-ping rounded-full ring-1 ring-primary/40"
-					/>
-				) : null}
-				<span className="relative font-heading text-sm text-primary italic">
-					{hub}
-				</span>
 			</div>
 		</div>
 	);

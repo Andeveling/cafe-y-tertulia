@@ -92,9 +92,9 @@ export const Countdown: Story = {
 	},
 	play: async ({ canvas }) => {
 		await expect(
-			canvas.getByRole("img", { name: /rueda del sorteo girando/i }),
+			canvas.getByRole("img", { name: /ciclo del sorteo girando/i }),
 		).toBeVisible();
-		await expect(canvas.getByText("La rueda gira")).toBeVisible();
+		await expect(canvas.getByText("Sorteando")).toBeVisible();
 	},
 };
 
@@ -105,6 +105,12 @@ export const Fanfare: Story = {
 		assignments: pairs,
 		nowMs: T0 + 3200,
 		reducedMotion: false,
+	},
+	play: async ({ canvas }) => {
+		await expect(
+			canvas.getByRole("img", { name: /ciclo del sorteo, parejas/i }),
+		).toBeVisible();
+		await expect(canvas.getByText("Las parejas")).toBeVisible();
 	},
 };
 
