@@ -4,6 +4,7 @@ import { WaitingRevealView } from "./waiting-reveal-view";
 
 const meta = {
 	component: WaitingRevealView,
+	parameters: { layout: "centered" },
 	args: {
 		nextAssigneeName: "Ana",
 		progressText: "Turno 1 de 2",
@@ -15,29 +16,25 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Moderador al que le toca: una sola acción primaria con consecuencia. */
+/** Moderador al que le toca: sobre sellado y una sola acción primaria. */
 export const ModeratorNext: Story = {
 	args: { youNext: true, isModerator: true, onReveal: () => {} },
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
-		await waitFor(() =>
-			expect(canvas.getByText("Turno 1 de 2")).toBeVisible(),
-		);
-		await expect(
-			canvas.getByText(/te toca en un momento/i),
-		).toBeVisible();
+		await waitFor(() => expect(canvas.getByText("Turno 1 de 2")).toBeVisible());
+		await expect(canvas.getByText(/la pregunta está sellada/i)).toBeVisible();
+		await expect(canvas.getByText(/te toca en un momento/i)).toBeVisible();
 		await expect(
 			canvas.getByRole("button", { name: /revelar pregunta 1 para ana/i }),
 		).toBeEnabled();
 		await expect(
 			canvas.getByText(/la verán todos\. no se puede des-revelar/i),
 		).toBeVisible();
-		expect(canvas.queryByText("Moderación")).toBeNull();
 		expect(canvas.queryByText("Solo tú ves esto.")).toBeNull();
 	},
 };
 
-/** Moderador cuando le toca a otro: sin jerga, sin etiqueta Moderación. */
+/** Moderador cuando le toca a otro: sin jerga, pregunta sellada. */
 export const ModeratorOther: Story = {
 	args: {
 		youNext: false,
@@ -49,13 +46,13 @@ export const ModeratorOther: Story = {
 	play: async ({ canvasElement }) => {
 		const canvas = within(canvasElement);
 		await waitFor(() =>
-			expect(
-				canvas.getByText(/la pregunta sigue oculta hasta que la reveles/i),
-			).toBeVisible(),
+			expect(canvas.getByText(/próximo en intervenir/i)).toBeVisible(),
 		);
+		await expect(canvas.getByText(/la pregunta está sellada/i)).toBeVisible();
 		await expect(
 			canvas.getByRole("button", { name: /revelar pregunta 1 para luis/i }),
 		).toBeEnabled();
+		expect(canvas.queryByText("Moderación")).toBeNull();
 	},
 };
 
@@ -83,6 +80,7 @@ export const ParticipantNext: Story = {
 		await waitFor(() =>
 			expect(canvas.getByText(/te toca en un momento/i)).toBeVisible(),
 		);
+		await expect(canvas.getByText(/prepárate/i)).toBeVisible();
 		expect(
 			canvas.queryByRole("button", { name: /revelar pregunta/i }),
 		).toBeNull();

@@ -1,5 +1,7 @@
 "use client";
 
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +11,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { useRoomMutation } from "../_hooks/use-room-mutation";
 import {
@@ -57,7 +64,6 @@ export function DebateToolsTray({
 }: Props) {
 	const { pending, run } = useRoomMutation();
 	const [takePrompt, setTakePrompt] = useState("");
-	const [expanded, setExpanded] = useState(false);
 
 	/** Acciones con formulario sobre el camino único de mutación de la Sala. */
 	function runFields(action: RoomFormAction, fields: Record<string, string>) {
@@ -67,9 +73,82 @@ export function DebateToolsTray({
 	const canLaunchTrivia =
 		isModerator && !state.liveRoundId && state.triviaRoundCount < 2;
 	const canLaunchTake = isModerator && !state.openTakeId && state.takeCount < 3;
+	const canLaunch = canLaunchTrivia || canLaunchTake;
 
 	const hasContent = round != null || state.takes.length > 0;
 	const actions = { sessionId, pending, isModerator, run: runFields };
+
+	const launchers = canLaunch ? (
+		<div className="flex flex-col gap-3">
+			<p className="text-xs tracking-wide text-muted-foreground uppercase">
+				Lanzar · máx. 2 trivias y 3 takes por sesión
+			</p>
+			{canLaunchTrivia &&
+				(state.bank.length === 0 ? (
+					<p className="text-sm text-muted-foreground">
+						No hay trivias en el banco del material.
+					</p>
+				) : (
+					<div className="flex flex-wrap gap-2">
+						{state.bank.map((t) => (
+							<Button
+								key={t.id}
+								variant="outline"
+								size="sm"
+								disabled={pending}
+								onClick={() =>
+									runFields(startTriviaAction, {
+										session_id: sessionId,
+										trivia_id: t.id,
+									})
+								}
+							>
+								{t.title}
+								{t.itemCount ? ` · ${t.itemCount}p` : ""}
+							</Button>
+						))}
+					</div>
+				))}
+			{canLaunchTake && (
+				<div className="flex gap-2">
+					<Input
+						placeholder="Frase disparadora"
+						aria-label="Frase disparadora del take"
+						value={takePrompt}
+						onChange={(e) => setTakePrompt(e.target.value)}
+					/>
+					<Button
+						size="sm"
+						disabled={pending || !takePrompt.trim()}
+						onClick={() => {
+							runFields(startTakeAction, {
+								session_id: sessionId,
+								prompt: takePrompt,
+							});
+							setTakePrompt("");
+						}}
+					>
+						Lanzar take
+					</Button>
+				</div>
+			)}
+		</div>
+	) : null;
+
+	if (!hasContent) {
+		if (!launchers) return null;
+		return (
+			<Collapsible className="flex flex-col items-center">
+				<CollapsibleTrigger className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+					<HugeiconsIcon icon={ArrowDown01Icon} className="size-3.5" />
+					Herramientas
+				</CollapsibleTrigger>
+				<CollapsibleContent className="w-full pt-3">
+					{launchers}
+				</CollapsibleContent>
+			</Collapsible>
+		);
+	}
 
 	return (
 		<Card>
@@ -88,89 +167,8 @@ export function DebateToolsTray({
 					<TakesSection takes={state.takes} {...actions} />
 				)}
 
-				{!hasContent && !canLaunchTrivia && !canLaunchTake && (
-					<p className="text-xs text-muted-foreground">
-						Sin minijuegos por ahora.
-					</p>
-				)}
-
-				{!hasContent && (canLaunchTrivia || canLaunchTake) && !expanded && (
-					<div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
-						<p className="text-xs text-muted-foreground">
-							Sin minijuegos en este material — puedes seguir sin esto.
-						</p>
-						<Button variant="ghost" size="sm" onClick={() => setExpanded(true)}>
-							Ver más
-						</Button>
-					</div>
-				)}
-
-				{(canLaunchTrivia || canLaunchTake) && (hasContent || expanded) && (
-					<div className="flex flex-col gap-3 border-t border-border pt-4">
-						<div className="flex flex-wrap items-center justify-between gap-2">
-							<p className="text-xs uppercase tracking-wide text-muted-foreground">
-								Lanzar · máx. 2 trivias y 3 takes por sesión
-							</p>
-							{!hasContent && (
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={() => setExpanded(false)}
-								>
-									Ver menos
-								</Button>
-							)}
-						</div>
-						{canLaunchTrivia &&
-							(state.bank.length === 0 ? (
-								<p className="text-sm text-muted-foreground">
-									No hay trivias en el banco del material.
-								</p>
-							) : (
-								<div className="flex flex-wrap gap-2">
-									{state.bank.map((t) => (
-										<Button
-											key={t.id}
-											variant="outline"
-											size="sm"
-											disabled={pending}
-											onClick={() =>
-												runFields(startTriviaAction, {
-													session_id: sessionId,
-													trivia_id: t.id,
-												})
-											}
-										>
-											{t.title}
-											{t.itemCount ? ` · ${t.itemCount}p` : ""}
-										</Button>
-									))}
-								</div>
-							))}
-						{canLaunchTake && (
-							<div className="flex gap-2">
-								<Input
-									placeholder="Frase disparadora"
-									aria-label="Frase disparadora del take"
-									value={takePrompt}
-									onChange={(e) => setTakePrompt(e.target.value)}
-								/>
-								<Button
-									size="sm"
-									disabled={pending || !takePrompt.trim()}
-									onClick={() => {
-										runFields(startTakeAction, {
-											session_id: sessionId,
-											prompt: takePrompt,
-										});
-										setTakePrompt("");
-									}}
-								>
-									Lanzar take
-								</Button>
-							</div>
-						)}
-					</div>
+				{launchers && (
+					<div className="border-t border-border pt-4">{launchers}</div>
 				)}
 			</CardContent>
 		</Card>
