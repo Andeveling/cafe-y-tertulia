@@ -65,7 +65,7 @@ export function InviteForm() {
 				)}
 			/>
 			<Button type="submit" disabled={isPending}>
-				{isPending ? "Enviando…" : "Enviar invitación"}
+				{isPending ? "Creando…" : "Crear enlace"}
 			</Button>
 		</form>
 	);

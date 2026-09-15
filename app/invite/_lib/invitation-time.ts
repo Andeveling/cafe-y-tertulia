@@ -4,6 +4,7 @@ export type InvitationRow = {
 	status: "pending" | "accepted" | "expired";
 	expires_at: string;
 	created_at: string;
+	url?: string;
 };
 
 export type InvitationDisplayStatus =
@@ -36,6 +37,11 @@ export function invitationDisplayStatus(
 
 export function formatTimeLeft(leftMs: number): string {
 	const minutes = Math.ceil(leftMs / 60_000);
+	if (minutes >= 60 * 24) {
+		const days = Math.floor(minutes / (60 * 24));
+		const restH = Math.floor((minutes % (60 * 24)) / 60);
+		return restH === 0 ? `${days} d` : `${days} d ${restH} h`;
+	}
 	if (minutes >= 60) {
 		const hours = Math.floor(minutes / 60);
 		const rest = minutes % 60;
@@ -51,3 +57,8 @@ export const INVITATION_STATUS_LABELS: Record<InvitationDisplayStatus, string> =
 		expired: "Vencida",
 		revoked: "Revocada",
 	};
+
+export function whatsappInviteHref(url: string) {
+	const text = `Te invito a Café y Tertulias, el club de lectura y conversación. El enlace vale 7 días:\n${url}`;
+	return `https://wa.me/?text=${encodeURIComponent(text)}`;
+}

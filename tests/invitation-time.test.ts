@@ -55,4 +55,11 @@ describe("formatTimeLeft", () => {
 		expect(formatTimeLeft(90 * 60_000)).toBe("1 h 30 min");
 		expect(formatTimeLeft(30_000)).toBe("menos de 1 min");
 	});
+
+	it("formatea días", () => {
+		expect(formatTimeLeft(7 * 24 * 60 * 60_000)).toBe("7 d");
+		expect(formatTimeLeft(2 * 24 * 60 * 60_000 + 3 * 60 * 60_000)).toBe(
+			"2 d 3 h",
+		);
+	});
 });

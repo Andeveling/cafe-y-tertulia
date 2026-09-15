@@ -1,21 +1,36 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { inviteMember, revokeInvitation } from "@/app/invite/_lib/invite";
+import {
+	acceptInviteToken,
+	createInviteLink,
+	inviteLinkFor,
+	resendInviteLink,
+	revokeInvitation,
+} from "@/app/invite/_lib/invite";
 import type { Database } from "@/lib/supabase/database.types";
 
 /**
- * Integration tests for the inviteMember server module (the padrinazgo flow).
- * Runs against the local Supabase stack.
+ * Integration tests for the shareable-invite module (ADR 0011).
+ * External behavior only: create link → redeem; revoked/expired/used do not
+ * enter. Runs against the local Supabase stack.
  */
 
-const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+const SERVICE_KEY =
+	process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-if (!URL || !SERVICE_KEY) {
+if (!SUPABASE_URL || !ANON_KEY || !SERVICE_KEY) {
 	throw new Error(
 		"Missing Supabase env vars. Start local Supabase and ensure .env.local exists.",
 	);
 }
+
+if (!process.env.INVITE_JWT_SECRET) {
+	throw new Error("Missing INVITE_JWT_SECRET in .env.local.");
+}
+
+type MemberRow = Database["public"]["Tables"]["members"]["Row"];
 
 let admin: SupabaseClient<Database>;
 let padrino: { id: string; email: string };
@@ -24,7 +39,12 @@ const usersToClean: string[] = [];
 const uniqueEmail = (prefix: string) =>
 	`${prefix}${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.local`;
 
-/** Find an auth user by email (admin listUsers, all pages). */
+function tokenFromUrl(url: string) {
+	const token = new URL(url).searchParams.get("token");
+	if (!token) throw new Error(`Invite URL has no token: ${url}`);
+	return token;
+}
+
 async function findUserByEmail(email: string) {
 	for (let page = 1; ; page++) {
 		const { data } = await admin.auth.admin.listUsers({ page, perPage: 200 });
@@ -38,8 +58,18 @@ async function findUserByEmail(email: string) {
 	}
 }
 
+async function signIn(email: string, password: string) {
+	const anon = createClient<Database>(SUPABASE_URL, ANON_KEY);
+	const { data, error } = await anon.auth.signInWithPassword({
+		email,
+		password,
+	});
+	if (error) throw error;
+	return { anon, user: data.user };
+}
+
 beforeAll(async () => {
-	admin = createClient<Database>(URL, SERVICE_KEY, {
+	admin = createClient<Database>(SUPABASE_URL, SERVICE_KEY, {
 		auth: { autoRefreshToken: false, persistSession: false },
 	});
 	const email = uniqueEmail("padrino");
@@ -64,22 +94,20 @@ afterAll(async () => {
 	}
 });
 
-describe("inviteMember (padrinazgo, ADR 0005)", () => {
-	it("invites a new person: auth user + invited member + pending invitation", async () => {
+describe("invitación por enlace compartible (ADR 0011)", () => {
+	it("crear y canjear deja a la persona activa y puede entrar", async () => {
 		const email = uniqueEmail("invitee");
-		const result = await inviteMember({
+		const created = await createInviteLink({
 			email,
 			padrinoId: padrino.id,
-			padrinoDisplayName: "Padrino de Prueba",
 		});
-		expect(result.ok).toBe(true);
+		expect(created.ok).toBe(true);
+		if (!created.ok) return;
 
-		// The auth user exists with the padrino's name in the invite metadata.
 		const user = await findUserByEmail(email);
 		expect(user).not.toBeNull();
 		usersToClean.push(user!.id);
 
-		// The members row is 'invited' with the padrino recorded.
 		const { data: member } = await admin
 			.from("members")
 			.select("status, invited_by")
@@ -88,76 +116,279 @@ describe("inviteMember (padrinazgo, ADR 0005)", () => {
 		expect(member?.status).toBe("invited");
 		expect(member?.invited_by).toBe(padrino.id);
 
-		// One pending invitation with a 24h expiry.
-		const { data: invites } = await admin
-			.from("invitations")
-			.select("status, expires_at")
-			.eq("email", email);
-		expect(invites).toHaveLength(1);
-		expect(invites![0].status).toBe("pending");
-		const durationMs = new Date(invites![0].expires_at).getTime() - Date.now();
-		expect(durationMs).toBeGreaterThan(23 * 60 * 60 * 1000);
-		expect(durationMs).toBeLessThanOrEqual(24 * 60 * 60 * 1000);
+		const accepted = await acceptInviteToken({
+			token: tokenFromUrl(created.url),
+			email,
+			displayName: "Invitada Nueva",
+			password: "invitee-password-123",
+		});
+		expect(accepted.ok).toBe(true);
+
+		const { anon } = await signIn(email, "invitee-password-123");
+		const { data: self } = await anon
+			.from("members")
+			.select("status, display_name")
+			.eq("id", user!.id)
+			.single();
+		expect(self?.status).toBe("active");
+		expect(self?.display_name).toBe("Invitada Nueva");
 	});
 
-	it("blocks a second invite while the first is still live", async () => {
-		const email = uniqueEmail("dup");
-		const first = await inviteMember({
+	it("el canje con un email distinto no entra", async () => {
+		const email = uniqueEmail("mismatch");
+		const created = await createInviteLink({
 			email,
 			padrinoId: padrino.id,
-			padrinoDisplayName: "Padrino",
 		});
-		expect(first.ok).toBe(true);
+		expect(created.ok).toBe(true);
+		if (!created.ok) return;
 		const user = await findUserByEmail(email);
 		expect(user).not.toBeNull();
 		usersToClean.push(user!.id);
 
-		const second = await inviteMember({
+		const accepted = await acceptInviteToken({
+			token: tokenFromUrl(created.url),
+			email: uniqueEmail("other"),
+			displayName: "Otra",
+			password: "invitee-password-123",
+		});
+		expect(accepted.ok).toBe(false);
+
+		const { data: member } = await admin
+			.from("members")
+			.select("status")
+			.eq("id", user!.id)
+			.single();
+		expect(member?.status).toBe("invited");
+	});
+
+	it("un enlace caducado no entra", async () => {
+		const email = uniqueEmail("expired");
+		const created = await createInviteLink({
 			email,
 			padrinoId: padrino.id,
-			padrinoDisplayName: "Padrino",
+		});
+		expect(created.ok).toBe(true);
+		if (!created.ok) return;
+		const user = await findUserByEmail(email);
+		expect(user).not.toBeNull();
+		usersToClean.push(user!.id);
+
+		await admin
+			.from("invitations")
+			.update({ expires_at: new Date(Date.now() - 1000).toISOString() })
+			.eq("email", email)
+			.eq("status", "pending");
+
+		const accepted = await acceptInviteToken({
+			token: tokenFromUrl(created.url),
+			email,
+			displayName: "Tarde",
+			password: "invitee-password-123",
+		});
+		expect(accepted.ok).toBe(false);
+	});
+
+	it("un enlace revocado no entra", async () => {
+		const email = uniqueEmail("revoked");
+		const created = await createInviteLink({
+			email,
+			padrinoId: padrino.id,
+		});
+		expect(created.ok).toBe(true);
+		if (!created.ok) return;
+		const user = await findUserByEmail(email);
+		expect(user).not.toBeNull();
+		usersToClean.push(user!.id);
+
+		const { data: live } = await admin
+			.from("invitations")
+			.select("id")
+			.eq("email", email)
+			.eq("status", "pending")
+			.single();
+		const revoked = await revokeInvitation({
+			invitationId: live!.id,
+			padrinoId: padrino.id,
+		});
+		expect(revoked.ok).toBe(true);
+
+		const accepted = await acceptInviteToken({
+			token: tokenFromUrl(created.url),
+			email,
+			displayName: "Revocada",
+			password: "invitee-password-123",
+		});
+		expect(accepted.ok).toBe(false);
+	});
+
+	it("el segundo uso del mismo enlace no entra", async () => {
+		const email = uniqueEmail("seconduse");
+		const created = await createInviteLink({
+			email,
+			padrinoId: padrino.id,
+		});
+		expect(created.ok).toBe(true);
+		if (!created.ok) return;
+		const user = await findUserByEmail(email);
+		expect(user).not.toBeNull();
+		usersToClean.push(user!.id);
+
+		const first = await acceptInviteToken({
+			token: tokenFromUrl(created.url),
+			email,
+			displayName: "Primera",
+			password: "invitee-password-123",
+		});
+		expect(first.ok).toBe(true);
+
+		const second = await acceptInviteToken({
+			token: tokenFromUrl(created.url),
+			email,
+			displayName: "Segunda",
+			password: "other-password-123",
+		});
+		expect(second.ok).toBe(false);
+	});
+
+	it("reenviar invalida el enlace anterior y el nuevo sí entra", async () => {
+		const email = uniqueEmail("resend");
+		const first = await createInviteLink({
+			email,
+			padrinoId: padrino.id,
+		});
+		expect(first.ok).toBe(true);
+		if (!first.ok) return;
+		const user = await findUserByEmail(email);
+		expect(user).not.toBeNull();
+		usersToClean.push(user!.id);
+
+		const { data: live } = await admin
+			.from("invitations")
+			.select("id")
+			.eq("email", email)
+			.eq("status", "pending")
+			.single();
+		const resent = await resendInviteLink({
+			invitationId: live!.id,
+			padrinoId: padrino.id,
+		});
+		expect(resent.ok).toBe(true);
+		if (!resent.ok) return;
+
+		const oldAccept = await acceptInviteToken({
+			token: tokenFromUrl(first.url),
+			email,
+			displayName: "Viejo",
+			password: "invitee-password-123",
+		});
+		expect(oldAccept.ok).toBe(false);
+
+		const newAccept = await acceptInviteToken({
+			token: tokenFromUrl(resent.url),
+			email,
+			displayName: "Nueva",
+			password: "invitee-password-123",
+		});
+		expect(newAccept.ok).toBe(true);
+	});
+
+	it("no hay dos invitaciones vivas para el mismo email", async () => {
+		const email = uniqueEmail("dup");
+		const first = await createInviteLink({
+			email,
+			padrinoId: padrino.id,
+		});
+		expect(first.ok).toBe(true);
+		if (!first.ok) return;
+		const user = await findUserByEmail(email);
+		expect(user).not.toBeNull();
+		usersToClean.push(user!.id);
+
+		const second = await createInviteLink({
+			email,
+			padrinoId: padrino.id,
 		});
 		expect(second.ok).toBe(false);
 		expect("code" in second && second.code).toBe("already_invited_pending");
 	});
 
-	it("re-invites after the previous invitation expired", async () => {
-		const email = uniqueEmail("reinvite");
-		const first = await inviteMember({
+	it("quien está invitada no puede invitar", async () => {
+		const email = uniqueEmail("notyet");
+		const created = await createInviteLink({
 			email,
 			padrinoId: padrino.id,
-			padrinoDisplayName: "Padrino",
 		});
-		expect(first.ok).toBe(true);
+		expect(created.ok).toBe(true);
+		if (!created.ok) return;
 		const user = await findUserByEmail(email);
 		expect(user).not.toBeNull();
 		usersToClean.push(user!.id);
 
-		// Expire the live invitation (24h pass) but keep it 'pending'.
-		await admin
-			.from("invitations")
-			.update({ expires_at: new Date(Date.now() - 1000).toISOString() })
-			.eq("email", email);
-
-		const second = await inviteMember({
-			email,
-			padrinoId: padrino.id,
-			padrinoDisplayName: "Padrino",
+		const result = await createInviteLink({
+			email: uniqueEmail("victim"),
+			padrinoId: user!.id,
 		});
-		expect(second.ok).toBe(true);
-
-		// Exactly one live invitation; the expired one was closed.
-		const { data: invites } = await admin
-			.from("invitations")
-			.select("status")
-			.eq("email", email)
-			.order("created_at", { ascending: true });
-		expect(invites).toHaveLength(2);
-		expect(invites![0].status).toBe("expired");
-		expect(invites![1].status).toBe("pending");
+		expect(result.ok).toBe(false);
+		expect("code" in result && result.code).toBe("not_active_member");
 	});
 
-	it("blocks inviting an existing active member", async () => {
+	it("quien se dio de baja no reingresa con el enlace", async () => {
+		const email = uniqueEmail("left");
+		const created = await createInviteLink({
+			email,
+			padrinoId: padrino.id,
+		});
+		expect(created.ok).toBe(true);
+		if (!created.ok) return;
+		const user = await findUserByEmail(email);
+		expect(user).not.toBeNull();
+		usersToClean.push(user!.id);
+
+		await admin
+			.from("members")
+			.update({ status: "left" satisfies MemberRow["status"] })
+			.eq("id", user!.id);
+
+		const accepted = await acceptInviteToken({
+			token: tokenFromUrl(created.url),
+			email,
+			displayName: "Ex",
+			password: "invitee-password-123",
+		});
+		expect(accepted.ok).toBe(false);
+	});
+
+	it("el padrino puede copiar después el mismo enlace vivo y canjearlo", async () => {
+		const email = uniqueEmail("copy");
+		const created = await createInviteLink({
+			email,
+			padrinoId: padrino.id,
+		});
+		expect(created.ok).toBe(true);
+		if (!created.ok) return;
+		const user = await findUserByEmail(email);
+		expect(user).not.toBeNull();
+		usersToClean.push(user!.id);
+
+		const { data: row } = await admin
+			.from("invitations")
+			.select("id, email, created_at, expires_at")
+			.eq("email", email)
+			.eq("status", "pending")
+			.single();
+		expect(row).not.toBeNull();
+		const copied = await inviteLinkFor(row!);
+		const accepted = await acceptInviteToken({
+			token: tokenFromUrl(copied),
+			email,
+			displayName: "Copia",
+			password: "invitee-password-123",
+		});
+		expect(accepted.ok).toBe(true);
+	});
+
+	it("no se invita a quien ya es Miembro activo", async () => {
 		const email = uniqueEmail("existing");
 		const { data: u, error } = await admin.auth.admin.createUser({
 			email,
@@ -173,17 +404,16 @@ describe("inviteMember (padrinazgo, ADR 0005)", () => {
 			display_name: "Ya Miembro",
 		});
 
-		const result = await inviteMember({
+		const result = await createInviteLink({
 			email,
 			padrinoId: padrino.id,
-			padrinoDisplayName: "Padrino",
 		});
 		expect(result.ok).toBe(false);
 		expect("code" in result && result.code).toBe("already_member");
 	});
 
-	it("blocks inviting a member who left (baja)", async () => {
-		const email = uniqueEmail("left");
+	it("no se invita a quien se dio de baja", async () => {
+		const email = uniqueEmail("baja");
 		const { data: u, error } = await admin.auth.admin.createUser({
 			email,
 			password: "left-password-123",
@@ -198,52 +428,30 @@ describe("inviteMember (padrinazgo, ADR 0005)", () => {
 			display_name: "Ex Miembro",
 		});
 
-		const result = await inviteMember({
+		const result = await createInviteLink({
 			email,
 			padrinoId: padrino.id,
-			padrinoDisplayName: "Padrino",
 		});
 		expect(result.ok).toBe(false);
 		expect("code" in result && result.code).toBe("left_member");
 	});
 
-	it("revokes a pending invitation so a new one can be sent", async () => {
-		const email = uniqueEmail("revoke");
-		const first = await inviteMember({
+	it("las pendientes viejas sin enlace nuevo no se pueden canjear", async () => {
+		const email = uniqueEmail("legacy");
+		const { error } = await admin.from("invitations").insert({
 			email,
-			padrinoId: padrino.id,
-			padrinoDisplayName: "Padrino",
+			invited_by: padrino.id,
+			status: "pending",
+			expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
 		});
-		expect(first.ok).toBe(true);
-		const user = await findUserByEmail(email);
-		expect(user).not.toBeNull();
-		usersToClean.push(user!.id);
+		expect(error).toBeNull();
 
-		const { data: live } = await admin
-			.from("invitations")
-			.select("id")
-			.eq("email", email)
-			.eq("status", "pending")
-			.single();
-
-		const revoked = await revokeInvitation({
-			invitationId: live!.id,
-			padrinoId: padrino.id,
-		});
-		expect(revoked.ok).toBe(true);
-
-		const { data: after } = await admin
-			.from("invitations")
-			.select("status")
-			.eq("id", live!.id)
-			.single();
-		expect(after?.status).toBe("expired");
-
-		const second = await inviteMember({
+		const accepted = await acceptInviteToken({
+			token: "not-a-real-link",
 			email,
-			padrinoId: padrino.id,
-			padrinoDisplayName: "Padrino",
+			displayName: "Legacy",
+			password: "invitee-password-123",
 		});
-		expect(second.ok).toBe(true);
+		expect(accepted.ok).toBe(false);
 	});
 });

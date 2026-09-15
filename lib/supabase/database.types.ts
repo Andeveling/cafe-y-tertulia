@@ -300,6 +300,7 @@ export type Database = {
 					id: string;
 					invited_by: string;
 					status: Database["public"]["Enums"]["invitation_status"];
+					token_hash: string | null;
 				};
 				Insert: {
 					created_at?: string;
@@ -308,6 +309,7 @@ export type Database = {
 					id?: string;
 					invited_by: string;
 					status?: Database["public"]["Enums"]["invitation_status"];
+					token_hash?: string | null;
 				};
 				Update: {
 					created_at?: string;
@@ -316,6 +318,7 @@ export type Database = {
 					id?: string;
 					invited_by?: string;
 					status?: Database["public"]["Enums"]["invitation_status"];
+					token_hash?: string | null;
 				};
 				Relationships: [
 					{
