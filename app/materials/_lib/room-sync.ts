@@ -1,6 +1,7 @@
 /**
- * Contrato de sincronización de la Sala: mutación del actor, apply-latest
- * de snapshots solapados, y cuándo refetch al recuperar el canal.
+ * Módulo de sincronización de la Sala. Interfaz: mutate + subscribe +
+ * apply-latest (`createSalaSync`). El actor muta, los observadores se
+ * enteran, el error no refresca. FormData es detalle interno.
  */
 
 export type RoomActionResult = { ok: true } | { ok: false; error: string };
@@ -22,14 +23,14 @@ export function snapshotAsOf(nowMs = Date.now()): number {
 }
 
 /** Un snapshot más viejo o del mismo reloj no pisa uno ya aplicado. */
-export function shouldApplySnapshot(
+function shouldApplySnapshot(
 	appliedAsOf: number,
 	incomingAsOf: number,
 ): boolean {
 	return incomingAsOf > appliedAsOf;
 }
 
-export function pickLatestRoomFrame<T extends { asOf: number }>(
+export function applyLatest<T extends { asOf: number }>(
 	held: T,
 	incoming: T,
 ): T {
@@ -45,18 +46,6 @@ export function roomSurface(status: string): RoomSurface {
 	return "inactive";
 }
 
-export function nextRefreshGeneration(current: number): number {
-	return current + 1;
-}
-
-/** Una generación anterior no pisa una más nueva ya aplicada. */
-export function shouldApplyRefresh(
-	appliedGeneration: number,
-	incomingGeneration: number,
-): boolean {
-	return incomingGeneration >= appliedGeneration;
-}
-
 /**
  * Éxito → onSuccess (opcional) y refresh del actor.
  * Error → onError y no se toma el camino de éxito.
@@ -67,7 +56,7 @@ export function shouldApplyRefresh(
  * trivia y takes) resuelven por aquí. El realtime cubre al resto de
  * dispositivos; este refresh cubre al que actúa.
  */
-export function applyRoomMutationResult(
+function applyRoomMutationResult(
 	result: RoomActionResult,
 	handlers: {
 		refresh: () => void;
@@ -83,6 +72,59 @@ export function applyRoomMutationResult(
 	handlers.refresh();
 }
 
+export type SalaFieldsMutation = {
+	action: RoomFormAction;
+	fields: Record<string, string>;
+};
+
+export type SalaMutation =
+	| (() => Promise<RoomActionResult>)
+	| SalaFieldsMutation;
+
+export type SalaObserver = {
+	notify: () => void;
+	unsubscribe: () => void;
+};
+
+export type SalaSync = {
+	mutate: (work: SalaMutation, onSuccess?: () => void) => Promise<void>;
+	subscribe: () => SalaObserver;
+	applyLatest: <T extends { asOf: number }>(held: T, incoming: T) => T;
+};
+
+function isFieldsMutation(work: SalaMutation): work is SalaFieldsMutation {
+	return typeof work === "object";
+}
+
+export function createSalaSync(deps: {
+	refresh: () => void;
+	onError?: (error: string) => void;
+	waitMs?: number;
+}): SalaSync {
+	const waitMs = deps.waitMs ?? ROOM_REFRESH_DEBOUNCE_MS;
+	const onError = deps.onError ?? (() => {});
+	return {
+		async mutate(work, onSuccess) {
+			const result = isFieldsMutation(work)
+				? await work.action(ROOM_OK_RESULT, roomFormData(work.fields))
+				: await work();
+			applyRoomMutationResult(result, {
+				refresh: deps.refresh,
+				onError,
+				onSuccess,
+			});
+		},
+		subscribe() {
+			const scheduler = createRefreshScheduler(deps.refresh, waitMs);
+			return {
+				notify: () => scheduler.schedule(),
+				unsubscribe: () => scheduler.cancel(),
+			};
+		},
+		applyLatest,
+	};
+}
+
 /**
  * Acción de servidor con campos sueltos: recibe un resultado dummy y un
  * FormData (trivia, takes, rating). Misma forma que `ServerActionFn`.
@@ -93,10 +135,10 @@ export type RoomFormAction = (
 ) => Promise<RoomActionResult>;
 
 /** Resultado dummy para las acciones con formulario: solo leen el FormData. */
-export const ROOM_OK_RESULT: RoomActionResult = { ok: true };
+const ROOM_OK_RESULT: RoomActionResult = { ok: true };
 
 /** Arma el FormData de una acción con campos sueltos. */
-export function roomFormData(fields: Record<string, string>): FormData {
+function roomFormData(fields: Record<string, string>): FormData {
 	const formData = new FormData();
 	for (const [key, value] of Object.entries(fields)) {
 		formData.set(key, value);
@@ -116,22 +158,22 @@ export function shouldRefetchOnChannelStatus(
 }
 
 /** Mientras el canal no está vivo, el actor y el observador no se congelan. */
-export const ROOM_OFFLINE_REFETCH_MS = 4_000;
+const ROOM_OFFLINE_REFETCH_MS = 4_000;
 /** Backstop while live: un evento de postgres_changes perdido no congela la Sala. */
-export const ROOM_LIVE_HEARTBEAT_MS = 5_000;
+const ROOM_LIVE_HEARTBEAT_MS = 5_000;
 /**
  * Colapsa ráfagas de eventos realtime (p. ej. el INSERT en draws + N
  * INSERTs en assignments del Sorteo) en un solo refresh trailing-edge.
  */
-export const ROOM_REFRESH_DEBOUNCE_MS = 350;
+const ROOM_REFRESH_DEBOUNCE_MS = 350;
 
-export type RefreshScheduler = {
+type RefreshScheduler = {
 	schedule: () => void;
 	cancel: () => void;
 };
 
 /** Scheduler trailing-edge puro: N schedule() seguidos disparan un solo run(). */
-export function createRefreshScheduler(
+function createRefreshScheduler(
 	run: () => void,
 	waitMs: number,
 ): RefreshScheduler {

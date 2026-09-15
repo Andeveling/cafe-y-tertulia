@@ -3,7 +3,7 @@
 import { StarIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { RatingDisplay } from "@/app/materials/_components/rating-display";
-import { useRunAction } from "@/app/materials/_hooks/use-run-action";
+import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -23,7 +23,7 @@ import {
 type Props = { progress: RatingProgress };
 
 export function RatingPanel({ progress }: Props) {
-	const { pending, run } = useRunAction();
+	const { pending, run } = useRoomMutation();
 
 	const frozen = progress.ratingCount > 0 && !progress.ratingOpen;
 

@@ -29,11 +29,7 @@ import {
 	voteTakeAction,
 } from "../_lib/minigame-actions";
 import type { MinigameState, TriviaRoundSnapshot } from "../_lib/minigames";
-import {
-	ROOM_OK_RESULT,
-	type RoomFormAction,
-	roomFormData,
-} from "../_lib/room-sync";
+import type { RoomFormAction } from "../_lib/room-sync";
 
 /**
  * Bandeja de herramientas del Debate: trivia y takes viven dentro de la Sala.
@@ -65,18 +61,13 @@ export function DebateToolsTray({
 	const { pending, run } = useRoomMutation();
 	const [takePrompt, setTakePrompt] = useState("");
 
-	/** Acciones con formulario sobre el camino único de mutación de la Sala. */
-	function runFields(action: RoomFormAction, fields: Record<string, string>) {
-		run(() => action(ROOM_OK_RESULT, roomFormData(fields)));
-	}
-
 	const canLaunchTrivia =
 		isModerator && !state.liveRoundId && state.triviaRoundCount < 2;
 	const canLaunchTake = isModerator && !state.openTakeId && state.takeCount < 3;
 	const canLaunch = canLaunchTrivia || canLaunchTake;
 
 	const hasContent = round != null || state.takes.length > 0;
-	const actions = { sessionId, pending, isModerator, run: runFields };
+	const actions = { sessionId, pending, isModerator, run };
 
 	const launchers = canLaunch ? (
 		<div className="flex flex-col gap-3">
@@ -97,7 +88,7 @@ export function DebateToolsTray({
 								size="sm"
 								disabled={pending}
 								onClick={() =>
-									runFields(startTriviaAction, {
+									run(startTriviaAction, {
 										session_id: sessionId,
 										trivia_id: t.id,
 									})
@@ -121,7 +112,7 @@ export function DebateToolsTray({
 						size="sm"
 						disabled={pending || !takePrompt.trim()}
 						onClick={() => {
-							runFields(startTakeAction, {
+							run(startTakeAction, {
 								session_id: sessionId,
 								prompt: takePrompt,
 							});
