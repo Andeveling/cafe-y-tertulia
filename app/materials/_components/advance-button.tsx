@@ -46,15 +46,11 @@ const BASE_ADVANCE: Omit<SessionAction, "label"> = {
 };
 
 const SESSION_ACTIONS: Record<
-	Exclude<SessionStatus, "archived">,
+	Exclude<SessionStatus, "archived" | "lobby">,
 	SessionAction
 > = {
 	preparation: {
 		label: SESSION_LIFECYCLE_LABELS.preparation,
-		...BASE_ADVANCE,
-	},
-	lobby: {
-		label: SESSION_LIFECYCLE_LABELS.lobby,
 		...BASE_ADVANCE,
 	},
 	in_progress: {
@@ -97,8 +93,12 @@ export function AdvanceButton(props: Props) {
 		);
 	}
 
-	// Histórico es solo lectura: el botón no existe ahí.
-	if (props.status === "archived") return null;
+	// Histórico es solo lectura: el botón no existe ahí. El salto
+	// lobby → in_progress tampoco existe: la Sala es dueña de ese avance
+	// (etapa Sorteo → Debate vía `advance_room_stage`, solo Moderador). Un
+	// salto directo dejaría room_stage desincronizado (p. ej.
+	// in_progress/questions).
+	if (props.status === "archived" || props.status === "lobby") return null;
 	const action = SESSION_ACTIONS[props.status];
 
 	return (

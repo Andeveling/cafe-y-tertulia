@@ -106,14 +106,6 @@ export function RoomSessionView({
 			<header className="flex flex-col gap-2">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="outline">Sala</Badge>
-					{view.status === "lobby" && (
-						<AdvanceButton
-							kind="session"
-							id={view.sessionId}
-							materialId={view.materialId}
-							status={view.status}
-						/>
-					)}
 				</div>
 				<h1 className="font-heading text-2xl font-semibold">
 					{view.range || "Sesión"}

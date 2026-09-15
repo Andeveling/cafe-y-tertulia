@@ -206,6 +206,16 @@ export async function advanceSession(input: {
 				return { ok: false, error: "Para cerrar la sesión usa Cerrar sesión." };
 			}
 
+			// Sin salto lobby → en curso: la Sala es dueña de ese avance
+			// (etapa Sorteo → Debate vía `advance_room_stage`). Un salto
+			// directo dejaría room_stage desincronizado.
+			if (data.status === "lobby") {
+				return {
+					ok: false,
+					error: "La tertulia se empieza desde la Sala, avanzando al Debate.",
+				};
+			}
+
 			// Archivado manual solo por el moderador (SPEC §3.1, AC5).
 			if (data.status === "closed" && data.moderator_id !== user?.id) {
 				return {

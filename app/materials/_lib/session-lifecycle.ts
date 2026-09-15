@@ -5,11 +5,10 @@ import type { SessionStatus } from "./constants";
  * La tarjeta del material es pasiva: estas etiquetas solo se usan en la Sala.
  */
 export const SESSION_LIFECYCLE_LABELS: Record<
-	Exclude<SessionStatus, "archived">,
+	Exclude<SessionStatus, "archived" | "lobby">,
 	string
 > = {
 	preparation: "Abrir sala",
-	lobby: "Empezar tertulia",
 	in_progress: "Cerrar sesión",
 	closed: "Archivar",
 };
