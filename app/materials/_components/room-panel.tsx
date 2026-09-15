@@ -39,14 +39,11 @@ import {
 	toggleOptOut,
 	transferModerator,
 } from "@/app/materials/_lib/room-actions";
-import type {
-	RoomQuestion,
-	RoomSnapshot,
-	RoomStage,
-} from "@/app/materials/_lib/room-types";
 import {
 	ROOM_STAGE_LABELS,
-	ROOM_STAGE_ORDER,
+	type RoomQuestion,
+	type RoomSnapshot,
+	type RoomStage,
 } from "@/app/materials/_lib/room-types";
 import { deriveSalaView, type SalaView } from "@/app/materials/_lib/room-view";
 import { InfoButton } from "@/components/info-button";
@@ -94,7 +91,7 @@ type Props = {
  * Texto del tooltip del ModeratorNav por etapa. Cada entrada describe:
  *  - `description`: en qué consiste la etapa actual.
  *  - `nextCondition`: qué tiene que estar dado para avanzar.
- * La `key` es la etapa actual; la etapa siguiente sale del `ROOM_STAGE_ORDER`.
+ * La `key` es la etapa actual; la siguiente sale de `view.next`.
  */
 const STAGE_HELP: Record<
 	RoomStage,
@@ -141,8 +138,8 @@ export function RoomPanel({
 	pendingIds = [],
 }: Props) {
 	const { live } = useRoomRealtime(snapshot.sessionId);
-	// La vista derivada se calcula una sola vez: Listo, mesa y debate
-	// llegan hechos a cada Etapa.
+	// Una sola derivación: mesa, Listo, debate y avance (next/prev,
+	// backBlocked, empty, warnings). Nav y Debate → Cierre la consumen.
 	const view = deriveSalaView(snapshot);
 
 	return (
@@ -251,6 +248,9 @@ function StageContent({
 						progress={view.debateProgress}
 						members={view.members}
 						nextAssigneeName={view.debateNextAssigneeName}
+						next={view.next}
+						empty={view.empty}
+						warnings={view.warnings}
 					/>
 					{minigameState && (
 						<DebateToolsTray
@@ -332,42 +332,20 @@ function ModeratorNav({
 	view: SalaView;
 }) {
 	const { pending, run } = useRoomMutation();
-	const currentIdx = ROOM_STAGE_ORDER.indexOf(snapshot.roomStage);
-	const nextStage = ROOM_STAGE_ORDER[currentIdx + 1] as RoomStage | undefined;
-	const prevStage = (
-		currentIdx > 0 ? ROOM_STAGE_ORDER[currentIdx - 1] : undefined
-	) as RoomStage | undefined;
+	const { next, prev, backBlocked, empty, warnings } = view;
 
-	if (!nextStage) return null;
+	if (!next) return null;
 
-	const members = view.members;
-	// Presentes es el paso de unirse: sin members se puede ir ahí.
-	// Sorteo y Debate sí exigen al menos un participante.
-	const isEmpty =
-		members.length === 0 && (nextStage === "draw" || nextStage === "debate");
-	// Con sorteo ya ejecutado no se vuelve a preguntas/presentes (el guard
-	// SQL lo rechaza; aquí ni se ofrece).
-	const backBlocked =
-		!!prevStage &&
-		snapshot.draw.done &&
-		(prevStage === "questions" || prevStage === "presence");
-	const showBack = !!prevStage && !backBlocked;
-	const notReady = view.notReadyNames;
-	const remainingInterventions = view.remainingInterventions;
-	const advanceWarning: string[] | null =
-		nextStage === "debate" && notReady.length > 0
-			? notReady
-			: nextStage === "cierre" && remainingInterventions > 0
-				? [`${remainingInterventions} turno(s) sin completar`]
-				: null;
+	const showBack = !!prev && !backBlocked;
 
 	function handleAdvance() {
-		run(() => advanceRoomStage(snapshot.sessionId, nextStage!));
+		if (!next) return;
+		run(() => advanceRoomStage(snapshot.sessionId, next));
 	}
 
 	function handleBack() {
-		if (!prevStage) return;
-		run(() => advanceRoomStage(snapshot.sessionId, prevStage));
+		if (!prev) return;
+		run(() => advanceRoomStage(snapshot.sessionId, prev));
 	}
 
 	// En Debate la conducción vive en el Escenario (revelar/continuar);
@@ -377,37 +355,38 @@ function ModeratorNav({
 		? "flex items-center justify-between gap-2 border-t border-border/40 pt-3 opacity-80"
 		: "flex items-center justify-between gap-2";
 
-	const backButton = showBack ? (
-		isDebate ? (
-			<DebateBackConfirm
-				prevLabel={ROOM_STAGE_LABELS[prevStage!]}
-				pending={pending}
-				onConfirm={handleBack}
-			/>
-		) : (
-			<Button variant="outline" disabled={pending} onClick={handleBack}>
-				<HugeiconsIcon
-					icon={ArrowLeft01Icon}
-					strokeWidth={2}
-					data-icon="inline-start"
-					aria-hidden="true"
+	const backButton =
+		showBack && prev ? (
+			isDebate ? (
+				<DebateBackConfirm
+					prevLabel={ROOM_STAGE_LABELS[prev]}
+					pending={pending}
+					onConfirm={handleBack}
 				/>
-				Volver a {ROOM_STAGE_LABELS[prevStage!]}
-			</Button>
-		)
-	) : (
-		<span />
-	);
+			) : (
+				<Button variant="outline" disabled={pending} onClick={handleBack}>
+					<HugeiconsIcon
+						icon={ArrowLeft01Icon}
+						strokeWidth={2}
+						data-icon="inline-start"
+						aria-hidden="true"
+					/>
+					Volver a {ROOM_STAGE_LABELS[prev]}
+				</Button>
+			)
+		) : (
+			<span />
+		);
 
 	// Sin participantes el avance queda bloqueado del todo: sin diálogo de
 	// "avanzar de todos modos".
-	if (isEmpty) {
+	if (empty) {
 		return (
 			<div className="flex items-center justify-between gap-2">
 				{backButton}
 				<div className="flex flex-col items-end gap-1">
 					<Button variant="default" disabled>
-						Continuar a {ROOM_STAGE_LABELS[nextStage!]}
+						Continuar a {ROOM_STAGE_LABELS[next]}
 						<HugeiconsIcon
 							icon={ArrowRight01Icon}
 							strokeWidth={2}
@@ -423,14 +402,15 @@ function ModeratorNav({
 		);
 	}
 
+	const hasWarning = warnings.length > 0;
 	const button = (
 		<Button
 			variant={isDebate ? "ghost" : "default"}
 			size={isDebate ? "sm" : undefined}
 			disabled={pending}
-			onClick={advanceWarning ? undefined : handleAdvance}
+			onClick={hasWarning ? undefined : handleAdvance}
 		>
-			Continuar a {ROOM_STAGE_LABELS[nextStage!]}
+			Continuar a {ROOM_STAGE_LABELS[next]}
 			<HugeiconsIcon
 				icon={ArrowRight01Icon}
 				strokeWidth={2}
@@ -442,7 +422,7 @@ function ModeratorNav({
 
 	const help = STAGE_HELP[snapshot.roomStage];
 
-	if (!advanceWarning) {
+	if (!hasWarning) {
 		return (
 			<div className={navClass}>
 				{backButton}
@@ -462,7 +442,7 @@ function ModeratorNav({
 							{help.nextCondition && (
 								<p className="mt-0.5 border-t border-background/20 pt-1.5 text-background/80">
 									<span className="font-medium">
-										Para ir a {ROOM_STAGE_LABELS[nextStage!]}:
+										Para ir a {ROOM_STAGE_LABELS[next]}:
 									</span>{" "}
 									{help.nextCondition}
 								</p>
@@ -482,12 +462,12 @@ function ModeratorNav({
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>
-							Ir a {ROOM_STAGE_LABELS[nextStage!]} de todos modos
+							Ir a {ROOM_STAGE_LABELS[next]} de todos modos
 						</DialogTitle>
 						<DialogDescription>Pendientes:</DialogDescription>
 					</DialogHeader>
 					<ul className="flex flex-col gap-1 py-2">
-						{advanceWarning.map((label) => (
+						{warnings.map((label) => (
 							<li key={label} className="text-sm">
 								{label}
 							</li>

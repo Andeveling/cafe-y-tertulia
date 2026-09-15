@@ -149,4 +149,132 @@ describe("deriveSalaView", () => {
 		expect(view.notReadyNames).toEqual([]);
 		expect(view.debateProgress).toBeNull();
 	});
+
+	it("deriva siguiente y anterior Etapa", () => {
+		const questions = deriveSalaView({
+			...base,
+			roomStage: "questions",
+			debate: null,
+		});
+		expect(questions.next).toBe("presence");
+		expect(questions.prev).toBeNull();
+
+		const presence = deriveSalaView({
+			...base,
+			roomStage: "presence",
+			debate: null,
+		});
+		expect(presence.next).toBe("draw");
+		expect(presence.prev).toBe("questions");
+
+		const draw = deriveSalaView({
+			...base,
+			roomStage: "draw",
+			debate: null,
+		});
+		expect(draw.next).toBe("debate");
+		expect(draw.prev).toBe("presence");
+
+		const debate = deriveSalaView(base);
+		expect(debate.next).toBe("cierre");
+		expect(debate.prev).toBe("draw");
+
+		const cierre = deriveSalaView({
+			...base,
+			roomStage: "cierre",
+			debate: null,
+			cierre: { openTrivia: 0, openTakes: 0 },
+		});
+		expect(cierre.next).toBeNull();
+		expect(cierre.prev).toBe("debate");
+	});
+
+	it("bloquea volver a Preguntas/Presentes si el Sorteo ya se ejecutó", () => {
+		const afterSorteo = deriveSalaView({
+			...base,
+			roomStage: "draw",
+			debate: null,
+		});
+		expect(afterSorteo.backBlocked).toBe(true);
+		expect(afterSorteo.prev).toBe("presence");
+
+		const debate = deriveSalaView(base);
+		expect(debate.backBlocked).toBe(false);
+		expect(debate.prev).toBe("draw");
+
+		const beforeSorteo = deriveSalaView({
+			...base,
+			roomStage: "draw",
+			debate: null,
+			draw: { done: false, status: null, createdAt: null },
+		});
+		expect(beforeSorteo.backBlocked).toBe(false);
+
+		const presence = deriveSalaView({
+			...base,
+			roomStage: "presence",
+			debate: null,
+			draw: { done: false, status: null, createdAt: null },
+		});
+		expect(presence.backBlocked).toBe(false);
+	});
+
+	it("marca mesa vacía solo al avanzar a Sorteo o Debate", () => {
+		const vacant = {
+			...base,
+			participants: [],
+			questions: [],
+			moderatorId: null,
+			debate: null,
+			assignments: [],
+			draw: { done: false, status: null, createdAt: null },
+		};
+
+		expect(deriveSalaView({ ...vacant, roomStage: "questions" }).empty).toBe(
+			false,
+		);
+		expect(deriveSalaView({ ...vacant, roomStage: "presence" }).empty).toBe(
+			true,
+		);
+		expect(deriveSalaView({ ...vacant, roomStage: "draw" }).empty).toBe(true);
+		expect(deriveSalaView({ ...vacant, roomStage: "debate" }).empty).toBe(
+			false,
+		);
+
+		expect(deriveSalaView(base).empty).toBe(false);
+	});
+
+	it("avisa quién no está Listo al avanzar a Debate", () => {
+		const draw = deriveSalaView({
+			...base,
+			roomStage: "draw",
+			debate: null,
+		});
+		expect(draw.warnings).toEqual(["Luis"]);
+
+		const presence = deriveSalaView({
+			...base,
+			roomStage: "presence",
+			debate: null,
+		});
+		expect(presence.warnings).toEqual([]);
+	});
+
+	it("avisa Intervenciones pendientes al avanzar a Cierre; vacío si el Debate terminó", () => {
+		const midDebate = deriveSalaView(base);
+		expect(midDebate.next).toBe("cierre");
+		expect(midDebate.warnings).toEqual(["1 turno(s) sin completar"]);
+
+		const done = deriveSalaView({
+			...base,
+			assignments: base.assignments.map((a) => ({
+				...a,
+				state: "complete" as const,
+			})),
+			debate: { mode: "done", remainingHidden: 0 },
+		});
+		expect(done.next).toBe("cierre");
+		expect(done.empty).toBe(false);
+		expect(done.warnings).toEqual([]);
+	});
 });

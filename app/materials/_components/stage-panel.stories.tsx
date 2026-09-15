@@ -199,5 +199,8 @@ export const ComplementCountsUp: Story = {
 export const Done: Story = {
 	args: {
 		debate: { mode: "done", remainingHidden: 0 },
+		next: "cierre",
+		empty: false,
+		warnings: [],
 	},
 };
