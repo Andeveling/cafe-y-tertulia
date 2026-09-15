@@ -7,7 +7,7 @@ import {
 	DRAW_FANFARE_MS,
 	DRAW_STAGGER_MS,
 } from "../_lib/draw-ceremony";
-import type { RoomAssignment } from "../_lib/room-types";
+import type { RoomAssignment, RoomParticipant } from "../_lib/room-types";
 import { DrawCeremonyView } from "./draw-ceremony-view";
 
 const T0 = Date.parse("2026-09-07T15:00:00.000Z");
@@ -40,23 +40,40 @@ const pairs: RoomAssignment[] = [
 	},
 ];
 
+const participants: RoomParticipant[] = [
+	{ memberId: "u-ana", displayName: "Ana", role: "member", optOut: false },
+	{
+		memberId: "u-andres",
+		displayName: "Andrés",
+		role: "member",
+		optOut: false,
+	},
+];
+
 const readiness = { total: 2, ready: 2, allReady: true };
 
-const people = [
-	{ id: "u-ana", name: "Ana" },
-	{ id: "u-andres", name: "Andrés" },
-];
+const waitingSnapshot = {
+	draw: { done: false, status: null, createdAt: null },
+	assignments: [] as RoomAssignment[],
+	participants,
+	readiness,
+	asOf: T0,
+};
+
+const drawnSnapshot = {
+	draw: { done: true, status: "hidden" as const, createdAt },
+	assignments: pairs,
+	participants,
+	readiness,
+	asOf: T0,
+};
 
 const meta = {
 	title: "Sala/Sorteo",
 	component: DrawCeremonyView,
 	tags: ["autodocs"],
 	args: {
-		done: false,
-		createdAt: null,
-		assignments: [],
-		readiness,
-		people,
+		snapshot: waitingSnapshot,
 		userId: "u-andres",
 		isModerator: true,
 		pending: false,
@@ -84,9 +101,7 @@ export const WaitingMember: Story = {
 
 export const Countdown: Story = {
 	args: {
-		done: true,
-		createdAt,
-		assignments: pairs,
+		snapshot: drawnSnapshot,
 		nowMs: T0 + 100,
 		reducedMotion: false,
 	},
@@ -100,9 +115,7 @@ export const Countdown: Story = {
 
 export const Fanfare: Story = {
 	args: {
-		done: true,
-		createdAt,
-		assignments: pairs,
+		snapshot: drawnSnapshot,
 		nowMs: T0 + 3200,
 		reducedMotion: false,
 	},
@@ -116,9 +129,7 @@ export const Fanfare: Story = {
 
 export const SettledYours: Story = {
 	args: {
-		done: true,
-		createdAt,
-		assignments: pairs,
+		snapshot: drawnSnapshot,
 		nowMs: T0 + 20_000,
 		reducedMotion: true,
 	},
@@ -132,9 +143,7 @@ export const SettledYours: Story = {
 
 export const SettledWitness: Story = {
 	args: {
-		done: true,
-		createdAt,
-		assignments: pairs,
+		snapshot: drawnSnapshot,
 		userId: "u-mira",
 		nowMs: T0 + 20_000,
 		reducedMotion: true,
@@ -148,12 +157,10 @@ export const SettledWitness: Story = {
 export const OptimisticCountdown: Story = {
 	tags: ["!test"],
 	args: {
-		done: true,
-		createdAt,
-		assignments: [],
+		snapshot: waitingSnapshot,
+		optimisticCreatedAt: createdAt,
 		nowMs: T0 + 100,
 		reducedMotion: false,
-		optimistic: true,
 	},
 };
 
@@ -177,11 +184,7 @@ function LiveClock({ userId }: { userId: string }) {
 
 	return (
 		<DrawCeremonyView
-			done
-			createdAt={createdAt}
-			assignments={pairs}
-			readiness={readiness}
-			people={people}
+			snapshot={drawnSnapshot}
 			userId={userId}
 			isModerator={false}
 			nowMs={nowMs}
