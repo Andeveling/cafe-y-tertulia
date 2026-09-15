@@ -158,6 +158,10 @@ select lives_ok(
 	'10. Agregar segundo espectador para test de sorteo'
 );
 
+update public.sessions
+set room_stage = 'draw'
+where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
 select lives_ok(
 	$$ select public.execute_draw('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb') $$,
 	'10b. El sorteo se ejecuta'

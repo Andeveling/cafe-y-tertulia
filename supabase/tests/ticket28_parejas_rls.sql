@@ -60,6 +60,10 @@ select ok(
 
 set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
 
+update public.sessions
+set room_stage = 'draw'
+where id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
+
 -- El sorteo crea assignments; aquí simulamos uno directamente para tener
 -- control del estado.
 select public.execute_draw('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb');
