@@ -246,11 +246,15 @@ function StageContent({
 					createdAt={drawClock}
 					assignments={snapshot.assignments}
 					readiness={snapshot.readiness}
+					people={snapshot.participants
+						.filter((p) => p.role !== "spectator" && !p.optOut)
+						.map((p) => ({ id: p.memberId, name: p.displayName }))}
 					userId={userId}
 					isModerator={isModerator}
 					pending={pending}
 					onExecute={() => run(() => executeDraw(snapshot.sessionId))}
 					optimistic={optimistic}
+					asOf={snapshot.asOf}
 				/>
 			);
 		}
@@ -263,8 +267,11 @@ function StageContent({
 						sessionId={snapshot.sessionId}
 						userId={userId}
 						isModerator={isModerator}
+						asOf={snapshot.asOf}
 						authorId={view.debateAuthorId}
 						progress={view.debateProgress}
+						members={view.members}
+						nextAssigneeName={view.debateNextAssigneeName}
 					/>
 					{minigameState && (
 						<DebateToolsTray
@@ -458,9 +465,7 @@ function ModeratorNav({
 
 	if (!advanceWarning) {
 		return (
-			<div
-				className={navClass}
-			>
+			<div className={navClass}>
 				{backButton}
 				<Tooltip>
 					<TooltipTrigger render={button} />
@@ -491,9 +496,7 @@ function ModeratorNav({
 	}
 
 	return (
-		<div
-			className={navClass}
-		>
+		<div className={navClass}>
 			{backButton}
 			<Dialog>
 				<DialogTrigger render={button} />

@@ -42,6 +42,11 @@ const pairs: RoomAssignment[] = [
 
 const readiness = { total: 2, ready: 2, allReady: true };
 
+const people = [
+	{ id: "u-ana", name: "Ana" },
+	{ id: "u-andres", name: "Andrés" },
+];
+
 const meta = {
 	title: "Sala/Sorteo",
 	component: DrawCeremonyView,
@@ -51,6 +56,7 @@ const meta = {
 		createdAt: null,
 		assignments: [],
 		readiness,
+		people,
 		userId: "u-andres",
 		isModerator: true,
 		pending: false,
@@ -85,7 +91,10 @@ export const Countdown: Story = {
 		reducedMotion: false,
 	},
 	play: async ({ canvas }) => {
-		await expect(canvas.getByText("3")).toBeVisible();
+		await expect(
+			canvas.getByRole("img", { name: /rueda del sorteo girando/i }),
+		).toBeVisible();
+		await expect(canvas.getByText("La rueda gira")).toBeVisible();
 	},
 };
 
@@ -166,6 +175,7 @@ function LiveClock({ userId }: { userId: string }) {
 			createdAt={createdAt}
 			assignments={pairs}
 			readiness={readiness}
+			people={people}
 			userId={userId}
 			isModerator={false}
 			nowMs={nowMs}

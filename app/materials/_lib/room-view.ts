@@ -20,6 +20,8 @@ export type SalaView = {
 	/** Autor de la Intervención activa — null fuera de `active`. */
 	debateAuthorId: string | null;
 	debateProgress: DebateProgress | null;
+	/** Siguiente en exponer — primera oculta por revealOrder en `active`. */
+	debateNextAssigneeName: string | null;
 };
 
 export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
@@ -42,12 +44,18 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 
 	let debateAuthorId: string | null = null;
 	let debateProgress: DebateProgress | null = null;
+	let debateNextAssigneeName: string | null = null;
 	const debate = snapshot.debate;
 	if (debate) {
 		if (debate.mode === "active") {
 			debateAuthorId =
 				snapshot.assignments.find((a) => a.assignmentId === debate.assignmentId)
 					?.authorId ?? null;
+			debateNextAssigneeName =
+				[...snapshot.assignments]
+					.filter((a) => a.state === "hidden")
+					.sort((a, b) => a.revealOrder - b.revealOrder)[0]?.assigneeName ??
+				null;
 		}
 		const total = snapshot.assignments.length;
 		if (total > 0) {
@@ -67,5 +75,6 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 		remainingInterventions,
 		debateAuthorId,
 		debateProgress,
+		debateNextAssigneeName,
 	};
 }

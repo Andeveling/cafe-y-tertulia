@@ -83,6 +83,30 @@ describe("deriveSalaView", () => {
 		expect(view.remainingInterventions).toBe(1);
 		expect(view.debateAuthorId).toBe("m-1");
 		expect(view.debateProgress).toEqual({ current: 1, total: 2 });
+		// a-2 está activa y no hay ocultas: nadie sigue.
+		expect(view.debateNextAssigneeName).toBeNull();
+	});
+
+	it("resuelve quién sigue en exponer", () => {
+		const view = deriveSalaView({
+			...base,
+			assignments: [
+				...base.assignments,
+				{
+					assignmentId: "a-3",
+					questionId: "q-1",
+					authorId: "m-2",
+					assigneeId: "m-1",
+					authorName: "Luis",
+					assigneeName: "Ana",
+					state: "hidden",
+					revealOrder: 2,
+					questionText: null,
+					questionVisible: false,
+				},
+			],
+		});
+		expect(view.debateNextAssigneeName).toBe("Ana");
 	});
 
 	it("resuelve progreso en espera, fin y sin debate", () => {

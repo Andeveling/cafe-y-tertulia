@@ -15,6 +15,7 @@ import {
 	sidebarOpenFromCookie,
 } from "@/lib/sidebar-preference";
 import { createClient } from "@/lib/supabase/server";
+import { THEME_INIT_SCRIPT } from "@/lib/theme-script";
 import { cn } from "@/lib/utils";
 
 const literata = Literata({
@@ -85,6 +86,9 @@ export default async function RootLayout({
 			)}
 		>
 			<body className="min-h-full">
+				<Script id="theme-init" strategy="beforeInteractive">
+					{THEME_INIT_SCRIPT}
+				</Script>
 				{process.env.NODE_ENV === "development" && (
 					<Script
 						src="//unpkg.com/react-grab/dist/index.global.js"

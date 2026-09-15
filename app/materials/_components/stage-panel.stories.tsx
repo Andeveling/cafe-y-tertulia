@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, waitFor } from "storybook/test";
+import { expect, userEvent, waitFor } from "storybook/test";
 import type { RoomDebateSnapshot } from "../_lib/room-types";
 import { StagePanel } from "./stage-panel";
 
@@ -78,14 +78,43 @@ export const WaitingRevealMember: Story = {
 };
 
 export const AudienceListens: Story = {
-	args: { debate: active, isModerator: false, userId: "u-marta" },
+	args: {
+		debate: active,
+		isModerator: false,
+		userId: "u-marta",
+		members: [
+			{ memberId: "u-ana", displayName: "Ana", role: "member", optOut: false },
+			{
+				memberId: "u-luis",
+				displayName: "Luis",
+				role: "member",
+				optOut: false,
+			},
+			{
+				memberId: "u-marta",
+				displayName: "Marta",
+				role: "member",
+				optOut: false,
+			},
+			{
+				memberId: "u-tito",
+				displayName: "Tito",
+				role: "member",
+				optOut: false,
+			},
+		],
+		nextAssigneeName: "Tito",
+	},
 	play: async ({ canvas }) => {
 		await waitFor(() =>
 			expect(canvas.getByText(/escuchas a ana/i)).toBeVisible(),
 		);
-		await expect(canvas.getByText(/responde la pregunta de/i)).toBeVisible();
+		await expect(canvas.getByText("Turno 1 de 2")).toBeVisible();
+		await expect(canvas.getByText("EXPONE")).toBeVisible();
+		await expect(canvas.getByText("Pregunta de Luis")).toBeVisible();
+		await expect(canvas.getByText("La mesa")).toBeVisible();
+		await expect(canvas.getByText("Siguiente en exponer:")).toBeVisible();
 		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
-		await expect(canvas.getByText("Turno 1 de 2 · Exposición")).toBeVisible();
 	},
 };
 
@@ -95,7 +124,8 @@ export const YouSpeak: Story = {
 		await waitFor(() =>
 			expect(canvas.getByText("Te toca hablar.")).toBeVisible(),
 		);
-		await expect(canvas.getByText(/responde la pregunta de/i)).toBeVisible();
+		await waitFor(() => expect(canvas.getByText("EXPONE")).toBeVisible());
+		await expect(canvas.getByText("Pregunta de Luis")).toBeVisible();
 		await expect(canvas.queryByText("Moderación")).toBeNull();
 	},
 };
@@ -112,8 +142,30 @@ export const ModeratorTimer: Story = {
 		await expect(
 			canvas.getByRole("button", { name: /terminar exposición/i }),
 		).toBeVisible();
-		await expect(canvas.getByText("Moderación")).toBeVisible();
 		await expect(canvas.getByText("Exposición · sugerido 5:00")).toBeVisible();
+	},
+};
+
+export const ModeratorConfirmsAdvance: Story = {
+	args: { debate: active, isModerator: true, userId: "u-marta" },
+	play: async ({ canvas }) => {
+		await waitFor(() =>
+			expect(
+				canvas.getByRole("button", { name: /terminar exposición/i }),
+			).toBeVisible(),
+		);
+		await userEvent.click(
+			canvas.getByRole("button", { name: /terminar exposición/i }),
+		);
+		await waitFor(() =>
+			expect(
+				canvas.getByRole("button", { name: /^confirmar$/i }),
+			).toBeVisible(),
+		);
+		await userEvent.click(canvas.getByRole("button", { name: /cancelar/i }));
+		await expect(
+			canvas.getByRole("button", { name: /terminar exposición/i }),
+		).toBeVisible();
 	},
 };
 
@@ -138,6 +190,7 @@ export const ComplementCountsUp: Story = {
 		await waitFor(() =>
 			expect(canvas.getByText(/complementa\. tú escuchas/i)).toBeVisible(),
 		);
+		await waitFor(() => expect(canvas.getByText("COMPLEMENTA")).toBeVisible());
 		await expect(canvas.getByText("Complemento · sugerido 2:00")).toBeVisible();
 		await expect(canvas.queryByRole("button", { name: /\+1 min/i })).toBeNull();
 	},
