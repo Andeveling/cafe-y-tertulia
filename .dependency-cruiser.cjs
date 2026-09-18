@@ -108,7 +108,6 @@ module.exports = {
 				"\\.next",
 				"dist",
 				"build",
-				"\\.storybook",
 				"biome-plugins",
 				"supabase/migrations",
 				"supabase/seeds",

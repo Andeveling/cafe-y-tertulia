@@ -17,7 +17,7 @@ para estructurar el proyecto - .agents/skills/nextjs-16/SKILL.md
 
 - Don't make me think; no excessive text.
 - **Tokens** in `app/globals.css` (CSS variables / `@theme`) — café, radio suave, no colores ad-hoc en `ui/*`.
-- **UI layers** (page → view → ui, Storybook vs e2e, shadcn re-add policy): `docs/agents/ui-layers.md`.
+- **UI layers** (page → view → ui, shadcn re-add policy): `docs/agents/ui-layers.md`.
 - `components/ui` = primitives only (see `components/ui/AGENTS.md`).
 - **Module design** — use `.agents/skills/codebase-design/SKILL.md` vocabulary (module, interface, depth, seam, adapter) when shaping or splitting modules. Load it at `/to-tickets` to get seams right before implementation, and verify against it during `/implement`.
 `./DESIGN.md`
@@ -36,11 +36,3 @@ Five canonical triage roles mapped to `needs-triage`, `needs-info`, `ready-for-a
 
 Single-context layout: `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
-## Storybook UI
-
-Requires `pnpm storybook` (MCP at `http://localhost:6006/mcp` when configured).
-
-- Prefer existing `*.stories.tsx` and Storybook MCP over guessing component props.
-- Never invent props; check stories/docs or the component source.
-- New feature UI: extract a view + story; don't story async pages that hit Supabase.
-- See `docs/agents/ui-layers.md`.

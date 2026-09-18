@@ -9,10 +9,6 @@
 			"transport": "stdio",
 			"command": "engram",
 			"args": ["mcp", "--tools=agent"]
-		},
-		"storybook": {
-			"url": "http://localhost:6006/mcp",
-			"type": "http"
 		}
 	}
 }
