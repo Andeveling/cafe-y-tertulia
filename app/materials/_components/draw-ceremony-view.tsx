@@ -323,10 +323,10 @@ function ResultsBeat({
 								className="flex flex-col gap-3 rounded-xl bg-primary/10 px-6 py-6 ring-1 ring-primary/25"
 							>
 								<div className="flex items-center justify-between gap-3">
-									<p className="text-[11px] font-bold tracking-[0.1em] text-primary uppercase">
+									<p className="text-label-sm font-bold tracking-[0.1em] text-primary uppercase">
 										Tú expones
 									</p>
-									<span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-[11px] font-semibold text-primary ring-1 ring-primary/25">
+									<span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-label-sm font-semibold text-primary ring-1 ring-primary/25">
 										Intervención {exposeTurn}/{total}
 									</span>
 								</div>
@@ -353,10 +353,10 @@ function ResultsBeat({
 								className="flex flex-col gap-3 rounded-xl px-6 py-6 ring-1 ring-foreground/10"
 							>
 								<div className="flex items-center justify-between gap-3">
-									<p className="text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
+									<p className="text-label-sm font-bold tracking-[0.1em] text-muted-foreground uppercase">
 										Tu pregunta
 									</p>
-									<span className="rounded-full bg-foreground/[0.05] px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground ring-1 ring-foreground/15">
+									<span className="rounded-full bg-foreground/[0.05] px-2.5 py-0.5 text-label-sm font-semibold text-muted-foreground ring-1 ring-foreground/15">
 										Intervención {answerTurn}/{total}
 									</span>
 								</div>
@@ -463,7 +463,7 @@ function ResultsBeat({
 										</span>
 									)}
 									{mine && (
-										<span className="text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
+										<span className="text-label-sm font-semibold tracking-wider text-muted-foreground uppercase">
 											{iExpose ? "Expones" : "Te responden"}
 										</span>
 									)}

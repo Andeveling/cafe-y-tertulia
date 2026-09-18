@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-18T00:00:00.000Z",
+  "title": "Design System: Sophisticated Lounge — Café y Tertulias",
+  "extensions": {
+    "colorMeta": {
+      "surface": { "role": "neutral", "displayName": "Espresso", "canonical": "#1c110c", "tonalRamp": ["#0d0704", "#160c07", "#1c110c", "#251913", "#291d17", "#342721", "#40322c", "#453630"] },
+      "surface-dim": { "role": "neutral", "displayName": "Espresso Dim", "canonical": "#1c110c", "tonalRamp": ["#0d0704", "#160c07", "#1c110c", "#251913", "#291d17", "#342721", "#40322c", "#453630"] },
+      "surface-bright": { "role": "neutral", "displayName": "Arcilla Media", "canonical": "#453630", "tonalRamp": ["#1c110c", "#251913", "#291d17", "#342721", "#40322c", "#453630", "#5a4a42", "#7a6a62"] },
+      "surface-container-lowest": { "role": "neutral", "displayName": "Espresso Profundo", "canonical": "#160c07", "tonalRamp": ["#0d0704", "#160c07", "#1c110c", "#251913", "#291d17", "#342721", "#40322c", "#453630"] },
+      "surface-container-low": { "role": "neutral", "displayName": "Moca Bajo", "canonical": "#251913", "tonalRamp": ["#160c07", "#1c110c", "#251913", "#291d17", "#342721", "#40322c", "#453630", "#5a4a42"] },
+      "surface-container": { "role": "neutral", "displayName": "Moca", "canonical": "#291d17", "tonalRamp": ["#160c07", "#1c110c", "#251913", "#291d17", "#342721", "#40322c", "#453630", "#5a4a42"] },
+      "surface-container-high": { "role": "neutral", "displayName": "Moca Alto", "canonical": "#342721", "tonalRamp": ["#1c110c", "#251913", "#291d17", "#342721", "#40322c", "#453630", "#5a4a42", "#7a6a62"] },
+      "surface-container-highest": { "role": "neutral", "displayName": "Arcilla Oscura", "canonical": "#40322c", "tonalRamp": ["#251913", "#291d17", "#342721", "#40322c", "#453630", "#5a4a42", "#7a6a62", "#9d8e80"] },
+      "on-surface": { "role": "neutral", "displayName": "Crema", "canonical": "#f5ded5", "tonalRamp": ["#d4c4b5", "#e0d0c1", "#ecdccb", "#f5ded5", "#f9e8dd", "#fcefe6", "#fff5ee", "#fff8f2"] },
+      "on-surface-variant": { "role": "neutral", "displayName": "Arcilla Clara", "canonical": "#d4c4b5", "tonalRamp": ["#9d8e80", "#b0a090", "#c2b2a2", "#d4c4b5", "#e0d0c1", "#ecdccb", "#f5ded5", "#f9e8dd"] },
+      "outline": { "role": "neutral", "displayName": "Borde Medio", "canonical": "#9d8e80", "tonalRamp": ["#504539", "#6b5a4a", "#7e6c5c", "#9d8e80", "#b0a090", "#c2b2a2", "#d4c4b5", "#e0d0c1"] },
+      "outline-variant": { "role": "neutral", "displayName": "Borde Tierra", "canonical": "#504539", "tonalRamp": ["#2a1d16", "#3d2b22", "#504539", "#6b5a4a", "#7e6c5c", "#9d8e80", "#b0a090", "#c2b2a2"] },
+      "primary": { "role": "primary", "displayName": "Ámbar Lounge", "canonical": "#ffcd97", "tonalRamp": ["#472a00", "#653e05", "#80551d", "#9e6d2e", "#c08a45", "#e8b06f", "#ffcd97", "#ffddb9"] },
+      "on-primary": { "role": "primary", "displayName": "Espresso sobre Ámbar", "canonical": "#472a00", "tonalRamp": ["#2b1700", "#472a00", "#653e05", "#80551d", "#9e6d2e", "#c08a45", "#e8b06f", "#ffcd97"] },
+      "primary-container": { "role": "primary", "displayName": "Miel", "canonical": "#e8b06f", "tonalRamp": ["#472a00", "#653e05", "#80551d", "#9e6d2e", "#c08a45", "#e8b06f", "#ffcd97", "#ffddb9"] },
+      "on-primary-container": { "role": "primary", "displayName": "Miel Oscuro", "canonical": "#694209", "tonalRamp": ["#2b1700", "#472a00", "#653e05", "#694209", "#80551d", "#9e6d2e", "#e8b06f", "#ffcd97"] },
+      "secondary": { "role": "secondary", "displayName": "Piedra Clara", "canonical": "#c9c6c2", "tonalRamp": ["#31302d", "#474743", "#6b6a66", "#8a8986", "#b7b5b0", "#c9c6c2", "#e5e2dd", "#f0eeea"] },
+      "tertiary": { "role": "tertiary", "displayName": "Blush", "canonical": "#e9d2c6", "tonalRamp": ["#3c2d26", "#54433b", "#57473f", "#7a6a62", "#cdb6ab", "#d9c2b7", "#e9d2c6", "#f6ded2"] },
+      "error": { "role": "neutral", "displayName": "Error Suave", "canonical": "#ffb4ab", "tonalRamp": ["#690005", "#93000a", "#ba1a1a", "#e57373", "#ffb4ab", "#ffdad6", "#ffe9e6", "#fff1ef"] },
+      "background": { "role": "neutral", "displayName": "Fondo Espresso", "canonical": "#1c110c", "tonalRamp": ["#0d0704", "#160c07", "#1c110c", "#251913", "#291d17", "#342721", "#40322c", "#453630"] },
+      "reward": { "role": "primary", "displayName": "Recompensa Miel", "canonical": "#e8b06f", "tonalRamp": ["#472a00", "#653e05", "#80551d", "#9e6d2e", "#c08a45", "#e8b06f", "#ffcd97", "#ffddb9"] },
+      "rank-1": { "role": "primary", "displayName": "Oro (Rank 1)", "canonical": "#ffcd97", "tonalRamp": ["#472a00", "#653e05", "#80551d", "#9e6d2e", "#c08a45", "#e8b06f", "#ffcd97", "#ffddb9"] },
+      "rank-2": { "role": "secondary", "displayName": "Plata (Rank 2)", "canonical": "#c9c6c2", "tonalRamp": ["#31302d", "#474743", "#6b6a66", "#8a8986", "#b7b5b0", "#c9c6c2", "#e5e2dd", "#f0eeea"] },
+      "rank-3": { "role": "tertiary", "displayName": "Bronce (Rank 3)", "canonical": "#e9d2c6", "tonalRamp": ["#3c2d26", "#54433b", "#57473f", "#7a6a62", "#cdb6ab", "#d9c2b7", "#e9d2c6", "#f6ded2"] }
+    },
+    "typographyMeta": {
+      "headline-xl": { "displayName": "Display / Headline XL", "purpose": "Hero statements y títulos de sesión en vacío. Literata 700." },
+      "headline-lg": { "displayName": "Headline LG", "purpose": "Títulos de página y secciones principales. Literata 600." },
+      "headline-md": { "displayName": "Headline MD / Card Title", "purpose": "Títulos de card y bloques. Literata 600." },
+      "body-lg": { "displayName": "Body LG", "purpose": "Lead y descripciones largas. Manrope 400, 65–75ch." },
+      "body-md": { "displayName": "Body MD", "purpose": "Cuerpo por defecto. Manrope 400." },
+      "body-sm": { "displayName": "Body SM", "purpose": "Secundarios y metadatos. Manrope 400." },
+      "label-md": { "displayName": "Label MD", "purpose": "Badges y etiquetas uppercase 0.05em. Manrope 600." },
+      "label-sm": { "displayName": "Label SM", "purpose": "Micro-labels uppercase 0.08em en pills, contadores y captions. Manrope 600, 11px." },
+      "headline-lg-mobile": { "displayName": "Headline Mobile", "purpose": "Headline-lg adaptado a móvil. Literata 600." }
+    },
+    "shadows": [
+      { "name": "shadow-2xs", "value": "0 1px 2px 0 oklch(0.38 0.05 48 / 0.05)", "purpose": "Micro-elevación, divisores sutiles." },
+      { "name": "shadow-xs", "value": "0 1px 3px 0 oklch(0.38 0.05 48 / 0.06)", "purpose": "Cards en reposo si necesitan definición extra." },
+      { "name": "shadow-sm", "value": "0 1px 2px 0 oklch(0.38 0.05 48 / 0.06), 0 2px 6px -1px oklch(0.38 0.05 48 / 0.08)", "purpose": "Hovers de card." },
+      { "name": "shadow", "value": "0 2px 4px 0 oklch(0.38 0.05 48 / 0.06), 0 6px 16px -4px oklch(0.38 0.05 48 / 0.1)", "purpose": "Dropdowns y popovers pequeños." },
+      { "name": "shadow-md", "value": "0 4px 8px -2px oklch(0.38 0.05 48 / 0.08), 0 10px 20px -6px oklch(0.38 0.05 48 / 0.12)", "purpose": "Modales medios." },
+      { "name": "shadow-lg", "value": "0 8px 16px -4px oklch(0.38 0.05 48 / 0.1), 0 18px 32px -8px oklch(0.38 0.05 48 / 0.14)", "purpose": "Dialogs y sheets. Halo ámbar suave en Lounge." },
+      { "name": "shadow-xl", "value": "0 16px 28px -8px oklch(0.38 0.05 48 / 0.12), 0 24px 40px -12px oklch(0.38 0.05 48 / 0.16)", "purpose": "Overlays máximos." },
+      { "name": "shadow-2xl", "value": "0 28px 50px -12px oklch(0.38 0.05 48 / 0.22)", "purpose": "Elevación extrema, hero overlays." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Transiciones de estado por defecto (150–200ms)." },
+      { "name": "ease-emphasized", "value": "cubic-bezier(0.2, 0, 0, 1)", "purpose": "Entradas authored, exponential ease-out desde default visible." },
+      { "name": "duration-fast", "value": "150ms", "purpose": "Hovers y focus." },
+      { "name": "duration-medium", "value": "250ms", "purpose": "Apertura de dialogs/sheets." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "CTA principal — Ámbar sobre espresso. Para Entrar, Nueva sesión.",
+      "html": "<button class=\"ds-btn-primary\">Entrar</button>",
+      "css": ".ds-btn-primary { background: #ffcd97; color: #472a00; border: 1px solid transparent; border-radius: 0.5rem; padding: 0 14px; height: 2.5rem; font-family: Manrope, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background 150ms cubic-bezier(0.4,0,0.2,1), transform 150ms; cursor: pointer; } .ds-btn-primary:hover { background: color-mix(in oklch, #ffcd97 80%, white); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: none; border-color: #ffcd97; box-shadow: 0 0 0 3px color-mix(in oklch, #ffcd97 50%, transparent); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acción secundaria — Piedra clara sobre espresso.",
+      "html": "<button class=\"ds-btn-secondary\">Cancelar</button>",
+      "css": ".ds-btn-secondary { background: #c9c6c2; color: #31302d; border: 1px solid transparent; border-radius: 0.5rem; padding: 0 14px; height: 2.5rem; font-family: Manrope, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; transition: background 150ms; cursor: pointer; } .ds-btn-secondary:hover { background: color-mix(in oklch, #c9c6c2 92%, #1c110c); }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Terciario con borde tierra — para navegación secundaria.",
+      "html": "<button class=\"ds-btn-outline\">Ver histórico</button>",
+      "css": ".ds-btn-outline { background: transparent; color: #f5ded5; border: 1px solid #504539; border-radius: 0.5rem; padding: 0 14px; height: 2.5rem; font-family: Manrope, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; transition: background 150ms, border-color 150ms; cursor: pointer; } .ds-btn-outline:hover { background: #40322c; border-color: #9d8e80; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Texto solo — para acciones de fila y sidebar.",
+      "html": "<button class=\"ds-btn-ghost\">Entrar →</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #f5ded5; border: 1px solid transparent; border-radius: 0.5rem; padding: 0 14px; height: 2.5rem; font-family: Manrope, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; transition: background 150ms; cursor: pointer; } .ds-btn-ghost:hover { background: #40322c; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Contenedor Level 1 — Moca con borde tierra 1px, sin sombra en reposo.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-header\"><div class=\"ds-card-title\">Tertulia #42 — Rayuela</div><div class=\"ds-card-desc\">Sesión cerrada · 12 preguntas · 8 presentes</div></div><div class=\"ds-card-content\"><p>La conversación giró en torno al capítulo 7. Notas y rating preservados.</p></div></div>",
+      "css": ".ds-card { background: #291d17; color: #f5ded5; border-radius: 1rem; border: 1px solid #504539; box-shadow: 0 0 0 1px rgba(245,222,213,0.08); display: flex; flex-direction: column; gap: 16px; padding: 16px; max-width: 420px; } .ds-card-header { display: flex; flex-direction: column; gap: 4px; } .ds-card-title { font-family: Literata, Georgia, serif; font-size: 16px; font-weight: 600; line-height: 1.35; letter-spacing: -0.01em; } .ds-card-desc { font-family: Manrope, system-ui, sans-serif; font-size: 14px; color: #d4c4b5; } .ds-card-content { font-family: Manrope, system-ui, sans-serif; font-size: 14px; line-height: 1.5; color: #d4c4b5; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo hundido — más oscuro que la card, foco ámbar.",
+      "html": "<input class=\"ds-input\" placeholder=\"Escribe tu pregunta...\" />",
+      "css": ".ds-input { background: #160c07; color: #f5ded5; border: 1px solid #504539; border-radius: 0.5rem; height: 2.5rem; padding: 0 12px; font-family: Manrope, system-ui, sans-serif; font-size: 14px; width: 100%; max-width: 360px; outline: none; transition: border-color 150ms, box-shadow 150ms; } .ds-input::placeholder { color: #9d8e80; } .ds-input:focus { border-color: #ffcd97; box-shadow: 0 0 0 3px color-mix(in oklch, #ffcd97 50%, transparent); }"
+    },
+    {
+      "name": "Badge",
+      "kind": "chip",
+      "refersTo": "badge-default",
+      "description": "Chip píldora — para estados Live/Open y contadores.",
+      "html": "<span class=\"ds-badge\">En curso</span> <span class=\"ds-badge-secondary\">Abierta</span>",
+      "css": ".ds-badge { background: #ffcd97; color: #472a00; border-radius: 9999px; padding: 2px 8px; font-family: Manrope, system-ui, sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; display: inline-flex; align-items: center; height: 20px; } .ds-badge-secondary { background: #c9c6c2; color: #31302d; border-radius: 9999px; padding: 2px 8px; font-family: Manrope, system-ui, sans-serif; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; height: 20px; }"
+    },
+    {
+      "name": "Navigation Sidebar",
+      "kind": "nav",
+      "refersTo": "card",
+      "description": "Sidebar oscuro 16rem — activo en ámbar, inactivo en crema tenue.",
+      "html": "<nav class=\"ds-sidebar\"><div class=\"ds-sidebar-item active\">Sesiones</div><div class=\"ds-sidebar-item\">Materiales</div><div class=\"ds-sidebar-item\">Miembros</div></nav>",
+      "css": ".ds-sidebar { background: #251913; color: #f5ded5; border-right: 1px solid #504539; width: 220px; padding: 16px; display: flex; flex-direction: column; gap: 4px; border-radius: 1rem; } .ds-sidebar-item { padding: 8px 12px; border-radius: 0.5rem; font-family: Manrope, system-ui, sans-serif; font-size: 14px; font-weight: 500; color: rgba(245,222,213,0.7); cursor: pointer; } .ds-sidebar-item.active { background: #ffcd97; color: #472a00; } .ds-sidebar-item:hover:not(.active) { background: #342721; color: #f5ded5; }"
+    },
+    {
+      "name": "Progress Track",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Barra de nivel — track arcilla, fill ámbar. Gamificación quieta.",
+      "html": "<div class=\"ds-progress\"><div class=\"ds-progress-fill\" style=\"width: 64%\"></div></div>",
+      "css": ".ds-progress { background: #40322c; border-radius: 9999px; height: 6px; width: 200px; overflow: hidden; } .ds-progress-fill { background: #ffcd97; height: 100%; border-radius: 9999px; transition: width 300ms cubic-bezier(0.2,0,0,1); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El salón a media luz",
+    "overview": "Café y Tertulias es un salón privado a media luz — no una herramienta, no una red social. La interfaz es un compañero hushed y premium que acompaña el ritual semanal de conversación intelectual. Evoca la calidez de un lounge de café de alto nivel y el recogimiento de un círculo literario tradicional: maderas oscuras, luz ámbar, tipografía que invita a quedarse. El sistema es Modern Corporate with Tactile Warmth. Oscuro por decisión de escena — lectura nocturna, videollamada íntima — no por categoría. La jerarquía se construye con capas tonales y tipografía impecable, no con sombras pesadas ni bordes agresivos. Todo respira: el espacio es la jerarquía. La gamificación es miel, no neón — un único acento cálido sobre una base de tierras desaturadas.",
+    "keyCharacteristics": [
+      "Hushed, premium y slow — prima la contemplación sobre el clic frenético",
+      "Capas tonales (espresso #1c110c → #40322c) en lugar de sombras duras",
+      "Dualidad Literata (serif editorial) + Manrope (sans limpio) como voz",
+      "Espacio generoso como estructura (xxl 48px entre secciones, md/lg 16/24px dentro de cards)",
+      "Un solo acento lúdico (ámbar/miel) — el resto en grises tierra"
+    ],
+    "rules": [
+      { "name": "The One Warm Voice Rule", "body": "Solo ámbar/miel compite por atención. Nunca ámbar + chart + destructive juntos en una misma vista. La gamificación vive en feedback y vitrina, no en el dashboard hero.", "section": "colors" },
+      { "name": "The Lounge Is Dark Rule", "body": "El mundo es oscuro por escena (tertulia nocturna, luz baja). El modo claro existe como inversión oklch suave, no como identidad alternativa.", "section": "colors" },
+      { "name": "The Literata Speaks Last Rule", "body": "Literata solo para headlines y momentos editoriales. Nunca para UI, labels o datos. Si no es un título que merece ser leído en voz alta, es Manrope.", "section": "typography" },
+      { "name": "The Measure Rule", "body": "Ningún párrafo de lectura supera 75ch. Headlines en balance y con tracking negativo solo por encima de 24px.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Las superficies son planas en reposo. Las sombras aparecen solo como respuesta a estado (hover, focus, elevación de overlay).", "section": "elevation" },
+      { "name": "The Tonal Layering Rule", "body": "La jerarquía de profundidad se lee por tono (espresso → moca → arcilla), no por sombra. Un borde 1px low-contrast vale más que un drop shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar espacio como jerarquía. xxl 48px entre secciones, md/lg 16/24px dentro de cards. Tight groups, generous separation.",
+      "Do mantener un solo acento. Ámbar/miel para CTA y recompensa; todo lo demás en tierras desaturadas.",
+      "Do usar Literata solo para títulos que merecen ser leídos en voz alta. Todo lo demás es Manrope.",
+      "Do definir superficies por tono y borde 1px, no por sombra. La sombra es respuesta a estado.",
+      "Do tematizar superficies del navegador. ::selection en secondary, caret, scrollbar, focus rings en ring #ffcd97.",
+      "Do mantener medida 65–75ch en lectura y balance en headlines. Tracking negativo solo por encima de 24px.",
+      "Do animar con propósito. Un momento authored por vista, ease exponential, desde default visible."
+    ],
+    "donts": [
+      "Don't usar kicker/eyebrow sobre el heading. El heading habla por sí mismo.",
+      "Don't crear cards del mismo tamaño con icono + título + texto como estructura de página. Cards anidadas siempre están mal.",
+      "Don't usar gradient text. El énfasis viene de peso o tamaño.",
+      "Don't añadir glass/blur como decoración. Solo como efecto específico y suave.",
+      "Don't usar border-left/right >1px coloreado en cards o alertas.",
+      "Don't usar sombras hard offset (4px 4px 0) sin un mundo neobrutalista.",
+      "Don't usar sparklines, progress rings o rectángulos redondeados con sombra suave como sustituto de contenido.",
+      "Don't usar monospace como disfraz técnico. Solo para código, datos o medida.",
+      "Don't usar glifos Unicode o emoji como iconos. Iconos Hugeicons dibujados, un solo stroke.",
+      "Don't usar máscaras geométricas para recortar fotos. O matte alpha real o sin recorte.",
+      "Don't competir con CTAs desde la gamificación. Dashboard = 0 gamificación salvo LevelBadge.",
+      "Don't elegir light/dark por categoría. Elige por escena de uso: tertulia nocturna = dark first."
+    ]
+  }
+}

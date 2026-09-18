@@ -24,7 +24,7 @@ export default async function MemberProfilePage({
 	if (!profile) notFound();
 
 	return (
-		<main className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-6">
+		<div className="flex w-full max-w-2xl flex-col gap-6">
 			<header className="flex flex-col gap-3">
 				<div className="flex items-center gap-3">
 					<div className="flex size-12 items-center justify-center rounded-full bg-secondary">
@@ -73,6 +73,6 @@ export default async function MemberProfilePage({
 					)}
 				</CardContent>
 			</Card>
-		</main>
+		</div>
 	);
 }

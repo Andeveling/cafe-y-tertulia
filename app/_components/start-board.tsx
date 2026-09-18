@@ -196,8 +196,9 @@ export function StartBoard({
 	);
 
 	return (
-		<div className="mx-auto w-full max-w-[1200px] px-4 py-8 pb-28 sm:px-6 md:pb-12 lg:px-12">
-			<div className="flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,1fr)_300px]">
+		<div className="pb-28 md:pb-0">
+			<h1 className="font-heading text-2xl font-semibold">Sesiones</h1>
+			<div className="mt-8 flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,1fr)_300px]">
 				{main}
 				<aside className="hidden flex-col gap-6 md:flex">
 					<ClubRoster

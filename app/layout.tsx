@@ -5,11 +5,8 @@ import Script from "next/script";
 import "./globals.css";
 import { ConvocatoriaInbox } from "@/app/_components/convocatoria-inbox";
 import { getMemberLevel } from "@/app/profile/_lib/gamification-actions";
-import { AppHeader } from "@/components/app-header";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppShell } from "@/components/app-shell";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/sonner";
 import {
 	SIDEBAR_COOKIE_NAME,
 	sidebarOpenFromCookie,
@@ -98,21 +95,22 @@ export default async function RootLayout({
 				)}
 				<ThemeProvider
 					attribute="class"
-					defaultTheme="system"
+					defaultTheme="dark"
 					enableSystem
 					disableTransitionOnChange
 				>
-					<SidebarProvider defaultOpen={defaultSidebarOpen}>
-						<AppSidebar user={navUser} />
-						<SidebarInset className="w-full">
-							<AppHeader level={memberLevel} />
-							<div className="flex flex-1 flex-col">{children}</div>
-						</SidebarInset>
-					</SidebarProvider>
-					<Toaster />
-					{user && memberStatus === "active" && (
-						<ConvocatoriaInbox userId={user.id} />
-					)}
+					<AppShell
+						user={navUser}
+						defaultOpen={defaultSidebarOpen}
+						level={memberLevel}
+						inbox={
+							user && memberStatus === "active" ? (
+								<ConvocatoriaInbox userId={user.id} />
+							) : null
+						}
+					>
+						{children}
+					</AppShell>
 				</ThemeProvider>
 			</body>
 		</html>

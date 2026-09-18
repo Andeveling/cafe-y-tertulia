@@ -9,7 +9,7 @@ export default async function InviteAcceptPage({
 	const { token } = await searchParams;
 	if (!token) {
 		return (
-			<div className="flex min-h-full flex-1 flex-col items-center justify-center px-4">
+			<div className="flex min-h-dvh flex-1 flex-col items-center justify-center px-4">
 				<div className="w-full max-w-sm">
 					<AcceptInviteView state="invalid" />
 				</div>
@@ -20,7 +20,7 @@ export default async function InviteAcceptPage({
 	const peeked = await peekInviteToken(token);
 
 	return (
-		<div className="flex min-h-full flex-1 flex-col items-center justify-center px-4">
+		<div className="flex min-h-dvh flex-1 flex-col items-center justify-center px-4">
 			<div className="w-full max-w-sm">
 				{peeked.ok ? (
 					<AcceptInviteView state="ready" email={peeked.email} token={token} />

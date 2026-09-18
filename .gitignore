@@ -43,3 +43,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local agent / design-tool state
+.claude/settings.local.json
+.impeccable/config.local.json
+
+# Impeccable skill installs (per-agent binaries). Briefs live in PRODUCT.md, DESIGN.md, .impeccable/
+.claude/skills/impeccable/
+.claude/agents/
+.opencode/skills/impeccable/
+.pi/skills/impeccable/

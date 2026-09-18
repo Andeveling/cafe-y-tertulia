@@ -79,6 +79,12 @@
 	--control-height-lg: 2.75rem;
 }
 
+/* DESIGN.md label-sm — micro-labels uppercase del sistema (11px). */
+@utility text-label-sm {
+	font-size: 11px;
+	line-height: 1.45;
+}
+
 /*
   Café y Tertulia — Sophisticated Lounge (DESIGN.md)
   ────────────────────────────────────────────────

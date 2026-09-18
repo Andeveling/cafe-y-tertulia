@@ -5,6 +5,7 @@ import {
 	ArrowRight01Icon,
 	Clock01Icon,
 	EyeIcon,
+	MessageQuestionIcon,
 	MinusSignIcon,
 	PencilEdit01Icon,
 	Tick01Icon,
@@ -53,7 +54,6 @@ import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
-	CardDescription,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
@@ -537,7 +537,7 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 
 	function handleSubmit() {
 		const trimmed = text.trim();
-		if (!trimmed) return;
+		if (!trimmed || pending) return;
 		run(
 			() => saveQuestion(sessionId, materialId, trimmed),
 			() => {
@@ -597,11 +597,13 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 	}
 
 	return (
-		<div className="flex flex-col gap-6">
-			<Card>
+		<div className="flex flex-col gap-8">
+			<Card className="shadow-sm ring-primary/20">
 				<CardHeader>
 					<div className="flex items-center gap-1.5">
-						<CardTitle>Escribe tu pregunta</CardTitle>
+						<CardTitle className="font-heading text-lg">
+							Escribe tu pregunta
+						</CardTitle>
 						<InfoButton
 							title="¿Quién ve tu pregunta?"
 							description="Tu texto es privado. Los demás solo ven que enviaste una."
@@ -617,7 +619,7 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 						disabled={pending}
 					/>
 					<div className="flex items-center justify-between">
-						<span className="text-xs text-muted-foreground">
+						<span className="text-xs text-muted-foreground tabular-nums">
 							{myCount > 0
 								? `${myCount} pregunta${myCount > 1 ? "s" : ""} enviada${myCount > 1 ? "s" : ""}`
 								: "Ninguna enviada aún"}
@@ -629,95 +631,117 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 				</CardContent>
 			</Card>
 
-			{myQuestions.length > 0 && (
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-base">Tus preguntas</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<ul className="flex flex-col gap-2">
-							{myQuestions.map((q) => {
-								const isEditing = editingId === q.id;
-								return (
-									<li
-										key={q.id}
-										className="rounded-md border border-border bg-card/40 p-4 text-sm"
-									>
-										{isEditing ? (
-											<div className="flex flex-col gap-2">
-												<Textarea
-													ref={editRef}
-													value={draft}
-													onChange={(e) => setDraft(e.target.value)}
-													onKeyDown={handleEditKeyDown}
-													rows={3}
+			<section
+				aria-labelledby="tus-preguntas-title"
+				className="flex flex-col gap-3"
+			>
+				<div className="flex items-baseline justify-between gap-2">
+					<h2
+						id="tus-preguntas-title"
+						className="font-heading text-base font-semibold text-muted-foreground"
+					>
+						Tus preguntas
+					</h2>
+					<span className="text-xs text-muted-foreground tabular-nums">
+						{myCount > 0 ? `${myCount} en privado` : "vacío"}
+					</span>
+				</div>
+				{myQuestions.length === 0 ? (
+					<div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border/70 bg-muted/20 px-4 py-8 text-center">
+						<HugeiconsIcon
+							icon={MessageQuestionIcon}
+							strokeWidth={1.5}
+							className="size-6 text-muted-foreground/70"
+							aria-hidden="true"
+						/>
+						<p className="text-sm text-muted-foreground">
+							Aún no envías preguntas. Aparecerán aquí para que puedas
+							editarlas.
+						</p>
+					</div>
+				) : (
+					<ul className="flex flex-col gap-2">
+						{myQuestions.map((q) => {
+							const isEditing = editingId === q.id;
+							return (
+								<li
+									key={q.id}
+									className="rounded-lg border border-border/60 bg-muted/20 p-4 text-sm"
+								>
+									{isEditing ? (
+										<div className="flex flex-col gap-2">
+											<Textarea
+												ref={editRef}
+												value={draft}
+												onChange={(e) => setDraft(e.target.value)}
+												onKeyDown={handleEditKeyDown}
+												rows={3}
+												disabled={pending}
+											/>
+											<div className="flex justify-end gap-2">
+												<Button
+													variant="ghost"
+													size="xs"
 													disabled={pending}
-												/>
-												<div className="flex justify-end gap-2">
-													<Button
-														variant="ghost"
-														size="xs"
-														disabled={pending}
-														onClick={handleCancelEdit}
-													>
-														Cancelar
-													</Button>
-													<Button
-														size="xs"
-														disabled={pending || !draft.trim()}
-														onClick={() => handleSaveEdit(q)}
-													>
-														Guardar
-													</Button>
-												</div>
+													onClick={handleCancelEdit}
+												>
+													Cancelar
+												</Button>
+												<Button
+													size="xs"
+													disabled={pending || !draft.trim()}
+													onClick={() => handleSaveEdit(q)}
+												>
+													Guardar
+												</Button>
 											</div>
-										) : (
-											<div className="flex items-start justify-between gap-2">
-												<span
-													aria-hidden="true"
-													className="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
-												/>
-												<span className="min-w-0 flex-1 break-words whitespace-pre-wrap">
-													{q.text}
-												</span>
-												<div className="flex shrink-0 gap-1">
-													<Button
-														variant="ghost"
-														size="icon-xs"
-														disabled={pending}
-														aria-label="Editar pregunta"
-														onClick={() => handleStartEdit(q)}
-													>
-														<HugeiconsIcon
-															icon={PencilEdit01Icon}
-															strokeWidth={2}
-															aria-hidden="true"
-														/>
-													</Button>
-													<Button
-														variant="ghost"
-														size="icon-xs"
-														disabled={pending}
-														aria-label="Borrar pregunta"
-														className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-														onClick={() => setConfirmingDeleteId(q.id)}
-													>
-														<HugeiconsIcon
-															icon={TrashIcon}
-															strokeWidth={2}
-															aria-hidden="true"
-														/>
-													</Button>
-												</div>
+										</div>
+									) : (
+										<div className="flex items-start justify-between gap-2">
+											<span
+												aria-hidden="true"
+												className="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
+											/>
+											<span className="min-w-0 flex-1 break-words whitespace-pre-wrap">
+												{q.text}
+											</span>
+											<div className="flex shrink-0 gap-1">
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													disabled={pending}
+													aria-label="Editar pregunta"
+													onClick={() => handleStartEdit(q)}
+												>
+													<HugeiconsIcon
+														icon={PencilEdit01Icon}
+														strokeWidth={2}
+														aria-hidden="true"
+													/>
+												</Button>
+												<Button
+													variant="ghost"
+													size="icon-xs"
+													disabled={pending}
+													aria-label="Borrar pregunta"
+													className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+													onClick={() => setConfirmingDeleteId(q.id)}
+												>
+													<HugeiconsIcon
+														icon={TrashIcon}
+														strokeWidth={2}
+														aria-hidden="true"
+													/>
+												</Button>
 											</div>
-										)}
-									</li>
-								);
-							})}
-						</ul>
-					</CardContent>
-				</Card>
-			)}
+										</div>
+									)}
+								</li>
+							);
+						})}
+					</ul>
+				)}
+			</section>
 
 			<Dialog
 				open={confirmingDeleteId !== null}
@@ -751,43 +775,65 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 				</DialogContent>
 			</Dialog>
 
-			<Card>
-				<CardHeader>
-					<CardTitle className="text-base">Participantes</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<ul className="flex flex-col gap-2">
-						{participants.map((p) => {
-							const hasQuestion = view.questionAuthorIds.has(p.memberId);
-							return (
-								<li
-									key={p.memberId}
-									className="flex items-center justify-between text-sm"
-								>
-									<span>
-										{p.displayName}
-										{p.memberId === moderatorId && (
-											<Badge variant="secondary" className="ml-2">
-												Modera
-											</Badge>
-										)}
-										{p.role === "spectator" && (
-											<Badge variant="outline" className="ml-2">
-												Espectador
-											</Badge>
-										)}
-									</span>
-									{p.role === "member" && (
-										<Badge variant={hasQuestion ? "secondary" : "outline"}>
-											{hasQuestion ? "✓ enviado" : "pendiente"}
+			<details className="group rounded-xl border border-border/60 bg-card/30 px-4 py-3">
+				<summary className="flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
+					<span className="flex flex-wrap items-baseline gap-x-2">
+						<span className="text-sm font-medium">Participantes</span>
+						<span className="text-xs text-muted-foreground">
+							{participants.length} en la sala · {view.questionAuthorIds.size}{" "}
+							con pregunta
+						</span>
+					</span>
+					<HugeiconsIcon
+						icon={ArrowRight01Icon}
+						strokeWidth={2}
+						aria-hidden="true"
+						className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+					/>
+				</summary>
+				<ul className="flex flex-col gap-2 pt-3">
+					{participants.map((p) => {
+						const hasQuestion = view.questionAuthorIds.has(p.memberId);
+						return (
+							<li
+								key={p.memberId}
+								className="flex items-center justify-between text-sm"
+							>
+								<span>
+									{p.displayName}
+									{p.memberId === moderatorId && (
+										<Badge variant="secondary" className="ml-2">
+											Modera
 										</Badge>
 									)}
-								</li>
-							);
-						})}
-					</ul>
-				</CardContent>
-			</Card>
+									{p.role === "spectator" && (
+										<Badge variant="outline" className="ml-2">
+											Espectador
+										</Badge>
+									)}
+								</span>
+								{p.role === "member" && (
+									<Badge variant={hasQuestion ? "secondary" : "outline"}>
+										{hasQuestion ? (
+											<span className="inline-flex items-center gap-1">
+												<HugeiconsIcon
+													icon={Tick01Icon}
+													strokeWidth={2.5}
+													className="size-3"
+													aria-hidden="true"
+												/>
+												enviado
+											</span>
+										) : (
+											"pendiente"
+										)}
+									</Badge>
+								)}
+							</li>
+						);
+					})}
+				</ul>
+			</details>
 		</div>
 	);
 }
@@ -1085,8 +1131,12 @@ function PresenceStage({
 					<table className="w-full text-sm">
 						<thead>
 							<tr className="border-b border-border text-left">
-								<th scope="col" className="py-2 pr-4 font-medium">Nombre</th>
-								<th scope="col" className="py-2 pr-4 font-medium">Listo</th>
+								<th scope="col" className="py-2 pr-4 font-medium">
+									Nombre
+								</th>
+								<th scope="col" className="py-2 pr-4 font-medium">
+									Listo
+								</th>
 								<th scope="col" className="py-2 font-medium">
 									<span className="inline-flex items-center gap-1">
 										Sorteo
@@ -1096,7 +1146,11 @@ function PresenceStage({
 										/>
 									</span>
 								</th>
-								{isModerator && <th scope="col" className="py-2 font-medium">Mesa</th>}
+								{isModerator && (
+									<th scope="col" className="py-2 font-medium">
+										Mesa
+									</th>
+								)}
 							</tr>
 						</thead>
 						<tbody>

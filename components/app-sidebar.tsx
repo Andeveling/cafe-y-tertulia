@@ -2,7 +2,6 @@
 
 import {
 	Book01Icon,
-	Github01Icon,
 	Home01Icon,
 	UserAdd01Icon,
 	UserCircleIcon,
@@ -28,14 +27,12 @@ import {
 } from "@/components/ui/sidebar";
 
 const navClub = [
-	{ title: "Inicio", url: "/", icon: Home01Icon },
+	{ title: "Sesiones", url: "/", icon: Home01Icon },
 	{ title: "Materiales", url: "/materials", icon: Book01Icon },
+	{ title: "Invitar", url: "/invite", icon: UserAdd01Icon },
 ];
 
-const navCuenta = [
-	{ title: "Invitar", url: "/invite", icon: UserAdd01Icon },
-	{ title: "Perfil", url: "/profile", icon: UserCircleIcon },
-];
+const navCuenta = [{ title: "Perfil", url: "/profile", icon: UserCircleIcon }];
 
 export type AppSidebarUser = {
 	name: string;
@@ -77,7 +74,7 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 
 			<SidebarContent className="gap-0">
 				<SidebarGroup className="py-3">
-					<SidebarGroupLabel className="px-2 text-sm font-bold tracking-widest">
+					<SidebarGroupLabel className="px-2 text-xs font-semibold uppercase tracking-widest">
 						Club
 					</SidebarGroupLabel>
 					<SidebarGroupContent>
@@ -105,7 +102,7 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 				<SidebarSeparator className="mx-0" />
 
 				<SidebarGroup className="py-3">
-					<SidebarGroupLabel className="px-2 text-sm tracking-widest font-bold">
+					<SidebarGroupLabel className="px-2 text-xs font-semibold uppercase tracking-widest">
 						Cuenta
 					</SidebarGroupLabel>
 					<SidebarGroupContent>
@@ -140,21 +137,6 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 							>
 								<HugeiconsIcon icon={UserCircleIcon} />
 								<span>Iniciar sesión</span>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-						<SidebarMenuItem>
-							<SidebarMenuButton
-								tooltip="Iniciar discusión"
-								render={
-									<a
-										href="https://github.com/Andeveling/cafe-y-tertulia/discussions/new/choose"
-										target="_blank"
-										rel="noreferrer"
-									/>
-								}
-							>
-								<HugeiconsIcon icon={Github01Icon} />
-								<span>Discusión</span>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					</SidebarMenu>

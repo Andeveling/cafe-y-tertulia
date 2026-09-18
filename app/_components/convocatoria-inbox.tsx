@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { responderConvocatoriaAction } from "@/app/materials/_lib/convocatoria-actions";
+import { isSalaPath } from "@/lib/sala-path";
 import { createClient } from "@/lib/supabase/client";
 
 export function ConvocatoriaInbox({ userId }: { userId: string }) {
@@ -28,6 +29,9 @@ export function ConvocatoriaInbox({ userId }: { userId: string }) {
 						status: string;
 					};
 					if (row.status !== "pending") return;
+					// Dentro de la Sala no se interrumpe el Escenario: la invitación
+					// queda en la base y se ve al salir.
+					if (isSalaPath(window.location.pathname)) return;
 					toast("Te convocan a una Sala", {
 						id: row.id,
 						duration: Number.POSITIVE_INFINITY,

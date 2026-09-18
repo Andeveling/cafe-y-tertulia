@@ -41,9 +41,9 @@ export function InviteView({ invitations, notice, error }: InviteViewProps) {
 			: undefined;
 
 	return (
-		<div className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 md:max-w-4xl md:px-8 md:py-10 lg:max-w-5xl">
-			<div className="space-y-2">
-				<h1 className="text-2xl font-semibold tracking-tight">Invitar</h1>
+		<div className="flex flex-col gap-8">
+			<div className="flex flex-col gap-2">
+				<h1 className="font-heading text-2xl font-semibold">Invitar</h1>
 				<p className="text-sm text-muted-foreground">
 					Cualquier Miembro activo puede invitar. El enlace vale 7 días; el
 					padrino puede revocarlo antes.
@@ -53,7 +53,7 @@ export function InviteView({ invitations, notice, error }: InviteViewProps) {
 			{notice && NOTICES[notice] && (
 				<div
 					role="status"
-					className="mt-4 rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground"
+					className="rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground"
 				>
 					{NOTICES[notice]}
 				</div>
@@ -62,14 +62,14 @@ export function InviteView({ invitations, notice, error }: InviteViewProps) {
 			{error && INVITE_ERRORS[error] && (
 				<div
 					role="alert"
-					className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+					className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
 				>
 					{INVITE_ERRORS[error]}
 				</div>
 			)}
 
 			{featured?.url && (
-				<Card className="mt-6">
+				<Card>
 					<CardHeader>
 						<CardTitle>Enlace para {featured.email}</CardTitle>
 						<CardDescription>
@@ -82,7 +82,7 @@ export function InviteView({ invitations, notice, error }: InviteViewProps) {
 				</Card>
 			)}
 
-			<Card className="mt-6">
+			<Card>
 				<CardHeader>
 					<CardTitle>Nueva invitación</CardTitle>
 					<CardDescription>

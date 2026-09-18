@@ -7,7 +7,7 @@ import {
 	getRosterMembers,
 } from "./_lib/home";
 
-export const metadata = { title: "Inicio · Café y Tertulia" };
+export const metadata = { title: "Sesiones · Café y Tertulia" };
 
 export default async function HomePage() {
 	const { member, supabase } = await getCurrentMember();

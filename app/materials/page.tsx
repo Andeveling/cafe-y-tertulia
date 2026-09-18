@@ -17,10 +17,10 @@ export default async function MaterialsPage() {
 	const materials = await getMaterials(supabase);
 
 	return (
-		<div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-6 pb-20">
+		<div className="flex flex-col gap-6">
 			<header className="flex items-center justify-between gap-4">
 				<div>
-					<h1 className="font-heading text-2xl font-medium">Materiales</h1>
+					<h1 className="font-heading text-2xl font-semibold">Materiales</h1>
 					<p className="text-sm text-muted-foreground">
 						Portadas — el club como estantería.
 					</p>

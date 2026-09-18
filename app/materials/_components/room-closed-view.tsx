@@ -150,7 +150,7 @@ function ChapterRule() {
 function MetaCell({ label, value }: { label: string; value: string }) {
 	return (
 		<div className="flex flex-col items-center gap-1">
-			<dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/60">
+			<dt className="text-label-sm font-medium uppercase tracking-[0.08em] text-muted-foreground/60">
 				{label}
 			</dt>
 			<dd className="font-heading text-lg font-medium tabular-nums text-foreground">

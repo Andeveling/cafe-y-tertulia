@@ -96,7 +96,7 @@ export function WaitingRevealView({
 				<p className="text-sm text-muted-foreground">
 					{copy.role}
 					{copy.showModeratorTag && (
-						<span className="ml-1.5 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold tracking-wide text-primary uppercase">
+						<span className="ml-1.5 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-label-sm font-semibold tracking-wide text-primary uppercase">
 							Moderador
 						</span>
 					)}

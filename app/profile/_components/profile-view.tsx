@@ -36,7 +36,7 @@ function statusLabel(status: string) {
 
 function initials(name: string) {
 	const parts = name.trim().split(/\s+/).filter(Boolean);
-	if (parts.length === 0) return "☕";
+	if (parts.length === 0) return "·";
 	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
 	return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
@@ -73,7 +73,7 @@ export function ProfileView({
 	);
 
 	return (
-		<div className="mx-auto w-full max-w-3xl flex-1 px-5 py-8 md:max-w-4xl md:px-8 md:py-10 lg:max-w-5xl">
+		<div className="flex-1">
 			{/* ── Pasaporte de tertulia · hero gamificado ─────────────────── */}
 			<section aria-label="Tu camino en el club">
 				<Card className="overflow-hidden">

@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import type { MemberLevel } from "@/app/profile/_lib/gamification-actions";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Progress } from "@/components/ui/progress";
@@ -27,7 +26,7 @@ function MemberLevelBar({ level }: { level: MemberLevel }) {
 			className="hidden items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 md:flex"
 			data-slot="member-level"
 		>
-			<span className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+			<span className="text-label-sm font-semibold tracking-wider text-muted-foreground uppercase">
 				{level.title}
 				<span className="text-foreground"> · {progress}%</span>
 			</span>
@@ -41,9 +40,7 @@ function MemberLevelBar({ level }: { level: MemberLevel }) {
 }
 
 export function AppHeader({ level }: { level?: MemberLevel | null }) {
-	const pathname = usePathname();
 	const { open } = useSidebarPreference();
-	if (pathname.startsWith("/auth")) return null;
 
 	return (
 		<header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">

@@ -26,7 +26,7 @@ export default async function SessionHistoryPage({
 	}
 
 	return (
-		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
+		<div className="flex w-full max-w-3xl flex-col gap-6">
 			<header className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="secondary">Histórico</Badge>
@@ -58,6 +58,6 @@ export default async function SessionHistoryPage({
 				takes={session.takes}
 			/>
 			<HistoryAwards awards={session.awards} />
-		</main>
+		</div>
 	);
 }

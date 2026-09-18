@@ -107,7 +107,7 @@ export default async function MaterialDetailPage({
 	const chronologicalSessions = [...material.sessions].reverse();
 
 	return (
-		<div className="mx-auto flex w-full max-w-7xl flex-col gap-8 p-5 md:p-7 lg:p-10">
+		<div className="flex flex-col gap-8">
 			<div className="grid grid-cols-1 gap-7 lg:grid-cols-12">
 				{/* ── Columna izquierda: info del material ── */}
 				<div className="flex flex-col gap-5 lg:col-span-4">
