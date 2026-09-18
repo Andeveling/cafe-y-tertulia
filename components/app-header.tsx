@@ -42,7 +42,9 @@ function MemberLevelBar({ level }: { level: MemberLevel }) {
 
 /** Título de chrome: una sola vez, el de la página. Nested routes keep the
  *  content heading (nombre del material, del miembro) as the document h1. */
-function clubHeading(pathname: string): { title: string; as: "h1" | "p" } | null {
+function clubHeading(
+	pathname: string,
+): { title: string; as: "h1" | "p" } | null {
 	if (pathname === "/") return { title: "Sesiones", as: "h1" };
 	if (pathname === "/materials") return { title: "Materiales", as: "h1" };
 	if (pathname === "/materials/new")

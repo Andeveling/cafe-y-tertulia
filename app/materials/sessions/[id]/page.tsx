@@ -29,7 +29,6 @@ export default async function SessionHistoryPage({
 		<div className="flex w-full max-w-3xl flex-col gap-6">
 			<header className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-center gap-2">
-					<Badge variant="secondary">Histórico</Badge>
 					<Badge variant="outline">
 						{SESSION_STATUS_LABELS[session.status]}
 					</Badge>

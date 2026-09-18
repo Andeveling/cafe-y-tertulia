@@ -37,7 +37,6 @@ export default async function MemberProfilePage({
 						<h1 className="font-heading text-2xl font-semibold">
 							{profile.display_name}
 						</h1>
-						<p className="text-sm text-muted-foreground">Miembro del club</p>
 					</div>
 				</div>
 			</header>
