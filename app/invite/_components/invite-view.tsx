@@ -42,13 +42,10 @@ export function InviteView({ invitations, notice, error }: InviteViewProps) {
 
 	return (
 		<div className="flex flex-col gap-8">
-			<div className="flex flex-col gap-2">
-				<h1 className="font-heading text-2xl font-semibold">Invitar</h1>
-				<p className="text-sm text-muted-foreground">
-					Cualquier Miembro activo puede invitar. El enlace vale 7 días; el
-					padrino puede revocarlo antes.
-				</p>
-			</div>
+			<p className="text-sm text-muted-foreground">
+				Cualquier Miembro activo puede invitar. El enlace vale 7 días; el
+				padrino puede revocarlo antes.
+			</p>
 
 			{notice && NOTICES[notice] && (
 				<div

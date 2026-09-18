@@ -18,18 +18,15 @@ export default async function MaterialsPage() {
 
 	return (
 		<div className="flex flex-col gap-6">
-			<header className="flex items-center justify-between gap-4">
-				<div>
-					<h1 className="font-heading text-2xl font-semibold">Materiales</h1>
-					<p className="text-sm text-muted-foreground">
-						Portadas — el club como estantería.
-					</p>
-				</div>
+			<div className="flex items-center justify-between gap-4">
+				<p className="text-sm text-muted-foreground">
+					Portadas — el club como estantería.
+				</p>
 				<Button nativeButton={false} render={<Link href="/materials/new" />}>
 					<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
 					Proponer material
 				</Button>
-			</header>
+			</div>
 
 			{materials.length === 0 ? (
 				<Card>

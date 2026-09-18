@@ -8,7 +8,6 @@ import {
 	CardContent,
 	CardDescription,
 	CardHeader,
-	CardTitle,
 } from "@/components/ui/card";
 
 export const metadata = {
@@ -31,7 +30,6 @@ export default function NewMaterialPage() {
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Proponer material</CardTitle>
 					<CardDescription>
 						Todo material entra como propuesto y el club decide cómo avanza.
 					</CardDescription>
