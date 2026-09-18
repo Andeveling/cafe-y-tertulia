@@ -457,7 +457,7 @@ function TurnSpotlight({
 				aria-label="En la palabra"
 				className="w-full rounded-xl bg-card px-6 py-8 text-center ring-1 ring-foreground/10"
 			>
-				<p className="text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
+				<p className="text-label-sm font-bold tracking-[0.1em] text-muted-foreground uppercase">
 					En la palabra
 				</p>
 				<span
@@ -523,7 +523,7 @@ function TurnSpotlight({
 				</div>
 				<p className="mt-2 text-xs text-muted-foreground">{clockCaption}</p>
 				{showExtendHint && (
-					<p className="mt-1 text-[11px] text-muted-foreground/70">
+					<p className="mt-1 text-label-sm text-muted-foreground/70">
 						cada +1 suma 60 s y marca la pregunta como hot
 					</p>
 				)}
@@ -625,7 +625,7 @@ function ActiveTurn({
 		<div ref={spotHostRef} className="contents">
 			<AnimatePresence mode="wait">
 				<Enter key={`${debate.assignmentId}-${debate.state}`}>
-					<div className="flex max-w-3xl flex-col items-start gap-6 py-2 text-left lg:py-4">
+					<div className="flex max-w-4xl flex-col items-start gap-6 py-2 text-left lg:py-4">
 						<div className="flex w-full flex-wrap items-center gap-2">
 							{showProgress && (
 								<p className="text-sm tabular-nums text-muted-foreground">
@@ -634,7 +634,7 @@ function ActiveTurn({
 							)}
 							<span
 								className={cn(
-									"rounded-full px-3 py-0.5 text-[11px] font-bold tracking-wider uppercase ring-1",
+									"rounded-full px-3 py-0.5 text-label-sm font-bold tracking-wider uppercase ring-1",
 									isComplement
 										? "bg-reward/10 text-reward ring-reward/25"
 										: "bg-primary/10 text-primary ring-primary/25",
@@ -653,7 +653,7 @@ function ActiveTurn({
 											style={{ width: `${progressPct}%` }}
 										/>
 									</span>
-									<span className="text-[11px] text-muted-foreground tabular-nums">
+									<span className="text-label-sm text-muted-foreground tabular-nums">
 										{progress.current} / {progress.total}
 									</span>
 								</span>
@@ -687,11 +687,13 @@ function ActiveTurn({
 
 						{!focusOpen && spotlight}
 
+						<div aria-hidden="true" className="h-px w-full bg-foreground/10" />
+
 						<section
 							aria-label="La mesa"
 							className="flex w-full flex-col gap-2"
 						>
-							<p className="text-[11px] font-bold tracking-[0.1em] text-muted-foreground uppercase">
+							<p className="text-label-sm font-bold tracking-[0.1em] text-muted-foreground uppercase">
 								La mesa
 							</p>
 							<ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -706,7 +708,7 @@ function ActiveTurn({
 										)}
 									>
 										{seat.isYou && (
-											<span className="absolute -top-2 rounded-full bg-card px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary uppercase ring-1 ring-primary/30">
+											<span className="absolute -top-2 rounded-full bg-card px-2 py-0.5 text-label-sm font-bold tracking-wider text-primary uppercase ring-1 ring-primary/30">
 												Tú
 											</span>
 										)}
@@ -726,7 +728,7 @@ function ActiveTurn({
 										</span>
 										<span
 											className={cn(
-												"rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ring-1",
+												"rounded-full px-2.5 py-0.5 text-label-sm font-bold tracking-wider uppercase ring-1",
 												seat.role === "speaker"
 													? "bg-primary/15 text-primary ring-primary/30"
 													: seat.role === "author"
@@ -739,7 +741,7 @@ function ActiveTurn({
 										{nextAssigneeName != null &&
 											seat.name === nextAssigneeName &&
 											seat.role !== "speaker" && (
-												<span className="rounded-full bg-reward/15 px-2 py-0.5 text-[10px] font-semibold text-reward ring-1 ring-reward/25">
+												<span className="rounded-full bg-reward/15 px-2 py-0.5 text-label-sm font-semibold text-reward ring-1 ring-reward/25">
 													Siguiente
 												</span>
 											)}

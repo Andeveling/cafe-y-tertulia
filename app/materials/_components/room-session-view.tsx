@@ -12,7 +12,6 @@ import type { InviteRosterMember } from "@/app/materials/_lib/presence-invite";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import { roomSurface } from "@/app/materials/_lib/room-sync";
 import type { RoomSnapshot } from "@/app/materials/_lib/room-types";
-import { Badge } from "@/components/ui/badge";
 
 type Props = {
 	snapshot: RoomSnapshot;
@@ -103,10 +102,7 @@ export function RoomSessionView({
 
 	return (
 		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-5 py-6 md:max-w-4xl md:px-8 md:py-8 lg:max-w-5xl lg:py-10">
-			<header className="flex flex-col gap-2">
-				<div className="flex flex-wrap items-center gap-2">
-					<Badge variant="outline">Sala</Badge>
-				</div>
+			<header className="flex items-center justify-between gap-4">
 				<h1 className="font-heading text-2xl font-semibold">
 					{view.range || "Sesión"}
 				</h1>

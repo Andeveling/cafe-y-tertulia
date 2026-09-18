@@ -44,7 +44,12 @@ export function StageBar({ current, className }: Props) {
 	return (
 		<nav
 			aria-label="Etapas de la Sala"
-			className={cn("flex flex-wrap items-center gap-1", className)}
+			className={cn(
+				"flex items-center gap-1 overflow-x-auto",
+				/* Hide scrollbar but keep scroll */
+				"[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+				className,
+			)}
 		>
 			{ROOM_STAGE_ORDER.map((stage, idx) => {
 				const isCompleted = idx < currentIdx;

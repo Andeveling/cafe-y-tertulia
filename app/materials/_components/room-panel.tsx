@@ -12,7 +12,8 @@ import {
 	UserIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CierreStage } from "@/app/materials/_components/cierre-stage";
 import { DebateToolsTray } from "@/app/materials/_components/debate-tools-tray";
@@ -137,30 +138,49 @@ export function RoomPanel({
 	rosterMembers = [],
 	pendingIds = [],
 }: Props) {
+	const router = useRouter();
 	const { live } = useRoomRealtime(snapshot.sessionId);
 	// Una sola derivación: mesa, Listo, debate y avance (next/prev,
 	// backBlocked, empty, warnings). Nav y Debate → Cierre la consumen.
 	const view = deriveSalaView(snapshot);
 
+	function handleRetryConnection() {
+		startTransition(() => router.refresh());
+	}
+
 	return (
-		<div className="flex flex-col gap-4">
-			{live ? (
-				<p
-					role="status"
-					className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-				>
-					<span
-						aria-hidden="true"
-						className="size-1.5 rounded-full bg-primary"
-					/>
-					En vivo
-				</p>
-			) : (
-				<p role="status" className="text-xs text-muted-foreground">
-					Reconectando…
-				</p>
-			)}
-			<StageBar current={snapshot.roomStage} />
+		<div className="flex flex-col gap-6">
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				<StageBar current={snapshot.roomStage} />
+				{live ? (
+					<p role="status" className="inline-flex">
+						<Badge variant="secondary" className="gap-1.5">
+							<span
+								aria-hidden="true"
+								className="size-2 rounded-full bg-primary"
+							/>
+							En vivo
+						</Badge>
+					</p>
+				) : (
+					<p
+						role="status"
+						aria-live="assertive"
+						className="inline-flex flex-wrap items-center gap-2"
+					>
+						<Badge variant="outline" className="gap-1.5">
+							<span
+								aria-hidden="true"
+								className="size-2 rounded-full bg-primary motion-safe:animate-pulse"
+							/>
+							Reconectando…
+						</Badge>
+						<Button variant="ghost" size="xs" onClick={handleRetryConnection}>
+							Reintentar
+						</Button>
+					</p>
+				)}
+			</div>
 
 			<StageContent
 				snapshot={snapshot}
@@ -237,7 +257,7 @@ function StageContent({
 		case "debate": {
 			if (!snapshot.debate) return null;
 			return (
-				<div className="flex flex-col gap-4">
+				<div className="flex flex-col gap-8">
 					<StagePanel
 						debate={snapshot.debate}
 						sessionId={snapshot.sessionId}
@@ -349,10 +369,11 @@ function ModeratorNav({
 	}
 
 	// En Debate la conducción vive en el Escenario (revelar/continuar);
-	// esta nav queda sutil abajo y Volver pide confirmación.
+	// esta nav queda fija abajo para no perderse con el scroll y Volver
+	// pide confirmación.
 	const isDebate = snapshot.roomStage === "debate";
 	const navClass = isDebate
-		? "flex items-center justify-between gap-2 border-t border-border/40 pt-3 opacity-80"
+		? "sticky bottom-0 flex items-center justify-between gap-2 border-t border-border/60 bg-card/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-card/80"
 		: "flex items-center justify-between gap-2";
 
 	const backButton =
@@ -405,8 +426,7 @@ function ModeratorNav({
 	const hasWarning = warnings.length > 0;
 	const button = (
 		<Button
-			variant={isDebate ? "ghost" : "default"}
-			size={isDebate ? "sm" : undefined}
+			variant="default"
 			disabled={pending}
 			onClick={hasWarning ? undefined : handleAdvance}
 		>
@@ -577,7 +597,7 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 	}
 
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="flex flex-col gap-6">
 			<Card>
 				<CardHeader>
 					<div className="flex items-center gap-1.5">
@@ -616,12 +636,12 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 					</CardHeader>
 					<CardContent>
 						<ul className="flex flex-col gap-2">
-							{myQuestions.map((q, idx) => {
+							{myQuestions.map((q) => {
 								const isEditing = editingId === q.id;
 								return (
 									<li
 										key={q.id}
-										className="rounded-md border border-border border-l-4 border-l-primary/60 bg-card/40 p-4 text-sm"
+										className="rounded-md border border-border bg-card/40 p-4 text-sm"
 									>
 										{isEditing ? (
 											<div className="flex flex-col gap-2">
@@ -653,7 +673,11 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 											</div>
 										) : (
 											<div className="flex items-start justify-between gap-2">
-												<span className="flex-1 whitespace-pre-wrap">
+												<span
+													aria-hidden="true"
+													className="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
+												/>
+												<span className="min-w-0 flex-1 break-words whitespace-pre-wrap">
 													{q.text}
 												</span>
 												<div className="flex shrink-0 gap-1">
@@ -779,28 +803,31 @@ function StatusIcon({
 	okLabel: string;
 	pendingLabel: string;
 }) {
+	const label = ok ? okLabel : pendingLabel;
 	return (
 		<Tooltip>
 			<TooltipTrigger
 				render={
 					<span
 						tabIndex={0}
+						role="img"
+						aria-label={label}
 						className={
 							ok
 								? "inline-flex text-primary"
 								: "inline-flex text-muted-foreground/50"
 						}
-					/>
+					>
+						<HugeiconsIcon
+							icon={ok ? Tick01Icon : MinusSignIcon}
+							strokeWidth={2}
+							className="size-4"
+							aria-hidden="true"
+						/>
+					</span>
 				}
-			>
-				<HugeiconsIcon
-					icon={ok ? Tick01Icon : MinusSignIcon}
-					strokeWidth={2}
-					className="size-4"
-					aria-hidden="true"
-				/>
-			</TooltipTrigger>
-			<TooltipContent>{ok ? okLabel : pendingLabel}</TooltipContent>
+			/>
+			<TooltipContent>{label}</TooltipContent>
 		</Tooltip>
 	);
 }
@@ -812,18 +839,19 @@ function SessionMarker() {
 				render={
 					<span
 						tabIndex={0}
-						className="inline-flex text-primary"
+						role="img"
 						aria-label="Sesión activa"
-					/>
+						className="inline-flex text-primary"
+					>
+						<HugeiconsIcon
+							icon={UserIcon}
+							strokeWidth={2}
+							className="size-3.5"
+							aria-hidden="true"
+						/>
+					</span>
 				}
-			>
-				<HugeiconsIcon
-					icon={UserIcon}
-					strokeWidth={2}
-					className="size-3.5"
-					aria-hidden="true"
-				/>
-			</TooltipTrigger>
+			/>
 			<TooltipContent>Sesión activa</TooltipContent>
 		</Tooltip>
 	);
@@ -1025,7 +1053,7 @@ function PresenceStage({
 				</header>
 
 				{moderatorName && (
-					<p className="text-sm text-muted-foreground">
+					<p className="text-sm break-words text-muted-foreground">
 						Modera {moderatorName}
 					</p>
 				)}
@@ -1057,9 +1085,9 @@ function PresenceStage({
 					<table className="w-full text-sm">
 						<thead>
 							<tr className="border-b border-border text-left">
-								<th className="py-2 pr-4 font-medium">Nombre</th>
-								<th className="py-2 pr-4 font-medium">Listo</th>
-								<th className="py-2 font-medium">
+								<th scope="col" className="py-2 pr-4 font-medium">Nombre</th>
+								<th scope="col" className="py-2 pr-4 font-medium">Listo</th>
+								<th scope="col" className="py-2 font-medium">
 									<span className="inline-flex items-center gap-1">
 										Sorteo
 										<InfoButton
@@ -1068,10 +1096,20 @@ function PresenceStage({
 										/>
 									</span>
 								</th>
-								{isModerator && <th className="py-2 font-medium">Mesa</th>}
+								{isModerator && <th scope="col" className="py-2 font-medium">Mesa</th>}
 							</tr>
 						</thead>
 						<tbody>
+							{members.length === 0 && (
+								<tr>
+									<td
+										colSpan={isModerator ? 4 : 3}
+										className="py-6 text-center text-sm text-muted-foreground"
+									>
+										Aún no hay miembros en la mesa.
+									</td>
+								</tr>
+							)}
 							{members.map((p, i) => {
 								const isYou = p.memberId === userId;
 								const hasQuestion = view.questionAuthorIds.has(p.memberId);
@@ -1087,7 +1125,7 @@ function PresenceStage({
 										}
 									>
 										<td className="py-3 pr-4">
-											<span className="inline-flex flex-wrap items-center gap-1.5">
+											<span className="inline-flex flex-wrap items-center gap-1.5 break-words">
 												{p.displayName}
 												{isYou && <SessionMarker />}
 												{p.memberId === moderatorId && (
@@ -1171,7 +1209,7 @@ function PresenceStage({
 
 				{spectators.length > 0 && (
 					<div className="flex flex-col gap-2">
-						<p className="text-xs text-muted-foreground">
+						<p className="text-xs break-words text-muted-foreground">
 							Espectadores · {spectators.map((s) => s.displayName).join(" · ")}
 						</p>
 						{isModerator && (
@@ -1181,7 +1219,9 @@ function PresenceStage({
 										key={s.memberId}
 										className="flex items-center justify-between text-sm"
 									>
-										<span>{s.displayName}</span>
+										<span className="min-w-0 flex-1 break-words">
+											{s.displayName}
+										</span>
 										<Button
 											variant="ghost"
 											size="xs"
