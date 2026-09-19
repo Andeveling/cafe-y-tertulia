@@ -1,0 +1,11 @@
+{
+	"$comment": "Paleta de marca para runtimes que no resuelven variables CSS (Satori/next-og y Web Manifest). Espejo de los tokens de app/globals.css — Sophisticated Lounge. No añadir colores ad-hoc: cualquier cambio va primero al token.",
+	"lounge": "#1c110c",
+	"amber": "#ffcd97",
+	"honey": "#e8b06f",
+	"cream": "#f5ded5",
+	"espresso": "#8d3f07",
+	"caramel": "#bf5710",
+	"cocoa": "#472a00",
+	"paper": "#ffffff"
+}

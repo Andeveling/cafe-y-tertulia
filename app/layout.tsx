@@ -11,6 +11,7 @@ import {
 	SIDEBAR_COOKIE_NAME,
 	sidebarOpenFromCookie,
 } from "@/lib/sidebar-preference";
+import { siteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 import { THEME_INIT_SCRIPT } from "@/lib/theme-script";
 import { cn } from "@/lib/utils";
@@ -28,9 +29,27 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
+const siteDescription =
+	"Club de lectura y conversación. Sesiones, materiales y tertulia — el club te espera.";
+
 export const metadata: Metadata = {
+	metadataBase: new URL(siteUrl()),
 	title: "Café y Tertulias",
-	description: "Club de lectura y conversación.",
+	description: siteDescription,
+	applicationName: "Café y Tertulias",
+	openGraph: {
+		type: "website",
+		locale: "es_ES",
+		url: "/",
+		siteName: "Café y Tertulias",
+		title: "Café y Tertulias",
+		description: siteDescription,
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "Café y Tertulias",
+		description: siteDescription,
+	},
 };
 
 export default async function RootLayout({

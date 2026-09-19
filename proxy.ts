@@ -13,8 +13,10 @@ export const config = {
 		 * - _next/image (image optimization files)
 		 * - favicon.ico (favicon file)
 		 * - Everything under /auth and /login
+		 * - File-convention metadata sin extensión (crawlers sin sesión:
+		 *   opengraph-image, twitter-image, manifest.webmanifest)
 		 * - Public files
 		 */
-		"/((?!_next/static|_next/image|favicon.ico|auth|login|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+		"/((?!_next/static|_next/image|favicon.ico|auth|login|opengraph-image|twitter-image|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
 	],
 };

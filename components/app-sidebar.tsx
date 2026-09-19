@@ -7,6 +7,7 @@ import {
 	UserCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavUser } from "@/components/nav-user";
@@ -56,8 +57,15 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 							render={<Link href="/" />}
 							isActive={pathname === "/"}
 						>
-							<div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-								<HugeiconsIcon icon={Book01Icon} className="size-4" />
+							<div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+								<Image
+									src="/brand/coffee.svg"
+									alt="Café y Tertulias"
+									width={32}
+									height={32}
+									className="size-8"
+									priority
+								/>
 							</div>
 							<div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
 								<span className="font-semibold text-sm tracking-tight">
