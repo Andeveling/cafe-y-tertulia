@@ -8,7 +8,7 @@ import { resuelveConvocatoria } from "@/app/_lib/convocatoria";
 import { convocarAction } from "@/app/materials/_lib/convocatoria-actions";
 import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
 	Collapsible,
 	CollapsibleContent,
@@ -76,6 +76,7 @@ export function ClubRoster({
 									<Button
 										size="xs"
 										variant="ghost"
+										className="min-h-11"
 										disabled={pending}
 										onClick={() => {
 											const convokeId = sessions.find(
@@ -109,9 +110,9 @@ export function ClubRoster({
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
+					<h2 className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
 						{title}
-					</CardTitle>
+					</h2>
 				</CardHeader>
 				<CardContent>{list}</CardContent>
 			</Card>

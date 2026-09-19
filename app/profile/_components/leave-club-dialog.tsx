@@ -39,7 +39,9 @@ export function LeaveClubDialog() {
 				if (!v) setInput("");
 			}}
 		>
-			<DialogTrigger render={<Button variant="destructive" />}>
+			<DialogTrigger
+				render={<Button variant="destructive" className="min-h-11" />}
+			>
 				Darme de baja
 			</DialogTrigger>
 			<DialogContent showCloseButton>
@@ -70,12 +72,19 @@ export function LeaveClubDialog() {
 
 				<DialogFooter>
 					<DialogClose
-						render={<Button variant="outline" disabled={isPending} />}
+						render={
+							<Button
+								variant="outline"
+								className="min-h-11"
+								disabled={isPending}
+							/>
+						}
 					>
 						Cancelar
 					</DialogClose>
 					<Button
 						variant="destructive"
+						className="min-h-11"
 						disabled={!matches || isPending}
 						onClick={handleConfirm}
 					>

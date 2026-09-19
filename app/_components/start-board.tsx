@@ -9,7 +9,6 @@ import {
 	CardContent,
 	CardDescription,
 	CardHeader,
-	CardTitle,
 } from "@/components/ui/card";
 import {
 	Empty,
@@ -79,6 +78,7 @@ export function StartBoard({
 				}
 				materials={materials}
 				displayName={displayName}
+				initialMode="scheduled"
 			/>
 		</div>
 	);
@@ -86,9 +86,9 @@ export function StartBoard({
 	const guide = (
 		<Card>
 			<CardHeader>
-				<CardTitle className="font-heading text-lg italic">
+				<h2 className="font-heading text-lg font-medium italic">
 					¿Cómo funciona una tertulia?
-				</CardTitle>
+				</h2>
 				<CardDescription>
 					Tres gestos bastan para entrar en ritmo. Sin prisa, sin ruido.
 				</CardDescription>
@@ -114,6 +114,7 @@ export function StartBoard({
 
 	const main = (
 		<div className="flex flex-col gap-12">
+			<h1 className="sr-only">Sesiones del club</h1>
 			{hero ? (
 				<HeroSessionCard session={hero} />
 			) : (
@@ -146,6 +147,8 @@ export function StartBoard({
 						variant="outline"
 						spacing={2}
 						value={[filter]}
+						aria-label="Filtrar sesiones"
+						className="flex-wrap"
 						onValueChange={(next) => {
 							const v = next[0];
 							if (v === "all" || v === "live" || v === "scheduled") {
@@ -157,7 +160,7 @@ export function StartBoard({
 							<ToggleGroupItem
 								key={f.value}
 								value={f.value}
-								className="rounded-full px-4 data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+								className="min-h-11 rounded-full px-4 data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
 							>
 								{f.label}
 							</ToggleGroupItem>

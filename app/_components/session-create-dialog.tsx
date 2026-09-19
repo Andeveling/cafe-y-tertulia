@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -76,15 +76,27 @@ export function SessionCreateDialog({
 	trigger,
 	materials,
 	displayName,
+	initialMode = "now",
 }: {
 	trigger: React.ReactElement;
 	materials: { id: string; title: string }[];
 	displayName: string;
+	initialMode?: "now" | "scheduled";
 }) {
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const [pending, startTransition] = useTransition();
-	const [mode, setMode] = useState<"now" | "scheduled">("now");
+	const [mode, setMode] = useState<"now" | "scheduled">(initialMode);
+	const uid = useId();
+	const ids = {
+		label: `${uid}-label`,
+		materialMode: `${uid}-materialMode`,
+		range: `${uid}-range`,
+		newTitle: `${uid}-newTitle`,
+		newAuthor: `${uid}-newAuthor`,
+		newKind: `${uid}-newKind`,
+		scheduledAt: `${uid}-scheduledAt`,
+	};
 
 	const form = useForm<Values>({
 		resolver: zodResolver(schema),
@@ -96,10 +108,11 @@ export function SessionCreateDialog({
 			newAuthor: "",
 			newKind: "book",
 			range: "",
-			mode: "now",
+			mode: initialMode,
 		},
 	});
 	const materialMode = form.watch("materialMode");
+	const materialError = form.formState.errors.newTitle;
 
 	function onSubmit(data: Values) {
 		startTransition(async () => {
@@ -153,10 +166,10 @@ export function SessionCreateDialog({
 							control={form.control}
 							render={({ field }) => (
 								<Field>
-									<FieldLabel htmlFor="label">Etiqueta</FieldLabel>
+									<FieldLabel htmlFor={ids.label}>Etiqueta</FieldLabel>
 									<Input
 										{...field}
-										id="label"
+										id={ids.label}
 										placeholder={`Sesión de ${displayName}`}
 									/>
 								</Field>
@@ -167,10 +180,10 @@ export function SessionCreateDialog({
 							control={form.control}
 							render={({ field }) => (
 								<Field>
-									<FieldLabel htmlFor="materialMode">Material</FieldLabel>
+									<FieldLabel htmlFor={ids.materialMode}>Material</FieldLabel>
 									<NativeSelect
 										{...field}
-										id="materialMode"
+										id={ids.materialMode}
 										onChange={(e) => {
 											field.onChange(e);
 											form.setValue("range", "");
@@ -201,8 +214,8 @@ export function SessionCreateDialog({
 									control={form.control}
 									render={({ field }) => (
 										<Field>
-											<FieldLabel htmlFor="range">Rango</FieldLabel>
-											<Input {...field} id="range" placeholder="Cap. 1–5" />
+											<FieldLabel htmlFor={ids.range}>Rango</FieldLabel>
+											<Input {...field} id={ids.range} placeholder="Cap. 1–5" />
 										</Field>
 									)}
 								/>
@@ -215,10 +228,10 @@ export function SessionCreateDialog({
 									control={form.control}
 									render={({ field, fieldState }) => (
 										<Field data-invalid={fieldState.invalid}>
-											<FieldLabel htmlFor="newTitle">Título</FieldLabel>
+											<FieldLabel htmlFor={ids.newTitle}>Título</FieldLabel>
 											<Input
 												{...field}
-												id="newTitle"
+												id={ids.newTitle}
 												placeholder="El Quijote"
 												aria-invalid={fieldState.invalid}
 											/>
@@ -233,11 +246,12 @@ export function SessionCreateDialog({
 									control={form.control}
 									render={({ field }) => (
 										<Field>
-											<FieldLabel htmlFor="newAuthor">Autor</FieldLabel>
+											<FieldLabel htmlFor={ids.newAuthor}>Autor</FieldLabel>
 											<Input
 												{...field}
-												id="newAuthor"
+												id={ids.newAuthor}
 												placeholder="Miguel de Cervantes"
+												aria-invalid={materialError ? true : undefined}
 											/>
 										</Field>
 									)}
@@ -247,13 +261,13 @@ export function SessionCreateDialog({
 									control={form.control}
 									render={({ field }) => (
 										<Field>
-											<FieldLabel htmlFor="newKind">Tipo</FieldLabel>
+											<FieldLabel htmlFor={ids.newKind}>Tipo</FieldLabel>
 											<Select
 												name={field.name}
 												value={field.value}
 												onValueChange={field.onChange}
 											>
-												<SelectTrigger id="newKind" className="w-full">
+												<SelectTrigger id={ids.newKind} className="w-full">
 													<SelectValue placeholder="Tipo">
 														{(v: string | null) =>
 															v
@@ -280,8 +294,8 @@ export function SessionCreateDialog({
 									control={form.control}
 									render={({ field }) => (
 										<Field>
-											<FieldLabel htmlFor="range">Rango</FieldLabel>
-											<Input {...field} id="range" placeholder="Cap. 1–5" />
+											<FieldLabel htmlFor={ids.range}>Rango</FieldLabel>
+											<Input {...field} id={ids.range} placeholder="Cap. 1–5" />
 										</Field>
 									)}
 								/>
@@ -289,11 +303,12 @@ export function SessionCreateDialog({
 						)}
 					</FieldGroup>
 					<div className="flex items-end gap-3">
-						<div className="flex gap-2">
+						<div className="flex gap-2" role="group" aria-label="Cuándo">
 							<Button
 								type="button"
 								variant={mode === "now" ? "default" : "outline"}
 								size="sm"
+								aria-pressed={mode === "now"}
 								onClick={() => {
 									setMode("now");
 									form.setValue("mode", "now");
@@ -305,6 +320,7 @@ export function SessionCreateDialog({
 								type="button"
 								variant={mode === "scheduled" ? "default" : "outline"}
 								size="sm"
+								aria-pressed={mode === "scheduled"}
 								onClick={() => {
 									setMode("scheduled");
 									form.setValue("mode", "scheduled");
@@ -319,7 +335,9 @@ export function SessionCreateDialog({
 								control={form.control}
 								render={({ field, fieldState }) => (
 									<Field data-invalid={fieldState.invalid}>
+										<FieldLabel htmlFor={ids.scheduledAt}>Fecha</FieldLabel>
 										<DatePicker
+											id={ids.scheduledAt}
 											date={field.value}
 											onSelect={field.onChange}
 											placeholder="Fecha"

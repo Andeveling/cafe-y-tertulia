@@ -83,13 +83,9 @@ export function ProfileView({
 					/>
 					<CardContent className="flex flex-col gap-6 p-6 md:flex-row md:items-center md:gap-8 md:p-8">
 						{/* Sello de nivel */}
-						<div className="flex items-center gap-5 md:flex-col md:items-center md:gap-3 md:text-center">
+						<div className="flex min-w-0 items-center gap-5 md:flex-col md:items-center md:gap-3 md:text-center">
 							<div className="relative shrink-0">
-								<div
-									aria-hidden="true"
-									className="absolute -inset-1.5 rounded-full bg-primary/20 blur-md"
-								/>
-								<div className="relative flex size-20 items-center justify-center rounded-full border bg-card font-heading text-2xl font-semibold text-foreground ring-1 ring-primary/40 md:size-24 md:text-3xl">
+								<div className="flex size-20 items-center justify-center rounded-full border bg-card font-heading text-2xl font-semibold text-foreground ring-1 ring-primary/40 md:size-24 md:text-3xl">
 									{initials(displayName)}
 								</div>
 								<div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
@@ -101,11 +97,8 @@ export function ProfileView({
 									</Badge>
 								</div>
 							</div>
-							<div className="md:mt-3">
-								<p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
-									Pasaporte de tertulia
-								</p>
-								<h1 className="mt-1 font-heading text-2xl font-semibold tracking-tight text-balance md:text-3xl">
+							<div className="min-w-0 md:mt-3">
+								<h1 className="font-heading text-2xl font-semibold tracking-tight text-balance break-words md:text-3xl">
 									{displayName}
 								</h1>
 								<p className="mt-1 text-sm text-muted-foreground">
@@ -121,10 +114,10 @@ export function ProfileView({
 						<div className="flex flex-1 flex-col gap-5 md:border-l md:border-border/60 md:pl-8">
 							<div>
 								<div className="flex items-baseline justify-between gap-3">
-									<p className="text-xs font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+									<p className="text-label-sm font-semibold tracking-wider text-muted-foreground uppercase">
 										Camino a {level.nextTitle}
 									</p>
-									<p className="text-xs text-muted-foreground tabular-nums">
+									<p className="text-label-sm text-muted-foreground tabular-nums">
 										{level.sessionsAttended} / {level.nextThreshold} sesiones
 									</p>
 								</div>
@@ -177,17 +170,17 @@ export function ProfileView({
 								].map((s) => (
 									<div
 										key={s.label}
-										className="rounded-xl border border-border/60 bg-muted/30 px-3 py-3 text-center"
+										className="min-w-0 rounded-xl border border-border/60 bg-muted/30 px-3 py-3 text-center"
 									>
-										<dt className="order-2 mt-1 text-xs font-medium text-muted-foreground">
+										<dt className="text-label-sm font-medium text-muted-foreground">
 											{s.label}
 										</dt>
-										<dd className="order-1 font-heading text-2xl font-semibold text-foreground tabular-nums">
+										<dd className="font-heading text-2xl font-semibold text-foreground tabular-nums">
 											{s.value}
+											<span className="mt-0.5 block font-sans text-label-sm font-medium text-muted-foreground">
+												{s.hint}
+											</span>
 										</dd>
-										<p className="mt-0.5 text-[11px] text-muted-foreground">
-											{s.hint}
-										</p>
 									</div>
 								))}
 							</dl>
@@ -201,7 +194,7 @@ export function ProfileView({
 					role="status"
 					className="mt-4 rounded-xl border border-border/60 bg-card px-4 py-3 text-sm text-muted-foreground"
 				>
-					☕ Perfil actualizado. Tu pasaporte ya muestra tu nuevo nombre.
+					Perfil actualizado. Tu nombre ya se ve en el club.
 				</div>
 			)}
 
@@ -215,24 +208,16 @@ export function ProfileView({
 			)}
 
 			{/* ── Vitrina ─────────────────────────────────────────────────── */}
-			<section aria-label="Vitrina de logros" className="mt-12">
+			<section aria-labelledby="vitrina-heading" className="mt-12">
 				<Card>
 					<CardHeader>
-						<div className="flex items-center justify-between gap-3">
-							<div>
-								<CardTitle className="font-heading text-xl">
-									Vitrina de la tertulia
-								</CardTitle>
-								<CardDescription>
-									Tus insignias y los hitos que el club consiguió contigo.
-								</CardDescription>
-							</div>
-							<Badge
-								variant="secondary"
-								className="rounded-full px-2.5 py-0.5 text-xs tabular-nums"
-							>
-								{earnedIndividual} / {totalIndividual}
-							</Badge>
+						<div className="min-w-0">
+							<CardTitle className="font-heading text-xl">
+								<h2 id="vitrina-heading">Vitrina de la tertulia</h2>
+							</CardTitle>
+							<CardDescription>
+								Tus insignias y los hitos que el club consiguió contigo.
+							</CardDescription>
 						</div>
 					</CardHeader>
 					<CardContent>
@@ -246,7 +231,9 @@ export function ProfileView({
 				<div className="grid gap-6 md:grid-cols-2">
 					<Card>
 						<CardHeader>
-							<CardTitle className="text-lg">Nombre visible</CardTitle>
+							<CardTitle className="text-lg">
+								<h2>Nombre visible</h2>
+							</CardTitle>
 							<CardDescription>
 								Es el nombre con el que te ve el resto del club.
 							</CardDescription>
@@ -258,7 +245,9 @@ export function ProfileView({
 
 					<Card>
 						<CardHeader>
-							<CardTitle className="text-lg">Membresía</CardTitle>
+							<CardTitle className="text-lg">
+								<h2>Membresía</h2>
+							</CardTitle>
 							<CardDescription>
 								Estado:{" "}
 								<span className="font-medium text-foreground">
@@ -278,7 +267,7 @@ export function ProfileView({
 
 				<div className="mt-8 flex justify-center">
 					<form action={signOut}>
-						<Button type="submit" variant="ghost" size="sm">
+						<Button type="submit" variant="ghost" className="min-h-11">
 							Cerrar sesión
 						</Button>
 					</form>

@@ -9,9 +9,7 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
-	CardTitle,
 } from "@/components/ui/card";
 import {
 	Sheet,
@@ -53,6 +51,7 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 				<div className="flex flex-wrap items-center gap-2">
 					<Badge variant="outline">
 						<span
+							aria-hidden="true"
 							className={cn(
 								"size-1.5 shrink-0 rounded-full",
 								meta.live ? "bg-primary" : "bg-muted-foreground/40",
@@ -62,7 +61,10 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 					</Badge>
 					{when && !meta.live && <Badge variant="outline">{when}</Badge>}
 				</div>
-				<CardTitle className="max-w-[22ch] text-3xl leading-tight tracking-tight md:text-[2.5rem] md:leading-tight">
+				<h2
+					data-slot="card-title"
+					className="max-w-[22ch] font-heading text-3xl leading-tight font-medium tracking-tight text-balance md:text-[3rem] md:leading-[3.5rem]"
+				>
 					{lead}
 					{accent ? (
 						<>
@@ -70,7 +72,7 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 							<em className="text-primary italic">{accent}</em>
 						</>
 					) : null}
-				</CardTitle>
+				</h2>
 				{subtitle && (
 					<CardDescription className="font-heading italic">
 						{subtitle}
@@ -136,16 +138,13 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 					</Sheet>
 				</div>
 			</CardContent>
-			{(when || subtitle) && (
-				<CardFooter className="relative flex flex-wrap gap-4 text-xs text-muted-foreground">
-					{when && (
-						<span className="flex items-center gap-2">
-							<HugeiconsIcon icon={Clock01Icon} />
-							{when}
-						</span>
-					)}
-					{subtitle && <span>{subtitle}</span>}
-				</CardFooter>
+			{ago && (
+				<footer className="relative flex flex-wrap gap-4 px-(--card-spacing) pb-(--card-spacing) text-xs text-muted-foreground">
+					<span className="flex items-center gap-2">
+						<HugeiconsIcon icon={Clock01Icon} aria-hidden="true" />
+						{ago}
+					</span>
+				</footer>
 			)}
 		</Card>
 	);

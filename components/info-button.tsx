@@ -33,11 +33,16 @@ export function InfoButton({
 					<Button
 						variant="ghost"
 						size="icon-xs"
-						className="text-[oklch(0.55_0.08_250)] hover:text-[oklch(0.45_0.1_250)]"
+						aria-label={`Información: ${title}`}
+						className="size-11 min-h-11 min-w-11 text-muted-foreground hover:text-foreground"
 					/>
 				}
 			>
-				<HugeiconsIcon icon={InformationCircleIcon} size={14} />
+				<HugeiconsIcon
+					icon={InformationCircleIcon}
+					size={16}
+					aria-hidden="true"
+				/>
 			</PopoverTrigger>
 			<PopoverContent side="top" align="start">
 				<PopoverHeader>

@@ -39,6 +39,7 @@ export function BoardSessionAction({
 	const className = cn(
 		"shrink-0",
 		variant === "hero" && "w-full sm:w-auto",
+		variant === "row" && "min-h-11",
 		fullWidth && "w-full sm:w-full",
 	);
 

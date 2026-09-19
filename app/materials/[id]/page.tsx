@@ -13,6 +13,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ClubMilestones } from "@/app/materials/_components/club-milestones";
 import { MaterialCover } from "@/app/materials/_components/material-cover";
 import { MaterialQuestionsSection } from "@/app/materials/_components/material-questions-section";
 import { NewSessionDialog } from "@/app/materials/_components/new-session-dialog";
@@ -254,24 +255,7 @@ export default async function MaterialDetailPage({
 						</div>
 					</article>
 
-					{milestones.length > 0 && (
-						<div className="rounded-2xl border border-border bg-card p-5">
-							<p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-								Hitos del club
-							</p>
-							<div className="mt-3 flex flex-wrap gap-2">
-								{milestones.map((m) => (
-									<span
-										key={m.id}
-										className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground"
-									>
-										<span aria-hidden="true">{m.emoji}</span>
-										<span>{m.name}</span>
-									</span>
-								))}
-							</div>
-						</div>
-					)}
+					<ClubMilestones milestones={milestones} />
 				</div>
 
 				{/* ── Columna derecha: plan de sesiones ── */}

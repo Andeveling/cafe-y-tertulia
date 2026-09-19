@@ -69,7 +69,11 @@ export function UpdateProfileForm({
 					</Field>
 				)}
 			/>
-			<Button type="submit" className="self-start" disabled={isPending}>
+			<Button
+				type="submit"
+				className="min-h-11 self-start"
+				disabled={isPending}
+			>
 				{isPending ? "Guardando…" : "Guardar"}
 			</Button>
 		</form>

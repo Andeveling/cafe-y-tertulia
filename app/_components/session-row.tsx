@@ -4,7 +4,6 @@ import {
 	CardAction,
 	CardDescription,
 	CardHeader,
-	CardTitle,
 } from "@/components/ui/card";
 import {
 	type BoardSession,
@@ -30,7 +29,12 @@ export function SessionRow({ session }: { session: BoardSession }) {
 						</Badge>
 						{when && <Badge variant="outline">{when}</Badge>}
 					</div>
-					<CardTitle className="text-lg">{editorialTitle(session)}</CardTitle>
+					<h3
+						data-slot="card-title"
+						className="font-heading text-lg leading-snug font-medium text-balance"
+					>
+						{editorialTitle(session)}
+					</h3>
 					<CardDescription>
 						{subtitle ? `${subtitle} · ` : ""}
 						Modera {session.moderator_name ?? "—"}
