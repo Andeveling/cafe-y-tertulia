@@ -28,7 +28,6 @@ import {
 	interventionDisplay,
 	interventionNextLabel,
 	interventionProgressLine,
-	phaseClockLabel,
 } from "@/app/materials/_lib/intervention";
 import {
 	advanceRoomStage,
@@ -453,13 +452,10 @@ function TurnSpotlight({
 	isComplement,
 	authorName,
 	questionText,
-	clockLabel,
 	clockText,
 	overtime,
 	timerPct,
-	clockCaption,
 	timerAction,
-	showExtendHint,
 	heartsVoted,
 	heartsEligible,
 	voter,
@@ -469,13 +465,10 @@ function TurnSpotlight({
 	isComplement: boolean;
 	authorName: string;
 	questionText: string;
-	clockLabel: string;
 	clockText: string;
 	overtime: boolean;
 	timerPct: number;
-	clockCaption: string;
 	timerAction?: ReactNode;
-	showExtendHint?: boolean;
 	heartsVoted?: number;
 	heartsEligible?: number;
 	/** Votador de corazones — vive dentro de la card del reloj, sin textos. */
@@ -527,8 +520,7 @@ function TurnSpotlight({
 				aria-label="Reloj del turno"
 				className="w-full rounded-xl bg-card px-6 py-5 text-center ring-1 ring-foreground/10"
 			>
-				<p className="text-xs text-muted-foreground">{clockLabel}</p>
-				<div className="mt-1 flex items-center justify-center gap-3">
+				<div className="flex items-center justify-center gap-3">
 					<p
 						className={cn(
 							"font-heading text-5xl tabular-nums tracking-tight",
@@ -551,12 +543,6 @@ function TurnSpotlight({
 						style={{ width: `${timerPct}%` }}
 					/>
 				</div>
-				<p className="mt-2 text-xs text-muted-foreground">{clockCaption}</p>
-				{showExtendHint && (
-					<p className="mt-1 text-label-sm text-muted-foreground/70">
-						cada +1 suma 60 s y marca la pregunta como hot
-					</p>
-				)}
 				{voter && <div className="mt-3">{voter}</div>}
 				{heartsVoted != null && heartsEligible != null && (
 					<Badge
@@ -695,13 +681,10 @@ function ActiveTurn({
 		isComplement,
 		authorName: debate.authorName,
 		questionText: debate.questionText,
-		clockLabel: phaseClockLabel(debate.state),
 		clockText: clock.text,
 		overtime: clock.overtime,
 		timerPct: clock.pct,
-		clockCaption: clock.caption,
 		timerAction: extendBtn,
-		showExtendHint: isModerator && !isComplement,
 		heartsVoted: hearts?.voted,
 		heartsEligible: hearts?.eligible,
 	};
