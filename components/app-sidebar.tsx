@@ -46,7 +46,7 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 	if (pathname.startsWith("/auth")) return null;
 
 	return (
-		<Sidebar collapsible="offcanvas" variant="inset">
+		<Sidebar collapsible="offcanvas">
 			<SidebarHeader className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-2">
 				<SidebarMenu>
 					<SidebarMenuItem>
@@ -73,56 +73,58 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 			</SidebarHeader>
 
 			<SidebarContent className="gap-0">
-				<SidebarGroup className="py-3">
-					<SidebarGroupLabel className="px-2 text-xs font-semibold uppercase tracking-widest">
-						Club
-					</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu className="gap-0.5">
-							{navClub.map((item) => (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton
-										tooltip={item.title}
-										isActive={
-											pathname === item.url ||
-											(item.url !== "/" && pathname.startsWith(item.url))
-										}
-										render={<Link href={item.url} />}
-										className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
-									>
-										<HugeiconsIcon icon={item.icon} />
-										<span>{item.title}</span>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
+				<nav aria-label="Navegación">
+					<SidebarGroup className="py-3">
+						<SidebarGroupLabel className="px-2 text-xs font-semibold uppercase tracking-widest">
+							Club
+						</SidebarGroupLabel>
+						<SidebarGroupContent>
+							<SidebarMenu className="gap-0.5">
+								{navClub.map((item) => (
+									<SidebarMenuItem key={item.title}>
+										<SidebarMenuButton
+											tooltip={item.title}
+											isActive={
+												pathname === item.url ||
+												(item.url !== "/" && pathname.startsWith(item.url))
+											}
+											render={<Link href={item.url} />}
+											className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
+										>
+											<HugeiconsIcon icon={item.icon} />
+											<span>{item.title}</span>
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								))}
+							</SidebarMenu>
+						</SidebarGroupContent>
+					</SidebarGroup>
 
-				<SidebarSeparator className="mx-0" />
+					<SidebarSeparator className="mx-0" />
 
-				<SidebarGroup className="py-3">
-					<SidebarGroupLabel className="px-2 text-xs font-semibold uppercase tracking-widest">
-						Cuenta
-					</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu className="gap-0.5">
-							{navCuenta.map((item) => (
-								<SidebarMenuItem key={item.title}>
-									<SidebarMenuButton
-										tooltip={item.title}
-										isActive={pathname.startsWith(item.url)}
-										render={<Link href={item.url} />}
-										className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
-									>
-										<HugeiconsIcon icon={item.icon} />
-										<span>{item.title}</span>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
+					<SidebarGroup className="py-3">
+						<SidebarGroupLabel className="px-2 text-xs font-semibold uppercase tracking-widest">
+							Cuenta
+						</SidebarGroupLabel>
+						<SidebarGroupContent>
+							<SidebarMenu className="gap-0.5">
+								{navCuenta.map((item) => (
+									<SidebarMenuItem key={item.title}>
+										<SidebarMenuButton
+											tooltip={item.title}
+											isActive={pathname.startsWith(item.url)}
+											render={<Link href={item.url} />}
+											className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
+										>
+											<HugeiconsIcon icon={item.icon} />
+											<span>{item.title}</span>
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								))}
+							</SidebarMenu>
+						</SidebarGroupContent>
+					</SidebarGroup>
+				</nav>
 			</SidebarContent>
 
 			<SidebarFooter className="border-t border-sidebar-border">

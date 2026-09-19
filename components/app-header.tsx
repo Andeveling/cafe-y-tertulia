@@ -67,17 +67,24 @@ export function AppHeader({ level }: { level?: MemberLevel | null }) {
 		"min-w-0 flex-1 truncate font-heading text-lg font-semibold";
 
 	return (
-		<header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4">
-			<SidebarTrigger className="-ml-1" aria-expanded={open} />
-			{heading?.as === "h1" ? (
-				<h1 className={titleClass}>{heading.title}</h1>
-			) : heading ? (
-				<p className={titleClass}>{heading.title}</p>
-			) : (
-				<div className="min-w-0 flex-1" />
-			)}
-			{level && <MemberLevelBar level={level} />}
-			<ThemeToggle />
+		<header className="sticky top-0 z-10 shrink-0 border-b bg-background">
+			<div className="mx-auto flex h-16 w-full max-w-container items-center gap-2 px-4 sm:px-6 lg:px-12">
+				<SidebarTrigger
+					className="-ml-1"
+					size="icon-lg"
+					aria-expanded={open}
+					aria-label="Navegación"
+				/>
+				{heading?.as === "h1" ? (
+					<h1 className={titleClass}>{heading.title}</h1>
+				) : heading ? (
+					<p className={titleClass}>{heading.title}</p>
+				) : (
+					<div className="min-w-0 flex-1" />
+				)}
+				{level && <MemberLevelBar level={level} />}
+				<ThemeToggle />
+			</div>
 		</header>
 	);
 }

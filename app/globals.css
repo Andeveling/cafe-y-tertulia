@@ -77,6 +77,8 @@
 	--control-height-sm: 2.25rem;
 	--control-height: 2.5rem;
 	--control-height-lg: 2.75rem;
+	/* DESIGN.md container-max — pozo del club, no el inset de shadcn. */
+	--max-width-container: 1200px;
 }
 
 /* DESIGN.md label-sm — micro-labels uppercase del sistema (11px). */

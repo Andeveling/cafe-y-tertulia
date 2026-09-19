@@ -65,7 +65,7 @@ export function ThemeToggle() {
 	// Evita hydration mismatch: renderizamos el icono por defecto hasta montar
 	if (!mounted) {
 		return (
-			<Button variant="outline" size="icon" aria-label="Cambiar tema">
+			<Button variant="outline" size="icon-lg" aria-label="Cambiar tema">
 				<svg
 					width="24"
 					height="24"
@@ -96,7 +96,7 @@ export function ThemeToggle() {
 				render={
 					<Button
 						variant="ghost"
-						size="icon"
+						size="icon-lg"
 						aria-label={`Tema: ${labels[theme as keyof typeof labels] ?? "Sistema"}`}
 					/>
 				}

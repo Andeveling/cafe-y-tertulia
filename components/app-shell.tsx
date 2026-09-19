@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import type { MemberLevel } from "@/app/profile/_lib/gamification-actions";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar, type AppSidebarUser } from "@/components/app-sidebar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { isAuthPath, isSalaPath } from "@/lib/sala-path";
 
@@ -12,7 +12,8 @@ import { isAuthPath, isSalaPath } from "@/lib/sala-path";
  * Chrome por ruta. Tres topologías:
  * - Sala: pantalla completa; el Escenario aporta su propio `<main>`.
  * - Auth: sin sidebar ni header; este shell aporta `<main>`.
- * - Club: sidebar persistida + header + pozo contenido (1200 / 16–24–48).
+ * - Club: sidebar + banner + `<main>` pozo (container-max / 16–24–48).
+ *   El marco no es landmark; el halo del lounge vive en `body`.
  */
 export function AppShell({
 	user,
@@ -56,16 +57,16 @@ export function AppShell({
 				Saltar al contenido
 			</a>
 			<AppSidebar user={user} />
-			<SidebarInset className="w-full">
+			<div className="relative flex w-full flex-1 flex-col">
 				<AppHeader level={level} />
-				<div
+				<main
 					id="contenido"
 					tabIndex={-1}
-					className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col px-4 py-6 sm:px-6 lg:px-12 lg:py-12"
+					className="mx-auto flex w-full max-w-container flex-1 flex-col px-4 py-6 sm:px-6 lg:px-12 lg:py-12"
 				>
 					{children}
-				</div>
-			</SidebarInset>
+				</main>
+			</div>
 			<Toaster />
 			{inbox}
 		</SidebarProvider>
