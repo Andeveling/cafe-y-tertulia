@@ -32,6 +32,7 @@ import type { InviteRosterMember } from "@/app/materials/_lib/presence-invite";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import {
 	advanceRoomStage,
+	advanceToDraw,
 	confirmPresence,
 	deleteQuestion,
 	editQuestion,
@@ -356,6 +357,12 @@ function ModeratorNav({
 
 	function handleAdvance() {
 		if (!next) return;
+		// Entrar a Sorteo ES sortear (una sola vez): mata el paso previo.
+		// Al volver a una Sorteo ya sorteada, avance normal sin re-sortear.
+		if (next === "draw" && !snapshot.draw.done) {
+			run(() => advanceToDraw(snapshot.sessionId));
+			return;
+		}
 		run(() => advanceRoomStage(snapshot.sessionId, next));
 	}
 

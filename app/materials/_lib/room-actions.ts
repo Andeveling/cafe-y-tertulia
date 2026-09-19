@@ -160,6 +160,30 @@ export async function executeDraw(sessionId: string): Promise<ActionResult> {
 	});
 }
 
+/**
+ * Avanza a Sorteo y ejecuta el sorteo en la misma acción: entrar a la
+ * etapa ES sortear. Si el sorteo falla, la etapa ya avanzó y la Sala
+ * muestra el paso previo con reintentar (fallback honesto, sin bloqueo).
+ */
+export async function advanceToDraw(sessionId: string): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			const { error: advanceError } = await supabase.rpc("advance_room_stage", {
+				target_session_id: sessionId,
+				new_stage: "draw" as Database["public"]["Enums"]["room_stage"],
+			});
+			if (advanceError) return { ok: false, error: advanceError.message };
+
+			const { error: drawError } = await supabase.rpc("execute_draw", {
+				target_session_id: sessionId,
+			});
+			if (drawError) return { ok: false, error: drawError.message };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
 /** Alterna opt_out del participante para el Sorteo. */
 export async function toggleOptOut(
 	sessionId: string,
