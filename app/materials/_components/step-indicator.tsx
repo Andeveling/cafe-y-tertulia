@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 type StepVariant = "completed" | "active" | "planned";
 const variantStyles: Record<StepVariant, { bg: string; iconColor: string }> = {
 	completed: {
-		bg: "bg-primary",
-		iconColor: "text-primary-foreground",
+		bg: "bg-muted",
+		iconColor: "text-muted-foreground",
 	},
 	active: {
 		bg: "bg-primary",

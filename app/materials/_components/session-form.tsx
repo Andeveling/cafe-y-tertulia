@@ -10,7 +10,7 @@ import { z } from "zod";
 import { createSession } from "@/app/materials/_lib/materials-actions";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
 const sessionFormSchema = z.object({
@@ -74,7 +74,16 @@ export function SessionForm({
 							id="session-range"
 							placeholder='Ej. "Capítulos 1-3"'
 							aria-invalid={fieldState.invalid}
+							aria-describedby={
+								fieldState.invalid ? "session-range-error" : undefined
+							}
 						/>
+						{fieldState.invalid && (
+							<FieldError
+								id="session-range-error"
+								errors={[fieldState.error]}
+							/>
+						)}
 					</Field>
 				)}
 			/>

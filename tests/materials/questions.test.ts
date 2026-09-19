@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
 	createQuestion,
 	getSessionPool,
+	getSessionPools,
 	toggleOutsideDraw,
 } from "@/app/materials/_lib/questions";
 
@@ -57,6 +58,55 @@ describe("getSessionPool", () => {
 		const from = vi.fn().mockReturnValue({ select });
 
 		await expect(getSessionPool({ from }, sessionId)).rejects.toThrow("boom");
+	});
+});
+
+describe("getSessionPools", () => {
+	it("agrupa Preguntas de varias Sesiones en una lectura", async () => {
+		const otherSession = "cccccccc-cccc-cccc-cccc-cccccccccccc";
+		const rows = [
+			{
+				id: "q1",
+				session_id: sessionId,
+				material_id: materialId,
+				author_id: authorId,
+				text: "¿Capítulo 2?",
+				outside_draw: false,
+				created_at: "2026-08-19T10:00:00Z",
+				members: { display_name: "Autor" },
+			},
+			{
+				id: "q2",
+				session_id: otherSession,
+				material_id: materialId,
+				author_id: authorId,
+				text: "¿Capítulo 5?",
+				outside_draw: false,
+				created_at: "2026-08-19T11:00:00Z",
+				members: { display_name: "Autor" },
+			},
+		];
+		const order = vi.fn().mockResolvedValue({ data: rows, error: null });
+		const inFilter = vi.fn().mockReturnValue({ order });
+		const select = vi.fn().mockReturnValue({ in: inFilter });
+		const from = vi.fn().mockReturnValue({ select });
+
+		const pools = await getSessionPools({ from }, [sessionId, otherSession]);
+
+		expect(from).toHaveBeenCalledTimes(1);
+		expect(inFilter).toHaveBeenCalledWith("session_id", [
+			sessionId,
+			otherSession,
+		]);
+		expect(pools.get(sessionId)?.[0]?.text).toBe("¿Capítulo 2?");
+		expect(pools.get(otherSession)?.[0]?.text).toBe("¿Capítulo 5?");
+	});
+
+	it("no consulta si no hay Sesiones y deja listas vacías", async () => {
+		const from = vi.fn();
+		const pools = await getSessionPools({ from }, []);
+		expect(from).not.toHaveBeenCalled();
+		expect(pools.size).toBe(0);
 	});
 });
 

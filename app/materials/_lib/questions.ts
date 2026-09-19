@@ -24,6 +24,19 @@ type QuestionPoolRow = QuestionRow & {
 	members: { display_name: string } | null;
 };
 
+function mapPoolRow(row: QuestionPoolRow): QuestionWithAuthor {
+	return {
+		id: row.id,
+		sessionId: row.session_id,
+		materialId: row.material_id,
+		authorId: row.author_id,
+		text: row.text,
+		outsideDraw: row.outside_draw,
+		createdAt: row.created_at,
+		authorName: row.members?.display_name ?? "Miembro del club",
+	};
+}
+
 export type CreateQuestionInput = {
 	sessionId: string;
 	materialId: string | null;
@@ -47,17 +60,38 @@ export async function getSessionPool(
 
 	if (error) throw error;
 
-	const rows = (data ?? []) as QuestionPoolRow[];
-	return rows.map((row) => ({
-		id: row.id,
-		sessionId: row.session_id,
-		materialId: row.material_id,
-		authorId: row.author_id,
-		text: row.text,
-		outsideDraw: row.outside_draw,
-		createdAt: row.created_at,
-		authorName: row.members?.display_name ?? "Miembro del club",
-	}));
+	return ((data ?? []) as QuestionPoolRow[]).map(mapPoolRow);
+}
+
+/**
+ * Pools de varias Sesiones en una sola lectura. Las claves sin Preguntas
+ * quedan en `[]` — el caller no tiene que distinguir "vacío" de "ausente".
+ */
+export async function getSessionPools(
+	supabase: Db,
+	sessionIds: string[],
+): Promise<Map<string, QuestionWithAuthor[]>> {
+	const bySession = new Map<string, QuestionWithAuthor[]>();
+	for (const id of sessionIds) {
+		bySession.set(id, []);
+	}
+	if (sessionIds.length === 0) return bySession;
+
+	const { data, error } = await supabase
+		.from("questions")
+		.select("*, members(display_name)")
+		.in("session_id", sessionIds)
+		.order("created_at", { ascending: true });
+
+	if (error) throw error;
+
+	for (const row of (data ?? []) as QuestionPoolRow[]) {
+		const mapped = mapPoolRow(row);
+		const list = bySession.get(mapped.sessionId) ?? [];
+		list.push(mapped);
+		bySession.set(mapped.sessionId, list);
+	}
+	return bySession;
 }
 
 /**

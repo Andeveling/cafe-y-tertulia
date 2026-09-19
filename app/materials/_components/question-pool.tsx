@@ -158,7 +158,9 @@ export function QuestionPool({
 								className="flex flex-col gap-2 rounded-md border border-border p-3"
 							>
 								<div className="flex items-start justify-between gap-2">
-									<p className="text-sm leading-relaxed">{question.text}</p>
+									<p className="min-w-0 text-sm leading-relaxed break-words">
+										{question.text}
+									</p>
 									{question.outsideDraw && (
 										<Badge variant="secondary">Fuera de sorteo</Badge>
 									)}
@@ -177,6 +179,7 @@ export function QuestionPool({
 												onCheckedChange={(checked) =>
 													onToggle(question.id, checked)
 												}
+												aria-label={`Fuera de sorteo: ${question.text.length > 80 ? `${question.text.slice(0, 80)}…` : question.text}`}
 											/>
 											Fuera de sorteo
 										</label>

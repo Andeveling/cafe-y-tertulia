@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar01Icon, Cancel01Icon } from "@hugeicons/core-free-icons";
+import { Cancel01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -40,18 +40,18 @@ export function SessionScheduler({
 	}
 
 	return (
-		<div className="flex items-center gap-1.5">
+		<div className="flex items-center gap-2">
 			<DatePicker
 				date={date}
 				onSelect={update}
 				placeholder="Sin fecha programada"
-				className="h-auto rounded-md border-0 px-1 py-1 text-xs font-normal text-muted-foreground hover:bg-transparent hover:text-foreground data-[empty=true]:text-muted-foreground"
+				className="h-11 min-h-11 border-0 px-2.5 font-normal text-muted-foreground hover:bg-muted/50 hover:text-foreground data-[empty=true]:text-muted-foreground"
 			/>
 			{date && (
 				<Button
 					type="button"
 					variant="ghost"
-					size="icon-xs"
+					size="icon-lg"
 					disabled={isPending}
 					aria-label="Quitar fecha programada"
 					onClick={() => update(undefined)}

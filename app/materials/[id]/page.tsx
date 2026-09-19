@@ -1,4 +1,5 @@
 import {
+	ArrowUpRight01Icon,
 	Book01Icon,
 	CheckmarkCircle01Icon,
 	CircleIcon,
@@ -19,7 +20,12 @@ import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { SessionScheduler } from "@/app/materials/_components/session-scheduler";
 import { StepIndicator } from "@/app/materials/_components/step-indicator";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
+import { isActiveMember } from "@/app/materials/_lib/members";
 import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
+import {
+	getSessionPools,
+	type QuestionWithAuthor,
+} from "@/app/materials/_lib/questions";
 import { createClient } from "@/lib/supabase/server";
 import {
 	getClubMilestones,
@@ -27,6 +33,7 @@ import {
 	MATERIAL_KIND_LABELS,
 	MATERIAL_STATUS_LABELS,
 	type MaterialKind,
+	type MaterialStatus,
 	SESSION_STATUS_LABELS,
 	type SessionStatus,
 } from "../_lib/materials";
@@ -42,6 +49,30 @@ const KIND_ICON: Record<MaterialKind, typeof Book01Icon> = {
 	article: News01Icon,
 };
 
+const sessionActionClassName =
+	"inline-flex min-h-11 items-center rounded-md px-1 font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:underline focus-visible:ring-3 focus-visible:ring-ring/50";
+
+function materialProgressCaption(
+	status: MaterialStatus,
+	percent: number,
+): string {
+	if (status === "finished") return MATERIAL_STATUS_LABELS.finished;
+	if (status === "in_progress") {
+		return `${MATERIAL_STATUS_LABELS.in_progress} (${percent}%)`;
+	}
+	return MATERIAL_STATUS_LABELS[status];
+}
+
+function planSessionOrder(
+	a: { id: string; scheduled_at: string | null; created_at: string },
+	b: { id: string; scheduled_at: string | null; created_at: string },
+): number {
+	const aKey = a.scheduled_at ?? a.created_at;
+	const bKey = b.scheduled_at ?? b.created_at;
+	const byTime = aKey.localeCompare(bKey);
+	return byTime !== 0 ? byTime : a.id.localeCompare(b.id);
+}
+
 type StepVariant = "completed" | "active" | "planned";
 
 function sessionStepInfo(status: SessionStatus): {
@@ -55,14 +86,14 @@ function sessionStepInfo(status: SessionStatus): {
 			return {
 				variant: "completed",
 				icon: CheckmarkCircle01Icon,
-				cardClass: "border-border bg-card/70 opacity-75",
+				cardClass: "border-border bg-muted/40",
 			};
 		case "in_progress":
 		case "lobby":
 			return {
 				variant: "active",
 				icon: PlayCircleIcon,
-				cardClass: "border-primary bg-card shadow-md",
+				cardClass: "border-primary bg-card",
 			};
 		default:
 			return {
@@ -80,17 +111,40 @@ export default async function MaterialDetailPage({
 }) {
 	const { id } = await params;
 	const supabase = await createClient();
-	const material = await getMaterial(supabase, id);
+	const [material, bank, milestones] = await Promise.all([
+		getMaterial(supabase, id),
+		listMaterialTrivias(supabase, id).catch(() => []),
+		getClubMilestones(supabase).catch(() => []),
+	]);
 
 	if (!material) {
 		notFound();
 	}
 
-	const bank = await listMaterialTrivias(supabase, id).catch(() => []);
-	const milestones = await getClubMilestones(supabase).catch(() => []);
 	const showTriviaBank = material.sessions.some(
 		(s) => s.status === "preparation",
 	);
+	const prepIds = material.sessions
+		.filter((s) => s.status === "preparation")
+		.map((s) => s.id);
+
+	let currentUserId: string | null = null;
+	let poolsBySession = new Map<string, QuestionWithAuthor[]>();
+
+	if (prepIds.length > 0) {
+		const { data: authData } = await supabase.auth.getUser();
+		const user = authData.user;
+		if (user) {
+			const [active, pools] = await Promise.all([
+				isActiveMember(supabase, user.id),
+				getSessionPools(supabase, prepIds),
+			]);
+			if (active) {
+				currentUserId = user.id;
+				poolsBySession = pools;
+			}
+		}
+	}
 
 	const closedCount = material.sessions.filter(
 		(s) => s.status === "closed" || s.status === "archived",
@@ -98,24 +152,22 @@ export default async function MaterialDetailPage({
 	const progressPercent =
 		material.status === "finished"
 			? 100
-			: material.status === "in_progress" && material.sessions.length > 0
+			: material.sessions.length > 0
 				? Math.round((closedCount / material.sessions.length) * 100)
-				: material.status === "selected"
-					? 10
-					: 0;
+				: 0;
 
-	const chronologicalSessions = [...material.sessions].reverse();
+	const chronologicalSessions = [...material.sessions].sort(planSessionOrder);
 
 	return (
 		<div className="flex flex-col gap-8">
-			<div className="grid grid-cols-1 gap-7 lg:grid-cols-12">
+			<div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
 				{/* ── Columna izquierda: info del material ── */}
-				<div className="flex flex-col gap-5 lg:col-span-4">
-					<article className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+				<div className="flex min-w-0 flex-col gap-5 lg:col-span-4">
+					<article className="overflow-hidden rounded-2xl border border-border bg-card">
 						<div className="relative h-36 overflow-hidden bg-accent">
 							<MaterialCover
 								src={material.image_url}
-								alt=""
+								alt={material.title}
 								fallback={
 									<div className="grid h-full w-full place-items-center">
 										<HugeiconsIcon
@@ -139,11 +191,11 @@ export default async function MaterialDetailPage({
 								{MATERIAL_KIND_LABELS[material.kind]}
 							</span>
 
-							<div>
-								<h1 className="text-2xl font-semibold tracking-tight">
+							<div className="min-w-0">
+								<h1 className="font-heading text-2xl font-semibold tracking-tight text-balance break-words">
 									{material.title}
 								</h1>
-								<p className="mt-1 italic text-muted-foreground">
+								<p className="mt-1 break-words italic text-muted-foreground">
 									{material.author}
 								</p>
 								{material.source_url && (
@@ -151,9 +203,17 @@ export default async function MaterialDetailPage({
 										href={material.source_url}
 										target="_blank"
 										rel="noopener noreferrer"
-										className="mt-2 inline-flex font-medium text-primary underline-offset-4 hover:underline"
+										className={`${sessionActionClassName} mt-2 gap-1.5`}
 									>
-										Ver recurso ↗
+										Ver recurso
+										<HugeiconsIcon
+											icon={ArrowUpRight01Icon}
+											className="size-3.5"
+											aria-hidden="true"
+										/>
+										<span className="sr-only">
+											(se abre en una pestaña nueva)
+										</span>
 									</a>
 								)}
 							</div>
@@ -171,15 +231,19 @@ export default async function MaterialDetailPage({
 							</div>
 							{material.status !== "proposed" && (
 								<div>
-									<div className="mb-2 flex justify-between text-sm text-muted-foreground">
-										<span>Estado general</span>
-										<span>
-											{material.status === "finished"
-												? "Finalizado"
-												: `En curso (${progressPercent}%)`}
+									<div className="mb-2 flex justify-between gap-2 text-sm text-muted-foreground">
+										<span>Avance</span>
+										<span className="text-right">
+											{materialProgressCaption(
+												material.status,
+												progressPercent,
+											)}
 										</span>
 									</div>
-									<div className="h-1.5 overflow-hidden rounded-full bg-secondary">
+									<div
+										className="h-1.5 overflow-hidden rounded-full bg-secondary"
+										aria-hidden="true"
+									>
 										<div
 											className="h-full rounded-full bg-primary transition-all"
 											style={{ width: `${progressPercent}%` }}
@@ -200,8 +264,6 @@ export default async function MaterialDetailPage({
 									<span
 										key={m.id}
 										className="inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground"
-										aria-label={m.name}
-										title={m.name}
 									>
 										<span aria-hidden="true">{m.emoji}</span>
 										<span>{m.name}</span>
@@ -214,9 +276,9 @@ export default async function MaterialDetailPage({
 
 				{/* ── Columna derecha: plan de sesiones ── */}
 				<div className="min-w-0 lg:col-span-8">
-					<div className="mb-7 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+					<div className="mb-8 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
 						<div className="max-w-prose">
-							<h2 className="text-4xl font-semibold leading-none tracking-tight">
+							<h2 className="font-heading text-3xl font-semibold tracking-tight text-balance md:text-4xl">
 								Plan de Tertulias
 							</h2>
 							<p className="mt-2 text-lg leading-7 text-muted-foreground">
@@ -269,7 +331,7 @@ export default async function MaterialDetailPage({
 											<div className="min-w-0 flex-1">
 												<div className="flex flex-wrap items-start justify-between gap-2">
 													<div>
-														<h3 className="text-lg font-semibold">
+														<h3 className="text-lg font-semibold break-words">
 															{session.range}
 														</h3>
 														{session.scheduled_at && (
@@ -307,26 +369,7 @@ export default async function MaterialDetailPage({
 												</div>
 
 												{!isClosed && (
-													<div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-														<span className="inline-flex items-center gap-1 rounded-lg bg-accent px-2 py-1 text-accent-foreground">
-															<HugeiconsIcon
-																icon={Time01Icon}
-																className="size-3"
-																aria-hidden="true"
-															/>
-															{session.scheduled_at ? (
-																<time dateTime={session.scheduled_at}>
-																	{new Date(
-																		session.scheduled_at,
-																	).toLocaleDateString("es", {
-																		day: "numeric",
-																		month: "short",
-																	})}
-																</time>
-															) : (
-																"Sin fecha"
-															)}
-														</span>
+													<div className="mt-4">
 														<SessionScheduler
 															materialId={material.id}
 															sessionId={session.id}
@@ -335,11 +378,11 @@ export default async function MaterialDetailPage({
 													</div>
 												)}
 
-												<div className="mt-3 flex flex-wrap gap-3 text-sm">
+												<div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
 													{session.status === "archived" && (
 														<Link
 															href={`/materials/sessions/${session.id}`}
-															className="font-medium text-primary underline-offset-4 hover:underline"
+															className={sessionActionClassName}
 														>
 															Ver memoria
 														</Link>
@@ -347,7 +390,7 @@ export default async function MaterialDetailPage({
 													{session.status === "lobby" && (
 														<Link
 															href={`/materials/sessions/${session.id}/lobby`}
-															className="font-medium text-primary underline-offset-4 hover:underline"
+															className={sessionActionClassName}
 														>
 															Ir a la sala
 														</Link>
@@ -356,19 +399,19 @@ export default async function MaterialDetailPage({
 														<>
 															<Link
 																href={`/materials/sessions/${session.id}/stage`}
-																className="font-medium text-primary underline-offset-4 hover:underline"
+																className={sessionActionClassName}
 															>
 																Escenario
 															</Link>
 															<Link
 																href={`/materials/sessions/${session.id}/minigames`}
-																className="font-medium text-primary underline-offset-4 hover:underline"
+																className={sessionActionClassName}
 															>
 																Minijuegos
 															</Link>
 															<Link
 																href={`/materials/sessions/${session.id}/rating`}
-																className="font-medium text-primary underline-offset-4 hover:underline"
+																className={sessionActionClassName}
 															>
 																Rating
 															</Link>
@@ -379,19 +422,24 @@ export default async function MaterialDetailPage({
 														session.rating_count > 0 && (
 															<Link
 																href={`/materials/sessions/${session.id}`}
-																className="font-medium text-primary underline-offset-4 hover:underline"
+																className={sessionActionClassName}
 															>
 																Ver rating en memoria
 															</Link>
 														)}
 												</div>
 
-												{session.status === "preparation" && (
+												{session.status === "preparation" && currentUserId && (
 													<div className="mt-3">
 														<MaterialQuestionsSection
 															materialId={material.id}
 															sessionId={session.id}
 															sessionRange={session.range ?? ""}
+															questions={poolsBySession.get(session.id) ?? []}
+															currentUserId={currentUserId}
+															isModerator={
+																session.moderator_id === currentUserId
+															}
 														/>
 													</div>
 												)}

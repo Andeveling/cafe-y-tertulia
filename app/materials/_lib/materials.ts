@@ -46,7 +46,7 @@ export type MaterialDetail = {
 	source_url: string | null;
 	rating_avg: number | null;
 	rating_count: number;
-	sessions: Omit<
+	sessions: (Omit<
 		SessionHistory,
 		| "material"
 		| "questions"
@@ -54,7 +54,7 @@ export type MaterialDetail = {
 		| "trivia_rounds"
 		| "takes"
 		| "awards"
-	>[];
+	> & { moderator_id: string | null })[];
 };
 
 /**
@@ -100,7 +100,7 @@ export async function getMaterial(
 	const { data, error } = await supabase
 		.from("materials")
 		.select(
-			"id, title, kind, author, status, created_at, image_url, source_url, rating_avg, rating_count, sessions(id, range, status, scheduled_at, created_at, rating_avg, rating_count)",
+			"id, title, kind, author, status, created_at, image_url, source_url, rating_avg, rating_count, sessions(id, range, status, scheduled_at, created_at, rating_avg, rating_count, moderator_id)",
 		)
 		.eq("id", id)
 		.single();
