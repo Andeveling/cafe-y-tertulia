@@ -178,6 +178,30 @@ export type Database = {
 				};
 				Relationships: [];
 			};
+			categories: {
+				Row: {
+					created_at: string;
+					icon: string;
+					id: string;
+					key: string;
+					name: string;
+				};
+				Insert: {
+					created_at?: string;
+					icon: string;
+					id?: string;
+					key: string;
+					name: string;
+				};
+				Update: {
+					created_at?: string;
+					icon?: string;
+					id?: string;
+					key?: string;
+					name?: string;
+				};
+				Relationships: [];
+			};
 			convocatorias: {
 				Row: {
 					created_at: string;
@@ -326,6 +350,39 @@ export type Database = {
 						columns: ["invited_by"];
 						isOneToOne: false;
 						referencedRelation: "members";
+						referencedColumns: ["id"];
+					},
+				];
+			};
+			material_categories: {
+				Row: {
+					category_id: string;
+					created_at: string;
+					material_id: string;
+				};
+				Insert: {
+					category_id: string;
+					created_at?: string;
+					material_id: string;
+				};
+				Update: {
+					category_id?: string;
+					created_at?: string;
+					material_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "material_categories_category_id_fkey";
+						columns: ["category_id"];
+						isOneToOne: false;
+						referencedRelation: "categories";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "material_categories_material_id_fkey";
+						columns: ["material_id"];
+						isOneToOne: false;
+						referencedRelation: "materials";
 						referencedColumns: ["id"];
 					},
 				];
@@ -547,6 +604,39 @@ export type Database = {
 					status?: Database["public"]["Enums"]["season_status"];
 				};
 				Relationships: [];
+			};
+			session_categories: {
+				Row: {
+					category_id: string;
+					created_at: string;
+					session_id: string;
+				};
+				Insert: {
+					category_id: string;
+					created_at?: string;
+					session_id: string;
+				};
+				Update: {
+					category_id?: string;
+					created_at?: string;
+					session_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "session_categories_category_id_fkey";
+						columns: ["category_id"];
+						isOneToOne: false;
+						referencedRelation: "categories";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "session_categories_session_id_fkey";
+						columns: ["session_id"];
+						isOneToOne: false;
+						referencedRelation: "sessions";
+						referencedColumns: ["id"];
+					},
+				];
 			};
 			session_participants: {
 				Row: {

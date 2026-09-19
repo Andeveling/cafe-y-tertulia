@@ -1,6 +1,8 @@
 import { UserIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { notFound } from "next/navigation";
+import { MasteryStrip } from "@/app/materials/_components/mastery-strip";
+import { getMemberMastery } from "@/app/materials/_lib/categories";
 import { getMemberProfile } from "@/app/materials/_lib/materials";
 import { getBadgeIcon } from "@/components/badge-icons";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +23,11 @@ export default async function MemberProfilePage({
 	params: Promise<{ id: string }>;
 }) {
 	const supabase = await createClient();
-	const profile = await getMemberProfile(supabase, (await params).id);
+	const { id } = await params;
+	const [profile, mastery] = await Promise.all([
+		getMemberProfile(supabase, id),
+		getMemberMastery(supabase, id).catch(() => []),
+	]);
 	if (!profile) notFound();
 
 	return (
@@ -73,6 +79,29 @@ export default async function MemberProfilePage({
 								</li>
 							))}
 						</ul>
+					)}
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<CardTitle>Maestrías</CardTitle>
+					<CardDescription>
+						Su recorrido por categoría, de por vida.
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{mastery.length === 0 ? (
+						<p className="text-sm text-muted-foreground">Aún sin maestrías.</p>
+					) : (
+						<MasteryStrip
+							items={mastery.map((m) => ({
+								categoryId: m.category.id,
+								categoryName: m.category.name,
+								level: m.level,
+								points: m.points,
+							}))}
+						/>
 					)}
 				</CardContent>
 			</Card>

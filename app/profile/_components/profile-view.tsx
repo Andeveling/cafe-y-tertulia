@@ -1,3 +1,4 @@
+import { MasteryStrip } from "@/app/materials/_components/mastery-strip";
 import { BadgeVitrina } from "@/app/profile/_components/badge-vitrina";
 import { LeaveClubDialog } from "@/app/profile/_components/leave-club-dialog";
 import { UpdateProfileForm } from "@/app/profile/_components/update-profile-form";
@@ -24,6 +25,7 @@ export type ProfileViewProps = {
 	level: MemberLevel;
 	badges: MemberBadge[];
 	recognitions: SeasonRecognition[];
+	mastery: { categoryId: string; categoryName: string; level: string }[];
 	updated?: boolean;
 	updateFailed?: boolean;
 };
@@ -35,18 +37,13 @@ function statusLabel(status: string) {
 }
 
 function initials(name: string) {
-	const parts = name.trim().split(/\s+/).filter(Boolean);
-	if (parts.length === 0) return "·";
-	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-	return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
 export function ProfileView({
 	displayName,
 	status,
 	level,
 	badges,
 	recognitions,
+	mastery,
 	updated,
 	updateFailed,
 }: ProfileViewProps) {
@@ -226,9 +223,41 @@ export function ProfileView({
 				</Card>
 			</section>
 
+			{/* ── Maestrías ─────────────────────────────────────────────────── */}
+			{mastery.length > 0 && (
+				<section aria-labelledby="maestrias-heading" className="mt-12">
+					<Card>
+						<CardHeader>
+							<div className="min-w-0">
+								<CardTitle className="font-heading text-xl">
+									<h2 id="maestrias-heading">Maestrías</h2>
+								</CardTitle>
+								<CardDescription>
+									Tu recorrido por categoría, de por vida.
+								</CardDescription>
+							</div>
+						</CardHeader>
+						<CardContent>
+							<MasteryStrip items={mastery} />
+						</CardContent>
+					</Card>
+				</section>
+			)}
+
 			{/* ── Ajustes tranquilos ──────────────────────────────────────── */}
 			<section aria-label="Ajustes del perfil" className="mt-12">
 				<div className="grid gap-6 md:grid-cols-2">
+					<Card>
+						<CardHeader>
+							<CardTitle className="text-lg">
+							</CardTitle>
+							<CardDescription>
+								La cara con la que te ve el resto del club.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+						</CardContent>
+					</Card>
 					<Card>
 						<CardHeader>
 							<CardTitle className="text-lg">

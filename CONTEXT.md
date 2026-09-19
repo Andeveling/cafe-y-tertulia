@@ -52,6 +52,14 @@ _Avoid_: Contenido, recurso, libro (como término general)
 Porción del Material que aborda una Sesión concreta (ej. "Capítulos 1-3", "Ep. 2", "Min 0-30"). Solo existe si la Sesión tiene Material. Texto libre, sin lista previa de capítulos ni validación de solapes.
 _Avoid_: Capítulo (como entidad), episodio, sección
 
+**Categoría**:
+Tema duradero del club (ej. filosofía, cine, actualidad) que agrupa Materiales y Sesiones. Un Material pertenece a una o varias; la Sesión con Material hereda las de su Material, y la Sesión sin Material lleva las suyas propias o ninguna.
+_Avoid_: Tema (como término de modelo), tag, etiqueta
+
+**Maestría**:
+Nivel de un Miembro en una Categoría (semilla → degustador → contertulio → maestro), derivado de participar y aportar en Sesiones de esa Categoría. Cuenta el histórico, es de por vida y no duplica Insignias, Hitos ni Reconocimientos.
+_Avoid_: Rango, nivel global, insignia
+
 **Pregunta**:
 Pregunta abierta que un Miembro aporta para una Sesión, con o sin Material. Puede escribirla días antes en `Preguntas` o, si no alcanzó, en `Presentes` sin volver atrás. Su texto es visible solo para su autor hasta la Intervención que la revela; los demás ven autor y estado (enviada ✓), no el contenido. Si aporta varias, elige cuál entra al Sorteo; si no elige, entra una al azar. Tiene autor y, dentro de la Sesión, un asignado.
 _Avoid_: Cuestión, interrogante

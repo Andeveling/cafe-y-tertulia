@@ -14,6 +14,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ClubMilestones } from "@/app/materials/_components/club-milestones";
+import { MaterialCategories } from "@/app/materials/_components/material-categories";
 import { MaterialCover } from "@/app/materials/_components/material-cover";
 import { MaterialQuestionsSection } from "@/app/materials/_components/material-questions-section";
 import { NewSessionDialog } from "@/app/materials/_components/new-session-dialog";
@@ -21,6 +22,11 @@ import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { SessionScheduler } from "@/app/materials/_components/session-scheduler";
 import { StepIndicator } from "@/app/materials/_components/step-indicator";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
+import {
+	getMaterialCategories,
+	getMemberMastery,
+	listCategories,
+} from "@/app/materials/_lib/categories";
 import { isActiveMember } from "@/app/materials/_lib/members";
 import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
 import {
@@ -112,15 +118,27 @@ export default async function MaterialDetailPage({
 }) {
 	const { id } = await params;
 	const supabase = await createClient();
-	const [material, bank, milestones] = await Promise.all([
-		getMaterial(supabase, id),
-		listMaterialTrivias(supabase, id).catch(() => []),
-		getClubMilestones(supabase).catch(() => []),
-	]);
+	const [material, bank, milestones, categories, materialCategories, authData] =
+		await Promise.all([
+			getMaterial(supabase, id),
+			listMaterialTrivias(supabase, id).catch(() => []),
+			getClubMilestones(supabase).catch(() => []),
+			listCategories(supabase).catch(() => []),
+			getMaterialCategories(supabase, id).catch(() => []),
+			supabase.auth.getUser().then(({ data }) => data.user),
+		]);
 
 	if (!material) {
 		notFound();
 	}
+
+	const viewer = authData ?? null;
+	const canTag = viewer
+		? await isActiveMember(supabase, viewer.id).catch(() => false)
+		: false;
+	const mastery = viewer
+		? await getMemberMastery(supabase, viewer.id).catch(() => [])
+		: [];
 
 	const showTriviaBank = material.sessions.some(
 		(s) => s.status === "preparation",
@@ -132,19 +150,9 @@ export default async function MaterialDetailPage({
 	let currentUserId: string | null = null;
 	let poolsBySession = new Map<string, QuestionWithAuthor[]>();
 
-	if (prepIds.length > 0) {
-		const { data: authData } = await supabase.auth.getUser();
-		const user = authData.user;
-		if (user) {
-			const [active, pools] = await Promise.all([
-				isActiveMember(supabase, user.id),
-				getSessionPools(supabase, prepIds),
-			]);
-			if (active) {
-				currentUserId = user.id;
-				poolsBySession = pools;
-			}
-		}
+	if (prepIds.length > 0 && viewer && canTag) {
+		currentUserId = viewer.id;
+		poolsBySession = await getSessionPools(supabase, prepIds);
 	}
 
 	const closedCount = material.sessions.filter(
@@ -230,6 +238,24 @@ export default async function MaterialDetailPage({
 									/>
 								)}
 							</div>
+							{categories.length > 0 && (
+								<MaterialCategories
+									materialId={material.id}
+									all={categories}
+									initialIds={materialCategories.map((c) => c.id)}
+									mastery={mastery
+										.filter((m) =>
+											materialCategories.some((c) => c.id === m.category.id),
+										)
+										.map((m) => ({
+											categoryId: m.category.id,
+											categoryName: m.category.name,
+											level: m.level,
+											points: m.points,
+										}))}
+									canEdit={canTag}
+								/>
+							)}
 							{material.status !== "proposed" && (
 								<div>
 									<div className="mb-2 flex justify-between gap-2 text-sm text-muted-foreground">
