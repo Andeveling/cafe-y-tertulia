@@ -307,16 +307,15 @@ export async function castHeart(
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase }) => {
-			// TODO: quitar el cast cuando se regeneren los tipos de DB tras la migración de corazones
-			const rpc = supabase.rpc as unknown as (
-				fn: string,
-				args: Record<string, unknown>,
-			) => Promise<{ error: { message: string } | null }>;
-			const { error } = await rpc("cast_heart", {
-				target_assignment_id: assignmentId,
-				p_phase: phase,
-				p_value: value,
-			});
+			// TODO: quitar `as never` al regenerar database.types tras 20260919000000
+			const { error } = await supabase.rpc(
+				"cast_heart" as never,
+				{
+					target_assignment_id: assignmentId,
+					p_phase: phase,
+					p_value: value,
+				} as never,
+			);
 			if (error) return { ok: false, error: error.message };
 		},
 		revalidate: async () => [roomPath(sessionId)],
