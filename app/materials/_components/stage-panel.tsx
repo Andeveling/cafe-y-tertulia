@@ -706,10 +706,6 @@ function ActiveTurn({
 		heartsEligible: hearts?.eligible,
 	};
 	const spotlight = <TurnSpotlight {...spotlightProps} voter={voter} />;
-	// El dialog del moderador es la pantalla compartida: ahí solo conteo.
-	const dialogSpotlight = (
-		<TurnSpotlight {...spotlightProps} voter={isModerator ? null : voter} />
-	);
 
 	return (
 		<div ref={spotHostRef} className="contents">
@@ -884,7 +880,7 @@ function ActiveTurn({
 								/>
 							</div>
 						)}
-						{dialogSpotlight}
+						{spotlight}
 					</DialogContent>
 				</Dialog>
 			)}
