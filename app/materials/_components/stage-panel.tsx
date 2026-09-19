@@ -3,6 +3,7 @@
 import {
 	ArrowRight01Icon,
 	Cancel01Icon,
+	FavouriteIcon,
 	FullScreenIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -44,6 +45,7 @@ import {
 } from "@/app/materials/_lib/room-types";
 import type { TurnoAprecio } from "@/app/materials/_lib/room-view";
 import { sharedNow } from "@/app/materials/_lib/shared-now";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
@@ -557,13 +559,21 @@ function TurnSpotlight({
 				)}
 				{voter && <div className="mt-3">{voter}</div>}
 				{heartsVoted != null && heartsEligible != null && (
-					<p
-						className="mt-2 text-sm tabular-nums text-muted-foreground"
+					<Badge
+						variant="outline"
+						className="mt-2 tabular-nums"
 						role="status"
 						aria-live="polite"
+						aria-label={`${heartsProgressText(heartsVoted, heartsEligible)} corazones`}
 					>
-						{heartsProgressText(heartsVoted, heartsEligible)} corazones
-					</p>
+						<HugeiconsIcon
+							icon={FavouriteIcon}
+							strokeWidth={2}
+							className="text-primary"
+							aria-hidden="true"
+						/>
+						{heartsVoted}/{heartsEligible}
+					</Badge>
 				)}
 			</section>
 		</>
