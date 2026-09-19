@@ -3,14 +3,9 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import {
-	DrawWheel,
-	type DrawWheelPerson,
-} from "@/app/materials/_components/draw-wheel";
-import {
 	assembleDrawCeremony,
 	type DrawCeremonySlice,
 	drawCeremonyPhase,
-	drawWheelRotationDeg,
 } from "@/app/materials/_lib/draw-ceremony";
 import type {
 	RoomAssignment,
@@ -80,7 +75,8 @@ export function DrawCeremonyView({
 	nowMs,
 	reducedMotion,
 }: Props) {
-	const reduced = usePrefersReducedMotion(reducedMotion);
+	const [skipMotion, setSkipMotion] = useState(false);
+	const reduced = usePrefersReducedMotion(reducedMotion) || skipMotion;
 	const clock = assembleDrawCeremony(snapshot, {
 		nowMs: nowMs ?? 0,
 		optimisticCreatedAt,
@@ -105,39 +101,30 @@ export function DrawCeremonyView({
 	const phase = ceremony.phase;
 	const started = ceremony.started;
 
-	const wheelPeople = wheelPeopleFrom(ceremony.people, sorted);
-
-	const edges = sorted.map((a) => ({
-		fromId: a.authorId,
-		toId: a.assigneeId,
-	}));
 	const spinning = started && phase?.kind === "countdown";
 	const locking = started && phase?.kind === "fanfare";
-	const spinningVisual = spinning || (locking && edges.length === 0);
-	const lockedVisual = locking && edges.length > 0;
+	const awaitingPairs = started && ceremony.assignments.length === 0;
+
+	const spectators = snapshot.participants.filter(
+		(p) => p.role === "spectator" || p.optOut,
+	);
+	const me = snapshot.participants.find((p) => p.memberId === userId);
+	const iWatch = me ? me.role === "spectator" || me.optOut : false;
 
 	if (!started || spinning || locking) {
-		const t0 = ceremony.createdAt ? Date.parse(ceremony.createdAt) : 0;
-		const elapsed =
-			(spinningVisual || lockedVisual) && Number.isFinite(t0)
-				? Math.max(0, now - t0)
-				: 0;
 		return (
-			<WheelBeat
-				people={wheelPeople}
-				spinning={Boolean(spinningVisual)}
-				locked={lockedVisual}
-				edges={edges}
-				rotationDeg={
-					(spinningVisual || lockedVisual) && !reduced
-						? drawWheelRotationDeg(elapsed)
-						: 0
-				}
-				reduced={reduced}
+			<SorteoBeat
+				count={phase?.kind === "countdown" ? phase.count : null}
+				fanfare={locking}
+				awaiting={locking && awaitingPairs}
+				inCycle={ceremony.people.length}
+				spectatorCount={spectators.length}
+				iWatch={iWatch}
 				readiness={snapshot.readiness}
 				isModerator={isModerator}
 				pending={pending}
 				onExecute={onExecute}
+				onSkip={spinning || locking ? () => setSkipMotion(true) : undefined}
 			/>
 		);
 	}
@@ -160,93 +147,127 @@ export function DrawCeremonyView({
 	);
 }
 
-function wheelPeopleFrom(
-	people: DrawWheelPerson[],
-	assignments: RoomAssignment[],
-): DrawWheelPerson[] {
-	if (people.length > 0) return people;
-	const seen = new Set<string>();
-	const out: DrawWheelPerson[] = [];
-	for (const a of assignments) {
-		for (const p of [
-			{ id: a.authorId, name: a.authorName },
-			{ id: a.assigneeId, name: a.assigneeName },
-		]) {
-			if (seen.has(p.id)) continue;
-			seen.add(p.id);
-			out.push(p);
-		}
-	}
-	return out;
+function GuaranteeLine() {
+	return (
+		<p className="max-w-md text-sm text-muted-foreground text-pretty">
+			Cada uno expone una pregunta ajena — nadie la propia. El texto se revela
+			en tu turno.
+		</p>
+	);
 }
 
-function WheelBeat({
-	people,
-	spinning,
-	locked,
-	edges,
-	rotationDeg,
-	reduced,
+function SorteoBeat({
+	count,
+	fanfare,
+	awaiting,
+	inCycle,
+	spectatorCount,
+	iWatch,
 	readiness,
 	isModerator,
 	pending,
 	onExecute,
+	onSkip,
 }: {
-	people: DrawWheelPerson[];
-	spinning: boolean;
-	locked: boolean;
-	edges: { fromId: string; toId: string }[];
-	rotationDeg: number;
-	reduced: boolean;
+	count: 3 | 2 | 1 | null;
+	fanfare: boolean;
+	awaiting: boolean;
+	inCycle: number;
+	spectatorCount: number;
+	iWatch: boolean;
 	readiness: RoomReadiness;
 	isModerator: boolean;
 	pending: boolean;
 	onExecute?: () => void;
+	onSkip?: () => void;
 }) {
-	const isEmpty = readiness.total === 0;
-	const inMotion = spinning || locked;
+	const inMotion = count != null || fanfare;
+	const canDraw = readiness.total >= 2;
+	const cycleLabel =
+		inCycle === 0
+			? "Sin participantes todavía."
+			: `${inCycle} ${inCycle === 1 ? "persona" : "personas"} en el ciclo.`;
 	return (
-		<div className="flex flex-col items-center gap-8 py-10 text-center">
-			<DrawWheel
-				people={people}
-				rotationDeg={rotationDeg}
-				spinning={spinning}
-				locked={locked}
-				edges={edges}
-				reduced={reduced}
-			/>
-			<div className="flex flex-col gap-2">
-				<h2 className="font-heading text-2xl font-semibold text-balance">
-					{locked
-						? "Las parejas"
-						: spinning
-							? "Sorteando"
-							: "El sorteo está listo"}
-				</h2>
-				{inMotion ? (
-					<p className="sr-only" aria-live="assertive">
-						{locked ? "Las parejas" : "Sorteando"}
+		<div className="flex flex-col items-center gap-6 px-4 py-8 text-center">
+			{count != null ? (
+				<div
+					role="status"
+					aria-live="assertive"
+					aria-label={`Sorteando, ${count}`}
+					className="flex flex-col items-center gap-3"
+				>
+					<motion.span
+						key={count}
+						initial={{ opacity: 0, y: 16, filter: "blur(8px)" }}
+						animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+						transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+						className="font-heading text-7xl font-semibold text-primary tabular-nums"
+					>
+						{count}
+					</motion.span>
+					<h2 className="font-heading text-2xl font-semibold text-balance">
+						Sorteando tu misión
+					</h2>
+				</div>
+			) : fanfare ? (
+				<div
+					role="status"
+					aria-live="assertive"
+					aria-label={awaiting ? "Revelando, esperando a la sala" : "Revelando"}
+					className="flex flex-col items-center gap-3"
+				>
+					<h2 className="font-heading text-2xl font-semibold text-balance">
+						Revelando
+					</h2>
+					{awaiting && (
+						<p className="text-sm text-muted-foreground">
+							Esperando a la sala…
+						</p>
+					)}
+				</div>
+			) : (
+				<div className="flex flex-col items-center gap-2">
+					<h2 className="font-heading text-2xl font-semibold text-balance">
+						El sorteo está listo
+					</h2>
+					<p className="text-sm text-muted-foreground">{cycleLabel}</p>
+				</div>
+			)}
+			<GuaranteeLine />
+			{iWatch && (
+				<p className="text-sm text-muted-foreground">Miras esta ronda.</p>
+			)}
+			{!inMotion && !iWatch && spectatorCount > 0 && (
+				<p className="text-xs text-muted-foreground">
+					{spectatorCount} {spectatorCount === 1 ? "mira" : "miran"} esta ronda.
+				</p>
+			)}
+			{inMotion ? (
+				isModerator && onSkip ? (
+					<Button variant="ghost" size="sm" onClick={onSkip}>
+						Saltar animación
+					</Button>
+				) : !isModerator ? (
+					<p className="text-sm text-muted-foreground">
+						Tu misión aparece en segundos.
 					</p>
-				) : (
-					<p className="max-w-sm text-sm text-muted-foreground text-pretty">
-						Luego ves a quién te tocó — el texto espera al debate.
-					</p>
-				)}
-			</div>
-			{inMotion ? null : (
+				) : null
+			) : (
 				<>
 					{isModerator ? (
-						isEmpty ? (
-							<div className="flex flex-col items-center gap-1">
-								<Button disabled>Sortear</Button>
-								<p className="text-xs text-muted-foreground">
-									Se necesita al menos un participante para sortear.
-								</p>
-							</div>
-						) : (
+						canDraw ? (
 							<Button disabled={pending} onClick={onExecute}>
 								Sortear
 							</Button>
+						) : (
+							<div className="flex flex-col items-center gap-1">
+								<Button disabled>Sortear</Button>
+								<p className="text-xs text-muted-foreground">
+									{readiness.total === 0
+										? "Se necesita al menos un participante para sortear."
+										: "Se necesitan al menos 2 participantes para sortear."}
+								</p>
+							</div>
 						)
 					) : (
 						<p className="text-sm text-muted-foreground">

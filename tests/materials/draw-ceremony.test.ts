@@ -5,11 +5,8 @@ import {
 	DRAW_BEAT_MS,
 	DRAW_COUNTDOWN_MS,
 	DRAW_FANFARE_MS,
-	DRAW_SPIN_MS,
 	DRAW_STAGGER_MS,
-	DRAW_WHEEL_TURNS,
 	drawCeremonyPhase,
-	drawWheelRotationDeg,
 } from "@/app/materials/_lib/draw-ceremony";
 import type {
 	RoomAssignment,
@@ -214,18 +211,5 @@ describe("clampOptimisticPhase", () => {
 		expect(clampOptimisticPhase({ kind: "settled" }, false)).toEqual({
 			kind: "settled",
 		});
-	});
-});
-
-describe("drawWheelRotationDeg", () => {
-	it("arranca en 0 y termina en 8 vueltas", () => {
-		expect(drawWheelRotationDeg(0)).toBe(0);
-		expect(drawWheelRotationDeg(DRAW_SPIN_MS)).toBe(360 * DRAW_WHEEL_TURNS);
-		expect(drawWheelRotationDeg(DRAW_SPIN_MS * 2)).toBe(360 * DRAW_WHEEL_TURNS);
-	});
-
-	it("no es lineal — más giro al inicio", () => {
-		const mid = drawWheelRotationDeg(DRAW_SPIN_MS / 2);
-		expect(mid).toBeGreaterThan((360 * DRAW_WHEEL_TURNS) / 2);
 	});
 });

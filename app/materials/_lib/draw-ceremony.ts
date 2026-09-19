@@ -7,18 +7,16 @@ import type {
 /**
  * Reloj compartido del Sorteo. Todos los dispositivos derivan la fase
  * de `draws.created_at` — no del momento en que les llegó el evento —
- * para que el ciclo gire igual en realtime.
+ * para que la cuenta vaya igual en realtime.
  *
  * La ceremonia asamblea el reloj (optimista vs autoritativo), quién entra
- * al ciclo y el freeze de parejas. La Sala pasa el slice + Sortear.
+ * en el ciclo y el freeze de parejas. La Sala pasa el slice + Sortear.
  */
 
 export const DRAW_BEAT_MS = 1000;
 export const DRAW_COUNTDOWN_MS = DRAW_BEAT_MS * 3;
 export const DRAW_FANFARE_MS = 900;
 export const DRAW_STAGGER_MS = 80;
-export const DRAW_SPIN_MS = DRAW_COUNTDOWN_MS + DRAW_FANFARE_MS;
-export const DRAW_WHEEL_TURNS = 8;
 
 export type DrawCeremonyPhase =
 	| { kind: "countdown"; count: 3 | 2 | 1 }
@@ -126,11 +124,4 @@ export function assembleDrawCeremony(
 		assignments: slice.assignments,
 		pairCount,
 	};
-}
-
-/** Giro del ciclo: 8 vueltas con ease-out, anclado al reloj compartido. */
-export function drawWheelRotationDeg(elapsedMs: number): number {
-	const t = Math.min(1, Math.max(0, elapsedMs / DRAW_SPIN_MS));
-	const eased = 1 - (1 - t) ** 3;
-	return eased * 360 * DRAW_WHEEL_TURNS;
 }
