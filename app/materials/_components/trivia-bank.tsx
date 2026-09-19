@@ -180,7 +180,6 @@ export function TriviaBank({ materialId, bank }: Props) {
 							<Button
 								type="button"
 								variant="outline"
-								size="sm"
 								onClick={() => setQs([...qs, emptyQ()])}
 							>
 								+ Pregunta
@@ -190,13 +189,12 @@ export function TriviaBank({ materialId, bank }: Props) {
 							<Button
 								type="button"
 								variant="ghost"
-								size="sm"
 								onClick={() => setQs(qs.slice(0, -1))}
 							>
 								Quitar última
 							</Button>
 						)}
-						<Button type="submit" size="sm" disabled={pending}>
+						<Button type="submit" disabled={pending}>
 							Guardar trivia
 						</Button>
 					</div>

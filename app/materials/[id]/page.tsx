@@ -452,7 +452,7 @@ export default async function MaterialDetailPage({
 							{/* Hito final */}
 							<div className="mt-3 flex items-center gap-3 text-sm italic text-muted-foreground">
 								<StepIndicator icon={Flag01Icon} variant="planned" size="md" />
-								Completar todas las sesiones marca el material como finalizado.
+								Completar todas las sesiones marca el material como terminado.
 							</div>
 						</div>
 					)}

@@ -96,7 +96,7 @@ export function SessionForm({
 					id="session-scheduled-at"
 				/>
 			</Field>
-			<Button type="submit" disabled={isPending} className="h-9">
+			<Button type="submit" disabled={isPending}>
 				<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
 				Nueva sesión
 			</Button>
