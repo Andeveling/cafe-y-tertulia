@@ -40,6 +40,10 @@ const base: RoomSnapshot = {
 			revealOrder: 0,
 			questionText: "¿Qué te movió?",
 			questionVisible: true,
+			aprecioExpositionAvg: null,
+			aprecioExpositionCount: 0,
+			aprecioComplementAvg: null,
+			aprecioComplementCount: 0,
 		},
 		{
 			assignmentId: "a-2",
@@ -52,6 +56,10 @@ const base: RoomSnapshot = {
 			revealOrder: 1,
 			questionText: "¿Qué te movió?",
 			questionVisible: true,
+			aprecioExpositionAvg: null,
+			aprecioExpositionCount: 0,
+			aprecioComplementAvg: null,
+			aprecioComplementCount: 0,
 		},
 	],
 	debate: {
@@ -65,6 +73,7 @@ const base: RoomSnapshot = {
 		revealOrder: 1,
 		myNotes: null,
 		phaseStartedAt: "2026-01-03",
+		hearts: null,
 		remainingHidden: 0,
 	},
 	cierre: null,
@@ -103,6 +112,10 @@ describe("deriveSalaView", () => {
 					revealOrder: 2,
 					questionText: null,
 					questionVisible: false,
+					aprecioExpositionAvg: null,
+					aprecioExpositionCount: 0,
+					aprecioComplementAvg: null,
+					aprecioComplementCount: 0,
 				},
 			],
 		});
@@ -133,6 +146,41 @@ describe("deriveSalaView", () => {
 		expect(plain.debateAuthorId).toBeNull();
 		expect(plain.debateProgress).toBeNull();
 		expect(plain.remainingInterventions).toBe(0);
+	});
+
+	it("deriva el Aprecio del último turno completado", () => {
+		const view = deriveSalaView({
+			...base,
+			assignments: base.assignments.map((a) =>
+				a.assignmentId === "a-1"
+					? {
+							...a,
+							aprecioExpositionAvg: 4.3,
+							aprecioExpositionCount: 5,
+							aprecioComplementAvg: 4.7,
+							aprecioComplementCount: 4,
+						}
+					: a,
+			),
+		});
+		expect(view.debateLastAprecio).toEqual({
+			assigneeName: "Luis",
+			respuestaAvg: 4.3,
+			respuestaCount: 5,
+			preguntaAvg: 4.7,
+			preguntaCount: 4,
+		});
+	});
+
+	it("sin turnos completados no hay Aprecio previo", () => {
+		const view = deriveSalaView({
+			...base,
+			assignments: base.assignments.map((a) => ({
+				...a,
+				state: "hidden" as const,
+			})),
+		});
+		expect(view.debateLastAprecio).toBeNull();
 	});
 
 	it("tolera Sala vacía", () => {

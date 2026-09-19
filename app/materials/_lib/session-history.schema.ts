@@ -45,6 +45,10 @@ export type SessionHistory = {
 			assignee: string;
 			state: string;
 			notes: string;
+			aprecio_exposition_avg: number | null;
+			aprecio_exposition_count: number;
+			aprecio_complement_avg: number | null;
+			aprecio_complement_count: number;
 		};
 	}[];
 	trivia_rounds: {
@@ -105,6 +109,10 @@ const AssignmentSchema = z.object({
 	assignee: jString,
 	state: jString,
 	notes: jString,
+	aprecio_exposition_avg: jNullNumber,
+	aprecio_exposition_count: jNumber,
+	aprecio_complement_avg: jNullNumber,
+	aprecio_complement_count: jNumber,
 });
 
 const QuestionSchema = z

@@ -5,6 +5,7 @@ import type { Database, Json } from "@/lib/supabase/database.types";
 import type {
 	AssignmentState,
 	DrawStatus,
+	HeartsProgress,
 	ParticipantRole,
 	RoomCierreSnapshot,
 	RoomDebateSnapshot,
@@ -15,6 +16,7 @@ import {
 	decodeSnapshot,
 	jArray,
 	jBool,
+	jNullNumber,
 	jNullString,
 	jNumber,
 	jString,
@@ -110,6 +112,10 @@ const AssignmentSchema = z
 		reveal_order: jNumber,
 		question_text: jNullString,
 		question_visible: jBool,
+		aprecio_exposition_avg: jNullNumber,
+		aprecio_exposition_count: jNumber,
+		aprecio_complement_avg: jNullNumber,
+		aprecio_complement_count: jNumber,
 	})
 	.transform((r) => ({
 		assignmentId: r.assignment_id,
@@ -122,7 +128,25 @@ const AssignmentSchema = z
 		revealOrder: r.reveal_order,
 		questionText: r.question_text,
 		questionVisible: r.question_visible,
+		aprecioExpositionAvg: r.aprecio_exposition_avg,
+		aprecioExpositionCount: r.aprecio_exposition_count,
+		aprecioComplementAvg: r.aprecio_complement_avg,
+		aprecioComplementCount: r.aprecio_complement_count,
 	}));
+
+const HeartsProgressSchema = z
+	.object({
+		my_heart: jNullNumber,
+		voted: jNumber,
+		eligible: jNumber,
+	})
+	.transform((r) => ({
+		myHeart: r.my_heart,
+		voted: r.voted,
+		eligible: r.eligible,
+	}))
+	.nullable()
+	.catch(null) as unknown as z.ZodType<HeartsProgress | null>;
 
 // El bloque `debate` llega camelCase desde SQL (mezcla histórica del RPC);
 // se valida tal cual y sale dominio camelCase sin cambios de forma.
@@ -137,6 +161,7 @@ const DebateActiveSchema = z.object({
 	revealOrder: jNumber,
 	myNotes: jNullString,
 	phaseStartedAt: jString,
+	hearts: HeartsProgressSchema,
 	remainingHidden: jNumber,
 });
 

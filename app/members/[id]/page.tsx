@@ -2,6 +2,7 @@ import { UserIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { notFound } from "next/navigation";
 import { getMemberProfile } from "@/app/materials/_lib/materials";
+import { getBadgeIcon } from "@/components/badge-icons";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -62,9 +63,12 @@ export default async function MemberProfilePage({
 									key={award.id}
 									className="flex items-center gap-2 rounded-lg border px-3 py-2"
 								>
-									<span className="text-xl" aria-hidden="true">
-										{award.emoji}
-									</span>
+									<HugeiconsIcon
+										icon={getBadgeIcon(award.badge_key)}
+										size={20}
+										className="shrink-0 text-primary"
+										aria-hidden="true"
+									/>
 									<span className="text-sm">{award.name}</span>
 								</li>
 							))}

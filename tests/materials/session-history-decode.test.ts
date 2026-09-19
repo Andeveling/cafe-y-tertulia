@@ -34,6 +34,10 @@ const row = {
 				assignee: "Luis",
 				state: "complete",
 				notes: "ideas",
+				aprecio_exposition_avg: 4.3,
+				aprecio_exposition_count: 5,
+				aprecio_complement_avg: 4.7,
+				aprecio_complement_count: 4,
 			},
 		},
 	],
@@ -168,6 +172,44 @@ describe("decodeSessionHistory", () => {
 				prompt: "",
 				status: "",
 				counts: { agree: 0, disagree: 0, neutral: 0 },
+			},
+		]);
+	});
+
+	it("tolera assignment sin claves de aprecio (RPC anterior)", () => {
+		const decoded = decodeSessionHistory({
+			...row,
+			questions: [
+				{
+					id: "q-9",
+					text: "Legado",
+					author: "Ana",
+					created_at: "2026-01-01T09:30:00Z",
+					assignment: {
+						id: "a-9",
+						assignee: "Luis",
+						state: "complete",
+						notes: "",
+					},
+				},
+			],
+		});
+		expect(decoded!.questions).toEqual([
+			{
+				id: "q-9",
+				text: "Legado",
+				author: "Ana",
+				created_at: "2026-01-01T09:30:00Z",
+				assignment: {
+					id: "a-9",
+					assignee: "Luis",
+					state: "complete",
+					notes: "",
+					aprecio_exposition_avg: null,
+					aprecio_exposition_count: 0,
+					aprecio_complement_avg: null,
+					aprecio_complement_count: 0,
+				},
 			},
 		]);
 	});

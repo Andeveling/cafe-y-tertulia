@@ -7,10 +7,16 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { memo, type ReactNode, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { HeartPicker } from "@/app/materials/_components/heart-picker";
 import { WaitingRevealView } from "@/app/materials/_components/waiting-reveal-view";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
+import {
+	heartEligibility,
+	heartsPhaseState,
+	heartsProgressText,
+} from "@/app/materials/_lib/hearts";
 import {
 	interventionDisplay,
 	interventionNextLabel,
@@ -19,6 +25,7 @@ import {
 } from "@/app/materials/_lib/intervention";
 import {
 	advanceRoomStage,
+	castHeart,
 	continueIntervention,
 	extendExposition,
 	revealNext,
@@ -29,6 +36,7 @@ import {
 	type RoomParticipant,
 	type RoomStage,
 } from "@/app/materials/_lib/room-types";
+import type { TurnoAprecio } from "@/app/materials/_lib/room-view";
 import { sharedNow } from "@/app/materials/_lib/shared-now";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -45,6 +53,8 @@ type Props = {
 	authorId?: string | null;
 	/** Progreso de intervenciones para “X de Y”. */
 	progress?: { current: number; total: number } | null;
+	/** Aprecio del último turno completado — se revela entre turnos. */
+	lastAprecio?: TurnoAprecio | null;
 	/** Mesa completa — para mostrar quién expone, complementa y escucha. */
 	members?: RoomParticipant[];
 	/** Siguiente en exponer — primera oculta por revealOrder. */
@@ -66,6 +76,7 @@ export function StagePanel({
 	isModerator,
 	authorId = null,
 	progress = null,
+	lastAprecio = null,
 	members = [],
 	nextAssigneeName = null,
 	asOf,
@@ -94,6 +105,7 @@ export function StagePanel({
 				userId={userId}
 				isModerator={isModerator}
 				progress={progress}
+				lastAprecio={lastAprecio}
 			/>
 		);
 	}
@@ -385,12 +397,14 @@ function WaitingReveal({
 	userId,
 	isModerator,
 	progress,
+	lastAprecio,
 }: {
 	debate: Extract<RoomDebateSnapshot, { mode: "waiting_reveal" }>;
 	sessionId: string;
 	userId: string;
 	isModerator: boolean;
 	progress?: { current: number; total: number } | null;
+	lastAprecio?: TurnoAprecio | null;
 }) {
 	const { pending, run } = useRoomMutation();
 	const youNext = debate.nextAssigneeId === userId;
@@ -412,6 +426,7 @@ function WaitingReveal({
 				progressText={progressText}
 				revealLabel={revealLabel}
 				pending={pending}
+				lastAprecio={lastAprecio ?? null}
 				onReveal={
 					isModerator ? () => run(() => revealNext(sessionId)) : undefined
 				}
@@ -437,6 +452,8 @@ function TurnSpotlight({
 	clockCaption,
 	timerAction,
 	showExtendHint,
+	heartsVoted,
+	heartsEligible,
 }: {
 	speakerName: string;
 	speakerVerb: string;
@@ -450,6 +467,8 @@ function TurnSpotlight({
 	clockCaption: string;
 	timerAction?: ReactNode;
 	showExtendHint?: boolean;
+	heartsVoted?: number;
+	heartsEligible?: number;
 }) {
 	return (
 		<>
@@ -527,10 +546,102 @@ function TurnSpotlight({
 						cada +1 suma 60 s y marca la pregunta como hot
 					</p>
 				)}
+				{heartsVoted != null && heartsEligible != null && (
+					<p
+						className="mt-2 text-sm tabular-nums text-muted-foreground"
+						role="status"
+						aria-live="polite"
+					>
+						{heartsProgressText(heartsVoted, heartsEligible)} corazones
+					</p>
+				)}
 			</section>
 		</>
 	);
 }
+
+// Memoizada: el tick del reloj del turno (500 ms) no re-renderiza el voto;
+// solo cambian hearts (snapshot), la fase o el pending de la mutación.
+const HeartsSection = memo(function HeartsSection({
+	hearts,
+	phase,
+	assignmentId,
+	assigneeId,
+	authorId,
+	assigneeName,
+	authorName,
+	userId,
+	sessionId,
+}: {
+	hearts: Extract<RoomDebateSnapshot, { mode: "active" }>["hearts"];
+	phase: "exposition" | "complement";
+	assignmentId: string;
+	assigneeId: string;
+	authorId: string | null;
+	assigneeName: string;
+	authorName: string;
+	userId: string;
+	sessionId: string;
+}) {
+	const { pending, run } = useRoomMutation();
+	if (!hearts) return null;
+	const phaseState = heartsPhaseState({
+		phase,
+		authorId,
+		eligibleCount: hearts.eligible,
+	});
+	const eligibility = heartEligibility({
+		phase,
+		userId,
+		assigneeId,
+		authorId,
+	});
+
+	function handleVote(value: number) {
+		run(() => castHeart(assignmentId, phase, value, sessionId));
+	}
+
+	return (
+		<section
+			aria-label="Corazones"
+			className="flex w-full flex-col items-center gap-3 rounded-xl bg-card px-6 py-5 text-center ring-1 ring-foreground/10"
+		>
+			{phaseState === "no-complement" ? (
+				<p className="text-xs text-muted-foreground">
+					Sin complemento: no hay pregunta que calificar en este turno.
+				</p>
+			) : phaseState === "solo" ? (
+				<p className="text-xs text-muted-foreground">
+					Solo estás tú en esta fase: no hay a quién calificar.
+				</p>
+			) : eligibility.eligible ? (
+				<>
+					<p className="text-xs text-muted-foreground">
+						¿Cómo te pareció{" "}
+						{phase === "exposition"
+							? `la respuesta de ${assigneeName}`
+							: `la pregunta de ${authorName}`}
+						?
+					</p>
+					<HeartPicker
+						value={hearts.myHeart}
+						disabled={pending}
+						onVote={handleVote}
+					/>
+				</>
+			) : (
+				<p className="text-xs text-muted-foreground">{eligibility.reason}</p>
+			)}
+			<p
+				className="text-sm tabular-nums text-muted-foreground"
+				role="status"
+				aria-live="polite"
+			>
+				{heartsProgressText(hearts.voted, hearts.eligible)} corazones
+			</p>
+		</section>
+	);
+});
 
 function ActiveTurn({
 	debate,
@@ -604,6 +715,24 @@ function ActiveTurn({
 			</Button>
 		) : null;
 
+	const hearts = debate.hearts;
+	// El votador vive en línea y — para no-moderadores — dentro del foco:
+	// el dialog del moderador es la pantalla compartida y nunca muestra votos.
+	const heartsBlock =
+		debate.hearts &&
+		(debate.state === "exposition" || debate.state === "complement") ? (
+			<HeartsSection
+				hearts={debate.hearts}
+				phase={debate.state}
+				assignmentId={debate.assignmentId}
+				assigneeId={debate.assigneeId}
+				authorId={authorId}
+				assigneeName={debate.assigneeName}
+				authorName={debate.authorName}
+				userId={userId}
+				sessionId={sessionId}
+			/>
+		) : null;
 	const spotlight = (
 		<TurnSpotlight
 			speakerName={speakerName}
@@ -618,6 +747,8 @@ function ActiveTurn({
 			clockCaption={clock.caption}
 			timerAction={extendBtn}
 			showExtendHint={isModerator && !isComplement}
+			heartsVoted={hearts?.voted}
+			heartsEligible={hearts?.eligible}
 		/>
 	);
 
@@ -686,6 +817,8 @@ function ActiveTurn({
 						)}
 
 						{!focusOpen && spotlight}
+
+						{!focusOpen && heartsBlock}
 
 						<div aria-hidden="true" className="h-px w-full bg-foreground/10" />
 
@@ -795,6 +928,7 @@ function ActiveTurn({
 							</div>
 						)}
 						{spotlight}
+						{!isModerator && heartsBlock}
 					</DialogContent>
 				</Dialog>
 			)}

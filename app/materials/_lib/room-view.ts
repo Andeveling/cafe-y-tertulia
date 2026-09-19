@@ -7,6 +7,15 @@ import {
 
 export type DebateProgress = { current: number; total: number };
 
+/** Aprecio del último turno completado — null si aún no hay ninguno. */
+export type TurnoAprecio = {
+	assigneeName: string;
+	respuestaAvg: number | null;
+	respuestaCount: number;
+	preguntaAvg: number | null;
+	preguntaCount: number;
+};
+
 /**
  * Vista derivada de la Sala: lo que cada Etapa necesita sin recalcular.
  * Se deriva una sola vez por render en `RoomPanel`; las Etapas la reciben
@@ -25,6 +34,8 @@ export type SalaView = {
 	/** Autor de la Intervención activa — null fuera de `active`. */
 	debateAuthorId: string | null;
 	debateProgress: DebateProgress | null;
+	/** Aprecio del último turno completado — para revelar entre turnos. */
+	debateLastAprecio: TurnoAprecio | null;
 	/** Siguiente en exponer — primera oculta por revealOrder en `active`. */
 	debateNextAssigneeName: string | null;
 	/** Siguiente Etapa — null en Cierre. */
@@ -60,6 +71,7 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 	let debateAuthorId: string | null = null;
 	let debateProgress: DebateProgress | null = null;
 	let debateNextAssigneeName: string | null = null;
+	let debateLastAprecio: TurnoAprecio | null = null;
 	const debate = snapshot.debate;
 	if (debate) {
 		if (debate.mode === "active") {
@@ -77,6 +89,18 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 			debateProgress = {
 				current: debate.mode === "done" ? total : debate.revealOrder,
 				total,
+			};
+		}
+		const lastComplete = [...snapshot.assignments]
+			.filter((a) => a.state === "complete")
+			.sort((a, b) => b.revealOrder - a.revealOrder)[0];
+		if (lastComplete) {
+			debateLastAprecio = {
+				assigneeName: lastComplete.assigneeName,
+				respuestaAvg: lastComplete.aprecioExpositionAvg,
+				respuestaCount: lastComplete.aprecioExpositionCount,
+				preguntaAvg: lastComplete.aprecioComplementAvg,
+				preguntaCount: lastComplete.aprecioComplementCount,
 			};
 		}
 	}
@@ -106,6 +130,7 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 		remainingInterventions,
 		debateAuthorId,
 		debateProgress,
+		debateLastAprecio,
 		debateNextAssigneeName,
 		next,
 		prev,

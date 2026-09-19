@@ -99,6 +99,7 @@ describe("decodeRoomSnapshot", () => {
 			revealOrder: 0,
 			myNotes: "ideas",
 			phaseStartedAt: "2026-01-03",
+			hearts: null,
 			remainingHidden: 1,
 		});
 	});
@@ -165,6 +166,10 @@ describe("decodeRoomSnapshot", () => {
 				revealOrder: 0,
 				questionText: null,
 				questionVisible: false,
+				aprecioExpositionAvg: null,
+				aprecioExpositionCount: 0,
+				aprecioComplementAvg: null,
+				aprecioComplementCount: 0,
 			},
 		]);
 		expect(snap!.debate).toBeNull();

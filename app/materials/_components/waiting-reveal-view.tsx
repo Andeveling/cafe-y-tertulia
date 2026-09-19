@@ -1,7 +1,9 @@
 "use client";
 
-import { CircleLock01Icon } from "@hugeicons/core-free-icons";
+import { CircleLock01Icon, FavouriteIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { aprecioDisplayText } from "@/app/materials/_lib/hearts";
+import type { TurnoAprecio } from "@/app/materials/_lib/room-view";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -13,6 +15,8 @@ type Props = {
 	/** "Revelar pregunta 1 para Ana". */
 	revealLabel: string;
 	pending?: boolean;
+	/** Aprecio del turno recién completado — null antes del primer turno. */
+	lastAprecio?: TurnoAprecio | null;
 	onReveal?: () => void;
 };
 
@@ -75,6 +79,7 @@ export function WaitingRevealView({
 	progressText,
 	revealLabel,
 	pending = false,
+	lastAprecio = null,
 	onReveal,
 }: Props) {
 	const copy = sceneCopy(youNext, isModerator);
@@ -88,6 +93,8 @@ export function WaitingRevealView({
 			)}
 
 			<SealedPregunta lead={copy.envelopeLead} hint={copy.envelopeHint} />
+
+			<LastAprecio aprecio={lastAprecio} />
 
 			<div className="flex flex-col items-center gap-1">
 				<p className="font-heading text-3xl font-semibold text-balance lg:text-4xl">
@@ -120,6 +127,57 @@ export function WaitingRevealView({
 				</div>
 			)}
 		</div>
+	);
+}
+
+function LastAprecio({ aprecio }: { aprecio: TurnoAprecio | null }) {
+	if (!aprecio) return null;
+	const respuesta = aprecioDisplayText(
+		aprecio.respuestaAvg,
+		aprecio.respuestaCount,
+	);
+	const pregunta = aprecioDisplayText(
+		aprecio.preguntaAvg,
+		aprecio.preguntaCount,
+	);
+	return (
+		<section
+			aria-label={`Aprecio del turno de ${aprecio.assigneeName}`}
+			className="flex w-full max-w-[26.25rem] flex-col items-center gap-1 rounded-xl bg-card px-6 py-4 text-center ring-1 ring-foreground/10"
+		>
+			<p className="flex items-center gap-1.5 text-label-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
+				<HugeiconsIcon
+					icon={FavouriteIcon}
+					className="size-3.5 text-primary"
+					aria-hidden="true"
+				/>
+				Aprecio del turno · {aprecio.assigneeName}
+			</p>
+			{respuesta || pregunta ? (
+				<p className="text-sm tabular-nums">
+					{respuesta && (
+						<span>
+							Respuesta <span className="font-semibold">{respuesta}</span>
+						</span>
+					)}
+					{respuesta && pregunta && (
+						<span aria-hidden="true" className="text-muted-foreground">
+							{" "}
+							·{" "}
+						</span>
+					)}
+					{pregunta && (
+						<span>
+							Pregunta <span className="font-semibold">{pregunta}</span>
+						</span>
+					)}
+				</p>
+			) : (
+				<p className="text-sm text-muted-foreground">
+					Este turno no recibió corazones.
+				</p>
+			)}
+		</section>
 	);
 }
 

@@ -1,25 +1,5 @@
-import {
-	Award01Icon,
-	Book02Icon,
-	ChampionIcon,
-	Chat01Icon,
-	Compass01Icon,
-	Medal01Icon,
-	PuzzleIcon,
-	UserGroupIcon,
-} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-
-const MILESTONE_ICONS: Record<string, typeof Award01Icon> = {
-	first_book_finished: Book02Icon,
-	fifty_sessions: Award01Icon,
-	hundred_questions: ChampionIcon,
-	mesa_llena: UserGroupIcon,
-	triviantes: PuzzleIcon,
-	debate_intenso: Chat01Icon,
-	exploradores: Compass01Icon,
-	club_de_plata: Medal01Icon,
-};
+import { getBadgeIcon } from "@/components/badge-icons";
 
 export type ClubMilestone = {
 	id: string;
@@ -63,7 +43,7 @@ export function ClubMilestones({
 			</p>
 			<ul className="mt-3 flex flex-wrap gap-2">
 				{milestones.map((m) => {
-					const icon = MILESTONE_ICONS[m.badge_key] ?? Award01Icon;
+					const icon = getBadgeIcon(m.badge_key);
 					const dateLabel = formatMilestoneDate(m.created_at);
 					return (
 						<li

@@ -273,6 +273,32 @@ export async function extendExposition(
 	});
 }
 
+/** Vota corazón (1-5) en la fase activa de una Intervención. */
+export async function castHeart(
+	assignmentId: string,
+	phase: "exposition" | "complement",
+	value: number,
+	sessionId: string,
+): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			// TODO: quitar el cast cuando se regeneren los tipos de DB tras la migración de corazones
+			const rpc = supabase.rpc as unknown as (
+				fn: string,
+				args: Record<string, unknown>,
+			) => Promise<{ error: { message: string } | null }>;
+			const { error } = await rpc("cast_heart", {
+				target_assignment_id: assignmentId,
+				p_phase: phase,
+				p_value: value,
+			});
+			if (error) return { ok: false, error: error.message };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
 // ─── Cierre actions ─────────────────────────────────────────
 
 /**

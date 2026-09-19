@@ -78,6 +78,8 @@ export type RoomDebateSnapshot =
 			revealOrder: number;
 			myNotes: string | null;
 			phaseStartedAt: string;
+			/** Progreso de corazones — null fuera de exposición/complemento. */
+			hearts: HeartsProgress | null;
 			remainingHidden: number;
 	  }
 	| {
@@ -92,6 +94,16 @@ export type RoomDebateSnapshot =
 			remainingHidden: number;
 	  };
 
+/** Progreso de corazones en la fase activa (solo dispositivo propio). */
+export type HeartsProgress = {
+	/** Corazón del usuario actual (1-5) o null si no ha votado. */
+	myHeart: number | null;
+	/** Cuántos han votado hasta ahora. */
+	voted: number;
+	/** Total de elegibles para votar (presentes menos el evaluado). */
+	eligible: number;
+};
+
 export type RoomAssignment = {
 	assignmentId: string;
 	questionId: string;
@@ -103,6 +115,10 @@ export type RoomAssignment = {
 	revealOrder: number;
 	questionText: string | null;
 	questionVisible: boolean;
+	aprecioExpositionAvg: number | null;
+	aprecioExpositionCount: number;
+	aprecioComplementAvg: number | null;
+	aprecioComplementCount: number;
 };
 
 /** Snapshot del cierre — solo presente cuando roomStage = 'cierre'. */

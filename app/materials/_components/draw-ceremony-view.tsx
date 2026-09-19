@@ -206,7 +206,7 @@ function SorteoBeat({
 						{count}
 					</motion.span>
 					<h2 className="font-heading text-2xl font-semibold text-balance">
-						Sorteando tu misión
+						{iWatch ? "Sorteando las misiones" : "Sorteando tu misión"}
 					</h2>
 				</div>
 			) : fanfare ? (
@@ -249,7 +249,9 @@ function SorteoBeat({
 					</Button>
 				) : !isModerator ? (
 					<p className="text-sm text-muted-foreground">
-						Tu misión aparece en segundos.
+						{iWatch
+							? "Las misiones aparecen en segundos."
+							: "Tu misión aparece en segundos."}
 					</p>
 				) : null
 			) : (

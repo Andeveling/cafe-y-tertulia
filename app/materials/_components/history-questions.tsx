@@ -1,5 +1,6 @@
 import { Message01Icon, UserIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { aprecioDisplayText } from "@/app/materials/_lib/hearts";
 import type { SessionHistory } from "@/app/materials/_lib/materials";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -21,8 +22,43 @@ const ASSIGNMENT_STATE_LABELS: Record<string, string> = {
 };
 
 /**
+ * Aprecio congelado de una asignación en el Histórico.
+ * Solo renderiza cuando hay al menos un corazón registrado.
+ */
+function AprecioLine({
+	assignment,
+}: {
+	assignment: NonNullable<Question["assignment"]>;
+}) {
+	const respuesta = aprecioDisplayText(
+		assignment.aprecio_exposition_avg ?? null,
+		assignment.aprecio_exposition_count ?? 0,
+	);
+	const pregunta = aprecioDisplayText(
+		assignment.aprecio_complement_avg ?? null,
+		assignment.aprecio_complement_count ?? 0,
+	);
+	if (!respuesta && !pregunta) return null;
+	return (
+		<p className="text-xs tabular-nums text-muted-foreground">
+			Aprecio ·{" "}
+			{respuesta && (
+				<span>
+					respuesta <span className="font-semibold">{respuesta}</span>
+				</span>
+			)}
+			{respuesta && pregunta && <span aria-hidden="true"> · </span>}
+			{pregunta && (
+				<span>
+					pregunta <span className="font-semibold">{pregunta}</span>
+				</span>
+			)}
+		</p>
+	);
+}
+/**
  * Preguntas de una sesión en el Histórico.
- * Muestra autor, asignado y notas de respuesta cuando existen.
+ * Muestra autor, asignado, Aprecio congelado y notas de respuesta.
  */
 export function HistoryQuestions({ questions }: { questions: Question[] }) {
 	if (questions.length === 0) {
@@ -92,6 +128,9 @@ export function HistoryQuestions({ questions }: { questions: Question[] }) {
 											{question.assignment.notes}
 										</p>
 									</div>
+								)}
+								{question.assignment && (
+									<AprecioLine assignment={question.assignment} />
 								)}
 							</div>
 						</li>

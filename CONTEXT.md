@@ -156,6 +156,14 @@ _Avoid_: Calificación, puntaje, nota
 Calificación anónima de 1 a 5 estrellas que un Participante da al Material de la Sesión, solo si hay Material. Voluntario y modificable mientras la Sesión está activa; al cerrarla se congela y el voto individual se descarta: solo persiste su aporte al agregado.
 _Avoid_: Estrella, valoración individual
 
+**Corazón**:
+Calificación anónima de 1 a 5 que un Participante da en una Intervención viva: en Exposición a la respuesta del asignado, en Complemento a la pregunta del autor. Uno por votante por fase, modificable hasta que el Moderador avanza; el evaluado no vota en su propia fase.
+_Avoid_: Voto, estrella, like, me gusta
+
+**Aprecio**:
+Agregado de Corazones por Intervención y fase: promedio (1 decimal) y conteo. Al congelar la fase los Corazones individuales se descartan y solo persiste el agregado, visible al completar la Intervención y en el Histórico.
+_Avoid_: Rating, promedio de persona, ranking
+
 **Histórico**:
 Modo de ver la memoria de una Sesión: Preguntas, Notas, minijuegos, Logros y, si hay Material, Rating. Se lee desde la propia Sesión y, cuando hay Material, también desde la página de ese Material. No es una entidad con datos propios.
 _Avoid_: Archivo, registro, timeline

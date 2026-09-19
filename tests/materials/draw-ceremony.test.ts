@@ -104,6 +104,10 @@ describe("assembleDrawCeremony", () => {
 				revealOrder: 1,
 				questionText: null,
 				questionVisible: false,
+				aprecioExpositionAvg: null,
+				aprecioExpositionCount: 0,
+				aprecioComplementAvg: null,
+				aprecioComplementCount: 0,
 			},
 			{
 				assignmentId: "a2",
@@ -116,6 +120,10 @@ describe("assembleDrawCeremony", () => {
 				revealOrder: 2,
 				questionText: null,
 				questionVisible: false,
+				aprecioExpositionAvg: null,
+				aprecioExpositionCount: 0,
+				aprecioComplementAvg: null,
+				aprecioComplementCount: 0,
 			},
 		];
 		const settledAt =

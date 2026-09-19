@@ -30,6 +30,7 @@ export const ROOM_PARTICIPANT_TABLES = [
 	"trivia_rounds",
 	"takes",
 	"votes",
+	"hearts",
 ] as const;
 
 /** sessions.room_stage UPDATE mueve el stepper (Presentes → Sorteo). */

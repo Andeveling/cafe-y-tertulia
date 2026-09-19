@@ -51,12 +51,7 @@ import { deriveSalaView, type SalaView } from "@/app/materials/_lib/room-view";
 import { InfoButton } from "@/components/info-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	Dialog,
 	DialogClose,
@@ -266,6 +261,7 @@ function StageContent({
 						asOf={snapshot.asOf}
 						authorId={view.debateAuthorId}
 						progress={view.debateProgress}
+						lastAprecio={view.debateLastAprecio}
 						members={view.members}
 						nextAssigneeName={view.debateNextAssigneeName}
 						next={view.next}
