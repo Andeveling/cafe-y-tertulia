@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useActionState, useEffect, useRef, useTransition } from "react";
+import { useActionState, useEffect, useId, useRef, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
@@ -63,6 +63,7 @@ export function QuestionPool({
 		initialCreateState,
 	);
 	const [isPending, startTransition] = useTransition();
+	const fieldId = useId();
 	const form = useForm<CreateQuestionValues>({
 		resolver: zodResolver(createQuestionSchema),
 		defaultValues: {
@@ -119,13 +120,11 @@ export function QuestionPool({
 							control={form.control}
 							render={({ field, fieldState }) => (
 								<Field data-invalid={fieldState.invalid}>
-									<FieldLabel htmlFor="question-text">
-										Aporta una pregunta
-									</FieldLabel>
+									<FieldLabel htmlFor={fieldId}>Aporta una pregunta</FieldLabel>
 									<FieldContent>
 										<Textarea
 											{...field}
-											id="question-text"
+											id={fieldId}
 											placeholder="¿Qué te hizo pensar del capítulo 2?"
 											aria-invalid={fieldState.invalid}
 										/>
