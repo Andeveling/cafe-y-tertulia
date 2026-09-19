@@ -7,7 +7,13 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { memo, type ReactNode, useEffect, useRef, useState } from "react";
+import {
+	type ReactNode,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { toast } from "sonner";
 import { HeartPicker } from "@/app/materials/_components/heart-picker";
 import { WaitingRevealView } from "@/app/materials/_components/waiting-reveal-view";
@@ -454,6 +460,7 @@ function TurnSpotlight({
 	showExtendHint,
 	heartsVoted,
 	heartsEligible,
+	voter,
 }: {
 	speakerName: string;
 	speakerVerb: string;
@@ -469,6 +476,8 @@ function TurnSpotlight({
 	showExtendHint?: boolean;
 	heartsVoted?: number;
 	heartsEligible?: number;
+	/** Votador de corazones — vive dentro de la card del reloj, sin textos. */
+	voter?: ReactNode;
 }) {
 	return (
 		<>
@@ -546,6 +555,7 @@ function TurnSpotlight({
 						cada +1 suma 60 s y marca la pregunta como hot
 					</p>
 				)}
+				{voter && <div className="mt-3">{voter}</div>}
 				{heartsVoted != null && heartsEligible != null && (
 					<p
 						className="mt-2 text-sm tabular-nums text-muted-foreground"
@@ -559,89 +569,6 @@ function TurnSpotlight({
 		</>
 	);
 }
-
-// Memoizada: el tick del reloj del turno (500 ms) no re-renderiza el voto;
-// solo cambian hearts (snapshot), la fase o el pending de la mutación.
-const HeartsSection = memo(function HeartsSection({
-	hearts,
-	phase,
-	assignmentId,
-	assigneeId,
-	authorId,
-	assigneeName,
-	authorName,
-	userId,
-	sessionId,
-}: {
-	hearts: Extract<RoomDebateSnapshot, { mode: "active" }>["hearts"];
-	phase: "exposition" | "complement";
-	assignmentId: string;
-	assigneeId: string;
-	authorId: string | null;
-	assigneeName: string;
-	authorName: string;
-	userId: string;
-	sessionId: string;
-}) {
-	const { pending, run } = useRoomMutation();
-	if (!hearts) return null;
-	const phaseState = heartsPhaseState({
-		phase,
-		authorId,
-		eligibleCount: hearts.eligible,
-	});
-	const eligibility = heartEligibility({
-		phase,
-		userId,
-		assigneeId,
-		authorId,
-	});
-
-	function handleVote(value: number) {
-		run(() => castHeart(assignmentId, phase, value, sessionId));
-	}
-
-	return (
-		<section
-			aria-label="Corazones"
-			className="flex w-full flex-col items-center gap-3 rounded-xl bg-card px-6 py-5 text-center ring-1 ring-foreground/10"
-		>
-			{phaseState === "no-complement" ? (
-				<p className="text-xs text-muted-foreground">
-					Sin complemento: no hay pregunta que calificar en este turno.
-				</p>
-			) : phaseState === "solo" ? (
-				<p className="text-xs text-muted-foreground">
-					Solo estás tú en esta fase: no hay a quién calificar.
-				</p>
-			) : eligibility.eligible ? (
-				<>
-					<p className="text-xs text-muted-foreground">
-						¿Cómo te pareció{" "}
-						{phase === "exposition"
-							? `la respuesta de ${assigneeName}`
-							: `la pregunta de ${authorName}`}
-						?
-					</p>
-					<HeartPicker
-						value={hearts.myHeart}
-						disabled={pending}
-						onVote={handleVote}
-					/>
-				</>
-			) : (
-				<p className="text-xs text-muted-foreground">{eligibility.reason}</p>
-			)}
-			<p
-				className="text-sm tabular-nums text-muted-foreground"
-				role="status"
-				aria-live="polite"
-			>
-				{heartsProgressText(hearts.voted, hearts.eligible)} corazones
-			</p>
-		</section>
-	);
-});
 
 function ActiveTurn({
 	debate,
@@ -716,40 +643,62 @@ function ActiveTurn({
 		) : null;
 
 	const hearts = debate.hearts;
-	// El votador vive en línea y — para no-moderadores — dentro del foco:
-	// el dialog del moderador es la pantalla compartida y nunca muestra votos.
-	const heartsBlock =
-		debate.hearts &&
-		(debate.state === "exposition" || debate.state === "complement") ? (
-			<HeartsSection
-				hearts={debate.hearts}
-				phase={debate.state}
-				assignmentId={debate.assignmentId}
-				assigneeId={debate.assigneeId}
-				authorId={authorId}
-				assigneeName={debate.assigneeName}
-				authorName={debate.authorName}
-				userId={userId}
-				sessionId={sessionId}
+	// Fase votable: exposición o complemento con corazones en el snapshot.
+	const votablePhase =
+		hearts && (debate.state === "exposition" || debate.state === "complement")
+			? debate.state
+			: null;
+	const canVote =
+		votablePhase != null &&
+		hearts != null &&
+		heartsPhaseState({
+			phase: votablePhase,
+			authorId,
+			eligibleCount: hearts.eligible,
+		}) === "vote" &&
+		heartEligibility({
+			phase: votablePhase,
+			userId,
+			assigneeId: debate.assigneeId,
+			authorId,
+		}).eligible;
+	const handleHeartVote = useCallback(
+		(value: number) => {
+			if (votablePhase == null) return;
+			run(() => castHeart(debate.assignmentId, votablePhase, value, sessionId));
+		},
+		[run, votablePhase, debate.assignmentId, sessionId],
+	);
+	// Sin textos: el picker se explica solo junto al conteo. Quien no puede
+	// votar (expositor/autor) solo ve el conteo.
+	const voter =
+		canVote && hearts ? (
+			<HeartPicker
+				value={hearts.myHeart}
+				disabled={pending}
+				onVote={handleHeartVote}
 			/>
 		) : null;
-	const spotlight = (
-		<TurnSpotlight
-			speakerName={speakerName}
-			speakerVerb={speakerVerb}
-			isComplement={isComplement}
-			authorName={debate.authorName}
-			questionText={debate.questionText}
-			clockLabel={phaseClockLabel(debate.state)}
-			clockText={clock.text}
-			overtime={clock.overtime}
-			timerPct={clock.pct}
-			clockCaption={clock.caption}
-			timerAction={extendBtn}
-			showExtendHint={isModerator && !isComplement}
-			heartsVoted={hearts?.voted}
-			heartsEligible={hearts?.eligible}
-		/>
+	const spotlightProps = {
+		speakerName,
+		speakerVerb,
+		isComplement,
+		authorName: debate.authorName,
+		questionText: debate.questionText,
+		clockLabel: phaseClockLabel(debate.state),
+		clockText: clock.text,
+		overtime: clock.overtime,
+		timerPct: clock.pct,
+		clockCaption: clock.caption,
+		timerAction: extendBtn,
+		showExtendHint: isModerator && !isComplement,
+		heartsVoted: hearts?.voted,
+		heartsEligible: hearts?.eligible,
+	};
+	const spotlight = <TurnSpotlight {...spotlightProps} voter={voter} />;
+	// El dialog del moderador es la pantalla compartida: ahí solo conteo.
+	const dialogSpotlight = (
+		<TurnSpotlight {...spotlightProps} voter={isModerator ? null : voter} />
 	);
 
 	return (
@@ -817,8 +766,6 @@ function ActiveTurn({
 						)}
 
 						{!focusOpen && spotlight}
-
-						{!focusOpen && heartsBlock}
 
 						<div aria-hidden="true" className="h-px w-full bg-foreground/10" />
 
@@ -927,8 +874,7 @@ function ActiveTurn({
 								/>
 							</div>
 						)}
-						{spotlight}
-						{!isModerator && heartsBlock}
+						{dialogSpotlight}
 					</DialogContent>
 				</Dialog>
 			)}

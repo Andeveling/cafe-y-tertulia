@@ -48,7 +48,7 @@ export const HeartPicker = memo(function HeartPicker({
 
 	return (
 		<div
-			className="flex items-center gap-1"
+			className="flex items-center justify-center gap-1"
 			role="radiogroup"
 			aria-label="Califica de 1 a 5 corazones"
 		>
