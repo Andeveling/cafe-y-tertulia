@@ -8,6 +8,7 @@ type Db = SupabaseClient<Database>;
 export type RoomRosterMember = {
 	id: string;
 	display_name: string;
+	avatar: string | null;
 };
 
 /** Miembros activos del club: universo invitable a la Sala. */
@@ -16,7 +17,7 @@ export async function getRoomRosterMembers(
 ): Promise<RoomRosterMember[]> {
 	const { data, error } = await supabase
 		.from("members")
-		.select("id, display_name")
+		.select("id, display_name, avatar")
 		.eq("status", "active");
 	if (error) throw error;
 	return data ?? [];

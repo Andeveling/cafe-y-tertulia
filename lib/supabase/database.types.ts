@@ -439,6 +439,7 @@ export type Database = {
 			};
 			members: {
 				Row: {
+					avatar: string | null;
 					created_at: string;
 					display_name: string;
 					id: string;
@@ -447,6 +448,7 @@ export type Database = {
 					status: Database["public"]["Enums"]["member_status"];
 				};
 				Insert: {
+					avatar?: string | null;
 					created_at?: string;
 					display_name?: string;
 					id: string;
@@ -455,6 +457,7 @@ export type Database = {
 					status?: Database["public"]["Enums"]["member_status"];
 				};
 				Update: {
+					avatar?: string | null;
 					created_at?: string;
 					display_name?: string;
 					id?: string;

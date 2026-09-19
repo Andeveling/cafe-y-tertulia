@@ -34,6 +34,8 @@ export const ROOM_STAGE_LABELS: Record<RoomStage, string> = {
 export type RoomParticipant = {
 	memberId: string;
 	displayName: string;
+	/** Src del catálogo (`members.avatar`) o null = iniciales. */
+	avatar: string | null;
 	role: ParticipantRole;
 	optOut: boolean;
 };
@@ -42,6 +44,8 @@ export type RoomQuestion = {
 	id: string;
 	authorId: string;
 	authorName: string;
+	/** Src del catálogo (`members.avatar`) o null = iniciales. */
+	authorAvatar: string | null;
 	/** Texto solo visible para el autor (RLS + snapshot). */
 	text: string | null;
 	isMine: boolean;
@@ -74,7 +78,11 @@ export type RoomDebateSnapshot =
 			questionText: string;
 			assigneeName: string;
 			assigneeId: string;
+			/** Src del catálogo o null = iniciales. */
+			assigneeAvatar: string | null;
 			authorName: string;
+			/** Src del catálogo o null = iniciales. */
+			authorAvatar: string | null;
 			revealOrder: number;
 			myNotes: string | null;
 			phaseStartedAt: string;
@@ -86,6 +94,8 @@ export type RoomDebateSnapshot =
 			mode: "waiting_reveal";
 			nextAssigneeName: string;
 			nextAssigneeId: string;
+			/** Src del catálogo o null = iniciales. */
+			nextAssigneeAvatar: string | null;
 			revealOrder: number;
 			remainingHidden: number;
 	  }
@@ -111,6 +121,10 @@ export type RoomAssignment = {
 	assigneeId: string;
 	authorName: string;
 	assigneeName: string;
+	/** Src del catálogo o null = iniciales. */
+	authorAvatar: string | null;
+	/** Src del catálogo o null = iniciales. */
+	assigneeAvatar: string | null;
 	state: AssignmentState;
 	revealOrder: number;
 	questionText: string | null;

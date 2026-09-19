@@ -47,14 +47,14 @@ export default async function RootLayout({
 	if (user) {
 		const { data: member } = await supabase
 			.from("members")
-			.select("display_name, status")
+			.select("display_name, status, avatar")
 			.eq("id", user.id)
 			.maybeSingle();
 		if (member) {
 			navUser = {
 				name: member.display_name || user.email || "Miembro",
 				email: user.email || "",
-				avatar: null,
+				avatar: member.avatar,
 			};
 			memberStatus = member.status;
 		} else {

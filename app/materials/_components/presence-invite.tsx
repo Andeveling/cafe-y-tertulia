@@ -7,8 +7,8 @@ import {
 	buildInviteCandidates,
 	type InviteRosterMember,
 } from "@/app/materials/_lib/presence-invite";
+import { MemberAvatar } from "@/components/member-avatar";
 import { PresenceEstado } from "@/components/presence-estado";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +38,11 @@ export function PresenceInvite({
 
 	const estados = useMemo(
 		() => Object.fromEntries(presenceRoster.map((m) => [m.id, m.estado])),
+		[presenceRoster],
+	);
+
+	const avatares = useMemo(
+		() => Object.fromEntries(presenceRoster.map((m) => [m.id, m.avatar])),
 		[presenceRoster],
 	);
 
@@ -102,18 +107,16 @@ export function PresenceInvite({
 						{candidates.map((c) => (
 							<li key={c.id} className="flex items-center justify-between py-2">
 								<span className="flex min-w-0 items-center gap-2">
-									<Avatar
+									<MemberAvatar
+										name={c.displayName || "Miembro"}
+										avatar={avatares[c.id] ?? null}
 										size="sm"
 										className={
 											c.estado === "desconectado"
 												? "opacity-40"
-												: "ring-1 ring-primary/30"
+												: "ring-1 ring-primary/40"
 										}
-									>
-										<AvatarFallback>
-											{(c.displayName || "?").slice(0, 1).toUpperCase()}
-										</AvatarFallback>
-									</Avatar>
+									/>
 									<span className="flex min-w-0 flex-col">
 										<span className="truncate text-sm">{c.displayName}</span>
 										<PresenceEstado

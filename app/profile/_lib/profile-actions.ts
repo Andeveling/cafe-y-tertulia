@@ -6,7 +6,7 @@ import { parseForm } from "@/app/_lib/form-helpers";
 import { getCurrentMember } from "@/lib/current-member";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { displayNameSchema } from "../_schemas/profile-schema";
+import { avatarSchema, displayNameSchema } from "../_schemas/profile-schema";
 
 export async function signOut() {
 	const supabase = await createServerClient();
@@ -44,6 +44,42 @@ export async function updateProfile(formData: FormData) {
 		}
 	}
 
+	revalidatePath("/profile");
+	redirect("/profile?updated=1");
+}
+
+export async function updateAvatar(formData: FormData) {
+	const { member } = await getCurrentMember();
+	if (!member) {
+		redirect("/auth/login");
+	}
+	if (member.status !== "active") {
+		redirect("/");
+	}
+
+	const parsed = await parseForm(avatarSchema, formData);
+	if (!parsed.ok) {
+		redirect("/profile?error=update_failed");
+	}
+
+	// "" = sin avatar (iniciales).
+	const avatar = parsed.data.avatar ? parsed.data.avatar : null;
+
+	if (avatar !== member.avatar) {
+		// Service role: igual que updateProfile — la edición de la fila es
+		// server-side (ADR 0005).
+		const admin = createAdminClient();
+		const { error } = await admin
+			.from("members")
+			.update({ avatar })
+			.eq("id", member.id);
+
+		if (error) {
+			redirect("/profile?error=update_failed");
+		}
+	}
+
+	revalidatePath("/");
 	revalidatePath("/profile");
 	redirect("/profile?updated=1");
 }

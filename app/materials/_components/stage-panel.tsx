@@ -44,6 +44,7 @@ import {
 } from "@/app/materials/_lib/room-types";
 import type { TurnoAprecio } from "@/app/materials/_lib/room-view";
 import { sharedNow } from "@/app/materials/_lib/shared-now";
+import { MemberAvatar } from "@/components/member-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -219,18 +220,12 @@ function turnCopy(debate: Active, userId: string, authorId: string | null) {
 	return { you: false, line: "" };
 }
 
-function initials(name: string) {
-	const parts = name.trim().split(/\s+/);
-	const first = parts[0]?.[0] ?? "";
-	const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
-	return (first + last).toUpperCase();
-}
-
 type SeatRole = "speaker" | "author" | "listener" | "past";
 
 type Seat = {
 	key: string;
 	name: string;
+	avatar: string | null;
 	isYou: boolean;
 	role: SeatRole;
 };
@@ -262,6 +257,7 @@ function buildSeats(
 		list.push({
 			memberId: debate.assigneeId,
 			displayName: debate.assigneeName,
+			avatar: debate.assigneeAvatar,
 			role: "member",
 			optOut: false,
 		});
@@ -270,6 +266,7 @@ function buildSeats(
 		list.push({
 			memberId: authorId ?? `name:${debate.authorName}`,
 			displayName: debate.authorName,
+			avatar: debate.authorAvatar,
 			role: "member",
 			optOut: false,
 		});
@@ -295,6 +292,7 @@ function buildSeats(
 		return {
 			key: p.memberId,
 			name: p.displayName,
+			avatar: p.avatar,
 			isYou: p.memberId === userId,
 			role,
 		};
@@ -474,6 +472,7 @@ function WaitingReveal({
 		<Enter>
 			<WaitingRevealView
 				nextAssigneeName={debate.nextAssigneeName}
+				nextAssigneeAvatar={debate.nextAssigneeAvatar}
 				youNext={youNext}
 				isModerator={isModerator}
 				progressText={progressText}
@@ -494,6 +493,7 @@ function WaitingReveal({
  */
 function TurnSpotlight({
 	speakerName,
+	speakerAvatar,
 	speakerVerb,
 	isComplement,
 	authorName,
@@ -507,6 +507,7 @@ function TurnSpotlight({
 	voter,
 }: {
 	speakerName: string;
+	speakerAvatar?: string | null;
 	speakerVerb: string;
 	isComplement: boolean;
 	authorName: string;
@@ -529,11 +530,12 @@ function TurnSpotlight({
 				<p className="text-label-sm font-bold tracking-[0.1em] text-muted-foreground uppercase">
 					En la palabra
 				</p>
-				<span
-					aria-hidden="true"
-					className="mx-auto mt-4 grid size-[4.5rem] place-items-center rounded-full bg-primary/10 font-heading text-2xl text-primary ring-1 ring-primary/40"
-				>
-					{initials(speakerName)}
+				<span aria-hidden="true" className="mx-auto mt-4 block w-fit">
+					<MemberAvatar
+						name={speakerName}
+						avatar={speakerAvatar}
+						className="size-[4.5rem] font-heading ring-1 ring-primary/40 [&_[data-slot=avatar-fallback]]:bg-primary/10 [&_[data-slot=avatar-fallback]]:text-2xl [&_[data-slot=avatar-fallback]]:text-primary"
+					/>
 				</span>
 				<p className="font-heading mt-3 text-3xl font-semibold text-balance">
 					{speakerName}
@@ -723,6 +725,7 @@ function ActiveTurn({
 		) : null;
 	const spotlightProps = {
 		speakerName,
+		speakerAvatar: isComplement ? debate.authorAvatar : debate.assigneeAvatar,
 		speakerVerb,
 		isComplement,
 		authorName: debate.authorName,
@@ -827,16 +830,17 @@ function ActiveTurn({
 												Tú
 											</span>
 										)}
-										<span
-											aria-hidden="true"
-											className={cn(
-												"grid size-10 place-items-center rounded-full font-heading text-sm ring-1",
-												seat.role === "speaker"
-													? "bg-primary/15 text-primary ring-primary/30"
-													: "bg-foreground/[0.04] text-muted-foreground ring-foreground/15",
-											)}
-										>
-											{initials(seat.name)}
+										<span aria-hidden="true">
+											<MemberAvatar
+												name={seat.name}
+												avatar={seat.avatar}
+												className={cn(
+													"size-10 font-heading",
+													seat.role === "speaker"
+														? "ring-1 ring-primary/30 [&_[data-slot=avatar-fallback]]:bg-primary/15 [&_[data-slot=avatar-fallback]]:text-sm [&_[data-slot=avatar-fallback]]:text-primary"
+														: "ring-1 ring-foreground/15 [&_[data-slot=avatar-fallback]]:bg-foreground/[0.04] [&_[data-slot=avatar-fallback]]:text-sm [&_[data-slot=avatar-fallback]]:text-muted-foreground",
+												)}
+											/>
 										</span>
 										<span className="w-full truncate text-xs font-medium">
 											{seat.name}

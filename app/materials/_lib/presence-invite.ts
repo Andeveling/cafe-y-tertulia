@@ -10,6 +10,8 @@ import type { EstadoPresencia } from "@/lib/presencia/estado";
 export type InviteRosterMember = {
 	id: string;
 	display_name: string;
+	/** Src del catálogo (`members.avatar`) o null = iniciales. */
+	avatar?: string | null;
 };
 
 export type InviteCandidate = {

@@ -12,7 +12,7 @@ export async function getOpenSessions(
 		.from("sessions")
 		.select(
 			`id, status, scheduled_at, range, moderator_id, material_id,
-			 moderator:members!sessions_moderator_id_fkey(display_name),
+			 moderator:members!sessions_moderator_id_fkey(display_name, avatar),
 			 material:materials(title)`,
 		)
 		.not("status", "in", '("closed","archived")')
@@ -27,8 +27,19 @@ export async function getOpenSessions(
 				range: s.range,
 				moderator_id: s.moderator_id,
 				moderator_name:
-					(s.moderator as unknown as { display_name: string | null } | null)
-						?.display_name ?? null,
+					(
+						s.moderator as unknown as {
+							display_name: string | null;
+							avatar: string | null;
+						} | null
+					)?.display_name ?? null,
+				moderator_avatar:
+					(
+						s.moderator as unknown as {
+							display_name: string | null;
+							avatar: string | null;
+						} | null
+					)?.avatar ?? null,
 				material_id: s.material_id,
 				material_title:
 					(s.material as unknown as { title: string | null } | null)?.title ??
@@ -69,7 +80,7 @@ export async function getRosterMembers(
 ): Promise<LastSeenRosterMember[]> {
 	const { data } = await supabase
 		.from("members")
-		.select("id, display_name, last_seen")
+		.select("id, display_name, avatar, last_seen")
 		.eq("status", "active");
 
 	return (data ?? []) as LastSeenRosterMember[];

@@ -18,6 +18,7 @@ const prep: BoardSession = {
 	range: "Capitulo 10",
 	moderator_id: "u1",
 	moderator_name: "Andrés",
+	moderator_avatar: "/avatars/Avatar01.svg",
 	material_id: "m-hyper",
 	material_title: "Hyperfocus",
 };

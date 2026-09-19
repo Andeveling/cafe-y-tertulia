@@ -19,12 +19,14 @@ const createdAt = "2026-09-07T15:00:00.000Z";
 const ana: RoomParticipant = {
 	memberId: "u-ana",
 	displayName: "Ana",
+	avatar: "/avatars/Avatar03.svg",
 	role: "member",
 	optOut: false,
 };
 const andres: RoomParticipant = {
 	memberId: "u-andres",
 	displayName: "Andrés",
+	avatar: null,
 	role: "member",
 	optOut: false,
 };
@@ -67,12 +69,14 @@ describe("assembleDrawCeremony", () => {
 		const spectator: RoomParticipant = {
 			memberId: "u-mia",
 			displayName: "Mia",
+			avatar: null,
 			role: "spectator",
 			optOut: false,
 		};
 		const optOut: RoomParticipant = {
 			memberId: "u-luis",
 			displayName: "Luis",
+			avatar: null,
 			role: "member",
 			optOut: true,
 		};
@@ -100,6 +104,8 @@ describe("assembleDrawCeremony", () => {
 				assigneeId: "u-andres",
 				authorName: "Ana",
 				assigneeName: "Andrés",
+				authorAvatar: "/avatars/Avatar03.svg",
+				assigneeAvatar: null,
 				state: "hidden",
 				revealOrder: 1,
 				questionText: null,
@@ -116,6 +122,8 @@ describe("assembleDrawCeremony", () => {
 				assigneeId: "u-ana",
 				authorName: "Andrés",
 				assigneeName: "Ana",
+				authorAvatar: null,
+				assigneeAvatar: "/avatars/Avatar03.svg",
 				state: "hidden",
 				revealOrder: 2,
 				questionText: null,

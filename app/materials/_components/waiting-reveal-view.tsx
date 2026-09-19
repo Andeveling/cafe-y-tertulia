@@ -4,10 +4,12 @@ import { CircleLock01Icon, FavouriteIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { aprecioDisplayText } from "@/app/materials/_lib/hearts";
 import type { TurnoAprecio } from "@/app/materials/_lib/room-view";
+import { MemberAvatar } from "@/components/member-avatar";
 import { Button } from "@/components/ui/button";
 
 type Props = {
 	nextAssigneeName: string;
+	nextAssigneeAvatar?: string | null;
 	youNext: boolean;
 	isModerator: boolean;
 	/** "Turno 1 de 2" o null cuando no hay progreso. */
@@ -74,6 +76,7 @@ function sceneCopy(youNext: boolean, isModerator: boolean): SceneCopy {
  */
 export function WaitingRevealView({
 	nextAssigneeName,
+	nextAssigneeAvatar,
 	youNext,
 	isModerator,
 	progressText,
@@ -97,6 +100,13 @@ export function WaitingRevealView({
 			<LastAprecio aprecio={lastAprecio} />
 
 			<div className="flex flex-col items-center gap-1">
+				<span aria-hidden="true">
+					<MemberAvatar
+						name={nextAssigneeName}
+						avatar={nextAssigneeAvatar}
+						className="size-16 font-heading ring-1 ring-primary/30 [&_[data-slot=avatar-fallback]]:bg-primary/10 [&_[data-slot=avatar-fallback]]:text-xl [&_[data-slot=avatar-fallback]]:text-primary"
+					/>
+				</span>
 				<p className="font-heading text-3xl font-semibold text-balance lg:text-4xl">
 					{nextAssigneeName}
 				</p>

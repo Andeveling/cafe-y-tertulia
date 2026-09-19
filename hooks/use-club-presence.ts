@@ -14,6 +14,8 @@ import { createClient } from "@/lib/supabase/client";
 export type RosterMember = {
 	id: string;
 	display_name: string;
+	/** Src del catálogo (`members.avatar`) o null = iniciales. */
+	avatar?: string | null;
 	last_seen?: string | null;
 };
 

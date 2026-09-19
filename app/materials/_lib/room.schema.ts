@@ -40,6 +40,7 @@ const ParticipantSchema = z
 	.object({
 		member_id: jString,
 		display_name: jString,
+		avatar: jNullString,
 		// z.string() fresco: el .catch exterior debe ver el undefined —
 		// apilarlo sobre jString nunca dispararía (el catch interno ya recuperó).
 		role: z.string().catch("member"),
@@ -48,6 +49,7 @@ const ParticipantSchema = z
 	.transform((r) => ({
 		memberId: r.member_id,
 		displayName: r.display_name,
+		avatar: r.avatar,
 		role: r.role as ParticipantRole,
 		optOut: r.opt_out,
 	}));
@@ -57,6 +59,7 @@ const QuestionSchema = z
 		id: jString,
 		author_id: jString,
 		author_name: jString,
+		author_avatar: jNullString,
 		text: z.string().nullable().catch(null) as unknown as z.ZodType<
 			string | null
 		>,
@@ -68,6 +71,7 @@ const QuestionSchema = z
 		id: r.id,
 		authorId: r.author_id,
 		authorName: r.author_name,
+		authorAvatar: r.author_avatar,
 		text: r.text,
 		isMine: r.is_mine,
 		outsideDraw: r.outside_draw,
@@ -108,6 +112,8 @@ const AssignmentSchema = z
 		assignee_id: jString,
 		author_name: jString,
 		assignee_name: jString,
+		author_avatar: jNullString,
+		assignee_avatar: jNullString,
 		state: AssignmentStateSchema,
 		reveal_order: jNumber,
 		question_text: jNullString,
@@ -124,6 +130,8 @@ const AssignmentSchema = z
 		assigneeId: r.assignee_id,
 		authorName: r.author_name,
 		assigneeName: r.assignee_name,
+		authorAvatar: r.author_avatar,
+		assigneeAvatar: r.assignee_avatar,
 		state: r.state,
 		revealOrder: r.reveal_order,
 		questionText: r.question_text,
@@ -157,7 +165,9 @@ const DebateActiveSchema = z.object({
 	questionText: jString,
 	assigneeName: jString,
 	assigneeId: jString,
+	assigneeAvatar: jNullString,
 	authorName: jString,
+	authorAvatar: jNullString,
 	revealOrder: jNumber,
 	myNotes: jNullString,
 	phaseStartedAt: jString,
@@ -169,6 +179,7 @@ const DebateWaitingSchema = z.object({
 	mode: z.literal("waiting_reveal"),
 	nextAssigneeName: jString,
 	nextAssigneeId: jString,
+	nextAssigneeAvatar: jNullString,
 	revealOrder: jNumber,
 	remainingHidden: jNumber,
 });

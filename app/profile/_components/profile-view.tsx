@@ -1,4 +1,5 @@
 import { MasteryStrip } from "@/app/materials/_components/mastery-strip";
+import { AvatarPicker } from "@/app/profile/_components/avatar-picker";
 import { BadgeVitrina } from "@/app/profile/_components/badge-vitrina";
 import { LeaveClubDialog } from "@/app/profile/_components/leave-club-dialog";
 import { UpdateProfileForm } from "@/app/profile/_components/update-profile-form";
@@ -7,6 +8,7 @@ import type {
 	MemberLevel,
 	SeasonRecognition,
 } from "@/app/profile/_lib/gamification-actions";
+import { MemberAvatar } from "@/components/member-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +24,7 @@ import { signOut } from "../_lib/profile-actions";
 export type ProfileViewProps = {
 	displayName: string;
 	status: string;
+	avatar: string | null;
 	level: MemberLevel;
 	badges: MemberBadge[];
 	recognitions: SeasonRecognition[];
@@ -36,10 +39,10 @@ function statusLabel(status: string) {
 	return "baja";
 }
 
-function initials(name: string) {
 export function ProfileView({
 	displayName,
 	status,
+	avatar,
 	level,
 	badges,
 	recognitions,
@@ -82,9 +85,11 @@ export function ProfileView({
 						{/* Sello de nivel */}
 						<div className="flex min-w-0 items-center gap-5 md:flex-col md:items-center md:gap-3 md:text-center">
 							<div className="relative shrink-0">
-								<div className="flex size-20 items-center justify-center rounded-full border bg-card font-heading text-2xl font-semibold text-foreground ring-1 ring-primary/40 md:size-24 md:text-3xl">
-									{initials(displayName)}
-								</div>
+								<MemberAvatar
+									name={displayName}
+									avatar={avatar}
+									className="size-20 font-heading ring-1 ring-primary/40 md:size-24 [&_[data-slot=avatar-fallback]]:bg-card [&_[data-slot=avatar-fallback]]:text-2xl [&_[data-slot=avatar-fallback]]:font-semibold [&_[data-slot=avatar-fallback]]:text-foreground md:[&_[data-slot=avatar-fallback]]:text-3xl"
+								/>
 								<div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
 									<Badge
 										variant="default"
@@ -191,7 +196,7 @@ export function ProfileView({
 					role="status"
 					className="mt-4 rounded-xl border border-border/60 bg-card px-4 py-3 text-sm text-muted-foreground"
 				>
-					Perfil actualizado. Tu nombre ya se ve en el club.
+					Perfil actualizado. El club ya te ve así.
 				</div>
 			)}
 
@@ -250,12 +255,14 @@ export function ProfileView({
 					<Card>
 						<CardHeader>
 							<CardTitle className="text-lg">
+								<h2>Avatar</h2>
 							</CardTitle>
 							<CardDescription>
 								La cara con la que te ve el resto del club.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
+							<AvatarPicker currentAvatar={avatar} displayName={displayName} />
 						</CardContent>
 					</Card>
 					<Card>

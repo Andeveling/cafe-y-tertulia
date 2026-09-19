@@ -75,13 +75,20 @@ describe("decodeRoomSnapshot", () => {
 			cierre: { openTrivia: 0, openTakes: 1 },
 		});
 		expect(snap!.participants).toEqual([
-			{ memberId: "m-1", displayName: "Ana", role: "member", optOut: false },
+			{
+				memberId: "m-1",
+				displayName: "Ana",
+				avatar: null,
+				role: "member",
+				optOut: false,
+			},
 		]);
 		expect(snap!.questions).toEqual([
 			{
 				id: "q-1",
 				authorId: "m-1",
 				authorName: "Ana",
+				authorAvatar: null,
 				text: "¿Qué te movió?",
 				isMine: true,
 				outsideDraw: false,
@@ -95,7 +102,9 @@ describe("decodeRoomSnapshot", () => {
 			questionText: "¿Qué te movió?",
 			assigneeName: "Luis",
 			assigneeId: "m-2",
+			assigneeAvatar: null,
 			authorName: "Ana",
+			authorAvatar: null,
 			revealOrder: 0,
 			myNotes: "ideas",
 			phaseStartedAt: "2026-01-03",
@@ -119,6 +128,7 @@ describe("decodeRoomSnapshot", () => {
 			mode: "waiting_reveal",
 			nextAssigneeName: "Luis",
 			nextAssigneeId: "m-2",
+			nextAssigneeAvatar: null,
 			revealOrder: 1,
 			remainingHidden: 2,
 		});
@@ -162,6 +172,8 @@ describe("decodeRoomSnapshot", () => {
 				assigneeId: "",
 				authorName: "",
 				assigneeName: "",
+				authorAvatar: null,
+				assigneeAvatar: null,
 				state: "hidden",
 				revealOrder: 0,
 				questionText: null,

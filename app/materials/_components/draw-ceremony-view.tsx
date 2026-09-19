@@ -12,6 +12,7 @@ import type {
 	RoomReadiness,
 } from "@/app/materials/_lib/room-types";
 import { sharedNow } from "@/app/materials/_lib/shared-now";
+import { MemberAvatar } from "@/components/member-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -282,13 +283,6 @@ function SorteoBeat({
 	);
 }
 
-function initials(name: string) {
-	const parts = name.trim().split(/\s+/);
-	const first = parts[0]?.[0] ?? "";
-	const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
-	return (first + last).toUpperCase();
-}
-
 function pad2(n: number) {
 	return String(n).padStart(2, "0");
 }
@@ -442,16 +436,14 @@ function ResultsBeat({
 									{pad2(i + 1)}
 								</span>
 								<span className="flex min-w-0 items-center gap-2 text-sm">
-									<span
-										aria-hidden="true"
-										className={cn(
-											"grid size-8 shrink-0 place-items-center rounded-full text-xs font-semibold ring-1",
-											authorIsMe
-												? "bg-primary/10 text-primary ring-primary/30"
-												: "bg-foreground/[0.04] text-foreground ring-foreground/15",
-										)}
-									>
-										{initials(a.authorName)}
+									<span aria-hidden="true" className="shrink-0">
+										<MemberAvatar
+											name={a.authorName}
+											avatar={a.authorAvatar}
+											className={
+												authorIsMe ? "ring-1 ring-primary/40" : undefined
+											}
+										/>
 									</span>
 									<span className="min-w-0 truncate font-medium">
 										{a.authorName}
@@ -462,16 +454,14 @@ function ResultsBeat({
 									>
 										→
 									</span>
-									<span
-										aria-hidden="true"
-										className={cn(
-											"grid size-8 shrink-0 place-items-center rounded-full text-xs font-semibold ring-1",
-											assigneeIsMe
-												? "bg-primary/10 text-primary ring-primary/30"
-												: "bg-foreground/[0.04] text-foreground ring-foreground/15",
-										)}
-									>
-										{initials(a.assigneeName)}
+									<span aria-hidden="true" className="shrink-0">
+										<MemberAvatar
+											name={a.assigneeName}
+											avatar={a.assigneeAvatar}
+											className={
+												assigneeIsMe ? "ring-1 ring-primary/40" : undefined
+											}
+										/>
 									</span>
 									<span className="min-w-0 truncate font-medium">
 										{a.assigneeName}

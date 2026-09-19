@@ -10,7 +10,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { useTransition } from "react";
 import { signOut } from "@/app/profile/_lib/profile-actions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MemberAvatar } from "@/components/member-avatar";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -35,20 +35,12 @@ export type NavUserProps = {
 	};
 };
 
-function getInitials(name: string) {
-	const parts = name.trim().split(/\s+/).filter(Boolean);
-	if (parts.length === 0) return "CT";
-	if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-	return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
 const GITHUB_DISCUSSIONS_URL =
 	"https://github.com/Andeveling/cafe-y-tertulia/discussions/new/choose";
 
 export function NavUser({ user }: NavUserProps) {
 	const { isMobile } = useSidebar();
 	const [isPending, startTransition] = useTransition();
-	const initials = getInitials(user.name);
 
 	return (
 		<SidebarMenu>
@@ -62,12 +54,11 @@ export function NavUser({ user }: NavUserProps) {
 							/>
 						}
 					>
-						<Avatar className="h-8 w-8 rounded-lg">
-							{user.avatar ? (
-								<AvatarImage src={user.avatar} alt={user.name} />
-							) : null}
-							<AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
-						</Avatar>
+						<MemberAvatar
+							name={user.name}
+							avatar={user.avatar}
+							className="h-8 w-8 rounded-lg [&_[data-slot=avatar-fallback]]:rounded-lg"
+						/>
 						<div className="grid flex-1 text-left text-sm leading-tight">
 							<span className="truncate font-medium">{user.name}</span>
 							<span className="truncate text-sm text-muted-foreground">
@@ -88,14 +79,11 @@ export function NavUser({ user }: NavUserProps) {
 						<DropdownMenuGroup>
 							<DropdownMenuLabel className="p-0 font-normal">
 								<div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-									<Avatar className="h-8 w-8 rounded-lg">
-										{user.avatar ? (
-											<AvatarImage src={user.avatar} alt={user.name} />
-										) : null}
-										<AvatarFallback className="rounded-lg">
-											{initials}
-										</AvatarFallback>
-									</Avatar>
+									<MemberAvatar
+										name={user.name}
+										avatar={user.avatar}
+										className="h-8 w-8 rounded-lg [&_[data-slot=avatar-fallback]]:rounded-lg"
+									/>
 									<div className="grid flex-1 text-left text-sm leading-tight">
 										<span className="truncate font-medium">{user.name}</span>
 										<span className="truncate text-sm text-muted-foreground">

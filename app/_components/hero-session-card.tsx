@@ -2,7 +2,7 @@
 
 import { ArrowRight01Icon, Clock01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { MemberAvatar } from "@/components/member-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +39,6 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 	const subtitle = sessionSubtitle(session);
 	const ago = meta.live ? startedAgo(session.scheduled_at) : null;
 	const when = session.scheduled_at ? whenLabel(session.scheduled_at) : null;
-	const initial = (session.moderator_name || "?").slice(0, 1).toUpperCase();
 
 	return (
 		<Card className="relative overflow-hidden">
@@ -93,9 +92,11 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 							<span>{ago}</span>
 						</>
 					)}
-					<Avatar size="sm">
-						<AvatarFallback>{initial}</AvatarFallback>
-					</Avatar>
+					<MemberAvatar
+						name={session.moderator_name ?? "Moderador"}
+						avatar={session.moderator_avatar}
+						size="sm"
+					/>
 				</p>
 				<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
 					<BoardSessionAction session={session} variant="hero">

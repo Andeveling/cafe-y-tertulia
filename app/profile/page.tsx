@@ -27,6 +27,7 @@ export default async function ProfilePage({
 		<ProfileView
 			displayName={member.display_name}
 			status={member.status}
+			avatar={member.avatar ?? null}
 			level={level}
 			badges={badges}
 			recognitions={recognitions}

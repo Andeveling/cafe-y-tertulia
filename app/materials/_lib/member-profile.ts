@@ -10,6 +10,7 @@ export async function getMemberProfile(
 ): Promise<{
 	id: string;
 	display_name: string;
+	avatar: string | null;
 	awards: {
 		id: string;
 		emoji: string;
@@ -22,7 +23,7 @@ export async function getMemberProfile(
 } | null> {
 	const { data: member, error } = await supabase
 		.from("members")
-		.select("id, display_name")
+		.select("id, display_name, avatar")
 		.eq("id", memberId)
 		.single();
 
@@ -37,6 +38,7 @@ export async function getMemberProfile(
 	return {
 		id: member.id,
 		display_name: member.display_name,
+		avatar: member.avatar,
 		awards: (awards ?? []).map((a) => ({
 			id: a.id,
 			emoji: a.badges?.emoji ?? "🏆",

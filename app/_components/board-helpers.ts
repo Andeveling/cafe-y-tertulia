@@ -8,6 +8,8 @@ export type BoardSession = {
 	range: string | null;
 	moderator_id: string | null;
 	moderator_name: string | null;
+	/** Src del catálogo (`members.avatar`) o null = iniciales. */
+	moderator_avatar: string | null;
 	material_id: string | null;
 	material_title: string | null;
 };

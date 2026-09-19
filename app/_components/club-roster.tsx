@@ -6,7 +6,7 @@ import { useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { resuelveConvocatoria } from "@/app/_lib/convocatoria";
 import { convocarAction } from "@/app/materials/_lib/convocatoria-actions";
-import { Avatar, AvatarBadge, AvatarFallback } from "@/components/ui/avatar";
+import { MemberAvatar } from "@/components/member-avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -60,15 +60,13 @@ export function ClubRoster({
 						{i > 0 && <Separator />}
 						<div className="flex items-center justify-between gap-2 py-2">
 							<span className="flex min-w-0 items-center gap-2">
-								<Avatar
+								<MemberAvatar
+									name={m.display_name || "Miembro"}
+									avatar={m.avatar}
 									size="sm"
-									className={m.online ? "ring-1 ring-primary/30" : "opacity-40"}
-								>
-									<AvatarFallback>
-										{(m.display_name || "?").slice(0, 1).toUpperCase()}
-									</AvatarFallback>
-									{m.online && <AvatarBadge />}
-								</Avatar>
+									badge={m.online}
+									className={m.online ? "ring-1 ring-primary/40" : "opacity-40"}
+								/>
 								<span className="truncate text-sm">{m.display_name}</span>
 							</span>
 							{canLlamar &&
