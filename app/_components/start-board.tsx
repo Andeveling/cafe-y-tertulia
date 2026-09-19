@@ -137,7 +137,7 @@ export function StartBoard({
 					</EmptyContent>
 				</Empty>
 			)}
-			<div className="lg:hidden">{create}</div>
+			{create ? <div className="lg:hidden">{create}</div> : null}
 			{others.length > 0 && (
 				<section className="flex flex-col gap-4">
 					<div className="flex items-center gap-3">
