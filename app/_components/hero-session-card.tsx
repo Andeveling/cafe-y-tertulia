@@ -63,7 +63,7 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 				</div>
 				<h2
 					data-slot="card-title"
-					className="max-w-[22ch] font-heading text-3xl leading-tight font-medium tracking-tight text-balance md:text-[3rem] md:leading-[3.5rem]"
+					className="max-w-[22ch] font-heading text-3xl leading-tight font-medium tracking-tight text-balance lg:text-[3rem] lg:leading-[3.5rem]"
 				>
 					{lead}
 					{accent ? (
@@ -97,12 +97,20 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 						<AvatarFallback>{initial}</AvatarFallback>
 					</Avatar>
 				</p>
-				<div className="flex flex-wrap gap-3">
+				<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
 					<BoardSessionAction session={session} variant="hero">
 						<HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
 					</BoardSessionAction>
 					<Sheet>
-						<SheetTrigger render={<Button variant="outline" size="lg" />}>
+						<SheetTrigger
+							render={
+								<Button
+									variant="outline"
+									size="lg"
+									className="w-full sm:w-auto"
+								/>
+							}
+						>
 							Ver programa
 						</SheetTrigger>
 						<SheetContent>

@@ -74,7 +74,9 @@ export function StartBoard({
 			/>
 			<SessionCreateDialog
 				trigger={
-					<Button variant="link">o programa una tertulia para mañana</Button>
+					<Button variant="link" className="min-h-11">
+						o programa una tertulia para mañana
+					</Button>
 				}
 				materials={materials}
 				displayName={displayName}
@@ -135,6 +137,7 @@ export function StartBoard({
 					</EmptyContent>
 				</Empty>
 			)}
+			<div className="lg:hidden">{create}</div>
 			{others.length > 0 && (
 				<section className="flex flex-col gap-4">
 					<div className="flex items-center gap-3">
@@ -185,9 +188,7 @@ export function StartBoard({
 					)}
 				</section>
 			)}
-			<div className="md:hidden">{create}</div>
-			<div className="md:hidden">{guide}</div>
-			<div className="md:hidden">
+			<div className="lg:hidden">
 				<ClubRoster
 					sessions={sessions}
 					rosterMembers={rosterMembers}
@@ -195,14 +196,15 @@ export function StartBoard({
 					collapsible
 				/>
 			</div>
+			<div className="lg:hidden">{guide}</div>
 		</div>
 	);
 
 	return (
-		<div className="pb-28 md:pb-0">
-			<div className="flex flex-col gap-8 md:grid md:grid-cols-[minmax(0,1fr)_300px]">
+		<div className="pb-28 lg:pb-0">
+			<div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_300px]">
 				{main}
-				<aside className="hidden flex-col gap-6 md:flex">
+				<aside className="hidden flex-col gap-6 lg:flex">
 					<ClubRoster
 						sessions={sessions}
 						rosterMembers={rosterMembers}
@@ -213,7 +215,7 @@ export function StartBoard({
 				</aside>
 			</div>
 			{hero && (
-				<div className="fixed inset-x-0 bottom-0 border-t bg-background/95 p-3 md:hidden">
+				<div className="fixed inset-x-0 bottom-0 border-t bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
 					<BoardSessionAction session={hero} variant="hero" fullWidth>
 						<HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
 					</BoardSessionAction>

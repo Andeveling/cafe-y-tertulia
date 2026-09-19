@@ -127,7 +127,7 @@ export function ClubRoster({
 						render={
 							<Button
 								variant="ghost"
-								className="h-auto w-full justify-between px-0 py-0 hover:bg-transparent"
+								className="h-auto min-h-11 w-full justify-between px-0 py-0 hover:bg-transparent"
 							/>
 						}
 					>
