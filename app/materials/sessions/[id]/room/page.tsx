@@ -10,6 +10,7 @@ import {
 	getPendingConvocatoriaIds,
 	getRoomRosterMembers,
 } from "@/app/materials/_lib/room-roster";
+import { seatIfAbsent } from "@/app/materials/_lib/room-seat";
 import { roomSurface } from "@/app/materials/_lib/room-sync";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,8 +29,20 @@ export default async function RoomPage({
 	} = await supabase.auth.getUser();
 	if (!user) redirect("/auth/login");
 
-	const snapshot = await getRoomSnapshot(supabase, sessionId);
+	let snapshot = await getRoomSnapshot(supabase, sessionId);
 	if (!snapshot) notFound();
+
+	// Preguntas cuenta a quien tiene la Sala abierta. Sin asiento, la
+	// mesa vacía se leía como "todos tienen pregunta".
+	if (
+		snapshot.status === "lobby" &&
+		snapshot.roomStage === "questions" &&
+		!snapshot.participants.some((p) => p.memberId === user.id)
+	) {
+		await seatIfAbsent(supabase, sessionId, user.id);
+		const seated = await getRoomSnapshot(supabase, sessionId);
+		if (seated) snapshot = seated;
+	}
 
 	const isModerator = snapshot.moderatorId === user.id;
 	const [rosterMembers, pendingIds] = isModerator

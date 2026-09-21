@@ -29,6 +29,7 @@ import type {
 	TriviaRoundSnapshot,
 } from "@/app/materials/_lib/minigames";
 import type { InviteRosterMember } from "@/app/materials/_lib/presence-invite";
+import { questionsAdvance } from "@/app/materials/_lib/questions-advance";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import {
 	advanceRoomStage,
@@ -36,6 +37,7 @@ import {
 	confirmPresence,
 	deleteQuestion,
 	editQuestion,
+	ensureRoomSeat,
 	executeDraw,
 	saveQuestion,
 	setSpectator,
@@ -98,7 +100,7 @@ const STAGE_HELP: Record<
 		description:
 			"Cada miembro escribe su pregunta en privado. Los demás solo ven que la enviaron.",
 		nextCondition:
-			"Todos los miembros deben tener al menos 1 pregunta enviada.",
+			"Hacen falta al menos 2 participantes, cada uno con una pregunta.",
 	},
 	presence: {
 		description:
@@ -555,10 +557,20 @@ function QuestionsStage({
 	const myQuestions = questions.filter((q) => q.isMine);
 	const myCount = myQuestions.length;
 	const me = participants.find((p) => p.memberId === userId) ?? null;
+	const gate = questionsAdvance({
+		participants,
+		questionAuthorIds: view.questionAuthorIds,
+	});
+	const missingIds = new Set(gate.missingIds);
 	/** Faltan: en sala, no espectadores, sin pregunta. */
-	const missing = participants.filter(
-		(p) => p.role === "member" && !view.questionAuthorIds.has(p.memberId),
-	);
+	const missing = participants.filter((p) => missingIds.has(p.memberId));
+	/** Ir de espectador exige mesa mínima: 3+ en sala y 2+ con pregunta. */
+	const canSpectate = participants.length >= 3 && gate.readyCount >= 2;
+
+	useEffect(() => {
+		if (snapshot.status !== "lobby" || me) return;
+		void ensureRoomSeat(sessionId);
+	}, [me, sessionId, snapshot.status]);
 
 	useEffect(() => {
 		if (editingId && editRef.current) {
@@ -616,11 +628,13 @@ function QuestionsStage({
 		);
 	}
 
-	/** Declarar Sin sorteo desde Preguntas (propio). */
+	/**
+	 * Declarar Sin sorteo desde Preguntas. `me` puede ser null (quien mira
+	 * la Sala sin fila aún, p. ej. el Moderador): el toggle sienta primero.
+	 */
 	function handleOptOut(next: boolean) {
-		if (!me) return;
 		run(
-			() => toggleOptOut(sessionId, me.optOut),
+			() => toggleOptOut(sessionId, me?.optOut ?? false),
 			() => {
 				toast.success(next ? "Vas como espectador" : "Vuelves al sorteo");
 			},
@@ -633,6 +647,7 @@ function QuestionsStage({
 	 * a Presentes en la misma acción.
 	 */
 	function handleAdvanceReview() {
+		if (!gate.canAdvance) return;
 		const toSpectators = missing.filter(
 			(m) => (advanceFor[m.memberId] ?? "wait") === "spectator",
 		);
@@ -673,47 +688,49 @@ function QuestionsStage({
 					<Textarea
 						value={text}
 						onChange={(e) => setText(e.target.value)}
-						rows={3}
+						rows={5}
+						className="min-h-36"
 						placeholder="¿Qué pregunta quieres hacer sobre el material?"
 						disabled={pending}
 					/>
-					<div className="flex items-center justify-between">
-						<span className="text-xs text-muted-foreground tabular-nums">
+					<div className="flex flex-nowrap items-center justify-end gap-2">
+						<span className="mr-auto hidden min-w-0 truncate text-xs whitespace-nowrap text-muted-foreground tabular-nums sm:inline">
 							{myCount > 0
 								? `${myCount} pregunta${myCount > 1 ? "s" : ""} enviada${myCount > 1 ? "s" : ""}`
 								: "Ninguna enviada aún"}
 						</span>
+						{!me?.optOut && (
+							<Button
+								variant="link"
+								size="sm"
+								disabled={pending || !canSpectate}
+								title={
+									canSpectate
+										? undefined
+										: "Disponible con 3+ en sala y 2+ con pregunta"
+								}
+								onClick={() => handleOptOut(true)}
+							>
+								Soy espectador
+							</Button>
+						)}
+						{me?.optOut && (
+							<Button
+								variant="link"
+								size="sm"
+								className="min-w-0 shrink"
+								disabled={pending}
+								onClick={() => handleOptOut(false)}
+							>
+								<span className="truncate">Volver a participar del sorteo</span>
+							</Button>
+						)}
 						<Button disabled={pending || !text.trim()} onClick={handleSubmit}>
 							Enviar pregunta
 						</Button>
 					</div>
 				</CardContent>
 			</Card>
-
-			{me && me.role === "member" && !me.optOut && (
-				<div>
-					<Button
-						variant="ghost"
-						size="sm"
-						disabled={pending}
-						onClick={() => handleOptOut(true)}
-					>
-						Voy solo a mirar (Sin sorteo)
-					</Button>
-				</div>
-			)}
-			{me && me.role === "member" && me.optOut && (
-				<div>
-					<Button
-						variant="ghost"
-						size="sm"
-						disabled={pending}
-						onClick={() => handleOptOut(false)}
-					>
-						Volver a participar del sorteo
-					</Button>
-				</div>
-			)}
 
 			<section
 				aria-labelledby="tus-preguntas-title"
@@ -859,66 +876,68 @@ function QuestionsStage({
 				</DialogContent>
 			</Dialog>
 
-			<details className="group rounded-xl border border-border/60 bg-card/30 px-4 py-3">
-				<summary className="flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
-					<span className="flex flex-wrap items-baseline gap-x-2">
-						<span className="text-sm font-medium">
-							{questions.length} enviada{questions.length === 1 ? "" : "s"} ✓
+			{isModerator && (
+				<details className="group rounded-xl border border-border/60 bg-card/30 px-4 py-3">
+					<summary className="flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
+						<span className="flex flex-wrap items-baseline gap-x-2">
+							<span className="text-sm font-medium">
+								{questions.length} enviada{questions.length === 1 ? "" : "s"} ✓
+							</span>
+							<span className="text-xs text-muted-foreground">
+								{participants.length} en la sala · ver quién falta
+							</span>
 						</span>
-						<span className="text-xs text-muted-foreground">
-							{participants.length} en la sala · ver quién falta
-						</span>
-					</span>
-					<HugeiconsIcon
-						icon={ArrowRight01Icon}
-						strokeWidth={2}
-						aria-hidden="true"
-						className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
-					/>
-				</summary>
-				<ul className="flex flex-col gap-2 pt-3">
-					{participants.map((p) => {
-						const hasQuestion = view.questionAuthorIds.has(p.memberId);
-						return (
-							<li
-								key={p.memberId}
-								className="flex items-center justify-between text-sm"
-							>
-								<span>
-									{p.displayName}
-									{p.memberId === moderatorId && (
-										<Badge variant="secondary" className="ml-2">
-											Modera
-										</Badge>
-									)}
-									{p.role === "spectator" && (
-										<Badge variant="outline" className="ml-2">
-											Espectador
-										</Badge>
-									)}
-								</span>
-								{p.role === "member" && (
-									<Badge variant={hasQuestion ? "secondary" : "outline"}>
-										{hasQuestion ? (
-											<span className="inline-flex items-center gap-1">
-												<HugeiconsIcon
-													icon={Tick01Icon}
-													strokeWidth={2.5}
-													className="size-3"
-													aria-hidden="true"
-												/>
-												enviado
-											</span>
-										) : (
-											"pendiente"
+						<HugeiconsIcon
+							icon={ArrowRight01Icon}
+							strokeWidth={2}
+							aria-hidden="true"
+							className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+						/>
+					</summary>
+					<ul className="flex flex-col gap-2 pt-3">
+						{participants.map((p) => {
+							const hasQuestion = view.questionAuthorIds.has(p.memberId);
+							return (
+								<li
+									key={p.memberId}
+									className="flex items-center justify-between text-sm"
+								>
+									<span>
+										{p.displayName}
+										{p.memberId === moderatorId && (
+											<Badge variant="secondary" className="ml-2">
+												Modera
+											</Badge>
 										)}
-									</Badge>
-								)}
-							</li>
-						);
-					})}
-				</ul>
-			</details>
+										{p.role === "spectator" && (
+											<Badge variant="outline" className="ml-2">
+												Espectador
+											</Badge>
+										)}
+									</span>
+									{p.role === "member" && (
+										<Badge variant={hasQuestion ? "secondary" : "outline"}>
+											{hasQuestion ? (
+												<span className="inline-flex items-center gap-1">
+													<HugeiconsIcon
+														icon={Tick01Icon}
+														strokeWidth={2.5}
+														className="size-3"
+														aria-hidden="true"
+													/>
+													enviado
+												</span>
+											) : (
+												"pendiente"
+											)}
+										</Badge>
+									)}
+								</li>
+							);
+						})}
+					</ul>
+				</details>
+			)}
 
 			{isModerator && (
 				<section
@@ -926,12 +945,12 @@ function QuestionsStage({
 					className="sticky bottom-0 flex flex-col gap-3 border-t border-border/60 bg-card/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-card/80"
 				>
 					<div className="flex flex-wrap items-baseline justify-between gap-2">
-						<p className="text-sm font-medium">
-							{missing.length === 0
-								? "Todos tienen pregunta."
-								: `Faltan ${missing.length}: ¿esperamos o entran mirando?`}
-						</p>
-						<Button size="sm" disabled={pending} onClick={handleAdvanceReview}>
+						<p className="text-sm font-medium">{gate.headline}</p>
+						<Button
+							size="sm"
+							disabled={pending || !gate.canAdvance}
+							onClick={handleAdvanceReview}
+						>
 							<HugeiconsIcon
 								icon={ArrowRight01Icon}
 								strokeWidth={2}
@@ -941,45 +960,46 @@ function QuestionsStage({
 							Avisar y avanzar a Presentes
 						</Button>
 					</div>
-					{missing.map((m) => {
-						const decision = advanceFor[m.memberId] ?? "wait";
-						return (
-							<div
-								key={m.memberId}
-								className="flex items-center justify-between gap-3"
-							>
-								<span className="text-sm">{m.displayName}</span>
-								<div className="flex gap-2">
-									<Button
-										size="xs"
-										variant={decision === "wait" ? "default" : "outline"}
-										disabled={pending}
-										onClick={() =>
-											setAdvanceFor((prev) => ({
-												...prev,
-												[m.memberId]: "wait",
-											}))
-										}
-									>
-										Esperar
-									</Button>
-									<Button
-										size="xs"
-										variant={decision === "spectator" ? "default" : "outline"}
-										disabled={pending}
-										onClick={() =>
-											setAdvanceFor((prev) => ({
-												...prev,
-												[m.memberId]: "spectator",
-											}))
-										}
-									>
-										Entra mirando
-									</Button>
+					{gate.canAdvance &&
+						missing.map((m) => {
+							const decision = advanceFor[m.memberId] ?? "wait";
+							return (
+								<div
+									key={m.memberId}
+									className="flex items-center justify-between gap-3"
+								>
+									<span className="text-sm">{m.displayName}</span>
+									<div className="flex gap-2">
+										<Button
+											size="xs"
+											variant={decision === "wait" ? "default" : "outline"}
+											disabled={pending}
+											onClick={() =>
+												setAdvanceFor((prev) => ({
+													...prev,
+													[m.memberId]: "wait",
+												}))
+											}
+										>
+											Esperar
+										</Button>
+										<Button
+											size="xs"
+											variant={decision === "spectator" ? "default" : "outline"}
+											disabled={pending}
+											onClick={() =>
+												setAdvanceFor((prev) => ({
+													...prev,
+													[m.memberId]: "spectator",
+												}))
+											}
+										>
+											Entra mirando
+										</Button>
+									</div>
 								</div>
-							</div>
-						);
-					})}
+							);
+						})}
 					<details className="group">
 						<summary className="cursor-pointer list-none text-xs text-muted-foreground underline underline-offset-4 [&::-webkit-details-marker]:hidden">
 							Convocar a quien falta

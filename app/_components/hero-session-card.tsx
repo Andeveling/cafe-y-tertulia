@@ -112,7 +112,11 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 							</BoardSessionAction>
 						) : null}
 						{waiting ? (
-							<Sheet open={askOpen} onOpenChange={setAskOpen}>
+							<Sheet
+								key="ask-question"
+								open={askOpen}
+								onOpenChange={setAskOpen}
+							>
 								<SheetTrigger
 									render={<Button size="lg" className="w-full sm:w-auto" />}
 								>
@@ -133,7 +137,7 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 								</SheetContent>
 							</Sheet>
 						) : (
-							<Sheet>
+							<Sheet key="program">
 								<SheetTrigger
 									render={
 										<Button

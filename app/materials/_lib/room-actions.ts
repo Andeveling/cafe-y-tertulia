@@ -1,5 +1,6 @@
 "use server";
 
+import { seatIfAbsent } from "@/app/materials/_lib/room-seat";
 import type { RoomStage } from "@/app/materials/_lib/room-types";
 import { type ActionResult, runServerAction } from "@/lib/server-action";
 import type { Database } from "@/lib/supabase/database.types";
@@ -103,6 +104,21 @@ export async function deleteQuestion(
 	});
 }
 
+/**
+ * Entra a la mesa al abrir Preguntas. Quien ya está (member o
+ * espectador) no se toca: confirmar presencia sigue siendo el upsert.
+ */
+export async function ensureRoomSeat(sessionId: string): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase, user }) => {
+			const seat = await seatIfAbsent(supabase, sessionId, user!.id);
+			if (seat.error) return { ok: false, error: seat.error };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
 /** Confirma presencia: upsert session_participant como member. */
 export async function confirmPresence(
 	sessionId: string,
@@ -184,7 +200,11 @@ export async function advanceToDraw(sessionId: string): Promise<ActionResult> {
 	});
 }
 
-/** Alterna opt_out del participante para el Sorteo. */
+/**
+ * Alterna opt_out del participante para el Sorteo. Sienta primero a quien
+ * aún no tiene fila (p. ej. el Moderador que abrió la Sala antes del lobby):
+ * sin asiento, el update no tocaba filas y el éxito era mentira.
+ */
 export async function toggleOptOut(
 	sessionId: string,
 	currentOptOut: boolean,
@@ -192,6 +212,8 @@ export async function toggleOptOut(
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase, user }) => {
+			const seat = await seatIfAbsent(supabase, sessionId, user!.id);
+			if (seat.error) return { ok: false, error: seat.error };
 			const { error } = await supabase
 				.from("session_participants")
 				.update({ opt_out: !currentOptOut })
