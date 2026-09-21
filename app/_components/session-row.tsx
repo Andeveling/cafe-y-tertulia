@@ -8,6 +8,7 @@ import {
 import {
 	type BoardSession,
 	editorialTitle,
+	sessionHasBoardCta,
 	sessionSubtitle,
 	statusMeta,
 	whenLabel,
@@ -39,9 +40,11 @@ export function SessionRow({ session }: { session: BoardSession }) {
 						{subtitle ? `${subtitle} · ` : ""}
 						Modera {session.moderator_name ?? "—"}
 					</CardDescription>
-					<CardAction>
-						<BoardSessionAction session={session} variant="row" />
-					</CardAction>
+					{sessionHasBoardCta(session) ? (
+						<CardAction>
+							<BoardSessionAction session={session} variant="row" />
+						</CardAction>
+					) : null}
 				</CardHeader>
 			</Card>
 		</li>

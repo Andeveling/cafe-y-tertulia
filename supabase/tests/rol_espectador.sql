@@ -3,7 +3,7 @@
 -- `execute_draw` (excluye espectadores), conteos de Listos y elegibilidad.
 
 begin;
-select plan(16);
+select plan(17);
 
 -- ============================================================
 -- Fixtures: membresía + material + sesión en lobby
@@ -152,7 +152,16 @@ select is(
 );
 
 -- 10. execute_draw nunca asigna Preguntas a Espectadores.
---     Agregamos un segundo espectador y ejecutamos el sorteo.
+--     Agregamos un segundo espectador y ejecutamos el sorteo. El sorteo es
+--     1:1 estricto (ADR-0008): al pasar 3333 a espectador solo quedarían
+--     2222 de elegible, así que el moderador entra a jugar con pregunta
+--     propia para que el 1:1 (2222 + moderador) siga válido.
+insert into public.session_participants (session_id, member_id, role) values
+	('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', 'member');
+
+insert into public.questions (id, session_id, material_id, author_id, text) values
+	('a1000000-0000-0000-0000-000000000003', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Pregunta del moderador');
+
 select lives_ok(
 	$$ select public.set_spectator('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '33333333-3333-3333-3333-333333333333', true) $$,
 	'10. Agregar segundo espectador para test de sorteo'
@@ -173,6 +182,14 @@ select is(
 	   and assignee_id in ('44444444-4444-4444-4444-444444444444', '33333333-3333-3333-3333-333333333333')),
 	0,
 	'10c. Ningún Espectador recibió asignación en el Sorteo'
+);
+
+select is(
+	(select count(*)::int from public.assignments
+	 where session_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+	   and question_id = 'a1000000-0000-0000-0000-000000000002'),
+	0,
+	'10d. La pregunta del espectador no entró al sorteo'
 );
 
 -- ============================================================

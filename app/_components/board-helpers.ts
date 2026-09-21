@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export type BoardSession = {
@@ -41,13 +41,6 @@ export function splitHeadline(title: string): {
 	return { lead: `${title.slice(0, idx)}:`, accent: accent || null };
 }
 
-export function startedAgo(iso: string | null): string | null {
-	if (!iso) return null;
-	const d = new Date(iso);
-	if (Number.isNaN(d.getTime()) || d.getTime() > Date.now()) return null;
-	return `empezó hace ${formatDistanceToNow(d, { locale: es })}`;
-}
-
 export type SessionFilter = "all" | "live" | "scheduled";
 
 export function matchesFilter(s: BoardSession, filter: SessionFilter): boolean {
@@ -86,6 +79,14 @@ export function sessionOpensSala(status: BoardSession["status"]): boolean {
 	return status === "preparation";
 }
 
+/** Fecha pactada = aún no se abre desde el tablero. Sala viva sí. */
+export function sessionHasBoardCta(
+	s: Pick<BoardSession, "status" | "scheduled_at">,
+): boolean {
+	if (s.status === "lobby" || s.status === "in_progress") return true;
+	return s.status === "preparation" && !s.scheduled_at;
+}
+
 export function othersHeading(others: BoardSession[]): string {
 	const live = others.filter(
 		(s) => s.status === "lobby" || s.status === "in_progress",
@@ -95,6 +96,7 @@ export function othersHeading(others: BoardSession[]): string {
 	return "Otras";
 }
 
+/** Solo el día: al crear se elige fecha, no hora. */
 export function whenLabel(iso: string | null): string {
 	if (!iso) return "Sin fecha";
 	const d = new Date(iso);
@@ -102,9 +104,9 @@ export function whenLabel(iso: string | null): string {
 	const today = format(now, "yyyy-MM-dd");
 	const tomorrow = format(new Date(now.getTime() + 86_400_000), "yyyy-MM-dd");
 	const day = format(d, "yyyy-MM-dd");
-	if (day === today) return `Hoy ${format(d, "HH:mm")}`;
-	if (day === tomorrow) return `Mañana ${format(d, "HH:mm")}`;
-	return format(d, "EEE d MMM, HH:mm", { locale: es });
+	if (day === today) return "Hoy";
+	if (day === tomorrow) return "Mañana";
+	return format(d, "EEE d MMM", { locale: es });
 }
 
 export function splitSessions(sessions: BoardSession[]) {

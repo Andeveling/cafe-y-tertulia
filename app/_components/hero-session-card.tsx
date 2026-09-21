@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight01Icon, Clock01Icon } from "@hugeicons/core-free-icons";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { MemberAvatar } from "@/components/member-avatar";
 import { Badge } from "@/components/ui/badge";
@@ -24,9 +24,9 @@ import { cn } from "@/lib/utils";
 import {
 	type BoardSession,
 	editorialTitle,
+	sessionHasBoardCta,
 	sessionSubtitle,
 	splitHeadline,
-	startedAgo,
 	statusMeta,
 	whenLabel,
 } from "./board-helpers";
@@ -37,8 +37,8 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 	const title = editorialTitle(session);
 	const { lead, accent } = splitHeadline(title);
 	const subtitle = sessionSubtitle(session);
-	const ago = meta.live ? startedAgo(session.scheduled_at) : null;
 	const when = session.scheduled_at ? whenLabel(session.scheduled_at) : null;
+	const hasCta = sessionHasBoardCta(session);
 
 	return (
 		<Card className="relative overflow-hidden">
@@ -86,12 +86,6 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 							{session.moderator_name ?? "—"}
 						</span>
 					</span>
-					{ago && (
-						<>
-							<span aria-hidden="true">·</span>
-							<span>{ago}</span>
-						</>
-					)}
 					<MemberAvatar
 						name={session.moderator_name ?? "Moderador"}
 						avatar={session.moderator_avatar}
@@ -99,14 +93,16 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 					/>
 				</p>
 				<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-					<BoardSessionAction session={session} variant="hero">
-						<HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
-					</BoardSessionAction>
+					{hasCta ? (
+						<BoardSessionAction session={session} variant="hero">
+							<HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
+						</BoardSessionAction>
+					) : null}
 					<Sheet>
 						<SheetTrigger
 							render={
 								<Button
-									variant="outline"
+									variant={hasCta ? "outline" : "default"}
 									size="lg"
 									className="w-full sm:w-auto"
 								/>
@@ -128,33 +124,32 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 								<SheetTitle>{title}</SheetTitle>
 								<SheetDescription>
 									Modera {session.moderator_name ?? "—"}
-									{ago ? ` · ${ago}` : when ? ` · ${when}` : ""}
+									{when && !meta.live ? ` · ${when}` : ""}
 								</SheetDescription>
 							</SheetHeader>
-							<div className="flex flex-col gap-2 px-4 text-sm text-muted-foreground">
-								{subtitle && <p>{subtitle}</p>}
-								{when && <p>{when}</p>}
-							</div>
-							<SheetFooter>
-								<BoardSessionAction session={session} variant="hero" fullWidth>
-									<HugeiconsIcon
-										icon={ArrowRight01Icon}
-										data-icon="inline-end"
-									/>
-								</BoardSessionAction>
-							</SheetFooter>
+							{subtitle ? (
+								<div className="flex flex-col gap-2 px-4 text-sm text-muted-foreground">
+									<p>{subtitle}</p>
+								</div>
+							) : null}
+							{hasCta ? (
+								<SheetFooter>
+									<BoardSessionAction
+										session={session}
+										variant="hero"
+										fullWidth
+									>
+										<HugeiconsIcon
+											icon={ArrowRight01Icon}
+											data-icon="inline-end"
+										/>
+									</BoardSessionAction>
+								</SheetFooter>
+							) : null}
 						</SheetContent>
 					</Sheet>
 				</div>
 			</CardContent>
-			{ago && (
-				<footer className="relative flex flex-wrap gap-4 px-(--card-spacing) pb-(--card-spacing) text-xs text-muted-foreground">
-					<span className="flex items-center gap-2">
-						<HugeiconsIcon icon={Clock01Icon} aria-hidden="true" />
-						{ago}
-					</span>
-				</footer>
-			)}
 		</Card>
 	);
 }

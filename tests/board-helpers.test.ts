@@ -5,10 +5,12 @@ import {
 	matchesFilter,
 	othersHeading,
 	sessionCta,
+	sessionHasBoardCta,
 	sessionHref,
 	sessionOpensSala,
 	sessionSubtitle,
 	splitHeadline,
+	whenLabel,
 } from "@/app/_components/board-helpers";
 
 const prep: BoardSession = {
@@ -54,6 +56,36 @@ describe("sessionCta", () => {
 	it("sala viva ofrece Entrar", () => {
 		expect(sessionCta("lobby", "row")).toBe("Entrar");
 		expect(sessionCta("in_progress", "hero")).toBe("Entrar a la sala");
+	});
+});
+
+describe("sessionHasBoardCta", () => {
+	it("preparation con fecha pactada no ofrece abrir sala", () => {
+		expect(sessionHasBoardCta(prep)).toBe(false);
+	});
+
+	it("preparation sin fecha sí ofrece abrir sala", () => {
+		expect(sessionHasBoardCta({ ...prep, scheduled_at: null })).toBe(true);
+	});
+
+	it("sala viva ofrece entrar aunque tenga fecha", () => {
+		expect(sessionHasBoardCta(live)).toBe(true);
+	});
+});
+
+describe("whenLabel", () => {
+	it("sin fecha", () => {
+		expect(whenLabel(null)).toBe("Sin fecha");
+	});
+
+	it("solo el día, nunca la hora", () => {
+		expect(whenLabel("2026-10-05T00:00:00.000Z")).not.toMatch(/\d{1,2}:\d{2}/);
+	});
+
+	it("hoy es Hoy, sin hora", () => {
+		const d = new Date();
+		d.setHours(12, 0, 0, 0);
+		expect(whenLabel(d.toISOString())).toBe("Hoy");
 	});
 });
 

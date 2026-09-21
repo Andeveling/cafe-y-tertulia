@@ -33,9 +33,11 @@ insert into public.session_participants (session_id, member_id) values
 	('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '22222222-2222-2222-2222-222222222222'),
 	('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '33333333-3333-3333-3333-333333333333');
 
--- Pregunta del Autor (texto: '¿Qué opinas del capítulo 2?')
+-- Preguntas (1:1: una por elegible; texto del Autor: '¿Qué opinas del capítulo 2?')
 insert into public.questions (id, session_id, material_id, author_id, text) values
-	('cccccccc-cccc-cccc-cccc-cccccccccccc', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', '¿Qué opinas del capítulo 2?');
+	('cccccccc-cccc-cccc-cccc-cccccccccccc', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', '¿Qué opinas del capítulo 2?'),
+	('cccccccc-cccc-cccc-cccc-cccccccccccd', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '22222222-2222-2222-2222-222222222222', '¿Pregunta del moderador?'),
+	('cccccccc-cccc-cccc-cccc-ccccccccccce', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '33333333-3333-3333-3333-333333333333', '¿Pregunta del asignado?');
 
 -- ============================================================
 -- Pre-draw: el pool es abierto, todos ven la Pregunta con texto
@@ -107,24 +109,30 @@ select ok(
 	'4. El Autor ve su Pregunta con texto aunque el assignment esté hidden'
 );
 
--- 5. Un Participante NO autor NO ve la Pregunta tras el Sorteo (texto oculto
---    por RLS: la fila entera queda oculta para no-autores).
+-- 5. Un Participante NO ve preguntas ajenas tras el Sorteo (texto oculto
+--    por RLS: solo la propia; en 1:1 todo elegible es autor de una).
 set local request.jwt.claim.sub = '33333333-3333-3333-3333-333333333333';
 
 select is(
 	(select count(*) from public.questions q
-	 where q.session_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'),
+	 where q.session_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'
+	   and q.author_id <> '33333333-3333-3333-3333-333333333333'),
 	0::bigint,
-	'5. Un Participante no-autor NO ve la Pregunta tras el Sorteo (texto oculto)'
+	'5. Un Participante NO ve preguntas ajenas tras el Sorteo (texto oculto)'
 );
 
 -- ============================================================
 -- Revelar: el texto se hace público
 -- ============================================================
 
--- El Moderador revela la primera asignación.
+-- El Moderador revela (una por RPC); el resto se avanza como postgres para
+-- que el test 6 no dependa de cuál salió primera en el orden aleatorio.
 set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
 select public.reveal_next_assignment('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb');
+reset role;
+update public.assignments set state = 'exposition'
+where session_id = 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' and state = 'hidden';
+set local role authenticated;
 
 -- 6. Tras revelar, un Participante ve la Pregunta con texto.
 set local request.jwt.claim.sub = '33333333-3333-3333-3333-333333333333';
@@ -171,6 +179,7 @@ select ok(
 		from json_array_elements(
 			public.lobby_assignments('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb')::json
 		) as elem
+		where elem->>'authorName' = 'Autor'
 		limit 1
 	),
 	'8. El Autor ve el texto de su Pregunta en lobby_assignments (assignment hidden)'
@@ -185,10 +194,11 @@ select is(
 		from json_array_elements(
 			public.lobby_assignments('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb')::json
 		) as elem
+		where elem->>'authorName' <> 'Asignado'
 		limit 1
 	),
 	null::text,
-	'9. Un Participante no-autor NO ve el texto en lobby_assignments (hidden)'
+	'9. Un Participante NO ve textos ajenos en lobby_assignments (hidden)'
 );
 
 -- 10. Tras revelar, el texto es visible para todos en el RPC.

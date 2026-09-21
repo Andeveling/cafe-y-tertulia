@@ -110,7 +110,7 @@ Entidades y relaciones. Todo acceso filtrado por RLS (membresía, ADR 0005).
 | `notes` | text | Notas de respuesta (pueden quedar vacías) |
 | `draw_id` | uuid FK → draws | |
 
-- Hasta 2 asignados por Pregunta; nunca el autor.
+- 1:1 estricto: cada elegible responde exactamente una Pregunta ajena; cada Pregunta entra como máximo una vez; nunca el autor (ADR-0008).
 
 ### 2.7 `draws`
 
@@ -121,7 +121,7 @@ Entidades y relaciones. Todo acceso filtrado por RLS (membresía, ADR 0005).
 | `status` | enum | `pending` \| `hidden` \| `revealing` \| `revealed` |
 | `created_at` | timestamptz | |
 
-- Matching aleatorio máx. bipartito con CSPRNG (ADR 0001).
+- Derangement aleatorio 1:1 con CSPRNG (ADR-0008).
 
 ### 2.8 `trivia_rounds` / `trivia_questions` / `trivia_answers`
 
@@ -263,7 +263,7 @@ stateDiagram-v2
 ```
 
 - Avance manual por el Moderador (revelar / continuar / siguiente).
-- `complement` solo si el autor está presente; con 2 asignados, complementa una sola vez tras el último.
+- `complement` solo si el autor está presente; tras el único exponente.
 
 ---
 

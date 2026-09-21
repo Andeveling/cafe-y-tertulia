@@ -20,11 +20,13 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { RosterMember } from "@/hooks/use-club-presence";
+import { cn } from "@/lib/utils";
 import {
 	type BoardSession,
 	matchesFilter,
 	othersHeading,
 	type SessionFilter,
+	sessionHasBoardCta,
 	splitSessions,
 } from "./board-helpers";
 import { BoardSessionAction } from "./board-session-action";
@@ -201,7 +203,7 @@ export function StartBoard({
 	);
 
 	return (
-		<div className="pb-28 lg:pb-0">
+		<div className={cn("lg:pb-0", hero && sessionHasBoardCta(hero) && "pb-28")}>
 			<div className="flex flex-col gap-8 lg:grid lg:grid-cols-[minmax(0,1fr)_300px]">
 				{main}
 				<aside className="hidden flex-col gap-6 lg:flex">
@@ -214,13 +216,13 @@ export function StartBoard({
 					{guide}
 				</aside>
 			</div>
-			{hero && (
+			{hero && sessionHasBoardCta(hero) ? (
 				<div className="fixed inset-x-0 bottom-0 border-t bg-background/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
 					<BoardSessionAction session={hero} variant="hero" fullWidth>
 						<HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
 					</BoardSessionAction>
 				</div>
-			)}
+			) : null}
 		</div>
 	);
 }

@@ -2,6 +2,12 @@
 
 ## Status: superseded by ADR-0008
 
+> Nota 2026-09-21: la implementación (`execute_draw`) ya no aplica el límite
+> 2/pregunta de este ADR. Rige sorteo 1:1 estricto: cada pregunta entra una
+> sola vez, cada elegible responde exactamente una ajena, y sin igualdad
+> participantes = preguntas sorteables el sorteo falla en vez de repartir
+> (incidente sesión 2026-09-21).
+
 ## Decision
 
 El Sorteo asigna aleatoriamente las Preguntas del pool (todas las propuestas en `preparación` para el Material de la Sesión, presente o no su autor) a los Participantes confirmados, con la única restricción de que nadie responde su propia Pregunta. Una Pregunta puede asignarse a hasta dos participantes; si aun así hay más participantes que posiciones, los sobrantes conversan libremente sin Asignación. Proponer Preguntas no es condición para presentar.

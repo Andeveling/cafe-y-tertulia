@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import {
 	type BoardSession,
 	sessionCta,
+	sessionHasBoardCta,
 	sessionHref,
 	sessionOpensSala,
 } from "./board-helpers";
@@ -33,6 +34,7 @@ export function BoardSessionAction({
 }: Props) {
 	const router = useRouter();
 	const [pending, start] = useTransition();
+	if (!sessionHasBoardCta(session)) return null;
 	const label = sessionCta(session.status, variant);
 	const size = variant === "hero" ? "lg" : "sm";
 	const buttonVariant = variant === "hero" ? "default" : "ghost";
