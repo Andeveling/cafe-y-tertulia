@@ -2,6 +2,7 @@
 
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { useState } from "react";
 import { MemberAvatar } from "@/components/member-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ import {
 import { cn } from "@/lib/utils";
 import {
 	type BoardSession,
+	daysUntilLabel,
 	editorialTitle,
 	sessionHasBoardCta,
 	sessionSubtitle,
@@ -31,14 +33,19 @@ import {
 	whenLabel,
 } from "./board-helpers";
 import { BoardSessionAction } from "./board-session-action";
+import { PrepareQuestionForm } from "./prepare-question-form";
 
 export function HeroSessionCard({ session }: { session: BoardSession }) {
+	const [askOpen, setAskOpen] = useState(false);
 	const meta = statusMeta(session.status);
 	const title = editorialTitle(session);
 	const { lead, accent } = splitHeadline(title);
 	const subtitle = sessionSubtitle(session);
 	const when = session.scheduled_at ? whenLabel(session.scheduled_at) : null;
 	const hasCta = sessionHasBoardCta(session);
+	const waiting =
+		session.status === "preparation" && Boolean(session.scheduled_at);
+	const days = waiting ? daysUntilLabel(session.scheduled_at) : null;
 
 	return (
 		<Card className="relative overflow-hidden">
@@ -58,7 +65,9 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 						/>
 						{meta.live ? `${meta.label} · Live` : meta.label}
 					</Badge>
-					{when && !meta.live && <Badge variant="outline">{when}</Badge>}
+					{when && !meta.live && !waiting ? (
+						<Badge variant="outline">{when}</Badge>
+					) : null}
 				</div>
 				<h2
 					data-slot="card-title"
@@ -92,62 +101,90 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 						size="sm"
 					/>
 				</p>
-				<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-					{hasCta ? (
-						<BoardSessionAction session={session} variant="hero">
-							<HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
-						</BoardSessionAction>
+				<div className="flex flex-col gap-3">
+					{days ? (
+						<p className="text-sm text-muted-foreground">{days}</p>
 					) : null}
-					<Sheet>
-						<SheetTrigger
-							render={
-								<Button
-									variant={hasCta ? "outline" : "default"}
-									size="lg"
-									className="w-full sm:w-auto"
-								/>
-							}
-						>
-							Ver programa
-						</SheetTrigger>
-						<SheetContent>
-							<SheetHeader>
-								<Badge variant="outline">
-									<span
-										className={cn(
-											"size-1.5 shrink-0 rounded-full",
-											meta.live ? "bg-primary" : "bg-muted-foreground/40",
-										)}
+					<div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+						{hasCta ? (
+							<BoardSessionAction session={session} variant="hero">
+								<HugeiconsIcon icon={ArrowRight01Icon} data-icon="inline-end" />
+							</BoardSessionAction>
+						) : null}
+						{waiting ? (
+							<Sheet open={askOpen} onOpenChange={setAskOpen}>
+								<SheetTrigger
+									render={<Button size="lg" className="w-full sm:w-auto" />}
+								>
+									Agrega tu pregunta
+								</SheetTrigger>
+								<SheetContent>
+									<SheetHeader>
+										<SheetTitle>Agrega tu pregunta</SheetTitle>
+										<SheetDescription>
+											{days ? `${days}. ` : null}
+											Así la tertulia es para hablar.
+										</SheetDescription>
+									</SheetHeader>
+									<PrepareQuestionForm
+										sessionId={session.id}
+										onSuccess={() => setAskOpen(false)}
 									/>
-									{meta.label}
-								</Badge>
-								<SheetTitle>{title}</SheetTitle>
-								<SheetDescription>
-									Modera {session.moderator_name ?? "—"}
-									{when && !meta.live ? ` · ${when}` : ""}
-								</SheetDescription>
-							</SheetHeader>
-							{subtitle ? (
-								<div className="flex flex-col gap-2 px-4 text-sm text-muted-foreground">
-									<p>{subtitle}</p>
-								</div>
-							) : null}
-							{hasCta ? (
-								<SheetFooter>
-									<BoardSessionAction
-										session={session}
-										variant="hero"
-										fullWidth
-									>
-										<HugeiconsIcon
-											icon={ArrowRight01Icon}
-											data-icon="inline-end"
+								</SheetContent>
+							</Sheet>
+						) : (
+							<Sheet>
+								<SheetTrigger
+									render={
+										<Button
+											variant={hasCta ? "outline" : "default"}
+											size="lg"
+											className="w-full sm:w-auto"
 										/>
-									</BoardSessionAction>
-								</SheetFooter>
-							) : null}
-						</SheetContent>
-					</Sheet>
+									}
+								>
+									Ver programa
+								</SheetTrigger>
+								<SheetContent>
+									<SheetHeader>
+										<Badge variant="outline">
+											<span
+												className={cn(
+													"size-1.5 shrink-0 rounded-full",
+													meta.live ? "bg-primary" : "bg-muted-foreground/40",
+												)}
+											/>
+											{meta.label}
+										</Badge>
+										<SheetTitle>{title}</SheetTitle>
+										<SheetDescription>
+											Modera {session.moderator_name ?? "—"}
+											{when && !meta.live ? ` · ${when}` : ""}
+										</SheetDescription>
+									</SheetHeader>
+									{subtitle ? (
+										<div className="flex flex-col gap-2 px-4 text-sm text-muted-foreground">
+											<p>{subtitle}</p>
+										</div>
+									) : null}
+									{hasCta ? (
+										<SheetFooter>
+											<BoardSessionAction
+												session={session}
+												variant="hero"
+												fullWidth
+											>
+												<HugeiconsIcon
+													icon={ArrowRight01Icon}
+													data-icon="inline-end"
+												/>
+											</BoardSessionAction>
+										</SheetFooter>
+									) : null}
+								</SheetContent>
+							</Sheet>
+						)}
+					</div>
 				</div>
 			</CardContent>
 		</Card>

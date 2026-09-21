@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	type BoardSession,
+	daysUntilLabel,
 	editorialTitle,
 	matchesFilter,
 	othersHeading,
@@ -86,6 +87,34 @@ describe("whenLabel", () => {
 		const d = new Date();
 		d.setHours(12, 0, 0, 0);
 		expect(whenLabel(d.toISOString())).toBe("Hoy");
+	});
+});
+
+describe("daysUntilLabel", () => {
+	it("sin fecha", () => {
+		expect(daysUntilLabel(null)).toBeNull();
+	});
+
+	it("hoy", () => {
+		const d = new Date();
+		d.setHours(12, 0, 0, 0);
+		expect(daysUntilLabel(d.toISOString())).toBe("Es hoy");
+	});
+
+	it("falta 1 día", () => {
+		const d = new Date();
+		d.setDate(d.getDate() + 1);
+		d.setHours(12, 0, 0, 0);
+		expect(daysUntilLabel(d.toISOString())).toBe("Falta 1 día para la sesión");
+	});
+
+	it("faltan n días", () => {
+		const d = new Date();
+		d.setDate(d.getDate() + 5);
+		d.setHours(12, 0, 0, 0);
+		expect(daysUntilLabel(d.toISOString())).toBe(
+			"Faltan 5 días para la sesión",
+		);
 	});
 });
 

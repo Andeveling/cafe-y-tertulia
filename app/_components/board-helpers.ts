@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { differenceInCalendarDays, format } from "date-fns";
 import { es } from "date-fns/locale";
 
 export type BoardSession = {
@@ -107,6 +107,17 @@ export function whenLabel(iso: string | null): string {
 	if (day === today) return "Hoy";
 	if (day === tomorrow) return "Mañana";
 	return format(d, "EEE d MMM", { locale: es });
+}
+
+/** Días de calendario hasta la sesión. Sin hora: al crear se elige solo el día. */
+export function daysUntilLabel(iso: string | null): string | null {
+	if (!iso) return null;
+	const d = new Date(iso);
+	if (Number.isNaN(d.getTime())) return null;
+	const n = differenceInCalendarDays(d, new Date());
+	if (n <= 0) return "Es hoy";
+	if (n === 1) return "Falta 1 día para la sesión";
+	return `Faltan ${n} días para la sesión`;
 }
 
 export function splitSessions(sessions: BoardSession[]) {
