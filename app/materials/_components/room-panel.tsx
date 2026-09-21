@@ -190,7 +190,10 @@ export function RoomPanel({
 				pendingIds={pendingIds}
 			/>
 
+			{/* En Preguntas la conducción vive en la hoja de revisión de la
+			etapa (variante C): el ModeratorNav genérico queda para el resto. */}
 			{isModerator &&
+				snapshot.roomStage !== "questions" &&
 				!(
 					snapshot.roomStage === "debate" && snapshot.debate?.mode === "done"
 				) && <ModeratorNav snapshot={snapshot} view={view} />}
@@ -204,6 +207,7 @@ type EtapaProps = {
 	snapshot: RoomSnapshot;
 	view: SalaView;
 	userId: string;
+	isModerator: boolean;
 	rosterMembers?: InviteRosterMember[];
 	pendingIds?: string[];
 };
@@ -228,7 +232,16 @@ function StageContent({
 
 	switch (snapshot.roomStage) {
 		case "questions":
-			return <QuestionsStage snapshot={snapshot} view={view} userId={userId} />;
+			return (
+				<QuestionsStage
+					snapshot={snapshot}
+					view={view}
+					userId={userId}
+					isModerator={isModerator}
+					rosterMembers={rosterMembers}
+					pendingIds={pendingIds}
+				/>
+			);
 		case "presence":
 			return (
 				<PresenceStage
@@ -516,7 +529,14 @@ function ModeratorNav({
 
 // ─── Questions Stage ────────────────────────────────────────
 
-function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
+function QuestionsStage({
+	snapshot,
+	view,
+	userId,
+	isModerator,
+	rosterMembers = [],
+	pendingIds = [],
+}: EtapaProps) {
 	const { sessionId, materialId, questions, participants, moderatorId } =
 		snapshot;
 	const { pending, run } = useRoomMutation();
@@ -526,10 +546,19 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 	const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(
 		null,
 	);
+	/** Pase de lista del Moderador: por faltante, esperar o entra mirando. */
+	const [advanceFor, setAdvanceFor] = useState<
+		Record<string, "wait" | "spectator">
+	>({});
 	const editRef = useRef<HTMLTextAreaElement | null>(null);
 
 	const myQuestions = questions.filter((q) => q.isMine);
 	const myCount = myQuestions.length;
+	const me = participants.find((p) => p.memberId === userId) ?? null;
+	/** Faltan: en sala, no espectadores, sin pregunta. */
+	const missing = participants.filter(
+		(p) => p.role === "member" && !view.questionAuthorIds.has(p.memberId),
+	);
 
 	useEffect(() => {
 		if (editingId && editRef.current) {
@@ -587,6 +616,35 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 		);
 	}
 
+	/** Declarar Sin sorteo desde Preguntas (propio). */
+	function handleOptOut(next: boolean) {
+		if (!me) return;
+		run(
+			() => toggleOptOut(sessionId, me.optOut),
+			() => {
+				toast.success(next ? "Vas como espectador" : "Vuelves al sorteo");
+			},
+		);
+	}
+
+	/**
+	 * Pase de lista y avance (solo Moderador, variante C): los faltantes
+	 * marcados como espectadores se sacan del Sorteo y luego se avanza
+	 * a Presentes en la misma acción.
+	 */
+	function handleAdvanceReview() {
+		const toSpectators = missing.filter(
+			(m) => (advanceFor[m.memberId] ?? "wait") === "spectator",
+		);
+		run(async () => {
+			for (const m of toSpectators) {
+				const r = await setSpectator(sessionId, m.memberId, true);
+				if (!r.ok) return r;
+			}
+			return advanceRoomStage(sessionId, "presence");
+		});
+	}
+
 	function handleEditKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
 		if (e.key === "Escape") {
 			e.preventDefault();
@@ -604,12 +662,10 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 			<Card className="shadow-sm ring-primary/20">
 				<CardHeader>
 					<div className="flex items-center gap-1.5">
-						<CardTitle className="font-heading text-lg">
-							Escribe tu pregunta
-						</CardTitle>
+						<CardTitle className="font-heading text-lg">Tu pregunta</CardTitle>
 						<InfoButton
 							title="¿Quién ve tu pregunta?"
-							description="Tu texto es privado. Los demás solo ven que enviaste una."
+							description="Tu texto es privado. Los demás solo ven que enviaste una. Solo vos podés corregirla, y solo durante Preguntas."
 						/>
 					</div>
 				</CardHeader>
@@ -633,6 +689,31 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 					</div>
 				</CardContent>
 			</Card>
+
+			{me && me.role === "member" && !me.optOut && (
+				<div>
+					<Button
+						variant="ghost"
+						size="sm"
+						disabled={pending}
+						onClick={() => handleOptOut(true)}
+					>
+						Voy solo a mirar (Sin sorteo)
+					</Button>
+				</div>
+			)}
+			{me && me.role === "member" && me.optOut && (
+				<div>
+					<Button
+						variant="ghost"
+						size="sm"
+						disabled={pending}
+						onClick={() => handleOptOut(false)}
+					>
+						Volver a participar del sorteo
+					</Button>
+				</div>
+			)}
 
 			<section
 				aria-labelledby="tus-preguntas-title"
@@ -781,10 +862,11 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 			<details className="group rounded-xl border border-border/60 bg-card/30 px-4 py-3">
 				<summary className="flex cursor-pointer list-none items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
 					<span className="flex flex-wrap items-baseline gap-x-2">
-						<span className="text-sm font-medium">Participantes</span>
+						<span className="text-sm font-medium">
+							{questions.length} enviada{questions.length === 1 ? "" : "s"} ✓
+						</span>
 						<span className="text-xs text-muted-foreground">
-							{participants.length} en la sala · {view.questionAuthorIds.size}{" "}
-							con pregunta
+							{participants.length} en la sala · ver quién falta
 						</span>
 					</span>
 					<HugeiconsIcon
@@ -837,6 +919,83 @@ function QuestionsStage({ snapshot, view, userId }: EtapaProps) {
 					})}
 				</ul>
 			</details>
+
+			{isModerator && (
+				<section
+					aria-label="Revisión del moderador"
+					className="sticky bottom-0 flex flex-col gap-3 border-t border-border/60 bg-card/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-card/80"
+				>
+					<div className="flex flex-wrap items-baseline justify-between gap-2">
+						<p className="text-sm font-medium">
+							{missing.length === 0
+								? "Todos tienen pregunta."
+								: `Faltan ${missing.length}: ¿esperamos o entran mirando?`}
+						</p>
+						<Button size="sm" disabled={pending} onClick={handleAdvanceReview}>
+							<HugeiconsIcon
+								icon={ArrowRight01Icon}
+								strokeWidth={2}
+								data-icon="inline-end"
+								aria-hidden="true"
+							/>
+							Avisar y avanzar a Presentes
+						</Button>
+					</div>
+					{missing.map((m) => {
+						const decision = advanceFor[m.memberId] ?? "wait";
+						return (
+							<div
+								key={m.memberId}
+								className="flex items-center justify-between gap-3"
+							>
+								<span className="text-sm">{m.displayName}</span>
+								<div className="flex gap-2">
+									<Button
+										size="xs"
+										variant={decision === "wait" ? "default" : "outline"}
+										disabled={pending}
+										onClick={() =>
+											setAdvanceFor((prev) => ({
+												...prev,
+												[m.memberId]: "wait",
+											}))
+										}
+									>
+										Esperar
+									</Button>
+									<Button
+										size="xs"
+										variant={decision === "spectator" ? "default" : "outline"}
+										disabled={pending}
+										onClick={() =>
+											setAdvanceFor((prev) => ({
+												...prev,
+												[m.memberId]: "spectator",
+											}))
+										}
+									>
+										Entra mirando
+									</Button>
+								</div>
+							</div>
+						);
+					})}
+					<details className="group">
+						<summary className="cursor-pointer list-none text-xs text-muted-foreground underline underline-offset-4 [&::-webkit-details-marker]:hidden">
+							Convocar a quien falta
+						</summary>
+						<div className="pt-3">
+							<PresenceInvite
+								sessionId={sessionId}
+								userId={userId}
+								rosterMembers={rosterMembers}
+								participantIds={participants.map((p) => p.memberId)}
+								pendingIds={pendingIds}
+							/>
+						</div>
+					</details>
+				</section>
+			)}
 		</div>
 	);
 }

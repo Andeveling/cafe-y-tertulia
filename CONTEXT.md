@@ -61,7 +61,7 @@ Nivel de un Miembro en una Categoría (semilla → degustador → contertulio �
 _Avoid_: Rango, nivel global, insignia
 
 **Pregunta**:
-Pregunta abierta que un Miembro aporta para una Sesión, con o sin Material. Puede escribirla días antes en `Preguntas` o, si no alcanzó, en `Presentes` sin volver atrás. Su texto es visible solo para su autor hasta la Intervención que la revela; los demás ven autor y estado (enviada ✓), no el contenido. Si aporta varias, elige cuál entra al Sorteo; si no elige, entra una al azar. Tiene autor y, dentro de la Sesión, un asignado.
+Pregunta abierta que un Miembro aporta para una Sesión, con o sin Material. Puede escribirla días antes en `Preguntas` o, si no alcanzó, en `Presentes` sin volver atrás. Su texto es visible solo para su autor hasta la Intervención que la revela; los demás ven autor y estado (enviada ✓), no el contenido. Solo su autor puede corregirla, y solo durante `Preguntas`. Si aporta varias, elige cuál entra al Sorteo; si no elige, entra una al azar. Tiene autor y, dentro de la Sesión, un asignado.
 _Avoid_: Cuestión, interrogante
 
 **Asignación**:
@@ -85,7 +85,7 @@ Asignación aleatoria 1:1 entre quienes no son Espectador y están presentes: ca
 _Avoid_: Ruleta, rifa, asignación manual
 
 **Espectador**:
-Participante presente que se saca del Sorteo: sus Preguntas no entran al pool, no recibe Asignación y no cuenta para Listos. Sí cuenta como presente. Lo declara cada quien con Sin sorteo; el Moderador no lo asigna.
+Participante presente que se saca del Sorteo: sus Preguntas no entran al pool y quedan como memoria del club, no recibe Asignación y no cuenta para Listos. Sí cuenta como presente. Cada quien lo declara con Sin sorteo, desde `Preguntas` o `Presentes`; el Moderador no lo asigna.
 _Avoid_: Invitado pasivo, oyente, audiencia
 
 **Sin sorteo**:

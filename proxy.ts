@@ -16,7 +16,8 @@ export const config = {
 		 * - File-convention metadata sin extensión (crawlers sin sesión:
 		 *   opengraph-image, twitter-image, manifest.webmanifest)
 		 * - Public files
+		 * - Prototipos throwaway (/prototype/*): se miran sin sesión
 		 */
-		"/((?!_next/static|_next/image|favicon.ico|auth|login|opengraph-image|twitter-image|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+		"/((?!_next/static|_next/image|favicon.ico|auth|login|prototype|opengraph-image|twitter-image|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
 	],
 };
