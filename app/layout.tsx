@@ -44,11 +44,20 @@ export const metadata: Metadata = {
 		siteName: "Café y Tertulias",
 		title: "Café y Tertulias",
 		description: siteDescription,
+		images: [
+			{
+				url: "/opengraph-image",
+				width: 1200,
+				height: 630,
+				alt: "Café y Tertulias — Club de lectura y conversación",
+			},
+		],
 	},
 	twitter: {
 		card: "summary_large_image",
 		title: "Café y Tertulias",
 		description: siteDescription,
+		images: ["/twitter-image"],
 	},
 };
 

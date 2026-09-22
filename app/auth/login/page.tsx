@@ -1,6 +1,33 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/app/auth/login/_components/login-form";
 import { getCurrentMember } from "@/lib/current-member";
+
+export const metadata: Metadata = {
+	title: "Entrar · Café y Tertulias",
+	description:
+		"Club de lectura y conversación. Sesiones, materiales y tertulia — el club te espera.",
+	openGraph: {
+		title: "Café y Tertulias",
+		description:
+			"Club de lectura y conversación. Sesiones, materiales y tertulia — el club te espera.",
+		images: [
+			{
+				url: "/opengraph-image",
+				width: 1200,
+				height: 630,
+				alt: "Café y Tertulias — Club de lectura y conversación",
+			},
+		],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "Café y Tertulias",
+		description:
+			"Club de lectura y conversación. Sesiones, materiales y tertulia — el club te espera.",
+		images: ["/twitter-image"],
+	},
+};
 
 export default async function LoginPage({
 	searchParams,

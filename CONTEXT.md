@@ -1,19 +1,27 @@
 # Café y Tertulias
 
-Club de lectura y conversación. Aplicación web que acompaña y organiza las sesiones del club: antes de la reunión recoge las preguntas, durante la tertulia organiza la dinámica (sorteo, debate, minijuegos) y después conserva la memoria de lo discutido. La conversación está primero; la aplicación acompaña, no dirige.
+Plataforma que aloja grupos de lectura y conversación. Aplicación web que acompaña y organiza las sesiones de cada grupo: antes de la reunión recoge las preguntas, durante la tertulia organiza la dinámica (sorteo, debate, minijuegos) y después conserva la memoria de lo discutido. La conversación está primero; la aplicación acompaña, no dirige.
 
 ## Language
 
 **Miembro**:
-Una persona del club con acceso a la aplicación. Ciclo de vida: `invitado` (creado por la Invitación de otro Miembro, aún no ingresó), `activo`, `baja` (sus aportes permanecen como memoria del club).
+Una persona con cuenta en la plataforma, con acceso a la aplicación. Su relación con contenidos es a través de los Grupos a los que pertenece. Ciclo de vida: `invitado` (creado por la Invitación de otro Miembro, aún no ingresó), `activo`, `baja` (sus aportes permanecen como memoria). Un Miembro puede pertenecer a ningún Grupo, uno, o varios.
 _Avoid_: Usuario, Participante (como entidad)
+
+**Grupo**:
+Comunidad aislada dentro de la plataforma, con sus propios Materiales, Sesiones, Categorías, Temporadas, Insignias y Conteos. Puede ser público (descubrible, unión instantánea) o privado (solo por invitación). Cada Grupo es un universo cerrado: nada se comparte entre Grupos.
+_Avoid_: Club (como entidad separada), espacio, comunidad, workspace
+
+**Administrador del Grupo**:
+Miembro con poderes de gestión sobre un Grupo: editar información, invitar y expulsar Miembros, eliminar el Grupo, nombrar co-Administradores. Puede haber varios. El creador del Grupo es su primer Administrador. No confundir con Moderador de Sesión, que es un rol temporal dentro de una Sesión.
+_Avoid_: Admin (ambiguo), owner, gestor
 
 **Participante**:
 Un Miembro confirmado como presente en una Sesión concreta. Término de contexto de sesión, no una entidad propia.
 _Avoid_: Asistente, integrante
 
 **Presencia**:
-Condición de un Miembro que tiene la aplicación abierta en este momento, visible para el resto del club en tiempo real. Su detalle vive en el Estado de presencia.
+Condición de un Miembro que tiene la aplicación abierta en este momento, visible para el resto del Grupo en tiempo real. Su detalle vive en el Estado de presencia.
 _Avoid_: Online, conectado, usuario en línea
 
 **Estado de presencia**:
@@ -21,7 +29,7 @@ Detalle visible de la Presencia en este momento: `En línea`, `En sesión`, `Aus
 _Avoid_: Online, status, conectado, offline, away
 
 **Sala de Sesión**:
-Única vista de una Sesión activa: ocupa todo el espacio de la pantalla, cambia de contenido según la Etapa y se mantiene sincronizada en realtime para Moderador y Participantes. Durante una Sesión nadie navega a otras páginas: las transiciones ocurren dentro de la Sala. Unirse a otra Sesión por Convocatoria es salir de esta Sala. El club puede tener varias Salas abiertas a la vez. Incluye el Escenario durante la etapa Debate: la Pregunta revelada, la Intervención actual y el temporizador viven dentro de la misma vista.
+Única vista de una Sesión activa: ocupa todo el espacio de la pantalla, cambia de contenido según la Etapa y se mantiene sincronizada en realtime para Moderador y Participantes. Durante una Sesión nadie navega a otras páginas: las transiciones ocurren dentro de la Sala. Unirse a otra Sesión por Convocatoria es salir de esta Sala. El Grupo puede tener varias Salas abiertas a la vez. Incluye el Escenario durante la etapa Debate: la Pregunta revelada, la Intervención actual y el temporizador viven dentro de la misma vista.
 _Avoid_: Lobby (como página), Escenario (como página separada), dashboard
 
 **Etapa**:
@@ -37,7 +45,7 @@ Estado temporal que un Miembro asume al iniciar o conducir una Sesión. Lo asume
 _Avoid_: Host, anfitrión, admin de sesión
 
 **Sesión**:
-Encuentro del club (presencial o por videollamada) con sus fases, estados y datos asociados. Puede nacer con o sin un único Material — objeto opcional, no padre —. Nace *ahora* (`lobby`, Sala abierta) o *programada* (`preparación` hasta que el Moderador abre la Sala). El Material se ata o se suelta solo antes del Sorteo. Sin Material se nombra por Moderador y fecha, o por una etiqueta opcional. Puede haber varias Salas abiertas a la vez.
+Encuentro del Grupo (presencial o por videollamada) con sus fases, estados y datos asociados. Puede nacer con o sin un único Material — objeto opcional, no padre —. Nace *ahora* (`lobby`, Sala abierta) o *programada* (`preparación` hasta que el Moderador abre la Sala). El Material se ata o se suelta solo antes del Sorteo. Sin Material se nombra por Moderador y fecha, o por una etiqueta opcional. Puede haber varias Salas abiertas a la vez.
 _Avoid_: Tertulia (como término de modelo), reunión, meet
 
 **Estado de la sesión**:
@@ -53,7 +61,7 @@ Porción del Material que aborda una Sesión concreta (ej. "Capítulos 1-3", "Ep
 _Avoid_: Capítulo (como entidad), episodio, sección
 
 **Categoría**:
-Tema duradero del club (ej. filosofía, cine, actualidad) que agrupa Materiales y Sesiones. Un Material pertenece a una o varias; la Sesión con Material hereda las de su Material, y la Sesión sin Material lleva las suyas propias o ninguna.
+Tema duradero del Grupo (ej. filosofía, cine, actualidad) que agrupa Materiales y Sesiones. Un Material pertenece a una o varias; la Sesión con Material hereda las de su Material, y la Sesión sin Material lleva las suyas propias o ninguna.
 _Avoid_: Tema (como término de modelo), tag, etiqueta
 
 **Maestría**:
@@ -85,7 +93,7 @@ Asignación aleatoria 1:1 entre quienes no son Espectador y están presentes: ca
 _Avoid_: Ruleta, rifa, asignación manual
 
 **Espectador**:
-Participante presente que se saca del Sorteo: sus Preguntas no entran al pool y quedan como memoria del club, no recibe Asignación y no cuenta para Listos. Sí cuenta como presente. Cada quien lo declara con Sin sorteo, desde `Preguntas` o `Presentes`; el Moderador no lo asigna.
+Participante presente que se saca del Sorteo: sus Preguntas no entran al pool y quedan como memoria del Grupo, no recibe Asignación y no cuenta para Listos. Sí cuenta como presente. Cada quien lo declara con Sin sorteo, desde `Preguntas` o `Presentes`; el Moderador no lo asigna.
 _Avoid_: Invitado pasivo, oyente, audiencia
 
 **Sin sorteo**:
@@ -117,15 +125,19 @@ Postura de un participante ante un Take: de acuerdo, en desacuerdo o neutral. Se
 _Avoid_: Voto del take, respuesta, postura individual
 
 **Insignia**:
-Logro visible individual que recompensa participación. Los logros del club como grupo son Hitos.
+Logro visible individual que recompensa participación dentro de un Grupo. Los logros colectivos del Grupo son Hitos.
 _Avoid_: Badge, medalla, trofeo
 
 **Invitación**:
-Acto por el que un Miembro (padrino) suma a una nueva persona al club; quien la recibe queda como Miembro `invitado` hasta su primer ingreso. Se entrega como enlace compartible por cualquier canal; cualquier Miembro puede invitar, no existe invitación pública. El padrino puede revocarla mientras está pendiente: el enlace deja de valer y se puede invitar de nuevo. No es llamar a un Miembro a una Sesión.
+Acto por el que un Miembro (padrino) suma a una nueva persona a la plataforma; quien la recibe queda como Miembro `invitado` hasta su primer ingreso. Se entrega como enlace compartible por cualquier canal; cualquier Miembro puede invitar, no existe invitación pública. El padrino puede revocarla mientras está pendiente: el enlace deja de valer y se puede invitar de nuevo. No es llamar a un Miembro a una Sesión. La Invitación da acceso a la plataforma, no a ningún Grupo específico.
 _Avoid_: Alta, registro, signup, reclutar, Convocatoria
 
+**Invitación al Grupo**:
+Acto por el que un Administrador de un Grupo privado invita a un Miembro existente de la plataforma a unirse a su Grupo, mediante enlace compartible con token. Distinta de la Invitación (padrinazgo): la Invitación da acceso a la plataforma; la Invitación al Grupo da acceso a un Grupo privado.
+_Avoid_: Invitación (ambiguo), Convocatoria
+
 **Convocatoria**:
-Acto del Moderador de llamar a un Miembro del club a su Sesión con Sala abierta. Quien la recibe elige Unirse o Ahora no; Unirse entra a esa Sala (y sale de otra si estaba en una) y no lo hace Participante — eso sigue siendo la Etapa Presentes. Distinta de la Invitación.
+Acto del Moderador de llamar a un Miembro del Grupo a su Sesión con Sala abierta. Quien la recibe elige Unirse o Ahora no; Unirse entra a esa Sala (y sale de otra si estaba en una) y no lo hace Participante — eso sigue siendo la Etapa Presentes. Distinta de la Invitación.
 _Avoid_: Invitación (a la sesión), invite, ping
 
 **Punto**:
@@ -137,11 +149,11 @@ Contador de eventos que alimenta Puntos e Insignias: preguntas creadas, sesiones
 _Avoid_: Evento, métrica, ledger
 
 **Logro**:
-Término paraguas para lo que un Miembro o el club gana: una Insignia (individual) o un Hito (colectivo).
+Término paraguas para lo que un Miembro o el Grupo gana: una Insignia (individual) o un Hito (colectivo).
 _Avoid_: Premio, conquista
 
 **Hito**:
-Logro colectivo del club, no de un Miembro: Primer libro terminado, 50 sesiones realizadas, 100 preguntas debatidas. Se registra en la página del Material o del club, no en un perfil individual.
+Logro colectivo del Grupo, no de un Miembro: Primer libro terminado, 50 sesiones realizadas, 100 preguntas debatidas. Se registra en la página del Material o del Grupo, no en un perfil individual.
 _Avoid_: Meta, logro grupal
 
 **Reconocimiento**:
@@ -153,7 +165,7 @@ Acción del moderador de entregar una Insignia a un Miembro durante una Interven
 _Avoid_: Concesión, entrega, award
 
 **Temporada**:
-Período de actividad del club de un mes calendario natural, con fecha de inicio y fin, dentro del cual se acumulan logros y puntos. Se crea y cierra automáticamente por calendario; el moderador puede reabrir una cerrada para corregir errores. Al cerrar entrega los Reconocimientos por categoría y el ranking competitivo reinicia; los logros históricos persisten.
+Período de actividad del Grupo de un mes calendario natural, con fecha de inicio y fin, dentro del cual se acumulan logros y puntos. Se crea y cierra automáticamente por calendario; el moderador puede reabrir una cerrada para corregir errores. Al cerrar entrega los Reconocimientos por categoría y el ranking competitivo reinicia; los logros históricos persisten.
 _Avoid_: Ciclo, ronda, liga
 
 **Rating**:
