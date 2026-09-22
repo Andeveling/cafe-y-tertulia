@@ -173,6 +173,7 @@ const DebateActiveSchema = z.object({
 	phaseStartedAt: jString,
 	hearts: HeartsProgressSchema,
 	remainingHidden: jNumber,
+	extensionCount: z.number().int().min(0).max(2).optional(),
 });
 
 const DebateWaitingSchema = z.object({

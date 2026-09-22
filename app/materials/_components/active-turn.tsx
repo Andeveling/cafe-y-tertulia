@@ -22,6 +22,8 @@ import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import {
 	heartEligibility,
 	heartsPhaseState,
+	heartsProgressText,
+	heartsSupportLabel,
 } from "@/app/materials/_lib/hearts";
 import {
 	interventionDisplay,
@@ -108,30 +110,37 @@ export function ActiveTurn({
 		);
 	}
 
-	// Modo foco: hero + reloj en Dialog, abierto por defecto mientras el
-	// turno vive. Se reabre solo en cada turno/fase; al cerrarlo se alterna
-	// con la vista inline de siempre.
+	// Modo foco: opt-in. La vista inline es la base; el Dialog solo abre
+	// a pedido (botón foco) y nunca auto-abre al cambiar turno/fase.
+	// Al cerrar vuelve a la vista inline de siempre.
 	const turnKey = `${debate.assignmentId}-${debate.state}`;
-	const [dismissedKey, setDismissedKey] = useState<string | null>(null);
-	const focusOpen = dismissedKey !== turnKey;
+	const [focusOpen, setFocusOpen] = useState(false);
+	useEffect(() => {
+		setFocusOpen(false);
+	}, [turnKey]);
 	function handleFocusOpenChange(open: boolean) {
-		setDismissedKey(open ? null : turnKey);
+		setFocusOpen(open);
 	}
 	const [mounted, setMounted] = useState(false);
 	useEffect(() => {
 		setMounted(true);
 	}, []);
 	const spotHostRef = useRef<HTMLDivElement>(null);
+	const remainingExt = Math.max(0, 2 - (debate.extensionCount ?? 0));
 
 	const extendBtn =
-		isModerator && !isComplement ? (
+		isModerator && !isComplement && remainingExt > 0 ? (
 			<Button
 				variant="outline"
 				size="sm"
 				disabled={pending}
 				onClick={handleExtend}
+				aria-label={`Sumar 1 minuto al reloj de Exposición. Quedan ${remainingExt} extensiones disponibles.`}
 			>
-				+1 min
+				+1 min{" "}
+				<span className="ml-1 tabular-nums text-muted-foreground">
+					({remainingExt})
+				</span>
 			</Button>
 		) : null;
 
@@ -162,29 +171,59 @@ export function ActiveTurn({
 		},
 		[run, votablePhase, debate.assignmentId, sessionId],
 	);
-	// Sin textos: el picker se explica solo junto al conteo. Quien no puede
-	// votar (expositor/autor) solo ve el conteo.
+	// Etiqueta siempre visible: en exposición se apoya al expositor, en
+	// complemento al autor. Quien puede votar ve el picker; quien no
+	// (expositor/autor) ve el mismo label con el conteo y el motivo.
+	const supportLabel =
+		votablePhase && hearts
+			? heartsSupportLabel({
+					phase: votablePhase,
+					assigneeName: debate.assigneeName,
+					authorName: debate.authorName,
+				})
+			: null;
+	const supportHint =
+		votablePhase && hearts
+			? `Califica de 1 a 5 corazones · ${heartsProgressText(hearts.voted, hearts.eligible)}`
+			: null;
+	const ineligibilityReason =
+		votablePhase && hearts && !canVote
+			? heartEligibility({
+					phase: votablePhase,
+					userId,
+					assigneeId: debate.assigneeId,
+					authorId,
+				}).reason
+			: undefined;
 	const voter =
-		canVote && hearts ? (
+		canVote && hearts && supportLabel && supportHint ? (
 			<HeartPicker
 				value={hearts.myHeart}
+				label={supportLabel}
+				hint={supportHint}
 				disabled={pending}
 				onVote={handleHeartVote}
 			/>
+		) : supportLabel ? (
+			<div className="flex flex-col items-center gap-2">
+				<p className="text-label-sm font-bold tracking-[0.1em] text-muted-foreground uppercase">
+					{supportLabel}
+				</p>
+				<p className="text-xs text-muted-foreground">
+					{supportHint}
+					{ineligibilityReason ? ` · ${ineligibilityReason}` : ""}
+				</p>
+			</div>
 		) : null;
 	const spotlightProps = {
 		speakerName,
 		speakerAvatar: isComplement ? debate.authorAvatar : debate.assigneeAvatar,
 		speakerVerb,
-		isComplement,
 		authorName: debate.authorName,
 		questionText: debate.questionText,
 		clockText: clock.text,
 		overtime: clock.overtime,
-		timerPct: clock.pct,
 		timerAction: extendBtn,
-		heartsVoted: hearts?.voted,
-		heartsEligible: hearts?.eligible,
 	};
 	const spotlight = <TurnSpotlight {...spotlightProps} voter={voter} />;
 
@@ -196,15 +235,12 @@ export function ActiveTurn({
 						<div className="flex w-full flex-wrap items-center gap-2">
 							{showProgress && (
 								<p className="text-sm tabular-nums text-muted-foreground">
-									Turno {progress.current} de {progress.total}
+									Intervención {progress.current} de {progress.total}
 								</p>
 							)}
 							<span
 								className={cn(
-									"rounded-full px-3 py-0.5 text-label-sm font-bold tracking-wider uppercase ring-1",
-									isComplement
-										? "bg-reward/10 text-reward ring-reward/25"
-										: "bg-primary/10 text-primary ring-primary/25",
+									"rounded-full px-3 py-0.5 text-label-sm font-bold tracking-wider uppercase ring-1 ring-foreground/15 text-muted-foreground",
 								)}
 							>
 								{isComplement ? "Complemento" : "Exposición"}
@@ -216,7 +252,7 @@ export function ActiveTurn({
 										className="h-1 w-20 overflow-hidden rounded-full bg-muted"
 									>
 										<span
-											className="block h-full rounded-full bg-reward"
+											className="block h-full rounded-full bg-muted-foreground/40"
 											style={{ width: `${progressPct}%` }}
 										/>
 									</span>
@@ -244,17 +280,40 @@ export function ActiveTurn({
 
 						{isModerator && !focusOpen && (
 							<ModeratorZone>
-								<ConfirmActionButton
-									label={interventionNextLabel(debate.state)}
-									pending={pending}
-									onConfirm={() => run(() => continueIntervention(sessionId))}
-								/>
+								<div className="flex flex-wrap items-center gap-3">
+									<ConfirmActionButton
+										label={interventionNextLabel(debate.state)}
+										pending={pending}
+										onConfirm={() => run(() => continueIntervention(sessionId))}
+									/>
+									{!isComplement && remainingExt > 0 && (
+										<Button
+											variant="outline"
+											size="sm"
+											disabled={pending}
+											onClick={handleExtend}
+											aria-label={`Sumar 1 minuto al reloj de Exposición. Quedan ${remainingExt} extensiones disponibles.`}
+										>
+											+1 min
+											<span className="ml-1 tabular-nums text-muted-foreground">
+												({remainingExt})
+											</span>
+										</Button>
+									)}
+								</div>
+								{!isComplement && (
+									<p
+										role="status"
+										aria-live="polite"
+										className="font-heading text-3xl tabular-nums"
+									>
+										{clock.text}
+									</p>
+								)}
 							</ModeratorZone>
 						)}
 
 						{!focusOpen && spotlight}
-
-						<div aria-hidden="true" className="h-px w-full bg-foreground/10" />
 
 						<section
 							aria-label="La mesa"
@@ -270,7 +329,7 @@ export function ActiveTurn({
 										className={cn(
 											"relative flex flex-col items-center gap-1 rounded-xl px-3 py-4 text-center ring-1",
 											seat.role === "speaker"
-												? "bg-primary/[0.07] ring-primary/30"
+												? "bg-foreground/[0.04] ring-foreground/15"
 												: "ring-foreground/10",
 										)}
 									>
@@ -300,7 +359,7 @@ export function ActiveTurn({
 												seat.role === "speaker"
 													? "bg-primary/15 text-primary ring-primary/30"
 													: seat.role === "author"
-														? "bg-reward/10 text-reward ring-reward/25"
+														? "text-muted-foreground ring-foreground/15"
 														: "text-muted-foreground ring-foreground/15",
 											)}
 										>

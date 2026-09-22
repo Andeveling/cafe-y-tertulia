@@ -89,6 +89,8 @@ export type RoomDebateSnapshot =
 			/** Progreso de corazones — null fuera de exposición/complemento. */
 			hearts: HeartsProgress | null;
 			remainingHidden: number;
+			/** +1 del moderador usados en esta Intervención (tope 2). */
+			extensionCount?: number;
 	  }
 	| {
 			mode: "waiting_reveal";

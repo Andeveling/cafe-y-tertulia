@@ -12,12 +12,12 @@ type Props = {
 	nextAssigneeAvatar?: string | null;
 	youNext: boolean;
 	isModerator: boolean;
-	/** "Turno 1 de 2" o null cuando no hay progreso. */
+	/** "Intervención 1 de 2" o null cuando no hay progreso. */
 	progressText: string | null;
 	/** "Revelar pregunta 1 para Ana". */
 	revealLabel: string;
 	pending?: boolean;
-	/** Aprecio del turno recién completado — null antes del primer turno. */
+	/** Aprecio de la Intervención recién completada — null antes de la primera. */
 	lastAprecio?: TurnoAprecio | null;
 	onReveal?: () => void;
 };
@@ -151,7 +151,7 @@ function LastAprecio({ aprecio }: { aprecio: TurnoAprecio | null }) {
 	);
 	return (
 		<section
-			aria-label={`Aprecio del turno de ${aprecio.assigneeName}`}
+			aria-label={`Aprecio de la Intervención de ${aprecio.assigneeName}`}
 			className="flex w-full max-w-105 flex-col items-center gap-1 rounded-xl bg-card px-6 py-4 text-center ring-1 ring-foreground/10"
 		>
 			<p className="flex items-center gap-1.5 text-label-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">

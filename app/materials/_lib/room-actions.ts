@@ -346,8 +346,8 @@ export async function continueIntervention(
 }
 
 /**
- * +1 del Moderador en Exposición: suma 60 s al reloj (mueve el ancla atrás)
- * y registra lo hot que estuvo la pregunta (evento question_hot = bono al
+ * +1 del Moderador en Exposición: suma 60 s al reloj (mueve el ancla
+ * adelante) y registra lo hot que estuvo la pregunta (evento question_hot = bono al
  * autor). Solo Moderador, vía RPC `extend_exposition`.
  */
 export async function extendExposition(

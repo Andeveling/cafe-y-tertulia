@@ -73,7 +73,7 @@ Aporte breve (unos dos minutos) que el autor de una Pregunta hace tras la exposi
 _Avoid_: Réplica, turno extra
 
 **Intervención**:
-Ciclo de una Asignación dentro del debate: `oculta` → `exposición` (5:00 regresivos + overtime visible, +1 del Moderador que suma 60 s y registra lo hot) → Complemento (count-up con sugerido 2:00) → completa. Lo conduce el Moderador; el temporizador orienta el ritmo pero nunca corta ni fuerza transiciones — solo habilita acciones de conducción (tiempo extra, siguiente fase). La rotación de Intervenciones es la permutación aleatoria fijada por el Sorteo.
+Ciclo de una Asignación dentro del debate: `oculta` → `exposición` (5:00 regresivos + overtime visible) → Complemento (count-up con sugerido 2:00) → completa. Lo conduce el Moderador; el temporizador orienta el ritmo pero nunca corta ni fuerza transiciones — solo habilita acciones de conducción (tiempo extra, siguiente fase). El +1 del Moderador en Exposición suma 60 s y registra `question_hot` (bono al autor de la pregunta, "lo hot que estuvo"); tiene tope de 2 extensiones por Exposición para que más tiempo sea otra fase, no más reloj. La rotación de Intervenciones es la permutación aleatoria fijada por el Sorteo.
 _Avoid_: Turno, intervención libre (como fase), bloque de debate
 
 **Escenario**:
