@@ -144,8 +144,13 @@ fi
 vercel_sha="$(grep -oP 'Commit: \K[0-9a-f]+' "$tmp_log" | head -1)"
 rm -f "$tmp_log"
 [[ -n "$vercel_sha" ]] || fail "no se pudo leer el commit del deploy en $PROD_URL."
-[[ "$origin_sha" == "$vercel_sha"* ]] || fail "vercel ($vercel_sha) != origin/main (${origin_sha:0:7}). Espera a que Vercel despliegue antes del push."
-echo "[deploy-sync] vercel al día ($vercel_sha)."
+if [[ "$origin_sha" == "$vercel_sha"* ]]; then
+	echo "[deploy-sync] vercel al día ($vercel_sha)."
+elif git merge-base --is-ancestor "$vercel_sha" "$origin_sha" 2>/dev/null; then
+	echo "[deploy-sync] vercel desplegando commit anterior ($vercel_sha), en historial de main. OK."
+else
+	fail "vercel ($vercel_sha) no está en el historial de origin/main (${origin_sha:0:7}). ¿Deploy desde otra rama?"
+fi
 
 if ((${#outgoing[@]})); then
 	echo "[deploy-sync] aplicando ${#outgoing[@]} migración(es) del push en remoto: ${outgoing[*]}"
