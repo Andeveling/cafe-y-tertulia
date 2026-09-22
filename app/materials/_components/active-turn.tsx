@@ -22,7 +22,6 @@ import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import {
 	heartEligibility,
 	heartsPhaseState,
-	heartsProgressText,
 	heartsSupportLabel,
 } from "@/app/materials/_lib/hearts";
 import {
@@ -128,22 +127,6 @@ export function ActiveTurn({
 	const spotHostRef = useRef<HTMLDivElement>(null);
 	const remainingExt = Math.max(0, 2 - (debate.extensionCount ?? 0));
 
-	const extendBtn =
-		isModerator && !isComplement && remainingExt > 0 ? (
-			<Button
-				variant="outline"
-				size="sm"
-				disabled={pending}
-				onClick={handleExtend}
-				aria-label={`Sumar 1 minuto al reloj de Exposición. Quedan ${remainingExt} extensiones disponibles.`}
-			>
-				+1 min{" "}
-				<span className="ml-1 tabular-nums text-muted-foreground">
-					({remainingExt})
-				</span>
-			</Button>
-		) : null;
-
 	const hearts = debate.hearts;
 	// Fase votable: exposición o complemento con corazones en el snapshot.
 	const votablePhase =
@@ -171,9 +154,8 @@ export function ActiveTurn({
 		},
 		[run, votablePhase, debate.assignmentId, sessionId],
 	);
-	// Etiqueta siempre visible: en exposición se apoya al expositor, en
-	// complemento al autor. Quien puede votar ve el picker; quien no
-	// (expositor/autor) ve el mismo label con el conteo y el motivo.
+	// Bloque de corazones solo para quien puede votar: el evaluado
+	// (expositor/autor) no se califica a sí mismo y no ve nada aquí.
 	const supportLabel =
 		votablePhase && hearts
 			? heartsSupportLabel({
@@ -182,38 +164,14 @@ export function ActiveTurn({
 					authorName: debate.authorName,
 				})
 			: null;
-	const supportHint =
-		votablePhase && hearts
-			? `Califica de 1 a 5 corazones · ${heartsProgressText(hearts.voted, hearts.eligible)}`
-			: null;
-	const ineligibilityReason =
-		votablePhase && hearts && !canVote
-			? heartEligibility({
-					phase: votablePhase,
-					userId,
-					assigneeId: debate.assigneeId,
-					authorId,
-				}).reason
-			: undefined;
 	const voter =
-		canVote && hearts && supportLabel && supportHint ? (
+		canVote && hearts && supportLabel ? (
 			<HeartPicker
 				value={hearts.myHeart}
 				label={supportLabel}
-				hint={supportHint}
 				disabled={pending}
 				onVote={handleHeartVote}
 			/>
-		) : supportLabel ? (
-			<div className="flex flex-col items-center gap-2">
-				<p className="text-label-sm font-bold tracking-[0.1em] text-muted-foreground uppercase">
-					{supportLabel}
-				</p>
-				<p className="text-xs text-muted-foreground">
-					{supportHint}
-					{ineligibilityReason ? ` · ${ineligibilityReason}` : ""}
-				</p>
-			</div>
 		) : null;
 	const spotlightProps = {
 		speakerName,
@@ -223,7 +181,6 @@ export function ActiveTurn({
 		questionText: debate.questionText,
 		clockText: clock.text,
 		overtime: clock.overtime,
-		timerAction: extendBtn,
 	};
 	const spotlight = <TurnSpotlight {...spotlightProps} voter={voter} />;
 
@@ -280,7 +237,7 @@ export function ActiveTurn({
 
 						{isModerator && !focusOpen && (
 							<ModeratorZone>
-								<div className="flex flex-wrap items-center gap-3">
+								<div className="flex flex-wrap items-center gap-2">
 									<ConfirmActionButton
 										label={interventionNextLabel(debate.state)}
 										pending={pending}
@@ -301,15 +258,6 @@ export function ActiveTurn({
 										</Button>
 									)}
 								</div>
-								{!isComplement && (
-									<p
-										role="status"
-										aria-live="polite"
-										className="font-heading text-3xl tabular-nums"
-									>
-										{clock.text}
-									</p>
-								)}
 							</ModeratorZone>
 						)}
 

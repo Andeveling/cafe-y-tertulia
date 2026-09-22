@@ -382,14 +382,16 @@ describe("RoomPanel", () => {
 		});
 	});
 
-	it("al terminar el debate esconde la nav y en Cierre compone el cierre", () => {
+	it("al terminar el debate el nav sigue (con vuelta) y en Cierre compone el cierre", () => {
 		const { rerender } = renderPanel({
 			roomStage: "debate",
 			debate: { mode: "done", remainingHidden: 0 },
 			draw: { done: true, status: "revealed", createdAt: "2026-01-02" },
 		});
-		expect(screen.queryByRole("button", { name: /Continuar a/ })).toBeNull();
-		expect(screen.queryByRole("button", { name: /Volver a/ })).toBeNull();
+		expect(
+			screen.getByRole("button", { name: "Continuar a Cierre" }),
+		).toBeTruthy();
+		expect(screen.getByRole("button", { name: "Volver a Sorteo" })).toBeTruthy();
 
 		rerender(
 			<RoomPanel

@@ -10,6 +10,7 @@ target_fingerprint: "sha256:2618ad0296eadc10d069ef04a2a669a0f7288166563bb6cfae5a
 target_path: /home/andres/Proyectos/cafe-y-tertulia/app/materials/_components/draw-ceremony-view.tsx
 timestamp: 2026-09-19T11-47-33Z
 slug: app-materials-components-draw-ceremony-view-tsx
+closed: true
 ---
 Method: dual-agent (A: ses_f46868bcaffe2YTLLGytrBM2k0 · B: ses_f46868b60ffeWdD2TYDULqEEKM)
 

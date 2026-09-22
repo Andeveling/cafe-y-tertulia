@@ -12,7 +12,7 @@ import type {
 	RoomReadiness,
 } from "@/app/materials/_lib/room-types";
 import { sharedNow } from "@/app/materials/_lib/shared-now";
-import { MemberAvatar } from "@/components/member-avatar";
+import { MemberAvatar, memberFirstName } from "@/components/member-avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -283,29 +283,6 @@ function pad2(n: number) {
 	return String(n).padStart(2, "0");
 }
 
-function personLabel(name: string) {
-	const trimmed = name.trim();
-	return trimmed || "Miembro";
-}
-
-function NameInSentence({
-	name,
-	avatar,
-}: {
-	name: string;
-	avatar: string | null;
-}) {
-	const label = personLabel(name);
-	return (
-		<>
-			<span aria-hidden="true" className="me-1.5 inline-flex align-middle">
-				<MemberAvatar name={label} avatar={avatar} size="sm" />
-			</span>
-			<span className="font-semibold">{label}</span>
-		</>
-	);
-}
-
 function PairSentence({
 	assignment,
 	userId,
@@ -313,41 +290,27 @@ function PairSentence({
 	assignment: RoomAssignment;
 	userId: string;
 }) {
+	const speaker = memberFirstName(assignment.assigneeName);
+	const author = memberFirstName(assignment.authorName);
 	if (assignment.assigneeId === userId) {
 		return (
 			<>
 				<span className="font-semibold">Tú</span> respondes la pregunta de{" "}
-				<NameInSentence
-					name={assignment.authorName}
-					avatar={assignment.authorAvatar}
-				/>
-				.
+				{author}.
 			</>
 		);
 	}
 	if (assignment.authorId === userId) {
 		return (
 			<>
-				<NameInSentence
-					name={assignment.assigneeName}
-					avatar={assignment.assigneeAvatar}
-				/>{" "}
-				responde <span className="font-semibold">tu pregunta</span>.
+				<span className="font-semibold">{speaker}</span> responde tu pregunta.
 			</>
 		);
 	}
 	return (
 		<>
-			<NameInSentence
-				name={assignment.assigneeName}
-				avatar={assignment.assigneeAvatar}
-			/>{" "}
-			responde la pregunta de{" "}
-			<NameInSentence
-				name={assignment.authorName}
-				avatar={assignment.authorAvatar}
-			/>
-			.
+			<span className="font-semibold">{speaker}</span> responde la pregunta de{" "}
+			{author}.
 		</>
 	);
 }
@@ -389,28 +352,42 @@ function ResultsBeat({
 				<h2 className="mb-3 font-heading text-xl font-semibold text-balance">
 					Orden de intervención
 				</h2>
-				<motion.ol className="flex flex-col gap-3" variants={resultsContainer}>
+				<motion.ol
+					className="flex list-none flex-col gap-2"
+					variants={resultsContainer}
+				>
 					{visible.map((a, i) => {
-						const mine = a.assigneeId === userId || a.authorId === userId;
+						const iSpeak = a.assigneeId === userId;
 						return (
 							<motion.li
 								key={a.assignmentId}
 								variants={item}
+								title={`${a.assigneeName} · ${a.authorName}`}
 								className={cn(
-									"flex items-start gap-4 rounded-xl px-4 py-4 ring-1",
-									mine ? "bg-primary/10 ring-primary/30" : "ring-foreground/10",
+									"flex items-center gap-3 rounded-xl px-4 py-3 ring-1",
+									iSpeak
+										? "bg-primary/10 ring-primary/30"
+										: "ring-foreground/10",
 								)}
 							>
 								<span
 									aria-hidden="true"
 									className={cn(
-										"w-10 shrink-0 pt-1 font-heading text-2xl leading-none tabular-nums",
-										mine ? "text-primary" : "text-muted-foreground",
+										"w-8 shrink-0 text-sm font-semibold tabular-nums",
+										iSpeak ? "text-primary" : "text-muted-foreground",
 									)}
 								>
 									{pad2(i + 1)}
 								</span>
-								<p className="min-w-0 text-pretty text-base leading-8">
+								<span aria-hidden="true" className="shrink-0">
+									<MemberAvatar
+										name={a.assigneeName}
+										avatar={a.assigneeAvatar}
+										size="sm"
+										className={iSpeak ? "ring-1 ring-primary/40" : undefined}
+									/>
+								</span>
+								<p className="min-w-0 text-pretty text-sm leading-6 sm:text-base sm:leading-7">
 									<PairSentence assignment={a} userId={userId} />
 								</p>
 							</motion.li>

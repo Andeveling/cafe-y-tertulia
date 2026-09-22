@@ -5,9 +5,11 @@
 export const MIN_READY_TO_LEAVE_QUESTIONS = 2;
 
 type Seat = {
-	memberId: string;
+	memberId?: string;
+	member_id?: string;
 	role: "member" | "spectator";
-	optOut: boolean;
+	optOut?: boolean;
+	opt_out?: boolean;
 };
 
 export type QuestionsAdvance = {
@@ -24,11 +26,11 @@ export function questionsAdvance(input: {
 }): QuestionsAdvance {
 	const authors = new Set(input.questionAuthorIds);
 	const members = input.participants.filter(
-		(p) => p.role === "member" && !p.optOut,
+		(p) => p.role === "member" && !(p.optOut ?? p.opt_out),
 	);
 	const missingIds = members
-		.filter((p) => !authors.has(p.memberId))
-		.map((p) => p.memberId);
+		.filter((p) => !authors.has((p.memberId ?? p.member_id) as string))
+		.map((p) => (p.memberId ?? p.member_id) as string);
 	const readyCount = members.length - missingIds.length;
 	const canAdvance = readyCount >= MIN_READY_TO_LEAVE_QUESTIONS;
 

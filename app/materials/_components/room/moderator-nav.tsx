@@ -119,11 +119,28 @@ function DebateBackConfirm({
 export function ModeratorNav({
 	snapshot,
 	view,
+	onAdvance,
+	pending: pendingOverride,
+	advanceDisabled = false,
+	advanceLabel,
 }: {
 	snapshot: RoomSnapshot;
 	view: SalaView;
+	/**
+	 * Reemplaza el avance genérico cuando la etapa tiene trabajo propio
+	 * antes de mover la Sala (Preguntas: pasar faltantes a espectador).
+	 * Si no se pasa, avanza con `advanceRoomStage`.
+	 */
+	onAdvance?: () => void;
+	/** Pending externo cuando el avance lo ejecuta la etapa, no el nav. */
+	pending?: boolean;
+	/** La etapa aún no cumple su condición (p. ej. faltan preguntas). */
+	advanceDisabled?: boolean;
+	/** Copy del botón de avance. Default: "Continuar a {etapa}". */
+	advanceLabel?: string;
 }) {
-	const { pending, run } = useRoomMutation();
+	const { pending: ownPending, run } = useRoomMutation();
+	const pending = pendingOverride ?? ownPending;
 	const { next, prev, backBlocked, empty, warnings } = view;
 
 	if (!next) return null;
@@ -132,6 +149,10 @@ export function ModeratorNav({
 
 	function handleAdvance() {
 		if (!next) return;
+		if (onAdvance) {
+			onAdvance();
+			return;
+		}
 		// Entrar a Sorteo ES sortear (una sola vez): mata el paso previo.
 		// Al volver a una Sorteo ya sorteada, avance normal sin re-sortear.
 		if (next === "draw" && !snapshot.draw.done) {
@@ -201,14 +222,15 @@ export function ModeratorNav({
 		);
 	}
 
-	const hasWarning = warnings.length > 0;
+	const hasWarning = warnings.length > 0 && !onAdvance;
+	const forwardLabel = advanceLabel ?? `Continuar a ${ROOM_STAGE_LABELS[next]}`;
 	const button = (
 		<Button
 			variant="default"
-			disabled={pending}
+			disabled={pending || advanceDisabled}
 			onClick={hasWarning ? undefined : handleAdvance}
 		>
-			Continuar a {ROOM_STAGE_LABELS[next]}
+			{forwardLabel}
 			<HugeiconsIcon
 				icon={ArrowRight01Icon}
 				strokeWidth={2}

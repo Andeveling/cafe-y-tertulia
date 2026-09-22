@@ -22,7 +22,6 @@ export function TurnSpotlight({
 	questionText,
 	clockText,
 	overtime,
-	timerAction,
 	voter,
 }: {
 	speakerName: string;
@@ -31,9 +30,9 @@ export function TurnSpotlight({
 	isComplement?: boolean;
 	authorName: string;
 	questionText: string;
-	clockText: string;
+	/** Reloj del turno. Ausente solo si esta vista no debe mostrarlo. */
+	clockText?: string;
 	overtime: boolean;
-	timerAction?: ReactNode;
 	/** Bloque de corazones con su label — anclado debajo del blockquote cuando aplica. */
 	voter?: ReactNode;
 }) {
@@ -47,17 +46,26 @@ export function TurnSpotlight({
 					<p className="text-label-sm font-bold tracking-[0.1em] text-muted-foreground uppercase">
 						En la palabra
 					</p>
-					<div className="flex items-center gap-3">
+					{clockText ? (
 						<p
+							role="timer"
+							aria-label={
+								overtime ? `Tiempo extra ${clockText}` : `Tiempo ${clockText}`
+							}
 							className={cn(
-								"text-sm font-medium tabular-nums",
-								overtime ? "text-destructive" : "text-muted-foreground",
+								"shrink-0 font-heading text-3xl leading-none tabular-nums",
+								overtime && "text-destructive",
 							)}
 						>
 							{clockText}
 						</p>
-						{timerAction}
-					</div>
+					) : (
+						overtime && (
+							<p className="text-sm font-medium text-destructive tabular-nums">
+								Tiempo extra
+							</p>
+						)
+					)}
 				</div>
 
 				<span aria-hidden="true" className="mx-auto mt-5 block w-fit">

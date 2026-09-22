@@ -230,7 +230,7 @@ describe("RoomPanel", () => {
 		expect(toast.success).toHaveBeenCalledWith("Vuelves al sorteo");
 	});
 
-	it("en Preguntas el moderador avanza desde la revisión, no desde la nav genérica", async () => {
+	it("en Preguntas el moderador avanza desde el nav, con el pase de lista de la revisión", async () => {
 		const user = userEvent.setup();
 		renderPanel({
 			participants: [
@@ -244,7 +244,6 @@ describe("RoomPanel", () => {
 			],
 		});
 
-		expect(screen.queryByRole("button", { name: /Continuar a/ })).toBeNull();
 		expect(
 			screen.getByText("Faltan 1: ¿esperamos o entran mirando?"),
 		).toBeTruthy();

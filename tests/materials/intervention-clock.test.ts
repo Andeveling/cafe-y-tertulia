@@ -66,9 +66,9 @@ describe("ciclo de la Intervención", () => {
 	});
 
 	it("compone una sola línea de progreso", () => {
-		expect(interventionProgressLine(1, 2)).toBe("Turno 1 de 2");
+		expect(interventionProgressLine(1, 2)).toBe("Intervención 1 de 2");
 		expect(interventionProgressLine(1, 2, "exposition")).toBe(
-			"Turno 1 de 2 · Exposición",
+			"Intervención 1 de 2 · Exposición",
 		);
 	});
 

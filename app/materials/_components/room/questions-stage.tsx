@@ -1,7 +1,6 @@
 "use client";
 
 import {
-	ArrowRight01Icon,
 	Clock01Icon,
 	MessageQuestionIcon,
 	PencilEdit01Icon,
@@ -54,7 +53,17 @@ export function QuestionsStage({
 	view,
 	userId,
 	isModerator,
-}: EtapaProps) {
+	advanceFor,
+	onAdvanceForChange,
+}: EtapaProps & {
+	/**
+	 * Pase de lista del Moderador, vive en el padre para que el nav pueda
+	 * avanzar con las mismas decisiones sin un efecto que empuje estado
+	 * hacia arriba.
+	 */
+	advanceFor?: Record<string, "wait" | "spectator">;
+	onAdvanceForChange?: (next: Record<string, "wait" | "spectator">) => void;
+}) {
 	const { sessionId, materialId, questions, participants, moderatorId } =
 		snapshot;
 	const { pending, run } = useRoomMutation();
@@ -64,10 +73,6 @@ export function QuestionsStage({
 	const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(
 		null,
 	);
-	/** Pase de lista del Moderador: por faltante, esperar o entra mirando. */
-	const [advanceFor, setAdvanceFor] = useState<
-		Record<string, "wait" | "spectator">
-	>({});
 	const editRef = useRef<HTMLTextAreaElement | null>(null);
 	const prevSeats = useRef<Map<string, string> | null>(null);
 
@@ -169,25 +174,6 @@ export function QuestionsStage({
 				toast.success(next ? "Vas como espectador" : "Vuelves al sorteo");
 			},
 		);
-	}
-
-	/**
-	 * Pase de lista y avance (solo Moderador, variante C): los faltantes
-	 * marcados como espectadores se sacan del Sorteo y luego se avanza
-	 * a Presentes en la misma acción.
-	 */
-	function handleAdvanceReview() {
-		if (!gate.canAdvance) return;
-		const toSpectators = missing.filter(
-			(m) => (advanceFor[m.memberId] ?? "wait") === "spectator",
-		);
-		run(async () => {
-			for (const m of toSpectators) {
-				const r = await setSpectator(sessionId, m.memberId, true);
-				if (!r.ok) return r;
-			}
-			return advanceRoomStage(sessionId, "presence");
-		});
 	}
 
 	function handleEditKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -473,30 +459,15 @@ export function QuestionsStage({
 				</ul>
 			</section>
 
-			{isModerator && (
+			{isModerator && missing.length > 0 && (
 				<section
 					aria-label="Revisión del moderador"
 					className="flex flex-col gap-3 border-t border-border/60 pt-4"
 				>
-					<div className="flex flex-wrap items-baseline justify-between gap-2">
-						<p className="text-sm font-medium">{gate.headline}</p>
-						<Button
-							size="sm"
-							disabled={pending || !gate.canAdvance}
-							onClick={handleAdvanceReview}
-						>
-							<HugeiconsIcon
-								icon={ArrowRight01Icon}
-								strokeWidth={2}
-								data-icon="inline-end"
-								aria-hidden="true"
-							/>
-							Avisar y avanzar a Presentes
-						</Button>
-					</div>
+					<p className="text-sm font-medium">{gate.headline}</p>
 					{gate.canAdvance &&
 						missing.map((m) => {
-							const decision = advanceFor[m.memberId] ?? "wait";
+							const decision = advanceFor?.[m.memberId] ?? "wait";
 							return (
 								<div
 									key={m.memberId}
@@ -509,10 +480,10 @@ export function QuestionsStage({
 											variant={decision === "wait" ? "default" : "outline"}
 											disabled={pending}
 											onClick={() =>
-												setAdvanceFor((prev) => ({
-													...prev,
+												onAdvanceForChange?.({
+													...advanceFor,
 													[m.memberId]: "wait",
-												}))
+												})
 											}
 										>
 											Esperar
@@ -522,10 +493,10 @@ export function QuestionsStage({
 											variant={decision === "spectator" ? "default" : "outline"}
 											disabled={pending}
 											onClick={() =>
-												setAdvanceFor((prev) => ({
-													...prev,
+												onAdvanceForChange?.({
+													...advanceFor,
 													[m.memberId]: "spectator",
-												}))
+												})
 											}
 										>
 											Entra mirando

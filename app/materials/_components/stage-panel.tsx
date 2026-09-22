@@ -57,13 +57,7 @@ export function StagePanel({
 }: Props) {
 	if (debate.mode === "done") {
 		return (
-			<DebateDone
-				sessionId={sessionId}
-				isModerator={isModerator}
-				next={next}
-				empty={empty}
-				warnings={warnings}
-			/>
+			<DebateDone isModerator={isModerator} />
 		);
 	}
 

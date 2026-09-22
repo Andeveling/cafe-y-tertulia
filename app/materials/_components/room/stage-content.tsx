@@ -26,7 +26,13 @@ export function StageContent({
 	round,
 	rosterMembers = [],
 	pendingIds = [],
+	questionsAdvanceFor,
+	onQuestionsAdvanceForChange,
 }: EtapaProps & {
+	questionsAdvanceFor?: Record<string, "wait" | "spectator">;
+	onQuestionsAdvanceForChange?: (
+		next: Record<string, "wait" | "spectator">,
+	) => void;
 	isModerator: boolean;
 	rating: RatingProgress | null;
 	minigameState?: MinigameState | null;
@@ -44,6 +50,8 @@ export function StageContent({
 					isModerator={isModerator}
 					rosterMembers={rosterMembers}
 					pendingIds={pendingIds}
+					advanceFor={questionsAdvanceFor}
+					onAdvanceForChange={onQuestionsAdvanceForChange}
 				/>
 			);
 		case "presence":

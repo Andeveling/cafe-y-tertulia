@@ -47,6 +47,23 @@ export function aprecioDisplayText(
 	return `${avg.toFixed(1)} (${count})`;
 }
 
+/**
+ * Etiqueta visible de qué se puntúa en cada fase votable.
+ * Exposición → la exposición del expositor; complemento → la pregunta del autor.
+ * Pura y testeable: ActiveTurn la usa para el label del HeartPicker y
+ * para el estado de solo-lectura cuando el usuario no puede votar.
+ */
+export function heartsSupportLabel(opts: {
+	phase: "exposition" | "complement";
+	assigneeName: string;
+	authorName: string;
+}): string {
+	if (opts.phase === "complement") {
+		return `Cómo estuvo la pregunta de ${opts.authorName}`;
+	}
+	return `Cómo estuvo la exposición de ${opts.assigneeName}`;
+}
+
 /** Estado de la sección de voto de una fase (puro, testeable sin React). */
 export type HeartsPhaseState = "vote" | "no-complement" | "solo";
 

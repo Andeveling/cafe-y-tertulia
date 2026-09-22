@@ -8,10 +8,14 @@ import { Button } from "@/components/ui/button";
 
 export function ModeratorZone({ children }: { children: ReactNode }) {
 	return (
-		<div className="flex w-full flex-col items-start gap-2 border-t border-border/60 pt-4">
-			<p className="text-xs font-medium">Moderación</p>
-			<p className="text-xs text-muted-foreground">Solo tú ves esto.</p>
-			{children}
+		<div className="flex w-full flex-col gap-3 border-t border-border/60 pt-4">
+			<div className="flex w-full flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
+				<p className="text-xs font-medium">Moderación</p>
+				<p className="text-xs text-muted-foreground">Solo tú ves esto.</p>
+			</div>
+			<div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+				{children}
+			</div>
 		</div>
 	);
 }

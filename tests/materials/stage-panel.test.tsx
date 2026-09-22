@@ -54,8 +54,7 @@ afterEach(() => {
 });
 
 describe("StagePanel", () => {
-	it("al terminar el debate el moderador continúa a Cierre", async () => {
-		const user = userEvent.setup();
+	it("al terminar el debate anuncia el cierre sin el avance (vive en el nav)", () => {
 		render(
 			<StagePanel
 				debate={{ mode: "done", remainingHidden: 0 }}
@@ -68,14 +67,9 @@ describe("StagePanel", () => {
 
 		expect(screen.getByText("Debate terminado")).toBeTruthy();
 		expect(screen.getByText(/En Cierre se califica el material/)).toBeTruthy();
-
-		await user.click(
-			screen.getByRole("button", { name: "Continuar a Cierre" }),
-		);
-		await waitFor(() => {
-			expect(advanceRoomStage).toHaveBeenCalledWith("sess-1", "cierre");
-		});
-		expect(refresh).toHaveBeenCalled();
+		expect(
+			screen.queryByRole("button", { name: "Continuar a Cierre" }),
+		).toBeNull();
 	});
 
 	it("quien no modera ve el cierre del debate sin el avance", async () => {
@@ -119,7 +113,7 @@ describe("StagePanel", () => {
 		expect(
 			screen.getByRole("region", { name: "Pregunta sellada" }),
 		).toBeTruthy();
-		expect(screen.getByText("Turno 1 de 2")).toBeTruthy();
+		expect(screen.getByText("Intervención 1 de 2")).toBeTruthy();
 		await user.click(
 			screen.getByRole("button", {
 				name: "Revelar pregunta 1 para Luis",
@@ -174,5 +168,202 @@ describe("StagePanel", () => {
 		await waitFor(() => {
 			expect(continueIntervention).toHaveBeenCalledWith("sess-1");
 		});
+	});
+
+	it("el expositor no ve el bloque de corazones de su propia exposición", () => {
+		const debate: RoomDebateSnapshot = {
+			...active,
+			hearts: { myHeart: null, voted: 0, eligible: 1 },
+		};
+		render(
+			<StagePanel
+				debate={debate}
+				sessionId="sess-1"
+				userId="m-2"
+				isModerator={false}
+				authorId="m-1"
+				members={[
+					{
+						memberId: "m-1",
+						displayName: "Ana",
+						avatar: null,
+						role: "member",
+						optOut: false,
+					},
+					{
+						memberId: "m-2",
+						displayName: "Luis",
+						avatar: null,
+						role: "member",
+						optOut: false,
+					},
+				]}
+				nowMs={Date.parse("2026-01-03T00:00:30.000Z")}
+			/>,
+		);
+
+		expect(screen.queryByText("Cómo estuvo la exposición de Luis")).toBeNull();
+		expect(screen.queryByRole("radiogroup")).toBeNull();
+	});
+
+	it("quien escucha ve el picker para calificar la exposición", () => {
+		const debate: RoomDebateSnapshot = {
+			...active,
+			hearts: { myHeart: null, voted: 0, eligible: 1 },
+		};
+		render(
+			<StagePanel
+				debate={debate}
+				sessionId="sess-1"
+				userId="m-3"
+				isModerator={false}
+				authorId="m-1"
+				members={[
+					{
+						memberId: "m-1",
+						displayName: "Ana",
+						avatar: null,
+						role: "member",
+						optOut: false,
+					},
+					{
+						memberId: "m-2",
+						displayName: "Luis",
+						avatar: null,
+						role: "member",
+						optOut: false,
+					},
+					{
+						memberId: "m-3",
+						displayName: "Mia",
+						avatar: null,
+						role: "member",
+						optOut: false,
+					},
+				]}
+				nowMs={Date.parse("2026-01-03T00:00:30.000Z")}
+			/>,
+		);
+
+		expect(screen.getByText("Cómo estuvo la exposición de Luis")).toBeTruthy();
+		expect(
+			screen.getByRole("radiogroup", {
+				name: "Cómo estuvo la exposición de Luis",
+			}),
+		).toBeTruthy();
+	});
+});
+
+describe("StagePanel · temporizador del turno", () => {
+	const nowMs = Date.parse("2026-01-03T00:00:30.000Z");
+	const members = [
+		{
+			memberId: "m-1",
+			displayName: "Ana",
+			avatar: null,
+			role: "member" as const,
+			optOut: false,
+		},
+		{
+			memberId: "m-2",
+			displayName: "Luis",
+			avatar: null,
+			role: "member" as const,
+			optOut: false,
+		},
+		{
+			memberId: "m-3",
+			displayName: "Mia",
+			avatar: null,
+			role: "member" as const,
+			optOut: false,
+		},
+	];
+
+	it("en exposición quien no modera ve el temporizador en En la palabra y no los controles", () => {
+		render(
+			<StagePanel
+				debate={active}
+				sessionId="sess-1"
+				userId="m-3"
+				isModerator={false}
+				authorId="m-1"
+				members={members}
+				nowMs={nowMs}
+			/>,
+		);
+
+		const palabra = screen.getByRole("region", { name: "En la palabra" });
+		expect(palabra.textContent).toContain("4:30");
+		expect(
+			screen.queryByRole("button", { name: "Terminar exposición" }),
+		).toBeNull();
+		expect(screen.queryByRole("button", { name: /Sumar 1 minuto/ })).toBeNull();
+	});
+
+	it("en complemento quien no modera ve el temporizador en En la palabra", () => {
+		render(
+			<StagePanel
+				debate={{ ...active, state: "complement" }}
+				sessionId="sess-1"
+				userId="m-2"
+				isModerator={false}
+				authorId="m-1"
+				members={members}
+				nowMs={nowMs}
+			/>,
+		);
+
+		const palabra = screen.getByRole("region", { name: "En la palabra" });
+		expect(palabra.textContent).toContain("0:30");
+		expect(
+			screen.queryByRole("button", { name: "Terminar complemento" }),
+		).toBeNull();
+	});
+
+	it("en exposición el moderador ve los controles y el temporizador una sola vez", () => {
+		render(
+			<StagePanel
+				debate={active}
+				sessionId="sess-1"
+				userId="m-1"
+				isModerator
+				authorId="m-1"
+				members={members}
+				nowMs={nowMs}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: "Terminar exposición" }),
+		).toBeTruthy();
+		expect(screen.getByRole("button", { name: /Sumar 1 minuto/ })).toBeTruthy();
+		expect(screen.getAllByText("4:30")).toHaveLength(1);
+		expect(
+			screen.getByRole("region", { name: "En la palabra" }).textContent,
+		).toContain("4:30");
+	});
+
+	it("en complemento el moderador ve los controles y el temporizador, sin sumar minutos", () => {
+		render(
+			<StagePanel
+				debate={{ ...active, state: "complement" }}
+				sessionId="sess-1"
+				userId="m-1"
+				isModerator
+				authorId="m-1"
+				members={members}
+				nowMs={nowMs}
+			/>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: "Terminar complemento" }),
+		).toBeTruthy();
+		expect(screen.queryByRole("button", { name: /Sumar 1 minuto/ })).toBeNull();
+		expect(screen.getAllByText("0:30")).toHaveLength(1);
+		expect(
+			screen.getByRole("region", { name: "En la palabra" }).textContent,
+		).toContain("0:30");
 	});
 });

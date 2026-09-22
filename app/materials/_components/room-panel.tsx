@@ -1,16 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { RoomConnectionStatus } from "@/app/materials/_components/room/connection-status";
 import { ModeratorNav } from "@/app/materials/_components/room/moderator-nav";
 import { StageContent } from "@/app/materials/_components/room/stage-content";
 import { StageBar } from "@/app/materials/_components/stage-bar";
+import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import { useRoomRealtime } from "@/app/materials/_hooks/use-room-realtime";
 import type {
 	MinigameState,
 	TriviaRoundSnapshot,
 } from "@/app/materials/_lib/minigames";
 import type { InviteRosterMember } from "@/app/materials/_lib/presence-invite";
+import { questionsAdvance } from "@/app/materials/_lib/questions-advance";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
+import {
+	advanceRoomStage,
+	setSpectator,
+} from "@/app/materials/_lib/room-actions";
 import type { RoomSnapshot } from "@/app/materials/_lib/room-types";
 import { deriveSalaView } from "@/app/materials/_lib/room-view";
 import { useClubPresence } from "@/hooks/use-club-presence";
@@ -44,6 +51,18 @@ export function RoomPanel({
 	// Una sola derivación: mesa, Listo, debate y avance (next/prev,
 	// backBlocked, empty, warnings). Nav y Debate → Cierre la consumen.
 	const view = deriveSalaView(snapshot);
+	const { pending, run } = useRoomMutation();
+	/** Pase de lista de Preguntas: por faltante, esperar o entra mirando. */
+	const [advanceFor, setAdvanceFor] = useState<
+		Record<string, "wait" | "spectator">
+	>({});
+	const questionsGate =
+		snapshot.roomStage === "questions"
+			? questionsAdvance({
+					participants: snapshot.participants,
+					questionAuthorIds: view.questionAuthorIds,
+				})
+			: null;
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -62,15 +81,48 @@ export function RoomPanel({
 				round={round}
 				rosterMembers={rosterMembers}
 				pendingIds={pendingIds}
+				questionsAdvanceFor={advanceFor}
+				onQuestionsAdvanceForChange={setAdvanceFor}
 			/>
 
-			{/* En Preguntas la conducción vive en la hoja de revisión de la
-			etapa (variante C): el ModeratorNav genérico queda para el resto. */}
-			{isModerator &&
-				snapshot.roomStage !== "questions" &&
-				!(
-					snapshot.roomStage === "debate" && snapshot.debate?.mode === "done"
-				) && <ModeratorNav snapshot={snapshot} view={view} />}
+			{isModerator && (
+				<ModeratorNav
+					snapshot={snapshot}
+					view={view}
+					pending={snapshot.roomStage === "questions" ? pending : undefined}
+					onAdvance={
+						snapshot.roomStage === "questions"
+							? () => {
+									if (!questionsGate?.canAdvance) return;
+									const toSpectators = snapshot.participants.filter(
+										(p) =>
+											questionsGate.missingIds.includes(p.memberId) &&
+											advanceFor[p.memberId] === "spectator",
+									);
+									run(async () => {
+										for (const m of toSpectators) {
+											const r = await setSpectator(
+												snapshot.sessionId,
+												m.memberId,
+												true,
+											);
+											if (!r.ok) return r;
+										}
+										return advanceRoomStage(snapshot.sessionId, "presence");
+									});
+								}
+							: undefined
+					}
+					advanceDisabled={
+						snapshot.roomStage === "questions" && !questionsGate?.canAdvance
+					}
+					advanceLabel={
+						snapshot.roomStage === "questions"
+							? "Avisar y avanzar a Presentes"
+							: undefined
+					}
+				/>
+			)}
 		</div>
 	);
 }
