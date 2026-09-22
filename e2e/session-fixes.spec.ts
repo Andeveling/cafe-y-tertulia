@@ -126,7 +126,7 @@ test("el moderador ve Todos listos en vez de Esperando al moderador", async ({
 	});
 	await expect(modPage.getByText("Todos listos")).toBeVisible();
 	await expect(
-		modPage.getByText("Ejecuta el sorteo para continuar."),
+		modPage.getByText("Avanza a Sorteo: el sorteo se ejecuta al entrar."),
 	).toBeVisible();
 	await expect(obsPage.getByText("Esperando al moderador")).toBeVisible({
 		timeout: 15_000,

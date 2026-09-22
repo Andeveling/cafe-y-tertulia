@@ -95,8 +95,6 @@ export function WaitingRevealView({
 				</p>
 			)}
 
-			<SealedPregunta lead={copy.envelopeLead} hint={copy.envelopeHint} />
-
 			<LastAprecio aprecio={lastAprecio} />
 
 			<div className="flex flex-col items-center gap-1">
@@ -120,6 +118,7 @@ export function WaitingRevealView({
 				</p>
 			</div>
 
+			<SealedPregunta lead={copy.envelopeLead} hint={copy.envelopeHint} />
 			{copy.status && (
 				<p className="max-w-sm text-sm text-muted-foreground text-pretty">
 					{copy.status}
@@ -153,7 +152,7 @@ function LastAprecio({ aprecio }: { aprecio: TurnoAprecio | null }) {
 	return (
 		<section
 			aria-label={`Aprecio del turno de ${aprecio.assigneeName}`}
-			className="flex w-full max-w-[26.25rem] flex-col items-center gap-1 rounded-xl bg-card px-6 py-4 text-center ring-1 ring-foreground/10"
+			className="flex w-full max-w-105 flex-col items-center gap-1 rounded-xl bg-card px-6 py-4 text-center ring-1 ring-foreground/10"
 		>
 			<p className="flex items-center gap-1.5 text-label-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
 				<HugeiconsIcon
@@ -219,7 +218,7 @@ function SealedPregunta({ lead, hint }: { lead: string; hint: string }) {
 			>
 				<HugeiconsIcon icon={CircleLock01Icon} className="size-7" />
 			</div>
-			<p className="font-heading max-w-[16.25rem] text-sm text-muted-foreground italic">
+			<p className="font-heading max-w-65 text-sm text-muted-foreground italic">
 				{lead}
 				<br />
 				{hint}

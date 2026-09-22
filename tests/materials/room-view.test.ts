@@ -114,6 +114,7 @@ describe("deriveSalaView", () => {
 		expect(view.questionAuthorIds.has("m-1")).toBe(true);
 		expect(view.questionAuthorIds.has("m-2")).toBe(false);
 		expect(view.notReadyNames).toEqual(["Luis"]);
+		expect(view.warnings).not.toContain("Luis");
 		expect(view.remainingInterventions).toBe(1);
 		expect(view.debateAuthorId).toBe("m-1");
 		expect(view.debateProgress).toEqual({ current: 1, total: 2 });
@@ -320,13 +321,15 @@ describe("deriveSalaView", () => {
 		expect(deriveSalaView(base).empty).toBe(false);
 	});
 
-	it("avisa quién no está Listo al avanzar a Debate", () => {
+	it("no inventa pendientes de pregunta al ir de Sorteo a Debate", () => {
 		const draw = deriveSalaView({
 			...base,
 			roomStage: "draw",
 			debate: null,
 		});
-		expect(draw.warnings).toEqual(["Luis"]);
+		expect(draw.next).toBe("debate");
+		expect(draw.notReadyNames).toEqual(["Luis"]);
+		expect(draw.warnings).toEqual([]);
 
 		const presence = deriveSalaView({
 			...base,

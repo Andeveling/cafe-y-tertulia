@@ -23,7 +23,8 @@ const NAMES = {
 function PrototypeContent() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
-	const current = (searchParams.get("variant") ?? "A") as (typeof VARIANTS)[number];
+	const current = (searchParams.get("variant") ??
+		"A") as (typeof VARIANTS)[number];
 	const idx = Math.max(0, VARIANTS.indexOf(current));
 
 	const [members, setMembers] = useState<ProtoMember[]>(INITIAL);
@@ -36,7 +37,11 @@ function PrototypeContent() {
 	useEffect(() => {
 		function onKey(e: KeyboardEvent) {
 			const t = e.target as HTMLElement;
-			if (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)
+			if (
+				t.tagName === "INPUT" ||
+				t.tagName === "TEXTAREA" ||
+				t.isContentEditable
+			)
 				return;
 			if (e.key === "ArrowLeft") go(idx - 1);
 			if (e.key === "ArrowRight") go(idx + 1);

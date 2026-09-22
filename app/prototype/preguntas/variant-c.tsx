@@ -10,7 +10,7 @@ import { useState } from "react";
 import { InfoButton } from "@/components/info-button";
 import { Button } from "@/components/ui/button";
 import { COPY, convocable, missing } from "./data";
-import type { SharedProps } from "./page";
+import type { SharedProps } from "./props";
 
 export function VariantC({
 	members,

@@ -142,6 +142,53 @@ export async function confirmPresence(
 	});
 }
 
+/**
+ * Salir de la sesión: borra tus preguntas y tu asiento (rastro limpio).
+ * Solo en Preguntas/Presentes — después rompería el sorteo; el Moderador
+ * cede primero. RLS ya limita ambos borrados a lo propio
+ * (`participants_delete_self`, `questions_delete_author`).
+ */
+export async function leaveSession(sessionId: string): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase, user }) => {
+			const { data: sess, error: sessError } = await supabase
+				.from("sessions")
+				.select("room_stage,moderator_id")
+				.eq("id", sessionId)
+				.single();
+
+			if (sessError || !sess) {
+				return { ok: false, error: "No se pudo leer la sesión." };
+			}
+			if (sess.room_stage !== "questions" && sess.room_stage !== "presence") {
+				return {
+					ok: false,
+					error: "En esta etapa solo puedes pasar a espectador.",
+				};
+			}
+			if (sess.moderator_id === user!.id) {
+				return { ok: false, error: "Cede la moderación antes de salir." };
+			}
+
+			const { error: qError } = await supabase
+				.from("questions")
+				.delete()
+				.eq("session_id", sessionId)
+				.eq("author_id", user!.id);
+			if (qError) return { ok: false, error: qError.message };
+
+			const { error: seatError } = await supabase
+				.from("session_participants")
+				.delete()
+				.eq("session_id", sessionId)
+				.eq("member_id", user!.id);
+			if (seatError) return { ok: false, error: seatError.message };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
 /** Avanza la etapa de la Sala (solo Moderador). */
 export async function advanceRoomStage(
 	sessionId: string,

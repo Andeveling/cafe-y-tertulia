@@ -16,6 +16,17 @@ export function memberInitials(name: string) {
 	return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+/**
+ * Primer nombre de un nombre visible ("Andrés Parra" → "Andrés").
+ * Las cards de la Sala muestran solo el primer nombre; el completo
+ * queda en `title` para accesibilidad.
+ */
+export function memberFirstName(name: string) {
+	const trimmed = name.trim();
+	if (!trimmed) return "Miembro";
+	return trimmed.split(/\s+/)[0];
+}
+
 export type MemberAvatarProps = {
 	/** Nombre visible — alt de la imagen y base de las iniciales. */
 	name: string;

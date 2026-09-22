@@ -46,7 +46,7 @@ export type SalaView = {
 	backBlocked: boolean;
 	/** Mesa sin members — bloquea avanzar a Sorteo o Debate. */
 	empty: boolean;
-	/** Avisos de avance (Listos faltantes, Intervenciones pendientes). */
+	/** Avisos de avance (Intervenciones pendientes al ir a Cierre). */
 	warnings: string[];
 };
 
@@ -61,7 +61,7 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 
 	const questionAuthorIds = new Set(snapshot.questions.map((q) => q.authorId));
 	const notReadyNames = members
-		.filter((p) => !questionAuthorIds.has(p.memberId))
+		.filter((p) => !p.optOut && !questionAuthorIds.has(p.memberId))
 		.map((p) => p.displayName);
 
 	const remainingInterventions = snapshot.assignments.filter(
@@ -115,11 +115,9 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 		(prev === "questions" || prev === "presence");
 	const empty = members.length === 0 && (next === "draw" || next === "debate");
 	const warnings =
-		next === "debate" && notReadyNames.length > 0
-			? notReadyNames
-			: next === "cierre" && remainingInterventions > 0
-				? [`${remainingInterventions} turno(s) sin completar`]
-				: [];
+		next === "cierre" && remainingInterventions > 0
+			? [`${remainingInterventions} turno(s) sin completar`]
+			: [];
 
 	return {
 		members,

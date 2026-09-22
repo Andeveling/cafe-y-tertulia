@@ -7,11 +7,10 @@ import {
 	buildInviteCandidates,
 	type InviteRosterMember,
 } from "@/app/materials/_lib/presence-invite";
-import { MemberAvatar } from "@/components/member-avatar";
+import { MemberAvatar, memberFirstName } from "@/components/member-avatar";
 import { PresenceEstado } from "@/components/presence-estado";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useClubPresence } from "@/hooks/use-club-presence";
 
 type Props = {
@@ -73,6 +72,11 @@ export function PresenceInvite({
 	);
 
 	const llamables = candidates.filter((c) => c.llamable).length;
+	const hasPending = candidates.some((c) => c.pending);
+
+	// Sin nadie a quien llamar no hay sección: el toast ya confirmó
+	// los enviados y la mesa muestra quién está.
+	if (llamables === 0 && !hasPending) return null;
 
 	function handleCall(toId: string) {
 		setCallingId(toId);
@@ -91,61 +95,56 @@ export function PresenceInvite({
 	}
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="text-xs font-semibold uppercase tracking-[0.05em] text-muted-foreground">
-					Invitar — {llamables} disponibles
-				</CardTitle>
-			</CardHeader>
-			<CardContent>
-				{candidates.length === 0 ? (
-					<p className="text-sm text-muted-foreground">
-						No hay miembros para invitar.
-					</p>
-				) : (
-					<ul className="flex max-h-64 flex-col divide-y divide-border overflow-y-auto">
-						{candidates.map((c) => (
-							<li key={c.id} className="flex items-center justify-between py-2">
-								<span className="flex min-w-0 items-center gap-2">
-									<MemberAvatar
-										name={c.displayName || "Miembro"}
-										avatar={avatares[c.id] ?? null}
-										size="sm"
-										className={
-											c.estado === "desconectado"
-												? "opacity-40"
-												: "ring-1 ring-primary/40"
-										}
-									/>
-									<span className="flex min-w-0 flex-col">
-										<span className="truncate text-sm">{c.displayName}</span>
-										<PresenceEstado
-											estado={c.estado}
-											detalle={c.enOtraSala ? "En otra sala" : undefined}
-										/>
-									</span>
+		<section aria-label="Invitar a la sala" className="flex flex-col gap-2">
+			<h2 className="font-heading text-base font-semibold text-muted-foreground">
+				Invitar · {llamables} {llamables === 1 ? "disponible" : "disponibles"}
+			</h2>
+			<ul className="flex flex-col gap-2">
+				{candidates.map((c) => (
+					<li
+						key={c.id}
+						title={c.displayName}
+						className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3"
+					>
+						<span className="flex min-w-0 flex-1 items-center gap-2">
+							<MemberAvatar
+								name={c.displayName || "Miembro"}
+								avatar={avatares[c.id] ?? null}
+								size="sm"
+								badge={c.online}
+								className={
+									c.estado === "desconectado" ? "opacity-40" : undefined
+								}
+							/>
+							<span className="flex min-w-0 flex-1 flex-col gap-1">
+								<span className="truncate text-sm font-medium">
+									{memberFirstName(c.displayName || "Miembro")}
 								</span>
-								{c.pending ? (
-									<Badge variant="outline">Convocado</Badge>
-								) : c.llamable ? (
-									<Button
-										size="xs"
-										variant="ghost"
-										disabled={calling && callingId === c.id}
-										onClick={() => handleCall(c.id)}
-									>
-										Llamar
-									</Button>
-								) : (
-									<span className="text-xs text-muted-foreground">
-										{c.enOtraSala ? "En otra sala" : "offline"}
-									</span>
-								)}
-							</li>
-						))}
-					</ul>
-				)}
-			</CardContent>
-		</Card>
+								<PresenceEstado
+									estado={c.estado}
+									detalle={c.enOtraSala ? "En otra sala" : undefined}
+								/>
+							</span>
+						</span>
+						{c.pending ? (
+							<Badge variant="outline">Convocado</Badge>
+						) : c.llamable ? (
+							<Button
+								size="xs"
+								variant="ghost"
+								disabled={calling && callingId === c.id}
+								onClick={() => handleCall(c.id)}
+							>
+								Llamar
+							</Button>
+						) : (
+							<span className="shrink-0 text-xs text-muted-foreground">
+								{c.enOtraSala ? "En otra sala" : "offline"}
+							</span>
+						)}
+					</li>
+				))}
+			</ul>
+		</section>
 	);
 }

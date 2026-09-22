@@ -52,10 +52,7 @@ export function VariantB({ members, onPresent, onOptOut }: Props) {
 							/>
 							<span>Quiero que me toque una pregunta en el sorteo.</span>
 						</label>
-						<InfoButton
-							title={COPY.sorteoTitle}
-							description={COPY.sorteo}
-						/>
+						<InfoButton title={COPY.sorteoTitle} description={COPY.sorteo} />
 					</div>
 				)}
 			</section>
@@ -66,12 +63,17 @@ export function VariantB({ members, onPresent, onOptOut }: Props) {
 						{ready}
 						<span className="text-muted-foreground">/{people.length}</span>
 					</p>
-					<p className="mt-1 text-sm text-muted-foreground">listos para el sorteo</p>
+					<p className="mt-1 text-sm text-muted-foreground">
+						listos para el sorteo
+					</p>
 				</div>
 
 				<ul className="flex flex-col gap-4">
 					{people.map((m) => (
-						<li key={m.id} className="flex items-baseline justify-between gap-4">
+						<li
+							key={m.id}
+							className="flex items-baseline justify-between gap-4"
+						>
 							<span className="text-sm">
 								{m.name}
 								{m.isYou && (

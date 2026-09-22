@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type ReactNode, useTransition } from "react";
 import { toast } from "sonner";
 import { advanceSession } from "@/app/materials/_lib/materials-actions";
+import { clearLeftRoom } from "@/app/materials/_lib/room-seat-gate";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -52,7 +53,9 @@ export function BoardSessionAction({
 				variant={buttonVariant}
 				className={className}
 				nativeButton={false}
-				render={<Link href={sessionHref(session)} />}
+				render={
+					<Link href={sessionHref(session)} onClick={() => clearLeftRoom()} />
+				}
 			>
 				{label}
 				{children}
@@ -68,6 +71,7 @@ export function BoardSessionAction({
 			disabled={pending}
 			onClick={() =>
 				start(async () => {
+					clearLeftRoom();
 					const result = await advanceSession({
 						sessionId: session.id,
 						materialId: session.material_id,

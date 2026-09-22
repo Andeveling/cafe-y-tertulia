@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { RoomSessionView } from "@/app/materials/_components/room-session-view";
 import {
@@ -11,6 +12,10 @@ import {
 	getRoomRosterMembers,
 } from "@/app/materials/_lib/room-roster";
 import { seatIfAbsent } from "@/app/materials/_lib/room-seat";
+import {
+	LEFT_ROOM_COOKIE,
+	shouldSeatOnRoomLoad,
+} from "@/app/materials/_lib/room-seat-gate";
 import { roomSurface } from "@/app/materials/_lib/room-sync";
 import { createClient } from "@/lib/supabase/server";
 
@@ -33,11 +38,17 @@ export default async function RoomPage({
 	if (!snapshot) notFound();
 
 	// Preguntas cuenta a quien tiene la Sala abierta. Sin asiento, la
-	// mesa vacía se leía como "todos tienen pregunta".
+	// mesa vacía se leía como "todos tienen pregunta". Un refresh justo
+	// después de Salir no cuenta: volvería a sentar a quien se fue.
+	const leftMarker = (await cookies()).get(LEFT_ROOM_COOKIE)?.value ?? null;
 	if (
-		snapshot.status === "lobby" &&
-		snapshot.roomStage === "questions" &&
-		!snapshot.participants.some((p) => p.memberId === user.id)
+		shouldSeatOnRoomLoad({
+			status: snapshot.status,
+			roomStage: snapshot.roomStage,
+			seated: snapshot.participants.some((p) => p.memberId === user.id),
+			leftMarker,
+			sessionId,
+		})
 	) {
 		await seatIfAbsent(supabase, sessionId, user.id);
 		const seated = await getRoomSnapshot(supabase, sessionId);

@@ -13,8 +13,8 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { Category } from "@/app/materials/_lib/categories";
 import { setMaterialCategories } from "@/app/materials/_lib/category-actions";
+import { MasteryStrip } from "@/components/mastery-strip";
 import { Badge } from "@/components/ui/badge";
-import { MasteryStrip } from "./mastery-strip";
 
 const CATEGORY_ICON: Record<string, typeof Idea01Icon> = {
 	filosofia: Idea01Icon,

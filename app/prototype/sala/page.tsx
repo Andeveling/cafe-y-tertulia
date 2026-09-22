@@ -1,19 +1,14 @@
 /**
- * Tres variantes de Preguntas, switchable via ?variant=
- * Pregunta: tablero por rol + avance del Moderador avisando a faltantes.
+ * Tres variantes de cards de Sala, switchable via ?variant=
+ * Pregunta: una sola composición (Avatar + primer nombre + estado)
+ * para unificar room/sala: quién entró, listo, sorteo, convocatoria.
  */
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { StageBar } from "@/app/materials/_components/stage-bar";
-import {
-	type AdvanceDecision,
-	convocable,
-	INITIAL,
-	missing,
-	type ProtoMember,
-} from "./data";
+import { INITIAL, type ProtoSalaMember } from "./data";
 import type { SharedProps } from "./props";
 import { VariantA } from "./variant-a";
 import { VariantB } from "./variant-b";
@@ -21,9 +16,9 @@ import { VariantC } from "./variant-c";
 
 const VARIANTS = ["A", "B", "C"] as const;
 const NAMES = {
-	A: "A — Tablero único",
-	B: "B — Comando",
-	C: "C — Mi pregunta primero",
+	A: "A — La Mesa",
+	B: "B — Pase de lista",
+	C: "C — Quién está",
 } as const;
 
 function PrototypeContent() {
@@ -33,10 +28,8 @@ function PrototypeContent() {
 		"A") as (typeof VARIANTS)[number];
 	const idx = Math.max(0, VARIANTS.indexOf(current));
 
-	const [members, setMembers] = useState<ProtoMember[]>(INITIAL);
+	const [members, setMembers] = useState<ProtoSalaMember[]>(INITIAL);
 	const [youId, setYouId] = useState("u-andres");
-	const [decisions, setDecisions] = useState<AdvanceDecision>({});
-	const [advanced, setAdvanced] = useState(false);
 
 	const go = useCallback(
 		(i: number) => {
@@ -62,47 +55,48 @@ function PrototypeContent() {
 		return () => window.removeEventListener("keydown", onKey);
 	}, [idx, go]);
 
-	const you = members.find((m) => m.id === youId) ?? members[0];
-
-	function patch(id: string, p: Partial<ProtoMember>) {
+	function patch(id: string, p: Partial<ProtoSalaMember>) {
 		setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...p } : m)));
 	}
+
+	const you = members.find((m) => m.id === youId) ?? members[0];
 
 	const props: SharedProps = {
 		members,
 		youId,
 		isModeratorView: you.isModerator,
 		onSeeAs: setYouId,
-		onSaveMine: () => patch(youId, { questionCount: you.questionCount + 1 }),
-		onOptOut: (id, next) => patch(id, { role: next ? "spectator" : "member" }),
-		onConvocar: (id) => patch(id, { inRoom: true }),
-		decisions,
-		onDecide: (id, d) => setDecisions((prev) => ({ ...prev, [id]: d })),
-		onAdvance: () => setAdvanced(true),
-		advanced,
+		onConvocar: (id) =>
+			patch(id, { inRoom: true, estado: "en_sesion", online: true }),
+		onToggleSpectator: (id) => {
+			const m = members.find((x) => x.id === id);
+			if (!m) return;
+			patch(id, { role: m.role === "spectator" ? "member" : "spectator" });
+		},
 	};
 
 	const state = {
-		you: you.name,
+		variant: current,
+		you: you.displayName,
 		moderatorView: props.isModeratorView,
-		missing: missing(members).map((m) => m.name),
-		convocable: convocable(members).map((m) => m.name),
-		decisions,
-		advanced,
-		questions: Object.fromEntries(
-			members.map((m) => [m.name, m.questionCount]),
-		),
-		roles: Object.fromEntries(members.map((m) => [m.name, m.role])),
+		inRoom: members.filter((m) => m.inRoom).map((m) => m.displayName),
+		convocable: members
+			.filter((m) => m.online && !m.inRoom)
+			.map((m) => m.displayName),
+		roles: Object.fromEntries(members.map((m) => [m.displayName, m.role])),
+		ready: members
+			.filter((m) => m.inRoom && m.role === "member" && m.hasQuestion)
+			.map((m) => m.displayName),
 	};
 
 	return (
 		<div className="min-h-screen bg-background pb-24">
 			<div className="mx-auto w-full max-w-4xl px-5 pt-6 md:px-8">
 				<p className="text-xs text-muted-foreground">
-					Prototipo throwaway · Preguntas · no muta datos reales
+					Prototipo throwaway · Sala · no muta datos reales
 				</p>
 				<div className="mt-4">
-					<StageBar current="questions" />
+					<StageBar current="presence" />
 				</div>
 				<label className="mt-4 flex items-center gap-2 text-sm">
 					Ver como
@@ -113,9 +107,9 @@ function PrototypeContent() {
 					>
 						{members.map((m) => (
 							<option key={m.id} value={m.id}>
-								{m.name}
-								{m.isModerator ? " (moderador)" : ""}
-								{m.role === "spectator" ? " (espectador)" : ""}
+								{m.displayName}
+								{m.isModerator ? " (modera)" : ""}
+								{m.role === "spectator" ? " (mira)" : ""}
 							</option>
 						))}
 					</select>
@@ -157,7 +151,7 @@ function PrototypeContent() {
 	);
 }
 
-export default function PreguntasPrototypePage() {
+export default function SalaPrototypePage() {
 	return (
 		<Suspense>
 			<PrototypeContent />

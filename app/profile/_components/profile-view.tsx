@@ -1,4 +1,3 @@
-import { MasteryStrip } from "@/app/materials/_components/mastery-strip";
 import { AvatarPicker } from "@/app/profile/_components/avatar-picker";
 import { BadgeVitrina } from "@/app/profile/_components/badge-vitrina";
 import { LeaveClubDialog } from "@/app/profile/_components/leave-club-dialog";
@@ -8,6 +7,7 @@ import type {
 	MemberLevel,
 	SeasonRecognition,
 } from "@/app/profile/_lib/gamification-actions";
+import { MasteryStrip } from "@/components/mastery-strip";
 import { MemberAvatar } from "@/components/member-avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

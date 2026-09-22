@@ -56,9 +56,7 @@ export function VariantC({ members, onPresent, onOptOut }: Props) {
 						{people.map((m, i) => (
 							<tr
 								key={m.id}
-								className={
-									i % 2 === 1 ? "bg-foreground/[0.03]" : undefined
-								}
+								className={i % 2 === 1 ? "bg-foreground/[0.03]" : undefined}
 							>
 								<td className="py-3 pr-4">
 									{m.name}

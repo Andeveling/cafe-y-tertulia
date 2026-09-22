@@ -87,6 +87,7 @@ export function useRoomRealtime(sessionId: string): { live: boolean } {
 				roomSessionChangeFilter(sessionId),
 				scheduleRefresh,
 			)
+			.on("broadcast", { event: "member_left" }, scheduleRefresh)
 			.subscribe((status) => {
 				setLive(roomChannelIsLive(status));
 				if (status === "SUBSCRIBED") setJoined(true);
@@ -117,4 +118,18 @@ export function useRoomRealtime(sessionId: string): { live: boolean } {
 	}, [joined, live, router]);
 
 	return { live };
+}
+
+/**
+ * Avisa a la Sala ya suscrita de que alguien se fue, sin refrescar la
+ * página del que sale: ese refresh la volvería a sentar (`seatIfAbsent`).
+ */
+export async function announceMemberLeft(sessionId: string) {
+	try {
+		await createClient()
+			.channel(`room:${sessionId}`)
+			.send({ type: "broadcast", event: "member_left", payload: {} });
+	} catch {
+		// El heartbeat de la Sala cubre el fallo.
+	}
 }

@@ -1,9 +1,8 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import { notFound } from "next/navigation";
-import { MasteryStrip } from "@/app/materials/_components/mastery-strip";
-import { getMemberMastery } from "@/app/materials/_lib/categories";
 import { getMemberProfile } from "@/app/materials/_lib/materials";
 import { getBadgeIcon } from "@/components/badge-icons";
+import { MasteryStrip } from "@/components/mastery-strip";
 import { MemberAvatar } from "@/components/member-avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -13,6 +12,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { getMemberMastery } from "@/lib/member-mastery";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Miembro · Café y Tertulia" };

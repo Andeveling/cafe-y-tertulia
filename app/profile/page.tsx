@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { getMemberMastery } from "@/app/materials/_lib/categories";
 import { ProfileView } from "@/app/profile/_components/profile-view";
 import { getCurrentMember } from "@/lib/current-member";
+import { getMemberMastery } from "@/lib/member-mastery";
 import { createClient } from "@/lib/supabase/server";
 import { getMemberBadges, getMemberLevel } from "./_lib/gamification-actions";
 

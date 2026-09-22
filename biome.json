@@ -34,6 +34,7 @@
 			},
 			"style": {
 				"noCommonJs": "error",
+				"noExcessiveLinesPerFile": { "level": "error", "options": { "maxLines": 500 } },
 				"noHeadElement": "warn",
 				"noNamespace": "error",
 				"useArrayLiterals": "error",

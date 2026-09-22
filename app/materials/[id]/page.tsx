@@ -24,7 +24,6 @@ import { StepIndicator } from "@/app/materials/_components/step-indicator";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
 import {
 	getMaterialCategories,
-	getMemberMastery,
 	listCategories,
 } from "@/app/materials/_lib/categories";
 import { isActiveMember } from "@/app/materials/_lib/members";
@@ -33,6 +32,7 @@ import {
 	getSessionPools,
 	type QuestionWithAuthor,
 } from "@/app/materials/_lib/questions";
+import { getMemberMastery } from "@/lib/member-mastery";
 import { createClient } from "@/lib/supabase/server";
 import {
 	getClubMilestones,
