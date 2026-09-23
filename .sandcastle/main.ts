@@ -79,7 +79,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     const implement = await sandbox.run({
       name: "implementer",
       maxIterations: 1,
-      agent: sandcastle.opencode("opencode/big-pickle"),
+      agent: sandcastle.opencode("opencode-go/muse-spark-1.3-contributor"),
       promptFile: "./.sandcastle/implement-prompt.md",
     });
 
@@ -103,7 +103,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     await sandbox.run({
       name: "reviewer",
       maxIterations: 1,
-      agent: sandcastle.opencode("opencode/big-pickle"),
+      agent: sandcastle.opencode("opencode-go/muse-spark-1.3-contributor"),
       promptFile: "./.sandcastle/review-prompt.md",
       promptArgs: {
         BRANCH: branch,
