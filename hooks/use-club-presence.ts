@@ -45,6 +45,14 @@ function toMs(iso: string | null | undefined): number | null {
 
 const TOPIC = "club-roster";
 
+/**
+ * Canal de presencia por grupo (PRD #69): dentro del grupo A solo se ve
+ * presencia de A. Sin grupo se mantiene el canal histórico del club.
+ */
+export function presenceTopic(groupId?: string): string {
+	return groupId ? `group-${groupId}-roster` : TOPIC;
+}
+
 type BrowserSupabase = ReturnType<typeof createClient>;
 type RosterChannel = ReturnType<BrowserSupabase["channel"]>;
 type RosterState = Record<string, TrackPayload[]>;
@@ -53,6 +61,7 @@ type RosterListener = (state: RosterState) => void;
 type SharedRoster = {
 	supabase: BrowserSupabase;
 	channel: RosterChannel;
+	topic: string;
 	userId: string;
 	salaId: string | undefined;
 	refs: number;
@@ -167,9 +176,12 @@ function acquireRoster(
 	userId: string,
 	salaId: string | undefined,
 	listener: RosterListener,
+	groupId?: string,
 ): () => void {
-	if (shared && shared.userId !== userId) {
-		// Cambio de usuario sin desmontaje intermedio: suelta la sesión anterior.
+	const topic = presenceTopic(groupId);
+	if (shared && (shared.userId !== userId || shared.topic !== topic)) {
+		// Cambio de usuario o de grupo sin desmontaje intermedio: suelta la
+		// sesión anterior (cada grupo tiene su propio canal).
 		const stale = shared;
 		shared = null;
 		stale.listeners.clear();
@@ -177,12 +189,13 @@ function acquireRoster(
 	}
 	if (!shared) {
 		const supabase = createClient();
-		const channel = supabase.channel(TOPIC, {
+		const channel = supabase.channel(topic, {
 			config: { presence: { key: userId } },
 		});
 		const s: SharedRoster = {
 			supabase,
 			channel,
+			topic,
 			userId,
 			salaId,
 			refs: 0,
@@ -227,9 +240,12 @@ function acquireRoster(
 }
 
 /**
- * Presencia híbrida (ADR 0010): `club-roster` vivo + `last_seen` persistido.
+ * Presencia híbrida (ADR 0010): canal vivo + `last_seen` persistido.
  * Una key por Miembro (multi-pestaña colapsa). Escucha sync+join+leave,
  * gracia offline 90 s, Ausente a 5 min fuera de Sala (en Sala nunca ausente).
+ *
+ * Con `opts.groupId` el canal es `group-{id}-roster` (PRD #69): dentro del
+ * grupo A solo se ve presencia de A. Sin grupo, canal histórico `club-roster`.
  *
  * El canal subyacente se comparte entre todas las instancias montadas a la
  * vez; desmontar la última solo hace `untrack`+`unsubscribe`, nunca
@@ -238,16 +254,17 @@ function acquireRoster(
 export function useClubPresence(
 	userId: string | undefined,
 	members: RosterMember[],
-	opts?: { salaId?: string },
+	opts?: { salaId?: string; groupId?: string },
 ): PresenceRosterMember[] {
 	const salaId = opts?.salaId;
+	const groupId = opts?.groupId;
 	const [tracks, setTracks] = useState<Record<string, TrackPayload[]>>({});
 	const [, setUltimaActividadPropia] = useState(() => Date.now());
 	const [ahora, setAhora] = useState(() => Date.now());
 
 	useEffect(() => {
 		if (!userId) return;
-		const release = acquireRoster(userId, salaId, setTracks);
+		const release = acquireRoster(userId, salaId, setTracks, groupId);
 		const ticker = setInterval(() => setAhora(Date.now()), 15_000);
 
 		// Actividad propia: resetea Ausente (throttle 10 s) fuera y dentro de sala.
@@ -268,7 +285,7 @@ export function useClubPresence(
 			clearInterval(ticker);
 			release();
 		};
-	}, [userId, salaId]);
+	}, [userId, salaId, groupId]);
 
 	const base = members.map((m) => {
 		const payload = tracks[m.id]?.[0];

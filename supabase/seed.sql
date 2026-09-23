@@ -98,3 +98,42 @@ begin
   end if;
 end
 $$;
+
+-- Multi-grupo (#71, PRD #69): el seed corre después de las migraciones, así
+-- que los Miembros semilla no los cubrió el backfill a "nojau". Se agregan
+-- aquí de forma idempotente; el más antiguo queda admin si no hay ninguno.
+do $$
+declare
+  v_nojau_id uuid;
+  v_oldest_member_id uuid;
+begin
+  select id into v_nojau_id from public.groups where name = 'nojau' limit 1;
+  if v_nojau_id is null then
+    return;
+  end if;
+
+  insert into public.group_members (group_id, member_id, role)
+  select v_nojau_id, id, 'member'
+  from public.members
+  where status = 'active'
+  on conflict do nothing;
+
+  if not exists (
+    select 1 from public.group_members
+    where group_id = v_nojau_id and role = 'admin'
+  ) then
+    select member_id into v_oldest_member_id
+    from public.group_members
+    where group_id = v_nojau_id
+    order by created_at asc, member_id asc
+    limit 1;
+
+    if v_oldest_member_id is not null then
+      update public.group_members
+      set role = 'admin'
+      where group_id = v_nojau_id
+      and member_id = v_oldest_member_id;
+    end if;
+  end if;
+end
+$$;
