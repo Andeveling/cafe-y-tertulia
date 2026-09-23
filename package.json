@@ -11,6 +11,8 @@
 		"format": "npx @biomejs/biome format --write",
 		"depcruise": "npx depcruise app --config .dependency-cruiser.cjs --output-type err",
 		"depcruise:graph": "npx depcruise app --config .dependency-cruiser.cjs --output-type dot | dot -T svg > dependency-graph.svg",
+		"sand": "bunx tsx .sandcastle/main.ts",
+		"sand:clean": "sh scripts/clean-sandcastle-worktrees.sh",
 		"test:watch": "vitest",
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",

@@ -28,6 +28,32 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 // Configuration
 // ---------------------------------------------------------------------------
 
+// OpenCode inside the sandcastle image (1.18.x) and on the host (2.x) both
+// take `opencode run`'s message as a positional argv. Linux rejects any
+// single argument over MAX_ARG_STRLEN (128 KiB) with spawn E2BIG. The
+// reviewer inlines `git diff`, and a migration on this repo already crosses
+// that limit. Both CLIs read a non-TTY stdin as the message, and Sandcastle
+// pipes PrintCommand.stdin through `docker exec -i` into `sh -c`.
+const MODEL = "opencode-go/muse-spark-1.3-contributor";
+
+function opencodeAgent(): ReturnType<typeof sandcastle.opencode> {
+  const base = sandcastle.opencode(MODEL);
+  return {
+    name: base.name,
+    env: base.env,
+    captureSessions: base.captureSessions,
+    parseStreamLine: (line) => base.parseStreamLine(line),
+    buildPrintCommand(options) {
+      const built = base.buildPrintCommand({ ...options, prompt: "" });
+      const emptyArg = " ''";
+      const command = built.command.endsWith(emptyArg)
+        ? built.command.slice(0, -emptyArg.length)
+        : built.command;
+      return { command, stdin: options.prompt };
+    },
+  };
+}
+
 // Maximum number of implement→review cycles to run before stopping.
 // Each cycle works on one issue. Raise this to process more issues per run.
 const MAX_ITERATIONS = 10;
@@ -79,7 +105,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     const implement = await sandbox.run({
       name: "implementer",
       maxIterations: 1,
-      agent: sandcastle.opencode("opencode-go/muse-spark-1.3-contributor"),
+      agent: opencodeAgent(),
       promptFile: "./.sandcastle/implement-prompt.md",
     });
 
@@ -103,7 +129,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     await sandbox.run({
       name: "reviewer",
       maxIterations: 1,
-      agent: sandcastle.opencode("opencode-go/muse-spark-1.3-contributor"),
+      agent: opencodeAgent(),
       promptFile: "./.sandcastle/review-prompt.md",
       promptArgs: {
         BRANCH: branch,
