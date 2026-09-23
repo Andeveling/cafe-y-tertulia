@@ -1,9 +1,6 @@
 import { redirect } from "next/navigation";
 import { ProfileView } from "@/app/profile/_components/profile-view";
 import { getCurrentMember } from "@/lib/current-member";
-import { getMemberMastery } from "@/lib/member-mastery";
-import { createClient } from "@/lib/supabase/server";
-import { getMemberBadges, getMemberLevel } from "./_lib/gamification-actions";
 
 export default async function ProfilePage({
 	searchParams,
@@ -16,27 +13,12 @@ export default async function ProfilePage({
 		redirect("/auth/login");
 	}
 
-	const supabase = await createClient();
-	const [{ badges, recognitions }, level, mastery] = await Promise.all([
-		getMemberBadges(member.id),
-		getMemberLevel(member.id),
-		getMemberMastery(supabase, member.id).catch(() => []),
-	]);
-
 	return (
 		<ProfileView
+			memberId={member.id}
 			displayName={member.display_name}
 			status={member.status}
 			avatar={member.avatar ?? null}
-			level={level}
-			badges={badges}
-			recognitions={recognitions}
-			mastery={mastery.map((m) => ({
-				categoryId: m.category.id,
-				categoryName: m.category.name,
-				level: m.level,
-				points: m.points,
-			}))}
 			updated={params.updated === "1"}
 			updateFailed={params.error === "update_failed"}
 		/>

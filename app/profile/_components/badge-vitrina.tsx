@@ -1,7 +1,6 @@
-"use client";
-
 import { Award01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { partitionBadges } from "@/app/profile/_lib/profile-stats";
 import { getBadgeIcon, RECOGNITION_ICONS } from "@/components/badge-icons";
 import { InfoButton } from "@/components/info-button";
 import {
@@ -114,10 +113,12 @@ export function BadgeVitrina({
 	badges: MemberBadge[];
 	recognitions: SeasonRecognition[];
 }) {
-	const individual = badges.filter((b) => b.kind === "individual");
-	const collective = badges.filter((b) => b.kind === "collective");
-	const earnedCount = individual.filter((b) => b.earned).length;
-	const earnedCollective = collective.filter((b) => b.earned).length;
+	const {
+		individual,
+		collective,
+		earnedIndividual: earnedCount,
+		earnedCollective,
+	} = partitionBadges(badges);
 
 	return (
 		<TooltipProvider>

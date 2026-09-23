@@ -1,15 +1,20 @@
+import { Suspense } from "react";
 import { AvatarPicker } from "@/app/profile/_components/avatar-picker";
-import { BadgeVitrina } from "@/app/profile/_components/badge-vitrina";
-import { LeaveClubDialog } from "@/app/profile/_components/leave-club-dialog";
+import {
+	HeroSection,
+	HeroSkeleton,
+} from "@/app/profile/_components/hero-section";
+import { LeaveClubDialogLazy } from "@/app/profile/_components/leave-club-dialog-lazy";
+import {
+	MasterySection,
+	MasterySkeleton,
+} from "@/app/profile/_components/mastery-section";
 import { UpdateProfileForm } from "@/app/profile/_components/update-profile-form";
-import type {
-	MemberBadge,
-	MemberLevel,
-	SeasonRecognition,
-} from "@/app/profile/_lib/gamification-actions";
-import { MasteryStrip } from "@/components/mastery-strip";
-import { MemberAvatar } from "@/components/member-avatar";
-import { Badge } from "@/components/ui/badge";
+import {
+	VitrinaSection,
+	VitrinaSkeleton,
+} from "@/app/profile/_components/vitrina-section";
+import { statusLabel } from "@/app/profile/_lib/profile-stats";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -18,236 +23,65 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { signOut } from "../_lib/profile-actions";
 
 export type ProfileViewProps = {
+	memberId: string;
 	displayName: string;
 	status: string;
 	avatar: string | null;
-	level: MemberLevel;
-	badges: MemberBadge[];
-	recognitions: SeasonRecognition[];
-	mastery: { categoryId: string; categoryName: string; level: string }[];
 	updated?: boolean;
 	updateFailed?: boolean;
 };
 
-function statusLabel(status: string) {
-	if (status === "active") return "activo";
-	if (status === "invited") return "invitado";
-	return "baja";
-}
-
+/** Compositor de la página de perfil: shell + secciones con stream (Suspense). */
 export function ProfileView({
+	memberId,
 	displayName,
 	status,
 	avatar,
-	level,
-	badges,
-	recognitions,
-	mastery,
 	updated,
 	updateFailed,
 }: ProfileViewProps) {
-	const earnedIndividual = badges.filter(
-		(b) => b.kind === "individual" && b.earned,
-	).length;
-	const totalIndividual = badges.filter((b) => b.kind === "individual").length;
-	const span =
-		level.nextThreshold > level.currentThreshold
-			? level.nextThreshold - level.currentThreshold
-			: 1;
-	const progress = Math.min(
-		100,
-		Math.max(
-			0,
-			Math.round(
-				((level.sessionsAttended - level.currentThreshold) / span) * 100,
-			),
-		),
-	);
-	const sessionsToNext = Math.max(
-		0,
-		level.nextThreshold - level.sessionsAttended,
-	);
-
 	return (
 		<div className="flex-1">
 			{/* ── Pasaporte de tertulia · hero gamificado ─────────────────── */}
-			<section aria-label="Tu camino en el club">
-				<Card className="overflow-hidden">
-					<div
-						aria-hidden="true"
-						className="h-1.5 w-full bg-gradient-to-r from-primary via-primary-container to-primary"
-					/>
-					<CardContent className="flex flex-col gap-6 p-6 md:flex-row md:items-center md:gap-8 md:p-8">
-						{/* Sello de nivel */}
-						<div className="flex min-w-0 items-center gap-5 md:flex-col md:items-center md:gap-3 md:text-center">
-							<div className="relative shrink-0">
-								<MemberAvatar
-									name={displayName}
-									avatar={avatar}
-									className="size-20 font-heading ring-1 ring-primary/40 md:size-24 [&_[data-slot=avatar-fallback]]:bg-card [&_[data-slot=avatar-fallback]]:text-2xl [&_[data-slot=avatar-fallback]]:font-semibold [&_[data-slot=avatar-fallback]]:text-foreground md:[&_[data-slot=avatar-fallback]]:text-3xl"
-								/>
-								<div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
-									<Badge
-										variant="default"
-										className="rounded-full px-2.5 py-0.5 text-xs font-semibold tabular-nums"
-									>
-										Nv {level.level}
-									</Badge>
-								</div>
-							</div>
-							<div className="min-w-0 md:mt-3">
-								<h1 className="font-heading text-2xl font-semibold tracking-tight text-balance break-words md:text-3xl">
-									{displayName}
-								</h1>
-								<p className="mt-1 text-sm text-muted-foreground">
-									{level.title || "Recién llegado"} ·{" "}
-									<span className="font-medium text-foreground">
-										{statusLabel(status)}
-									</span>
-								</p>
-							</div>
-						</div>
+			<Suspense fallback={<HeroSkeleton />}>
+				<HeroSection
+					memberId={memberId}
+					displayName={displayName}
+					status={status}
+					avatar={avatar}
+				/>
+			</Suspense>
 
-						{/* Progreso + stats */}
-						<div className="flex flex-1 flex-col gap-5 md:border-l md:border-border/60 md:pl-8">
-							<div>
-								<div className="flex items-baseline justify-between gap-3">
-									<p className="text-label-sm font-semibold tracking-wider text-muted-foreground uppercase">
-										Camino a {level.nextTitle}
-									</p>
-									<p className="text-label-sm text-muted-foreground tabular-nums">
-										{level.sessionsAttended} / {level.nextThreshold} sesiones
-									</p>
-								</div>
-								<Progress
-									value={progress}
-									aria-label={`Progreso a ${level.nextTitle}: ${progress} por ciento`}
-									className="mt-2.5 [&_[data-slot='progress-track']]:h-1.5"
-								/>
-								<p className="mt-2 text-sm text-muted-foreground">
-									{sessionsToNext === 0 ? (
-										<>
-											Nivel máximo por sesiones. Las insignias siguen contando
-											{level.nextInsigniasRequired > 0 &&
-												` · te faltan ${level.nextInsigniasRequired} para ${level.nextTitle}`}
-											.
-										</>
-									) : (
-										<>
-											Te faltan{" "}
-											<span className="font-semibold text-foreground tabular-nums">
-												{sessionsToNext}{" "}
-												{sessionsToNext === 1 ? "sesión" : "sesiones"}
-											</span>{" "}
-											para ser {level.nextTitle}
-											{level.nextInsigniasRequired > 0 &&
-												` + ${level.nextInsigniasRequired} ${level.nextInsigniasRequired === 1 ? "insignia" : "insignias"}`}
-											.
-										</>
-									)}
-								</p>
-							</div>
-
-							<dl className="grid grid-cols-3 gap-3">
-								{[
-									{
-										label: "Sesiones",
-										value: level.sessionsAttended,
-										hint: "tertulias vividas",
-									},
-									{
-										label: "Insignias",
-										value: `${earnedIndividual}/${totalIndividual}`,
-										hint: "logros propios",
-									},
-									{
-										label: "Temporadas",
-										value: recognitions.length,
-										hint: "reconocimientos",
-									},
-								].map((s) => (
-									<div
-										key={s.label}
-										className="min-w-0 rounded-xl border border-border/60 bg-muted/30 px-3 py-3 text-center"
-									>
-										<dt className="text-label-sm font-medium text-muted-foreground">
-											{s.label}
-										</dt>
-										<dd className="font-heading text-2xl font-semibold text-foreground tabular-nums">
-											{s.value}
-											<span className="mt-0.5 block font-sans text-label-sm font-medium text-muted-foreground">
-												{s.hint}
-											</span>
-										</dd>
-									</div>
-								))}
-							</dl>
-						</div>
-					</CardContent>
-				</Card>
-			</section>
-
-			{updated && (
+			{updated ? (
 				<div
 					role="status"
 					className="mt-4 rounded-xl border border-border/60 bg-card px-4 py-3 text-sm text-muted-foreground"
 				>
 					Perfil actualizado. El club ya te ve así.
 				</div>
-			)}
+			) : null}
 
-			{updateFailed && (
+			{updateFailed ? (
 				<div
 					role="alert"
 					className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
 				>
 					No pudimos guardar los cambios. Intentá de nuevo.
 				</div>
-			)}
+			) : null}
 
 			{/* ── Vitrina ─────────────────────────────────────────────────── */}
-			<section aria-labelledby="vitrina-heading" className="mt-12">
-				<Card>
-					<CardHeader>
-						<div className="min-w-0">
-							<CardTitle className="font-heading text-xl">
-								<h2 id="vitrina-heading">Vitrina de la tertulia</h2>
-							</CardTitle>
-							<CardDescription>
-								Tus insignias y los hitos que el club consiguió contigo.
-							</CardDescription>
-						</div>
-					</CardHeader>
-					<CardContent>
-						<BadgeVitrina badges={badges} recognitions={recognitions} />
-					</CardContent>
-				</Card>
-			</section>
+			<Suspense fallback={<VitrinaSkeleton />}>
+				<VitrinaSection memberId={memberId} />
+			</Suspense>
 
 			{/* ── Maestrías ─────────────────────────────────────────────────── */}
-			{mastery.length > 0 && (
-				<section aria-labelledby="maestrias-heading" className="mt-12">
-					<Card>
-						<CardHeader>
-							<div className="min-w-0">
-								<CardTitle className="font-heading text-xl">
-									<h2 id="maestrias-heading">Maestrías</h2>
-								</CardTitle>
-								<CardDescription>
-									Tu recorrido por categoría, de por vida.
-								</CardDescription>
-							</div>
-						</CardHeader>
-						<CardContent>
-							<MasteryStrip items={mastery} />
-						</CardContent>
-					</Card>
-				</section>
-			)}
+			<Suspense fallback={<MasterySkeleton />}>
+				<MasterySection memberId={memberId} />
+			</Suspense>
 
 			{/* ── Ajustes tranquilos ──────────────────────────────────────── */}
 			<section aria-label="Ajustes del perfil" className="mt-12">
@@ -262,7 +96,11 @@ export function ProfileView({
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<AvatarPicker currentAvatar={avatar} displayName={displayName} />
+							<AvatarPicker
+								key={avatar ?? "sin-avatar"}
+								currentAvatar={avatar}
+								displayName={displayName}
+							/>
 						</CardContent>
 					</Card>
 					<Card>
@@ -296,7 +134,7 @@ export function ProfileView({
 								Si te das de baja, tus aportes quedan como memoria del club y no
 								podrás iniciar sesión.
 							</p>
-							<LeaveClubDialog />
+							<LeaveClubDialogLazy />
 						</CardContent>
 					</Card>
 				</div>

@@ -1,5 +1,3 @@
-"use client";
-
 import {
 	Chat01Icon,
 	Coffee01Icon,
