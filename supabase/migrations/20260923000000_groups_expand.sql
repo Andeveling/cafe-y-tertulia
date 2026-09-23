@@ -53,7 +53,7 @@ create table public.group_members (
 
 comment on table public.group_members is 'Membresía a un Grupo con rol admin/member (PRD #69).';
 
-create index group_members_member_idx on public.group_members (member_id);
+create index if not exists group_members_member_idx on public.group_members (member_id);
 
 -- ============================================================
 -- 3. Helpers de membresía por grupo (security definer, como is_member)
@@ -123,7 +123,7 @@ create policy "group_members_select" on public.group_members
 	for select
 	to authenticated
 	using (
-		member_id = auth.uid()
+		member_id = (select auth.uid())
 		or public.is_group_member(group_id)
 	);
 
@@ -267,7 +267,7 @@ security definer
 set search_path = public
 as $$
 declare
-	v_name text := trim(p_name);
+	v_name text;
 	v_group_id uuid;
 	v_template_id uuid;
 	v_month_start timestamptz;
@@ -276,7 +276,8 @@ begin
 		raise exception 'Solo los Miembros activos pueden crear grupos'
 			using errcode = '42501';
 	end if;
-	if v_name is null or char_length(v_name) = 0 then
+	v_name := nullif(trim(both from p_name), '');
+	if v_name is null then
 		raise exception 'El nombre del grupo es obligatorio'
 			using errcode = 'P0001';
 	end if;

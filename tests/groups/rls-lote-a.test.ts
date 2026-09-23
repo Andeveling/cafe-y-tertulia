@@ -22,8 +22,12 @@ const hasEnv = Boolean(URL && ANON_KEY && SERVICE_KEY);
 
 // Cliente sin tipos generados: database.types.ts aún no incluye groups ni
 // group_id (se regenera con la migración aplicada); el test usa strings.
-let sb: SupabaseClient;
+let sb!: SupabaseClient;
 let anonFor: (email: string, password: string) => Promise<SupabaseClient>;
+
+const TEST_PASSWORD = "pass-123456";
+
+type TestMember = { id: string; email: string; password: string };
 
 const ids = {
 	users: [] as string[],
@@ -33,10 +37,19 @@ const ids = {
 	matB: "",
 };
 
+const testUsers: {
+	a?: TestMember;
+	b?: TestMember;
+	out?: TestMember;
+} = {};
+
 const uniqueEmail = (prefix: string) =>
 	`${prefix}${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.local`;
 
-async function createActiveMember(email: string, password: string) {
+async function createActiveMember(
+	email: string,
+	password: string,
+): Promise<TestMember> {
 	const { data, error } = await sb.auth.admin.createUser({
 		email,
 		password,
@@ -50,12 +63,6 @@ async function createActiveMember(email: string, password: string) {
 	if (mErr) throw mErr;
 	return { id: data.user.id, email, password };
 }
-
-const ids_sessions: {
-	a?: { id: string; email: string; password: string };
-	b?: { id: string; email: string; password: string };
-	out?: { id: string; email: string; password: string };
-} = {};
 
 beforeAll(async () => {
 	if (!hasEnv) return;
@@ -72,9 +79,9 @@ beforeAll(async () => {
 		return client;
 	};
 
-	const a = await createActiveMember(uniqueEmail("lotea-a"), "pass-123456");
-	const b = await createActiveMember(uniqueEmail("lotea-b"), "pass-123456");
-	const out = await createActiveMember(uniqueEmail("lotea-out"), "pass-123456");
+	const a = await createActiveMember(uniqueEmail("lotea-a"), TEST_PASSWORD);
+	const b = await createActiveMember(uniqueEmail("lotea-b"), TEST_PASSWORD);
+	const out = await createActiveMember(uniqueEmail("lotea-out"), TEST_PASSWORD);
 
 	// Dos grupos con un miembro cada uno (setup directo, salta RLS).
 	const { data: gA, error: gAErr } = await sb
@@ -129,9 +136,9 @@ beforeAll(async () => {
 	ids.matA = mA.id;
 	ids.matB = mB.id;
 
-	ids_sessions.a = a;
-	ids_sessions.b = b;
-	ids_sessions.out = out;
+	testUsers.a = a;
+	testUsers.b = b;
+	testUsers.out = out;
 });
 
 afterAll(async () => {
@@ -149,7 +156,7 @@ describe.skipIf(!hasEnv)(
 	"lote A: contenido core aislado por grupo (#72)",
 	() => {
 		it("miembro de A lee su material y no el de B", async () => {
-			const anon = await anonFor(ids_sessions.a!.email, "pass-123456");
+			const anon = await anonFor(testUsers.a!.email, TEST_PASSWORD);
 			const { data, error } = await anon.from("materials").select("id");
 			expect(error).toBeNull();
 			const seen = (data ?? []).map((r: { id: string }) => r.id);
@@ -158,19 +165,19 @@ describe.skipIf(!hasEnv)(
 		});
 
 		it("miembro de A no inserta en B", async () => {
-			const anon = await anonFor(ids_sessions.a!.email, "pass-123456");
+			const anon = await anonFor(testUsers.a!.email, TEST_PASSWORD);
 			const { error } = await anon.from("materials").insert({
 				title: "Intruso",
 				kind: "book",
 				author: "X",
-				created_by: ids_sessions.a!.id,
+				created_by: testUsers.a!.id,
 				group_id: ids.groupB,
 			});
 			expect(error).not.toBeNull();
 		});
 
 		it("quien no es miembro no ve ni inserta", async () => {
-			const anon = await anonFor(ids_sessions.out!.email, "pass-123456");
+			const anon = await anonFor(testUsers.out!.email, TEST_PASSWORD);
 			const { data, error } = await anon.from("materials").select("id");
 			expect(error).toBeNull();
 			const seen = (data ?? []).map((r: { id: string }) => r.id);
@@ -180,7 +187,7 @@ describe.skipIf(!hasEnv)(
 				title: "Intruso",
 				kind: "book",
 				author: "X",
-				created_by: ids_sessions.out!.id,
+				created_by: testUsers.out!.id,
 				group_id: ids.groupA,
 			});
 			expect(insErr).not.toBeNull();
@@ -200,8 +207,8 @@ describe.skipIf(!hasEnv)(
 				.from("group_members")
 				.delete()
 				.eq("group_id", ids.groupA)
-				.eq("member_id", ids_sessions.a!.id);
-			const anon = await anonFor(ids_sessions.a!.email, "pass-123456");
+				.eq("member_id", testUsers.a!.id);
+			const anon = await anonFor(testUsers.a!.email, TEST_PASSWORD);
 			const { data } = await anon.from("materials").select("id");
 			const seen = (data ?? []).map((r: { id: string }) => r.id);
 			expect(seen).not.toContain(ids.matA);

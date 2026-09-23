@@ -191,40 +191,26 @@ $$;
 comment on function public.groups_prevent_group_change() is
 	'Las filas nunca cambian de grupo: el aislamiento no se mueve por UPDATE (PRD #69).';
 
-drop trigger if exists groups_freeze_group on public.materials;
-create trigger groups_freeze_group
-	before update of group_id on public.materials
-	for each row execute function public.groups_prevent_group_change();
-
-drop trigger if exists groups_freeze_group on public.sessions;
-create trigger groups_freeze_group
-	before update of group_id on public.sessions
-	for each row execute function public.groups_prevent_group_change();
-
-drop trigger if exists groups_freeze_group on public.categories;
-create trigger groups_freeze_group
-	before update of group_id on public.categories
-	for each row execute function public.groups_prevent_group_change();
-
-drop trigger if exists groups_freeze_group on public.material_categories;
-create trigger groups_freeze_group
-	before update of group_id on public.material_categories
-	for each row execute function public.groups_prevent_group_change();
-
-drop trigger if exists groups_freeze_group on public.session_categories;
-create trigger groups_freeze_group
-	before update of group_id on public.session_categories
-	for each row execute function public.groups_prevent_group_change();
-
-drop trigger if exists groups_freeze_group on public.seasons;
-create trigger groups_freeze_group
-	before update of group_id on public.seasons
-	for each row execute function public.groups_prevent_group_change();
-
-drop trigger if exists groups_freeze_group on public.convocatorias;
-create trigger groups_freeze_group
-	before update of group_id on public.convocatorias
-	for each row execute function public.groups_prevent_group_change();
+-- Un solo trigger por tabla del lote; el bucle crea los siete con el mismo
+-- nombre y función para no repetir siete bloques idénticos.
+do $$
+declare
+	t text;
+begin
+	foreach t in array array[
+		'materials', 'sessions', 'categories', 'material_categories',
+		'session_categories', 'seasons', 'convocatorias'
+	] loop
+		execute format('drop trigger if exists groups_freeze_group on public.%I', t);
+		execute format(
+			'create trigger groups_freeze_group '
+			'before update of group_id on public.%I '
+			'for each row execute function public.groups_prevent_group_change()',
+			t
+		);
+	end loop;
+end
+$$;
 
 -- ============================================================
 -- 5. Coherencia mismo-grupo en las FKs del lote
@@ -386,12 +372,12 @@ security definer
 set search_path = public
 as $$
 declare
-	s public.seasons;
+	v_season public.seasons;
 	v_month_start timestamptz;
 begin
 	if new.season_id is null then
 		if new.group_id is not null then
-			select * into s
+			select * into v_season
 			from public.seasons
 			where group_id = new.group_id
 			and status = 'open'
@@ -401,12 +387,12 @@ begin
 				v_month_start := date_trunc('month', now());
 				insert into public.seasons (group_id, starts_at, ends_at)
 				values (new.group_id, v_month_start, v_month_start + interval '1 month')
-				returning * into s;
+				returning * into v_season;
 			end if;
-			new.season_id := s.id;
+			new.season_id := v_season.id;
 		else
-			select * into s from public.ensure_current_season();
-			new.season_id := s.id;
+			select * into v_season from public.ensure_current_season();
+			new.season_id := v_season.id;
 		end if;
 	end if;
 	return new;
@@ -415,7 +401,7 @@ $$;
 
 -- El trigger ya existe (ticket #34); se recrea idempotente junto a la
 -- función para que ambas viajen juntas.
-	drop trigger if exists sessions_set_season on public.sessions;
+drop trigger if exists sessions_set_season on public.sessions;
 create trigger sessions_set_season
 	before insert on public.sessions
 	for each row
@@ -435,10 +421,10 @@ security definer
 set search_path = public
 as $$
 declare
-	new_id uuid;
+	v_convocatoria_id uuid;
 	v_group_id uuid;
 begin
-	-- Caller must be an active member.
+	-- Solo un Miembro activo puede convocar.
 	if not public.is_member() then
 		raise exception 'Solo miembros';
 	end if;
@@ -451,13 +437,13 @@ begin
 		raise exception 'Sesión no encontrada';
 	end if;
 
-	-- Caller must belong to the session's group (leaving revokes).
+	-- Solo si sigue en el grupo de la sesión (salir revoca).
 	if v_group_id is null or not public.is_group_member(v_group_id) then
 		raise exception 'No perteneces al grupo de esta sesión'
 			using errcode = '42501';
 	end if;
 
-	-- Caller must be the session moderator.
+	-- Solo el moderador de la sesión.
 	if not exists (
 		select 1 from public.sessions
 		where id = p_session_id
@@ -466,7 +452,7 @@ begin
 		raise exception 'Solo el moderador puede convocar';
 	end if;
 
-	-- Session must be lobby or in_progress.
+	-- Solo sesiones abiertas (lobby o en curso).
 	if not exists (
 		select 1 from public.sessions
 		where id = p_session_id
@@ -475,7 +461,7 @@ begin
 		raise exception 'La sesión no está abierta';
 	end if;
 
-	-- Target must be an active member, not the caller.
+	-- El destinatario es otro Miembro activo (no uno mismo).
 	if p_to_id = auth.uid() then
 		raise exception 'No puedes convocarte a ti mismo';
 	end if;
@@ -488,7 +474,7 @@ begin
 		raise exception 'El miembro no está activo';
 	end if;
 
-	-- Target must belong to the same group (no llamadas cruzadas).
+	-- El destinatario es del mismo grupo (sin llamadas cruzadas).
 	if not exists (
 		select 1
 		from public.group_members gm
@@ -501,23 +487,23 @@ begin
 			using errcode = '42501';
 	end if;
 
-	-- Insert pending, or no-op if already pending (idempotent).
+	-- Inserta en pendiente o no hace nada si ya hay una (idempotente).
 	insert into public.convocatorias (session_id, group_id, from_id, to_id, status)
 	values (p_session_id, v_group_id, auth.uid(), p_to_id, 'pending')
 	on conflict (session_id, to_id) where status = 'pending'
 	do nothing
-	returning id into new_id;
+	returning id into v_convocatoria_id;
 
-	-- If no row was inserted (already pending), fetch the existing id.
-	if new_id is null then
-		select id into new_id
+	-- Si ya existía la pendiente, devuelve su id.
+	if v_convocatoria_id is null then
+		select id into v_convocatoria_id
 		from public.convocatorias
 		where session_id = p_session_id
 		and to_id = p_to_id
 		and status = 'pending';
 	end if;
 
-	return new_id;
+	return v_convocatoria_id;
 end;
 $$;
 
@@ -534,8 +520,8 @@ declare
 	v_session_id uuid;
 	v_group_id uuid;
 begin
-	-- Only the addressed member can respond, and only if pending.
-	-- Leaving the group revokes: membership is re-checked first.
+	-- Solo el destinatario responde una pendiente.
+	-- Salir del grupo revoca: la membresía se verifica primero.
 	select session_id, group_id into v_session_id, v_group_id
 	from public.convocatorias
 	where id = p_id
