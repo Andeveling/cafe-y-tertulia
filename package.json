@@ -18,6 +18,7 @@
 		"arch:baseline": "ts-archunit baseline"
 	},
 	"dependencies": {
+		"@ai-hero/sandcastle": "^0.12.0",
 		"@base-ui/react": "^1.8.0",
 		"@hookform/resolvers": "^5.9.1",
 		"@hugeicons/core-free-icons": "^4.3.5",

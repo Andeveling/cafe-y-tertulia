@@ -26,7 +26,7 @@ para estructurar el proyecto - .agents/skills/nextjs-16/SKILL.md
 
 ### Issue tracker
 
-Issues live in GitHub Issues (`Andeveling/cafe-y-tertulia`), accessed via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+Issues live as markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
