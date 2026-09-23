@@ -199,6 +199,12 @@ alter table public.votes add column group_id uuid;
 alter table public.hearts add column group_id uuid;
 alter table public.convocatorias add column group_id uuid;
 
+-- El backfill solo rellena la columna nueva group_id, pero los guards de
+-- inmutabilidad (sessions_closed_archived_guard, session_child_frozen_guard,
+-- session_categories_guard) bloquean CUALQUIER update en histórico/cerrada.
+-- Se puentean triggers solo durante el backfill; fuera de él siguen activos.
+set local session_replication_role = 'replica';
+
 do $$
 declare
 	v_nojau_id uuid;
@@ -230,6 +236,8 @@ begin
 	update public.convocatorias set group_id = v_nojau_id where group_id is null;
 end
 $$;
+
+reset session_replication_role;
 
 -- ============================================================
 -- 7. Unicidades globales re-scopeadas por grupo
