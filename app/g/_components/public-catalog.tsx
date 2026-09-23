@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { joinGroup } from "@/app/g/_lib/group-actions";
 import { MemberAvatar } from "@/components/member-avatar";
@@ -10,6 +11,7 @@ import type { PublicGroupCard } from "@/lib/groups/types";
  * descubrimiento. Nunca expone contenido interno (materiales, preguntas).
  */
 export function PublicCatalog({ groups }: { groups: PublicGroupCard[] }) {
+	const router = useRouter();
 	const [pending, start] = useTransition();
 
 	if (groups.length === 0) {
@@ -45,6 +47,7 @@ export function PublicCatalog({ groups }: { groups: PublicGroupCard[] }) {
 						onClick={() =>
 							start(async () => {
 								await joinGroup(g.id);
+								router.refresh();
 							})
 						}
 						className="mt-3 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"

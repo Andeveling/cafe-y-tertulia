@@ -1,7 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { notFound, redirect } from "next/navigation";
 import { GroupSwitcher } from "@/app/g/_components/group-switcher";
-import { MemberAvatar } from "@/components/member-avatar";
+import { LeaveGroupButton } from "@/app/g/_components/leave-group-button";
+import { GroupRoster } from "@/app/g/[slug]/_components/group-roster";
 import { getCurrentMember } from "@/lib/current-member";
 import { getGroupBySlug, getMyGroups } from "@/lib/groups/queries";
 
@@ -17,7 +18,8 @@ export async function generateMetadata({
 /**
  * /g/{slug} — hogar del grupo. Todo lo visible (materiales, sesiones,
  * miembros) está scopeado al grupo del layout; la identidad (nombre/avatar)
- * es global y se muestra igual en cada grupo.
+ * es global y se muestra igual en cada grupo. La presencia es del canal
+ * group-{id}-roster: aquí solo se ve a este grupo.
  */
 export default async function GroupHomePage({
 	params,
@@ -40,18 +42,32 @@ export default async function GroupHomePage({
 	const db = supabase as unknown as SupabaseClient;
 	const { data: roster } = await db
 		.from("group_members")
-		.select("role, member:members(id, display_name, avatar)")
+		.select("role, member:members(id, display_name, avatar, last_seen)")
 		.eq("group_id", group.id);
 
-	const members =
+	const members = (
 		(roster as unknown as {
-			role: string;
+			role: "admin" | "member";
 			member: {
 				id: string;
 				display_name: string;
 				avatar: string | null;
+				last_seen: string | null;
 			} | null;
-		}[]) ?? [];
+		}[]) ?? []
+	).flatMap((r) =>
+		r.member == null
+			? []
+			: [
+					{
+						id: r.member.id,
+						display_name: r.member.display_name,
+						avatar: r.member.avatar,
+						last_seen: r.member.last_seen,
+						role: r.role,
+					},
+				],
+	);
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -65,38 +81,19 @@ export default async function GroupHomePage({
 				<GroupSwitcher groups={myGroups} currentSlug={group.slug} />
 			</header>
 
-			<section aria-label="Miembros" className="flex flex-col gap-2">
-				<h2 className="font-serif text-lg font-semibold">
-					Miembros ({members.length})
-				</h2>
-				<ul className="grid gap-2 sm:grid-cols-2">
-					{members.map((m) =>
-						m.member == null ? null : (
-							<li
-								key={m.member.id}
-								className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2"
-							>
-								<MemberAvatar
-									name={m.member.display_name}
-									avatar={m.member.avatar}
-									size="sm"
-								/>
-								<span className="text-sm font-medium">
-									{m.member.display_name}
-								</span>
-								{m.role === "admin" ? (
-									<span className="text-xs text-muted-foreground">admin</span>
-								) : null}
-							</li>
-						),
-					)}
-				</ul>
-			</section>
+			<GroupRoster groupId={group.id} members={members} userId={member.id} />
+
+			<LeaveGroupButton groupId={group.id} />
 
 			{group.role === "admin" ? (
 				<p className="text-sm text-muted-foreground">
-					Administras este grupo. Los ajustes avanzados (expulsar, roles,
-					borrar) llegan en el ticket de admin (#76).
+					Administras este grupo.{" "}
+					<a
+						href={`/g/${group.slug}/ajustes`}
+						className="underline underline-offset-2"
+					>
+						Abrir ajustes
+					</a>
 				</p>
 			) : null}
 		</div>

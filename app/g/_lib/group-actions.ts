@@ -2,8 +2,13 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
+import {
+	hashGroupInviteToken,
+	verifyGroupInviteToken,
+} from "@/app/g/_lib/group-invite";
 import { isActiveMember } from "@/app/materials/_lib/members";
 import type { ActionResult } from "@/lib/server-action";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export type CreateGroupInput = {
@@ -92,4 +97,58 @@ export async function leaveGroup(groupId: string): Promise<ActionResult> {
 	if (error) return { ok: false, error: error.message };
 	revalidatePath("/g");
 	return { ok: true };
+}
+
+/**
+ * Unirse a un grupo privado con enlace de invitación (JWT, patrón
+ * ADR-0011): verifica firma y caducidad, comprueba que la invitación siga
+ * vigente (no revocada) y une como miembro.
+ */
+export async function joinGroupWithToken(
+	token: string,
+): Promise<ActionResult & { slug?: string }> {
+	const claims = await verifyGroupInviteToken(token);
+	if (!claims) return { ok: false, error: "Este enlace no es válido." };
+	const supabase = await createClient();
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) return { ok: false, error: "Debes iniciar sesión." };
+	if (!(await isActiveMember(supabase, user.id))) {
+		return { ok: false, error: "Debes ser miembro activo." };
+	}
+	const admin = createAdminClient() as unknown as SupabaseClient;
+	const { data: invite } = await admin
+		.from("group_invites")
+		.select("id, group_id, token_hash, expires_at")
+		.eq("id", claims.inviteId)
+		.maybeSingle();
+	const row = invite as {
+		id: string;
+		group_id: string;
+		token_hash: string | null;
+		expires_at: string;
+	} | null;
+	if (
+		!row ||
+		row.group_id !== claims.groupId ||
+		row.token_hash !== hashGroupInviteToken(token) ||
+		Date.parse(row.expires_at) < Date.now()
+	) {
+		return { ok: false, error: "Este enlace ya no vale. Pide uno nuevo." };
+	}
+	const { error: joinError } = await admin
+		.from("group_members")
+		.upsert(
+			{ group_id: row.group_id, member_id: user.id, role: "member" },
+			{ onConflict: "group_id,member_id" },
+		);
+	if (joinError) return { ok: false, error: joinError.message };
+	const { data: group } = await admin
+		.from("groups")
+		.select("slug")
+		.eq("id", row.group_id)
+		.maybeSingle();
+	revalidatePath("/g");
+	return { ok: true, slug: (group as { slug?: string } | null)?.slug };
 }

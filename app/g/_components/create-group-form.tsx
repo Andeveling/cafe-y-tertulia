@@ -1,9 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createGroup } from "@/app/g/_lib/group-actions";
 
 export function CreateGroupForm() {
+	const router = useRouter();
 	const [open, setOpen] = useState(false);
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");
@@ -43,6 +45,7 @@ export function CreateGroupForm() {
 				setOpen(false);
 				setName("");
 				setDescription("");
+				router.refresh();
 			}}
 		>
 			<label className="text-sm font-semibold">
