@@ -120,7 +120,7 @@ export default async function MaterialDetailPage({
 	const supabase = await createClient();
 	const [material, bank, milestones, categories, materialCategories, authData] =
 		await Promise.all([
-			getMaterial(supabase, id),
+			getMaterial(id),
 			listMaterialTrivias(supabase, id).catch(() => []),
 			getClubMilestones(supabase).catch(() => []),
 			listCategories(supabase).catch(() => []),

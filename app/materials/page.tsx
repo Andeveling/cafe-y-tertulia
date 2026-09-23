@@ -3,7 +3,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
 import { MaterialsGrid } from "./_components/materials-grid";
 import { getMaterials } from "./_lib/materials";
 
@@ -13,8 +12,7 @@ export const metadata = {
 };
 
 export default async function MaterialsPage() {
-	const supabase = await createClient();
-	const materials = await getMaterials(supabase);
+	const materials = await getMaterials();
 
 	return (
 		<div className="flex flex-col gap-6">
