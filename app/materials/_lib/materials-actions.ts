@@ -26,7 +26,7 @@ function materialUrlsOrError(input: MaterialInput): ActionResult | null {
 }
 
 export async function createMaterial(
-	input: MaterialInput,
+	input: MaterialInput & { groupId: string; slug: string },
 ): Promise<ActionResult> {
 	return runServerAction({
 		requireAuth: true,
@@ -40,6 +40,7 @@ export async function createMaterial(
 				image_url: toNullableUrl(input.imageUrl),
 				source_url: toNullableUrl(input.sourceUrl),
 				created_by: user!.id,
+				group_id: input.groupId,
 			});
 
 			if (error) {
@@ -49,8 +50,8 @@ export async function createMaterial(
 				};
 			}
 
-			revalidatePath("/materials");
-			redirect("/materials");
+			revalidatePath(`/g/${input.slug}/materiales`);
+			redirect(`/g/${input.slug}/materiales`);
 		},
 	});
 }
@@ -100,6 +101,7 @@ export async function advanceMaterial(id: string): Promise<ActionResult> {
 }
 
 export async function createSession(input: {
+	groupId?: string;
 	materialId?: string | null;
 	range?: string | null;
 	scheduledAt?: string | null;
@@ -121,6 +123,7 @@ export async function createSession(input: {
 						image_url: toNullableUrl(input.material.imageUrl),
 						source_url: toNullableUrl(input.material.sourceUrl),
 						created_by: user!.id,
+						group_id: input.groupId,
 					})
 					.select("id")
 					.single();
@@ -137,6 +140,7 @@ export async function createSession(input: {
 				p_material_id: materialId ?? undefined,
 				p_range: input.range?.trim() || undefined,
 				p_scheduled_at: input.scheduledAt ?? undefined,
+				p_group_id: input.groupId,
 			});
 
 			if (error || !sessionId) {
@@ -147,6 +151,7 @@ export async function createSession(input: {
 			}
 
 			revalidatePath("/");
+			if (input.groupId) revalidatePath("/g");
 			if (materialId) revalidatePath(`/materials/${materialId}`);
 			return { ok: true, sessionId };
 		},

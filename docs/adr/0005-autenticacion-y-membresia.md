@@ -1,6 +1,8 @@
 # Autenticación y membresía: club cerrado por invitación
 
-## Status: accepted
+## Status: superseded by ADR-0014
+
+La membresía cerrada por padrinazgo queda derogada. Siguen la contraseña, el RLS por `auth.uid` y el alta del primer Miembro por bootstrap, hasta que el registro abierto esté construido.
 
 ## Decision
 

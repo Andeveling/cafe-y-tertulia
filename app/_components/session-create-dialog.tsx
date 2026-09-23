@@ -76,11 +76,13 @@ export function SessionCreateDialog({
 	trigger,
 	materials,
 	displayName,
+	groupId,
 	initialMode = "now",
 }: {
 	trigger: React.ReactElement;
 	materials: { id: string; title: string }[];
 	displayName: string;
+	groupId: string;
 	initialMode?: "now" | "scheduled";
 }) {
 	const router = useRouter();
@@ -117,6 +119,7 @@ export function SessionCreateDialog({
 	function onSubmit(data: Values) {
 		startTransition(async () => {
 			const payload: Parameters<typeof createSession>[0] = {
+				groupId,
 				range: data.label?.trim() || undefined,
 				scheduledAt:
 					data.mode === "scheduled" && data.scheduledAt

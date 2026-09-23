@@ -11,16 +11,18 @@ import type { MyGroup, PublicGroupCard } from "@/lib/groups/types";
 export function MisGruposView({
 	myGroups,
 	catalog,
+	startCreating = false,
 }: {
 	myGroups: MyGroup[];
 	catalog: PublicGroupCard[];
+	startCreating?: boolean;
 }) {
 	return (
 		<div className="flex flex-col gap-8">
 			<section aria-label="Mis grupos">
 				<div className="mb-3 flex items-center justify-between">
 					<h1 className="font-serif text-2xl font-semibold">Mis grupos</h1>
-					<CreateGroupForm />
+					<CreateGroupForm startOpen={startCreating} />
 				</div>
 				{myGroups.length === 0 ? (
 					<p className="text-sm text-muted-foreground">

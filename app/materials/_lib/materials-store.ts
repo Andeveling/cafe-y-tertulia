@@ -49,13 +49,14 @@ export type MaterialDetail = {
  * Cada llamada crea su propio cliente (Fluid compute).
  */
 export const listMaterials = cache(
-	async (): Promise<MaterialWithSessionsCount[]> => {
+	async (groupId: string): Promise<MaterialWithSessionsCount[]> => {
 		const supabase = await createClient();
 		const { data, error } = await supabase
 			.from("materials")
 			.select(
 				"id, title, kind, author, status, created_at, image_url, source_url, rating_avg, rating_count, sessions(id)",
 			)
+			.eq("group_id", groupId)
 			.order("created_at", { ascending: false });
 
 		if (error) throw error;

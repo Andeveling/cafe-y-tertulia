@@ -1,13 +1,8 @@
 import { notFound, redirect } from "next/navigation";
-import { GroupSwitcher } from "@/app/g/_components/group-switcher";
 import { LeaveGroupButton } from "@/app/g/_components/leave-group-button";
 import { GroupRoster } from "@/app/g/[slug]/_components/group-roster";
 import { getCurrentMember } from "@/lib/current-member";
-import {
-	getGroupBySlug,
-	getGroupRoster,
-	getMyGroups,
-} from "@/lib/groups/queries";
+import { getGroupBySlug, getGroupRoster } from "@/lib/groups/queries";
 
 export async function generateMetadata({
 	params,
@@ -35,10 +30,7 @@ export default async function GroupHomePage({
 	if (!member) redirect("/auth/login");
 	if (member.status !== "active") redirect("/auth/invite");
 
-	const [group, myGroups] = await Promise.all([
-		getGroupBySlug(supabase, slug, member.id),
-		getMyGroups(supabase, member.id),
-	]);
+	const group = await getGroupBySlug(supabase, slug, member.id);
 	if (!group || group.role == null) notFound();
 
 	const members = await getGroupRoster(supabase, group.id);
@@ -52,7 +44,6 @@ export default async function GroupHomePage({
 						<p className="text-sm text-muted-foreground">{group.description}</p>
 					) : null}
 				</div>
-				<GroupSwitcher groups={myGroups} currentSlug={group.slug} />
 			</header>
 
 			<GroupRoster groupId={group.id} members={members} userId={member.id} />

@@ -9,7 +9,11 @@ export const metadata = { title: "Mis grupos · Café y Tertulia" };
  * /g — Mis Grupos: mis grupos con presencia + catálogo público.
  * Sin grupo no hay acceso a materiales/sesiones: esta pantalla es la puerta.
  */
-export default async function MisGruposPage() {
+export default async function MisGruposPage({
+	searchParams,
+}: {
+	searchParams: Promise<{ crear?: string }>;
+}) {
 	const { member, supabase } = await getCurrentMember();
 
 	if (!member) redirect("/auth/login");
@@ -19,6 +23,13 @@ export default async function MisGruposPage() {
 		getMyGroups(supabase, member.id),
 		getPublicCatalog(supabase),
 	]);
+	const { crear } = await searchParams;
 
-	return <MisGruposView myGroups={myGroups} catalog={catalog} />;
+	return (
+		<MisGruposView
+			myGroups={myGroups}
+			catalog={catalog}
+			startCreating={crear === "1"}
+		/>
+	);
 }

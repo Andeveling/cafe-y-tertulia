@@ -49,12 +49,14 @@ export function StartBoard({
 	displayName,
 	rosterMembers = [],
 	userId,
+	groupId,
 }: {
 	sessions: BoardSession[];
 	materials: { id: string; title: string }[];
 	displayName: string;
 	rosterMembers?: RosterMember[];
 	userId?: string;
+	groupId: string;
 }) {
 	const { hero, others } = splitSessions(sessions);
 	const [filter, setFilter] = useState<SessionFilter>("all");
@@ -73,6 +75,7 @@ export function StartBoard({
 				trigger={createTrigger}
 				materials={materials}
 				displayName={displayName}
+				groupId={groupId}
 			/>
 			<SessionCreateDialog
 				trigger={
@@ -82,6 +85,7 @@ export function StartBoard({
 				}
 				materials={materials}
 				displayName={displayName}
+				groupId={groupId}
 				initialMode="scheduled"
 			/>
 		</div>
@@ -135,6 +139,7 @@ export function StartBoard({
 							trigger={<Button>Crear la primera sesión</Button>}
 							materials={materials}
 							displayName={displayName}
+							groupId={groupId}
 						/>
 					</EmptyContent>
 				</Empty>

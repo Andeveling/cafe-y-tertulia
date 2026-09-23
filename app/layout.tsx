@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist_Mono, Literata, Manrope } from "next/font/google";
 import { cookies } from "next/headers";
 import Script from "next/script";
+import { LAST_GROUP_COOKIE } from "@/lib/groups/active-group";
+import { getMyGroups } from "@/lib/groups/queries";
 import "./globals.css";
 import { ConvocatoriaInbox } from "@/app/_components/convocatoria-inbox";
 import { getMemberLevel } from "@/app/profile/_lib/gamification-actions";
@@ -96,6 +98,16 @@ export default async function RootLayout({
 	const defaultSidebarOpen = sidebarOpenFromCookie(
 		cookieStore.get(SIDEBAR_COOKIE_NAME)?.value,
 	);
+	const rememberedSlug = cookieStore.get(LAST_GROUP_COOKIE)?.value ?? null;
+	const groups =
+		user && memberStatus === "active"
+			? (await getMyGroups(supabase, user.id)).map((group) => ({
+					slug: group.slug,
+					name: group.name,
+					role: group.role,
+					visibility: group.visibility,
+				}))
+			: [];
 
 	return (
 		<html
@@ -129,6 +141,8 @@ export default async function RootLayout({
 				>
 					<AppShell
 						user={navUser}
+						groups={groups}
+						rememberedSlug={rememberedSlug}
 						defaultOpen={defaultSidebarOpen}
 						level={memberLevel}
 						inbox={

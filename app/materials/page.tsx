@@ -1,47 +1,22 @@
-import { Book01Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { MaterialsGrid } from "./_components/materials-grid";
-import { getMaterials } from "./_lib/materials";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getCurrentMember } from "@/lib/current-member";
+import { LAST_GROUP_COOKIE, landingPath } from "@/lib/groups/active-group";
+import { getMyGroups } from "@/lib/groups/queries";
 
-export const metadata = {
-	title: "Materiales · Café y Tertulia",
-	description: "Pipeline de materiales del club.",
-};
-
+/** La estantería vive en el Grupo activo, no en un pool mezclado. */
 export default async function MaterialsPage() {
-	const materials = await getMaterials();
+	const { member, supabase } = await getCurrentMember();
+	if (!member) redirect("/auth/login");
+	if (member.status !== "active") redirect("/auth/invite");
 
-	return (
-		<div className="flex flex-col gap-6">
-			<div className="flex items-center justify-between gap-4">
-				<p className="text-sm text-muted-foreground">
-					Portadas — el club como estantería.
-				</p>
-				<Button nativeButton={false} render={<Link href="/materials/new" />}>
-					<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
-					Proponer material
-				</Button>
-			</div>
-
-			{materials.length === 0 ? (
-				<Card>
-					<CardContent className="flex flex-col items-center gap-3 py-8 text-center">
-						<HugeiconsIcon
-							icon={Book01Icon}
-							className="text-muted-foreground"
-						/>
-						<p className="text-sm text-muted-foreground">
-							Todavía no hay materiales. Propón el primero y el club lo
-							conversa.
-						</p>
-					</CardContent>
-				</Card>
-			) : (
-				<MaterialsGrid materials={materials} />
-			)}
-		</div>
+	const groups = await getMyGroups(supabase, member.id);
+	const cookieStore = await cookies();
+	redirect(
+		landingPath(
+			groups.map((group) => group.slug),
+			cookieStore.get(LAST_GROUP_COOKIE)?.value,
+			"materiales",
+		),
 	);
 }

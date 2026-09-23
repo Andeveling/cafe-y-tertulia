@@ -392,6 +392,7 @@ export type Database = {
 					author: string;
 					created_at: string;
 					created_by: string;
+					group_id: string;
 					id: string;
 					image_url: string | null;
 					kind: Database["public"]["Enums"]["material_kind"];
@@ -405,6 +406,7 @@ export type Database = {
 					author: string;
 					created_at?: string;
 					created_by: string;
+					group_id?: string;
 					id?: string;
 					image_url?: string | null;
 					kind: Database["public"]["Enums"]["material_kind"];
@@ -418,6 +420,7 @@ export type Database = {
 					author?: string;
 					created_at?: string;
 					created_by?: string;
+					group_id?: string;
 					id?: string;
 					image_url?: string | null;
 					kind?: Database["public"]["Enums"]["material_kind"];
@@ -680,6 +683,7 @@ export type Database = {
 			sessions: {
 				Row: {
 					created_at: string;
+					group_id: string;
 					id: string;
 					material_id: string | null;
 					moderator_id: string | null;
@@ -695,6 +699,7 @@ export type Database = {
 				};
 				Insert: {
 					created_at?: string;
+					group_id?: string;
 					id?: string;
 					material_id?: string | null;
 					moderator_id?: string | null;
@@ -710,6 +715,7 @@ export type Database = {
 				};
 				Update: {
 					created_at?: string;
+					group_id?: string;
 					id?: string;
 					material_id?: string | null;
 					moderator_id?: string | null;
@@ -1106,6 +1112,7 @@ export type Database = {
 			};
 			create_session: {
 				Args: {
+					p_group_id?: string;
 					p_material_id?: string;
 					p_range?: string;
 					p_scheduled_at?: string;

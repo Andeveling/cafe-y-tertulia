@@ -5,9 +5,13 @@ import { useState } from "react";
 import { createGroup } from "@/app/g/_lib/group-actions";
 import type { GroupVisibility } from "@/lib/groups/types";
 
-export function CreateGroupForm() {
+export function CreateGroupForm({
+	startOpen = false,
+}: {
+	startOpen?: boolean;
+}) {
 	const router = useRouter();
-	const [open, setOpen] = useState(false);
+	const [open, setOpen] = useState(startOpen);
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");
 	const [visibility, setVisibility] = useState<GroupVisibility>("private");

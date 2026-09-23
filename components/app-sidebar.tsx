@@ -7,11 +7,13 @@ import {
 	UserCircleIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+	ActiveGroupSwitcher,
+	type SwitcherGroup,
+} from "@/components/active-group-switcher";
 import { NavUser } from "@/components/nav-user";
-
 import {
 	Sidebar,
 	SidebarContent,
@@ -26,11 +28,11 @@ import {
 	SidebarRail,
 	SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { resolveActiveGroup } from "@/lib/groups/active-group";
 
 const navClub = [
-	{ title: "Sesiones", url: "/", icon: Home01Icon },
-	{ title: "Materiales", url: "/materials", icon: Book01Icon },
-	{ title: "Invitar", url: "/invite", icon: UserAdd01Icon },
+	{ title: "Sesiones", section: "sesiones" as const, icon: Home01Icon },
+	{ title: "Materiales", section: "materiales" as const, icon: Book01Icon },
 ];
 
 const navCuenta = [{ title: "Perfil", url: "/profile", icon: UserCircleIcon }];
@@ -41,43 +43,26 @@ export type AppSidebarUser = {
 	avatar?: string | null;
 } | null;
 
-export function AppSidebar({ user }: { user?: AppSidebarUser }) {
+export function AppSidebar({
+	user,
+	groups = [],
+	rememberedSlug = null,
+}: {
+	user?: AppSidebarUser;
+	groups?: SwitcherGroup[];
+	rememberedSlug?: string | null;
+}) {
 	const pathname = usePathname();
 
 	if (pathname.startsWith("/auth")) return null;
 
+	const active = resolveActiveGroup(groups, pathname, rememberedSlug);
+	const canInvite = active?.role === "admin" && active.visibility === "private";
+
 	return (
 		<Sidebar collapsible="offcanvas">
 			<SidebarHeader className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-2">
-				<SidebarMenu>
-					<SidebarMenuItem>
-						<SidebarMenuButton
-							size="lg"
-							className="gap-3 data-active:bg-transparent"
-							render={<Link href="/" />}
-							isActive={pathname === "/"}
-						>
-							<div className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-								<Image
-									src="/brand/coffee.svg"
-									alt="Café y Tertulias"
-									width={32}
-									height={32}
-									className="size-8"
-									priority
-								/>
-							</div>
-							<div className="flex flex-col gap-0.5 leading-none group-data-[collapsible=icon]:hidden">
-								<span className="font-semibold text-sm tracking-tight">
-									Café y Tertulias
-								</span>
-								<span className="text-sm text-sidebar-foreground/60">
-									El club te espera
-								</span>
-							</div>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-				</SidebarMenu>
+				<ActiveGroupSwitcher groups={groups} rememberedSlug={rememberedSlug} />
 			</SidebarHeader>
 
 			<SidebarContent className="gap-0">
@@ -88,22 +73,40 @@ export function AppSidebar({ user }: { user?: AppSidebarUser }) {
 						</SidebarGroupLabel>
 						<SidebarGroupContent>
 							<SidebarMenu className="gap-0.5">
-								{navClub.map((item) => (
-									<SidebarMenuItem key={item.title}>
+								{navClub.map((item) => {
+									const href = active
+										? `/g/${active.slug}/${item.section}`
+										: "/g";
+									return (
+										<SidebarMenuItem key={item.title}>
+											<SidebarMenuButton
+												tooltip={active ? item.title : "Elige un grupo"}
+												disabled={!active}
+												isActive={!!active && pathname.startsWith(href)}
+												render={active ? <Link href={href} /> : undefined}
+												className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
+											>
+												<HugeiconsIcon icon={item.icon} />
+												<span>{item.title}</span>
+											</SidebarMenuButton>
+										</SidebarMenuItem>
+									);
+								})}
+								{canInvite ? (
+									<SidebarMenuItem>
 										<SidebarMenuButton
-											tooltip={item.title}
-											isActive={
-												pathname === item.url ||
-												(item.url !== "/" && pathname.startsWith(item.url))
-											}
-											render={<Link href={item.url} />}
+											tooltip="Invitar"
+											isActive={pathname.startsWith(
+												`/g/${active.slug}/ajustes`,
+											)}
+											render={<Link href={`/g/${active.slug}/ajustes`} />}
 											className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
 										>
-											<HugeiconsIcon icon={item.icon} />
-											<span>{item.title}</span>
+											<HugeiconsIcon icon={UserAdd01Icon} />
+											<span>Invitar</span>
 										</SidebarMenuButton>
 									</SidebarMenuItem>
-								))}
+								) : null}
 							</SidebarMenu>
 						</SidebarGroupContent>
 					</SidebarGroup>

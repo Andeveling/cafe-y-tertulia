@@ -29,8 +29,10 @@ export type { MaterialDetail, MaterialWithSessionsCount };
  * Fachada sin args: el acceso a datos vive en `./materials-store` (único
  * archivo que conoce Supabase).
  */
-export async function getMaterials(): Promise<MaterialWithSessionsCount[]> {
-	return listMaterials();
+export async function getMaterials(
+	groupId: string,
+): Promise<MaterialWithSessionsCount[]> {
+	return listMaterials(groupId);
 }
 
 /**

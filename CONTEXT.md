@@ -5,16 +5,20 @@ Plataforma que aloja grupos de lectura y conversación. Aplicación web que acom
 ## Language
 
 **Miembro**:
-Una persona con cuenta en la plataforma, con acceso a la aplicación. Su relación con contenidos es a través de los Grupos a los que pertenece. Ciclo de vida: `invitado` (creado por la Invitación de otro Miembro, aún no ingresó), `activo`, `baja` (sus aportes permanecen como memoria). Un Miembro puede pertenecer a ningún Grupo, uno, o varios.
-_Avoid_: Usuario, Participante (como entidad)
+Una persona con cuenta en la plataforma. Se registra por su cuenta, o al seguir una Invitación a un Grupo. Puede no pertenecer a ningún Grupo, a uno, o a varios. Su cara (nombre y avatar) es la misma en todos. Ciclo de vida: `activo`, `baja` (sus aportes permanecen como memoria).
+_Avoid_: Usuario, colaborador, Participante (como entidad)
 
 **Grupo**:
 Comunidad aislada dentro de la plataforma, con sus propios Materiales, Sesiones, Categorías, Temporadas, Insignias y Conteos. Puede ser público (descubrible, unión instantánea) o privado (solo por invitación). Cada Grupo es un universo cerrado: nada se comparte entre Grupos.
 _Avoid_: Club (como entidad separada), espacio, comunidad, workspace
 
+**Grupo activo**:
+El Grupo en el que el Miembro está ahora. Sesiones, Materiales y el resto de lo que ve son de ese Grupo, no de los otros a los que pertenece. La cara del Miembro (nombre y avatar) es la misma en todos.
+_Avoid_: club activo, workspace, contexto
+
 **Administrador del Grupo**:
-Miembro con poderes de gestión sobre un Grupo: editar información, invitar y expulsar Miembros, eliminar el Grupo, nombrar co-Administradores. Puede haber varios. El creador del Grupo es su primer Administrador. No confundir con Moderador de Sesión, que es un rol temporal dentro de una Sesión.
-_Avoid_: Admin (ambiguo), owner, gestor
+Miembro con poderes de gestión sobre un Grupo: editar información, invitar personas y expulsar Miembros, eliminar el Grupo, nombrar co-Administradores. Puede haber varios. El creador del Grupo es su primer Administrador. Solo él invita a un Grupo privado. No confundir con Moderador de Sesión, que es un rol temporal dentro de una Sesión.
+_Avoid_: Admin (ambiguo), owner, gestor, colaborador
 
 **Participante**:
 Un Miembro confirmado como presente en una Sesión concreta. Término de contexto de sesión, no una entidad propia.
@@ -129,12 +133,8 @@ Logro visible individual que recompensa participación dentro de un Grupo. Los l
 _Avoid_: Badge, medalla, trofeo
 
 **Invitación**:
-Acto por el que un Miembro (padrino) suma a una nueva persona a la plataforma; quien la recibe queda como Miembro `invitado` hasta su primer ingreso. Se entrega como enlace compartible por cualquier canal; cualquier Miembro puede invitar, no existe invitación pública. El padrino puede revocarla mientras está pendiente: el enlace deja de valer y se puede invitar de nuevo. No es llamar a un Miembro a una Sesión. La Invitación da acceso a la plataforma, no a ningún Grupo específico.
-_Avoid_: Alta, registro, signup, reclutar, Convocatoria
-
-**Invitación al Grupo**:
-Acto por el que un Administrador de un Grupo privado invita a un Miembro existente de la plataforma a unirse a su Grupo, mediante enlace compartible con token. Distinta de la Invitación (padrinazgo): la Invitación da acceso a la plataforma; la Invitación al Grupo da acceso a un Grupo privado.
-_Avoid_: Invitación (ambiguo), Convocatoria
+Acto por el que un Administrador de un Grupo privado suma a una persona a ese Grupo, mediante enlace compartible. Si no tiene cuenta, el enlace la registra y la mete en el Grupo. Si ya es Miembro, solo la suma. No abre la plataforma: la cuenta nace por registro. Quien invita puede revocarla mientras está pendiente. No es llamar a un Miembro a una Sesión.
+_Avoid_: padrinazgo, invitación de plataforma, colaborador, reclutar, Convocatoria, Invitación al Grupo (es la misma Invitación)
 
 **Convocatoria**:
 Acto del Moderador de llamar a un Miembro del Grupo a su Sesión con Sala abierta. Quien la recibe elige Unirse o Ahora no; Unirse entra a esa Sala (y sale de otra si estaba en una) y no lo hace Participante — eso sigue siendo la Etapa Presentes. Distinta de la Invitación.

@@ -32,7 +32,8 @@ const ROW = {
 
 function mockListClient(rows: unknown, error: unknown = null) {
 	const order = vi.fn().mockResolvedValue({ data: rows, error });
-	const select = vi.fn().mockReturnValue({ order });
+	const eq = vi.fn().mockReturnValue({ order });
+	const select = vi.fn().mockReturnValue({ eq });
 	vi.mocked(serverClient.createClient).mockResolvedValue({
 		from: vi.fn().mockReturnValue({ select }),
 	} as never);
@@ -57,7 +58,7 @@ describe("listMaterials", () => {
 			{ ...ROW, sessions: [{ id: "s1" }, { id: "s2" }] },
 			{ ...ROW, id: "m2", sessions: [] },
 		]);
-		const result = await listMaterials();
+		const result = await listMaterials("g1");
 		expect(result.map((m) => [m.id, m.sessions_count])).toEqual([
 			["m1", 2],
 			["m2", 0],
@@ -66,7 +67,7 @@ describe("listMaterials", () => {
 
 	it("lanza el error de Supabase", async () => {
 		mockListClient(null, new Error("db caída"));
-		await expect(listMaterials()).rejects.toThrow("db caída");
+		await expect(listMaterials("g1")).rejects.toThrow("db caída");
 	});
 });
 

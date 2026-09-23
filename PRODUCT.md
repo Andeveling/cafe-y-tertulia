@@ -12,9 +12,7 @@ Next.js 16 (App Router, Server Components), React 19, Supabase (PostgreSQL, Auth
 
 ## Users
 
-**Primary:** Miembros de un club de lectura hispanohablante que se reúne semanalmente (normalmente por videollamada) para tertuliar de un tema relacionado a un Material (libro, podcast, video, artículo). Valoran el intercambio intelectual, la comodidad y la exclusividad de un grupo cerrado.
-
-**Secondary (later):** Moderadores de otros clubs que quieran crear su propia instancia (multi-club, not yet built).
+**Primary:** Un Miembro hispanohablante que pertenece a uno o varios Grupos de lectura (pareja, trabajo, familia) y se reúne, normalmente por videollamada, a tertuliar de un Material. Es la misma persona en todos; lo que se habla en uno no se ve en otro.
 
 ## Product Purpose
 
@@ -30,7 +28,7 @@ A premium, unhurried companion for intellectual conversation — not a meeting t
 
 - **Cadence:** Reuniones semanales, normalmente por videollamada (Google Meet, Zoom, etc.). La app funciona en ambos modos (presencial/remoto) pero el caso principal es remoto.
 - **Ritual:** Cada sesión tiene un Material opcional. Los miembros preparan preguntas antes, la sesión se desarrolla en Etapas fijas (Preguntas → Presentes → Sorteo → Debate → Cierre), y después queda el Histórico.
-- **Invite-only:** No hay registro público. Los miembros invitan a otros mediante enlaces compartibles. Es un club cerrado.
+- **Registro abierto, Grupo cerrado:** Cualquiera puede crear cuenta y crear Grupos. Un Grupo privado solo se abre con Invitación de un Administrador. Sin Grupos, igual entra al perfil.
 - **Language:** Interfaz y contenido en español.
 
 ## Capabilities and Constraints
@@ -48,16 +46,16 @@ A premium, unhurried companion for intellectual conversation — not a meeting t
 - Rating agregado de Materials (1-5 estrellas, anónimo, congelado al cerrar sesión)
 - Histórico de cada sesión: preguntas, notas, minijuegos, logros, rating
 - Convocatoria: invitar a un miembro a una Sala abierta en tiempo real
-- Invitación: enlace compartible para sumar nuevos miembros (padrino → invitado → activo)
+- Invitación: enlace de un Administrador a un Grupo privado; si no hay cuenta, el enlace registra y mete en ese Grupo
 
 **Technical constraints:**
 - Supabase RLS para aislamiento de datos
 - Realtime para sincronización de la Sala
-- Single club por ahora; la arquitectura debe permitir multi-club más adelante
+- Cada Grupo es un universo cerrado (`group_id` + RLS). La cara del Miembro es global.
 - Deploy en Vercel
 
 **Undecided:**
-- Multi-club: fecha o prioridad no definida. La arquitectura actual no lo impide pero no hay tablas de organización/club.
+- Registro abierto aún no está construido. El padrinazgo de plataforma sigue en el código y en ADR-0005; el modelo vigente ya no es ese.
 
 ## Brand Commitments
 
@@ -84,7 +82,7 @@ A premium, unhurried companion for intellectual conversation — not a meeting t
 1. **La conversación está primero.** The app accompanies, it never directs. During a session, the interface should be invisible — the conversation is the product.
 2. **Memoria, no archivo.** The historical record is alive and valuable, not a dusty filing cabinet. What was discussed matters after the session ends.
 3. **Ritual, no herramienta.** The weekly meeting is a ritual. The app should feel like part of the ritual — warm, familiar, unhurried — not like a productivity tool.
-4. **Exclusividad sin barreras.** Invite-only creates intimacy, not exclusion. The invite flow should be frictionless for the member extending it.
+4. **El Grupo es el cierre.** La cuenta es abierta; la intimidad vive en el Grupo. Invitar a un Grupo privado es de un gesto, no un trámite.
 5. **Simplicidad deliberada.** Every feature earns its place. If it doesn't serve the conversation or the memory, it doesn't ship.
 
 ## Accessibility & Inclusion

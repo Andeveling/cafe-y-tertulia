@@ -14,7 +14,13 @@ import {
 } from "@/components/ui/dialog";
 import { MaterialForm } from "./material-form";
 
-export function NewMaterialDialog() {
+export function NewMaterialDialog({
+	groupId,
+	slug,
+}: {
+	groupId: string;
+	slug: string;
+}) {
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
 
@@ -42,7 +48,7 @@ export function NewMaterialDialog() {
 				<p className="text-sm text-muted-foreground -mt-2">
 					Todo material entra como propuesto y el club decide cómo avanza.
 				</p>
-				<MaterialForm onSuccess={handleSuccess} />
+				<MaterialForm groupId={groupId} slug={slug} onSuccess={handleSuccess} />
 			</DialogContent>
 		</Dialog>
 	);

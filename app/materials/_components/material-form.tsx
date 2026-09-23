@@ -48,7 +48,15 @@ const materialFormSchema = z.object({
 
 type MaterialFormValues = z.infer<typeof materialFormSchema>;
 
-export function MaterialForm({ onSuccess }: { onSuccess?: () => void } = {}) {
+export function MaterialForm({
+	groupId,
+	slug,
+	onSuccess,
+}: {
+	groupId: string;
+	slug: string;
+	onSuccess?: () => void;
+}) {
 	const [isPending, startTransition] = useTransition();
 	const form = useForm<MaterialFormValues>({
 		resolver: zodResolver(materialFormSchema),
@@ -69,6 +77,8 @@ export function MaterialForm({ onSuccess }: { onSuccess?: () => void } = {}) {
 				author: data.author,
 				imageUrl: data.imageUrl,
 				sourceUrl: data.sourceUrl,
+				groupId,
+				slug,
 			});
 			if ("error" in result) {
 				toast.error(result.error);

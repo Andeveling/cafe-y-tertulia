@@ -1,8 +1,21 @@
 import { type NextRequest } from "next/server";
+import {
+	LAST_GROUP_COOKIE,
+	slugFromGroupPath,
+} from "@/lib/groups/active-group";
 import { updateSession } from "@/lib/supabase/proxy";
 
 export async function proxy(request: NextRequest) {
-	return await updateSession(request);
+	const response = await updateSession(request);
+	const slug = slugFromGroupPath(request.nextUrl.pathname);
+	if (slug) {
+		response.cookies.set(LAST_GROUP_COOKIE, slug, {
+			path: "/",
+			maxAge: 60 * 60 * 24 * 400,
+			sameSite: "lax",
+		});
+	}
+	return response;
 }
 
 export const config = {

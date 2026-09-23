@@ -7,6 +7,7 @@ import type { BoardSession } from "../_components/start-board";
 /** Sessions visible on the home board: exclude closed/archived. */
 export async function getOpenSessions(
 	supabase: SupabaseClient,
+	groupId: string,
 ): Promise<BoardSession[]> {
 	const { data: rawSessions } = await supabase
 		.from("sessions")
@@ -15,6 +16,7 @@ export async function getOpenSessions(
 			 moderator:members!sessions_moderator_id_fkey(display_name, avatar),
 			 material:materials(title)`,
 		)
+		.eq("group_id", groupId)
 		.not("status", "in", '("closed","archived")')
 		.order("scheduled_at", { ascending: true, nullsFirst: false });
 
@@ -62,10 +64,12 @@ export async function getOpenSessions(
 
 export async function getMaterialOptions(
 	supabase: SupabaseClient,
+	groupId: string,
 ): Promise<{ id: string; title: string }[]> {
 	const { data } = await supabase
 		.from("materials")
 		.select("id, title")
+		.eq("group_id", groupId)
 		.order("title");
 
 	return data ?? [];

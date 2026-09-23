@@ -1,43 +1,21 @@
-import { ArrowLeftIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
-import { MaterialForm } from "@/app/materials/_components/material-form";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-} from "@/components/ui/card";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getCurrentMember } from "@/lib/current-member";
+import { LAST_GROUP_COOKIE, landingPath } from "@/lib/groups/active-group";
+import { getMyGroups } from "@/lib/groups/queries";
 
-export const metadata = {
-	title: "Proponer material · Café y Tertulia",
-};
+/** Proponer un material es del Grupo activo, no de un pool mezclado. */
+export default async function NewMaterialPage() {
+	const { member, supabase } = await getCurrentMember();
+	if (!member) redirect("/auth/login");
+	if (member.status !== "active") redirect("/auth/invite");
 
-export default function NewMaterialPage() {
-	return (
-		<div className="flex w-full max-w-xl flex-col gap-6">
-			<Button
-				variant="ghost"
-				size="sm"
-				nativeButton={false}
-				render={<Link href="/materials" />}
-				className="w-fit"
-			>
-				<HugeiconsIcon icon={ArrowLeftIcon} data-icon="inline-start" />
-				Volver a materiales
-			</Button>
-
-			<Card>
-				<CardHeader>
-					<CardDescription>
-						Todo material entra como propuesto y el club decide cómo avanza.
-					</CardDescription>
-				</CardHeader>
-				<CardContent>
-					<MaterialForm />
-				</CardContent>
-			</Card>
-		</div>
+	const groups = await getMyGroups(supabase, member.id);
+	const cookieStore = await cookies();
+	const path = landingPath(
+		groups.map((group) => group.slug),
+		cookieStore.get(LAST_GROUP_COOKIE)?.value,
+		"materiales",
 	);
+	redirect(path === "/g" ? "/g" : `${path}/nuevo`);
 }

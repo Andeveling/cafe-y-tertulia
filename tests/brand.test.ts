@@ -73,7 +73,9 @@ describe("marca Café y Tertulias", () => {
 	});
 
 	it("sidebar usa el logo de la marca", () => {
-		const sidebar = bytes("components/app-sidebar.tsx").toString("utf8");
+		const sidebar = bytes("components/active-group-switcher.tsx").toString(
+			"utf8",
+		);
 		expect(sidebar).toContain('src="/brand/coffee.svg"');
 	});
 

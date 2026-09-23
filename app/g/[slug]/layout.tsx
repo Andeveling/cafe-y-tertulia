@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getCurrentMember } from "@/lib/current-member";
 import { GroupProvider } from "@/lib/groups/group-context";
-import { getGroupBySlug, getMyGroups } from "@/lib/groups/queries";
+import { getGroupBySlug } from "@/lib/groups/queries";
 
 /**
  * Layout de /g/{slug}: resuelve el grupo, exige membresía (las privadas
@@ -24,8 +24,6 @@ export default async function GroupLayout({
 	const group = await getGroupBySlug(supabase, slug, member.id);
 	if (!group || group.role == null) notFound();
 
-	const myGroups = await getMyGroups(supabase, member.id);
-
 	return (
 		<GroupProvider
 			value={{
@@ -37,31 +35,7 @@ export default async function GroupLayout({
 				visibility: group.visibility,
 			}}
 		>
-			<div className="flex flex-col gap-4">
-				<nav aria-label="Grupos" className="flex items-center gap-2 text-sm">
-					<a href="/g" className="text-muted-foreground hover:underline">
-						Mis grupos
-					</a>
-					<span aria-hidden className="text-muted-foreground">
-						/
-					</span>
-					<span className="font-semibold">{group.name}</span>
-				</nav>
-				{children}
-				<footer className="flex gap-2 text-sm">
-					{myGroups
-						.filter((g) => g.slug !== group.slug)
-						.map((g) => (
-							<a
-								key={g.slug}
-								href={`/g/${g.slug}`}
-								className="rounded-lg border border-border px-2 py-1 hover:border-primary"
-							>
-								{g.name}
-							</a>
-						))}
-				</footer>
-			</div>
+			{children}
 		</GroupProvider>
 	);
 }

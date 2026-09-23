@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import type { MemberLevel } from "@/app/profile/_lib/gamification-actions";
+import type { SwitcherGroup } from "@/components/active-group-switcher";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar, type AppSidebarUser } from "@/components/app-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -17,12 +18,16 @@ import { isAuthPath, isSalaPath } from "@/lib/sala-path";
  */
 export function AppShell({
 	user,
+	groups = [],
+	rememberedSlug = null,
 	defaultOpen,
 	level,
 	inbox,
 	children,
 }: {
 	user?: AppSidebarUser;
+	groups?: SwitcherGroup[];
+	rememberedSlug?: string | null;
 	defaultOpen: boolean;
 	level?: MemberLevel | null;
 	inbox?: React.ReactNode;
@@ -56,7 +61,7 @@ export function AppShell({
 			>
 				Saltar al contenido
 			</a>
-			<AppSidebar user={user} />
+			<AppSidebar user={user} groups={groups} rememberedSlug={rememberedSlug} />
 			<div className="relative flex w-full flex-1 flex-col">
 				<AppHeader level={level} />
 				<main
