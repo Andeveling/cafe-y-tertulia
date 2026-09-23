@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTransition } from "react";
+import { useActionState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,10 @@ export function UpdateProfileForm({
 }: {
 	defaultDisplayName: string;
 }) {
-	const [isPending, startTransition] = useTransition();
+	const [formState, formAction, isPending] = useActionState(
+		updateProfile,
+		null,
+	);
 	const form = useForm<UpdateProfileValues>({
 		resolver: zodResolver(updateProfileSchema),
 		defaultValues: {
@@ -38,11 +41,9 @@ export function UpdateProfileForm({
 	});
 
 	function onSubmit(data: UpdateProfileValues) {
-		startTransition(async () => {
-			const formData = new FormData();
-			formData.set("displayName", data.displayName);
-			await updateProfile(formData);
-		});
+		const formData = new FormData();
+		formData.set("displayName", data.displayName);
+		formAction(formData);
 	}
 
 	return (
@@ -69,6 +70,16 @@ export function UpdateProfileForm({
 					</Field>
 				)}
 			/>
+			{formState && "error" in formState ? (
+				<p role="alert" className="text-sm text-destructive">
+					No pudimos guardar los cambios. Intentá de nuevo.
+				</p>
+			) : null}
+			{formState && "ok" in formState ? (
+				<p role="status" className="text-sm text-muted-foreground">
+					Perfil actualizado. El club ya te ve así.
+				</p>
+			) : null}
 			<Button
 				type="submit"
 				className="min-h-11 self-start"

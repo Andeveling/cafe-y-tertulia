@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useTransition } from "react";
+import { useActionState, useState } from "react";
 import { updateAvatar } from "@/app/profile/_lib/profile-actions";
 import { memberInitials } from "@/components/member-avatar";
 import { Button } from "@/components/ui/button";
@@ -20,18 +20,9 @@ export function AvatarPicker({
 	currentAvatar: string | null;
 	displayName: string;
 }) {
-	const [isPending, startTransition] = useTransition();
+	const [formState, formAction, isPending] = useActionState(updateAvatar, null);
 	const [selected, setSelected] = useState<string>(currentAvatar ?? "");
 	const dirty = selected !== (currentAvatar ?? "");
-
-	function onSubmit(e: React.FormEvent) {
-		e.preventDefault();
-		startTransition(async () => {
-			const formData = new FormData();
-			formData.set("avatar", selected);
-			await updateAvatar(formData);
-		});
-	}
 
 	const ring = cn(
 		"ring-2 ring-offset-2 ring-offset-card transition outline-none",
@@ -39,7 +30,7 @@ export function AvatarPicker({
 	);
 
 	return (
-		<form onSubmit={onSubmit} className="flex flex-col gap-4">
+		<form action={formAction} className="flex flex-col gap-4">
 			<fieldset>
 				<legend className="sr-only">Elegí tu avatar</legend>
 				<div className="grid grid-cols-6 gap-2 sm:grid-cols-7">
@@ -95,6 +86,16 @@ export function AvatarPicker({
 					))}
 				</div>
 			</fieldset>
+			{formState && "error" in formState ? (
+				<p role="alert" className="text-sm text-destructive">
+					No pudimos guardar el avatar. Intentá de nuevo.
+				</p>
+			) : null}
+			{formState && "ok" in formState ? (
+				<p role="status" className="text-sm text-muted-foreground">
+					Avatar actualizado.
+				</p>
+			) : null}
 			<Button
 				type="submit"
 				className="min-h-11 self-start"

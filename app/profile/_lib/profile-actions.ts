@@ -8,13 +8,26 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { avatarSchema, displayNameSchema } from "../_schemas/profile-schema";
 
+export type UpdateProfileState =
+	| { error: "update_failed" }
+	| { ok: true }
+	| null;
+
+export type UpdateAvatarState =
+	| { error: "update_failed" }
+	| { ok: true }
+	| null;
+
 export async function signOut() {
 	const supabase = await createServerClient();
 	await supabase.auth.signOut();
 	redirect("/auth/login");
 }
 
-export async function updateProfile(formData: FormData) {
+export async function updateProfile(
+	_prev: UpdateProfileState,
+	formData: FormData,
+): Promise<UpdateProfileState> {
 	const { member } = await getCurrentMember();
 	if (!member) {
 		redirect("/auth/login");
@@ -25,7 +38,7 @@ export async function updateProfile(formData: FormData) {
 
 	const parsed = await parseForm(displayNameSchema, formData);
 	if (!parsed.ok) {
-		redirect("/profile?error=update_failed");
+		return { error: "update_failed" };
 	}
 
 	const { displayName } = parsed.data;
@@ -40,15 +53,18 @@ export async function updateProfile(formData: FormData) {
 			.eq("id", member.id);
 
 		if (error) {
-			redirect("/profile?error=update_failed");
+			return { error: "update_failed" };
 		}
 	}
 
 	revalidatePath("/profile");
-	redirect("/profile?updated=1");
+	return { ok: true };
 }
 
-export async function updateAvatar(formData: FormData) {
+export async function updateAvatar(
+	_prev: UpdateAvatarState,
+	formData: FormData,
+): Promise<UpdateAvatarState> {
 	const { member } = await getCurrentMember();
 	if (!member) {
 		redirect("/auth/login");
@@ -59,7 +75,7 @@ export async function updateAvatar(formData: FormData) {
 
 	const parsed = await parseForm(avatarSchema, formData);
 	if (!parsed.ok) {
-		redirect("/profile?error=update_failed");
+		return { error: "update_failed" };
 	}
 
 	// "" = sin avatar (iniciales).
@@ -75,13 +91,13 @@ export async function updateAvatar(formData: FormData) {
 			.eq("id", member.id);
 
 		if (error) {
-			redirect("/profile?error=update_failed");
+			return { error: "update_failed" };
 		}
 	}
 
 	revalidatePath("/");
 	revalidatePath("/profile");
-	redirect("/profile?updated=1");
+	return { ok: true };
 }
 
 export async function leaveClub() {

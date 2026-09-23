@@ -30,8 +30,6 @@ export type ProfileViewProps = {
 	displayName: string;
 	status: string;
 	avatar: string | null;
-	updated?: boolean;
-	updateFailed?: boolean;
 };
 
 /** Compositor de la página de perfil: shell + secciones con stream (Suspense). */
@@ -40,8 +38,6 @@ export function ProfileView({
 	displayName,
 	status,
 	avatar,
-	updated,
-	updateFailed,
 }: ProfileViewProps) {
 	return (
 		<div className="flex-1">
@@ -54,24 +50,6 @@ export function ProfileView({
 					avatar={avatar}
 				/>
 			</Suspense>
-
-			{updated ? (
-				<div
-					role="status"
-					className="mt-4 rounded-xl border border-border/60 bg-card px-4 py-3 text-sm text-muted-foreground"
-				>
-					Perfil actualizado. El club ya te ve así.
-				</div>
-			) : null}
-
-			{updateFailed ? (
-				<div
-					role="alert"
-					className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-				>
-					No pudimos guardar los cambios. Intentá de nuevo.
-				</div>
-			) : null}
 
 			{/* ── Vitrina ─────────────────────────────────────────────────── */}
 			<Suspense fallback={<VitrinaSkeleton />}>

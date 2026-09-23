@@ -23,10 +23,27 @@ export default defineConfig({
 		},
 	},
 	test: {
-		include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
 		// UI tests (.tsx) run in jsdom; logic tests (.ts) stay in node.
-		// New .tsx tests no longer need the `@vitest-environment jsdom` pragma.
-		environmentMatchGlobs: [["tests/**/*.test.tsx", "jsdom"]],
+		// (environmentMatchGlobs no existe en Vitest 4: se ignora en silencio.)
+		projects: [
+			{
+				extends: true,
+				test: {
+					name: "unit",
+					include: ["tests/**/*.test.ts"],
+					exclude: ["tests/**/*.test.tsx"],
+					environment: "node",
+				},
+			},
+			{
+				extends: true,
+				test: {
+					name: "ui",
+					include: ["tests/**/*.test.tsx"],
+					environment: "jsdom",
+				},
+			},
+		],
 		setupFiles: ["./tests/setup.ts"],
 		testTimeout: 30_000,
 		hookTimeout: 30_000,
