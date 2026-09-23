@@ -18,7 +18,12 @@ Scopeado transitivamente (sin `group_id` propio, vía padre): `trivia_items` (v�
 
 No scopeados (globales): `members` (identidad única en la plataforma), `invitations` (padrinazgo de plataforma), `recognition_category_meta` (datos de referencia).
 
-Consecuencias directas: Categorías, Insignias, Temporadas y Conteos son por-Grupo (maestro en A, semilla en B es posible); `create_group` siembra categorías, catálogo de insignias y temporada del mes; toda política RLS de contenido pasa de `is_member()` a `is_group_member(group_id)`; `is_member()` queda solo para checks de plataforma (ver Mis Grupos, perfil); el acceso anónimo a `materials`/`sessions` se elimina (la memoria pública por-grupo queda para después).
+Consecuencias directas:
+
+- Categorías, Insignias, Temporadas y Conteos son por-Grupo (maestro en A, semilla en B es posible).
+- `create_group` siembra categorías, catálogo de insignias y temporada del mes.
+- Toda política RLS de contenido pasa de `is_member()` a `is_group_member(group_id)`; `is_member()` queda solo para checks de plataforma (ver Mis Grupos, perfil).
+- El acceso anónimo a `materials`/`sessions` se elimina (la memoria pública por-grupo queda para después).
 
 ## Considered Options
 
