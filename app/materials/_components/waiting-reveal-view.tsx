@@ -2,8 +2,8 @@
 
 import { CircleLock01Icon, FavouriteIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { aprecioDisplayText } from "@/app/materials/_lib/hearts";
-import type { TurnoAprecio } from "@/app/materials/_lib/room-view";
+import { aprecioDisplayText as appreciationDisplayText } from "@/app/materials/_lib/hearts";
+import type { TurnoAprecio as TurnAppreciation } from "@/app/materials/_lib/room-view";
 import { MemberAvatar } from "@/components/member-avatar";
 import { Button } from "@/components/ui/button";
 
@@ -12,13 +12,13 @@ type Props = {
 	nextAssigneeAvatar?: string | null;
 	youNext: boolean;
 	isModerator: boolean;
-	/** "Intervención 1 de 2" o null cuando no hay progreso. */
+	/** "Intervención 1 de 2" or null when there is no progress. */
 	progressText: string | null;
 	/** "Revelar pregunta 1 para Ana". */
 	revealLabel: string;
 	pending?: boolean;
-	/** Aprecio de la Intervención recién completada — null antes de la primera. */
-	lastAprecio?: TurnoAprecio | null;
+	/** Appreciation for the just-completed intervention — null before the first one. */
+	lastAppreciation?: TurnAppreciation | null;
 	onReveal?: () => void;
 };
 
@@ -70,9 +70,9 @@ function sceneCopy(youNext: boolean, isModerator: boolean): SceneCopy {
 }
 
 /**
- * WaitingRevealView — pausa ceremonial entre Intervenciones del Debate.
- * Vista pura: sin Supabase ni mutaciones. La Pregunta permanece sellada;
- * el caller aporta `onReveal` (revealNext) y `pending`.
+ * WaitingRevealView — ceremonial pause between debate interventions.
+ * Pure view: no Supabase, no mutations. The question stays sealed;
+ * the caller provides `onReveal` (revealNext) and `pending`.
  */
 export function WaitingRevealView({
 	nextAssigneeName,
@@ -82,7 +82,7 @@ export function WaitingRevealView({
 	progressText,
 	revealLabel,
 	pending = false,
-	lastAprecio = null,
+	lastAppreciation = null,
 	onReveal,
 }: Props) {
 	const copy = sceneCopy(youNext, isModerator);
@@ -95,7 +95,7 @@ export function WaitingRevealView({
 				</p>
 			)}
 
-			<LastAprecio aprecio={lastAprecio} />
+			<LastAppreciation appreciation={lastAppreciation} />
 
 			<div className="flex flex-col items-center gap-1">
 				<span aria-hidden="true">
@@ -118,7 +118,7 @@ export function WaitingRevealView({
 				</p>
 			</div>
 
-			<SealedPregunta lead={copy.envelopeLead} hint={copy.envelopeHint} />
+			<SealedQuestion lead={copy.envelopeLead} hint={copy.envelopeHint} />
 			{copy.status && (
 				<p className="max-w-sm text-sm text-muted-foreground text-pretty">
 					{copy.status}
@@ -139,19 +139,23 @@ export function WaitingRevealView({
 	);
 }
 
-function LastAprecio({ aprecio }: { aprecio: TurnoAprecio | null }) {
-	if (!aprecio) return null;
-	const respuesta = aprecioDisplayText(
-		aprecio.respuestaAvg,
-		aprecio.respuestaCount,
+function LastAppreciation({
+	appreciation,
+}: {
+	appreciation: TurnAppreciation | null;
+}) {
+	if (!appreciation) return null;
+	const answerText = appreciationDisplayText(
+		appreciation.respuestaAvg,
+		appreciation.respuestaCount,
 	);
-	const pregunta = aprecioDisplayText(
-		aprecio.preguntaAvg,
-		aprecio.preguntaCount,
+	const questionText = appreciationDisplayText(
+		appreciation.preguntaAvg,
+		appreciation.preguntaCount,
 	);
 	return (
 		<section
-			aria-label={`Aprecio de la Intervención de ${aprecio.assigneeName}`}
+			aria-label={`Aprecio de la Intervención de ${appreciation.assigneeName}`}
 			className="flex w-full max-w-105 flex-col items-center gap-1 rounded-xl bg-card px-6 py-4 text-center ring-1 ring-foreground/10"
 		>
 			<p className="flex items-center gap-1.5 text-label-sm font-bold tracking-[0.08em] text-muted-foreground uppercase">
@@ -160,24 +164,24 @@ function LastAprecio({ aprecio }: { aprecio: TurnoAprecio | null }) {
 					className="size-3.5 text-primary"
 					aria-hidden="true"
 				/>
-				Aprecio del turno · {aprecio.assigneeName}
+				Aprecio del turno · {appreciation.assigneeName}
 			</p>
-			{respuesta || pregunta ? (
+			{answerText || questionText ? (
 				<p className="text-sm tabular-nums">
-					{respuesta && (
+					{answerText && (
 						<span>
-							Respuesta <span className="font-semibold">{respuesta}</span>
+							Respuesta <span className="font-semibold">{answerText}</span>
 						</span>
 					)}
-					{respuesta && pregunta && (
+					{answerText && questionText && (
 						<span aria-hidden="true" className="text-muted-foreground">
 							{" "}
 							·{" "}
 						</span>
 					)}
-					{pregunta && (
+					{questionText && (
 						<span>
-							Pregunta <span className="font-semibold">{pregunta}</span>
+							Pregunta <span className="font-semibold">{questionText}</span>
 						</span>
 					)}
 				</p>
@@ -190,7 +194,7 @@ function LastAprecio({ aprecio }: { aprecio: TurnoAprecio | null }) {
 	);
 }
 
-function SealedPregunta({ lead, hint }: { lead: string; hint: string }) {
+function SealedQuestion({ lead, hint }: { lead: string; hint: string }) {
 	return (
 		<section
 			aria-label="Pregunta sellada"

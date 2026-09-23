@@ -126,7 +126,7 @@ function WaitingReveal({
 				progressText={progressText}
 				revealLabel={revealLabel}
 				pending={pending}
-				lastAprecio={lastAprecio ?? null}
+				lastAppreciation={lastAprecio ?? null}
 				onReveal={
 					isModerator ? () => run(() => revealNext(sessionId)) : undefined
 				}
