@@ -266,7 +266,7 @@ begin
 		'session_participants', 'takes', 'trivia_rounds', 'votes', 'hearts',
 		'convocatorias'
 	)
-	and definition ilike '%is_member()%'
+	and (qual ilike '%is_member()%' or with_check ilike '%is_member()%')
 	limit 1;
 
 	if v_bad_policy is not null then
