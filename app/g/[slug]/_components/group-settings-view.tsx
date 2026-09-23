@@ -10,7 +10,7 @@ import {
 	updateGroup,
 	updateMemberRole,
 } from "@/app/g/[slug]/_lib/settings-actions";
-import type { GroupRole } from "@/lib/groups/types";
+import type { GroupRole, GroupVisibility } from "@/lib/groups/types";
 
 export type SettingsGroup = {
 	id: string;
@@ -18,7 +18,7 @@ export type SettingsGroup = {
 	name: string;
 	description: string | null;
 	avatar: string | null;
-	visibility: "public" | "private";
+	visibility: GroupVisibility;
 };
 
 export type SettingsMember = {
@@ -89,10 +89,22 @@ function InfoSection({ group }: { group: SettingsGroup }) {
 	const [pending, start] = useTransition();
 	const [name, setName] = useState(group.name);
 	const [description, setDescription] = useState(group.description ?? "");
-	const [visibility, setVisibility] = useState<"public" | "private">(
+	const [visibility, setVisibility] = useState<GroupVisibility>(
 		group.visibility,
 	);
 	const [msg, setMsg] = useState<string | null>(null);
+
+	function handleSave() {
+		const payload = {
+			name,
+			description: description || null,
+			visibility,
+		};
+		start(async () => {
+			const r = await updateGroup(group.id, payload);
+			setMsg(r.ok ? "Guardado." : r.error);
+		});
+	}
 
 	return (
 		<Section title="Información del grupo">
@@ -130,16 +142,7 @@ function InfoSection({ group }: { group: SettingsGroup }) {
 			<button
 				type="button"
 				disabled={pending}
-				onClick={() =>
-					start(async () => {
-						const r = await updateGroup(group.id, {
-							name,
-							description: description || null,
-							visibility,
-						});
-						setMsg(r.ok ? "Guardado." : r.error);
-					})
-				}
+				onClick={handleSave}
 				className="w-fit rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
 			>
 				Guardar
@@ -152,6 +155,18 @@ function InviteSection({ groupId }: { groupId: string }) {
 	const [pending, start] = useTransition();
 	const [url, setUrl] = useState<string | null>(null);
 	const [msg, setMsg] = useState<string | null>(null);
+
+	function handleGenerate() {
+		start(async () => {
+			const r = await createInviteLink(groupId);
+			if (r.ok) {
+				setUrl(r.url ?? null);
+				setMsg(null);
+			} else {
+				setMsg(r.error);
+			}
+		});
+	}
 
 	return (
 		<Section title="Enlace de invitación">
@@ -167,17 +182,7 @@ function InviteSection({ groupId }: { groupId: string }) {
 				<button
 					type="button"
 					disabled={pending}
-					onClick={() =>
-						start(async () => {
-							const r = await createInviteLink(groupId);
-							if (r.ok) {
-								setUrl(r.url ?? null);
-								setMsg(null);
-							} else {
-								setMsg(r.error);
-							}
-						})
-					}
+					onClick={handleGenerate}
 					className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
 				>
 					Generar enlace
@@ -208,6 +213,24 @@ function MembersSection({
 	const [pending, start] = useTransition();
 	const [msg, setMsg] = useState<string | null>(null);
 
+	function handleRoleChange(memberId: string, nextRole: string) {
+		start(async () => {
+			const r = await updateMemberRole(
+				groupId,
+				memberId,
+				nextRole as GroupRole,
+			);
+			setMsg(r.ok ? null : r.error);
+		});
+	}
+
+	function handleRemove(memberId: string) {
+		start(async () => {
+			const r = await removeMember(groupId, memberId);
+			setMsg(r.ok ? null : r.error);
+		});
+	}
+
 	return (
 		<Section title={`Miembros (${members.length})`}>
 			{msg ? <p className="text-sm text-muted-foreground">{msg}</p> : null}
@@ -223,16 +246,7 @@ function MembersSection({
 								aria-label={`Rol de ${m.display_name}`}
 								value={m.role}
 								disabled={pending || m.id === userId}
-								onChange={(e) =>
-									start(async () => {
-										const r = await updateMemberRole(
-											groupId,
-											m.id,
-											e.target.value as GroupRole,
-										);
-										setMsg(r.ok ? null : r.error);
-									})
-								}
+								onChange={(e) => handleRoleChange(m.id, e.target.value)}
 								className="rounded-md border border-border bg-background px-2 py-1"
 							>
 								<option value="member">member</option>
@@ -242,12 +256,7 @@ function MembersSection({
 								<button
 									type="button"
 									disabled={pending}
-									onClick={() =>
-										start(async () => {
-											const r = await removeMember(groupId, m.id);
-											setMsg(r.ok ? null : r.error);
-										})
-									}
+									onClick={() => handleRemove(m.id)}
 									className="rounded-md border border-destructive px-2 py-1 text-destructive"
 								>
 									Expulsar
@@ -267,6 +276,23 @@ function DangerSection({ groupId, slug }: { groupId: string; slug: string }) {
 	const [confirm, setConfirm] = useState("");
 	const [armed, setArmed] = useState(false);
 	const [msg, setMsg] = useState<string | null>(null);
+
+	function handleDelete() {
+		start(async () => {
+			const r = await deleteGroup(groupId, confirm);
+			if (r.ok) {
+				router.push("/g");
+			} else {
+				setMsg(r.error);
+			}
+		});
+	}
+
+	function handleCancel() {
+		setArmed(false);
+		setConfirm("");
+		setMsg(null);
+	}
 
 	return (
 		<section
@@ -301,27 +327,14 @@ function DangerSection({ groupId, slug }: { groupId: string; slug: string }) {
 						<button
 							type="button"
 							disabled={pending}
-							onClick={() =>
-								start(async () => {
-									const r = await deleteGroup(groupId, confirm);
-									if (r.ok) {
-										router.push("/g");
-									} else {
-										setMsg(r.error);
-									}
-								})
-							}
+							onClick={handleDelete}
 							className="rounded-lg bg-destructive px-3 py-1.5 text-sm font-semibold text-destructive-foreground disabled:opacity-50"
 						>
 							Borrar para siempre
 						</button>
 						<button
 							type="button"
-							onClick={() => {
-								setArmed(false);
-								setConfirm("");
-								setMsg(null);
-							}}
+							onClick={handleCancel}
 							className="rounded-lg border border-border px-3 py-1.5 text-sm"
 						>
 							Cancelar

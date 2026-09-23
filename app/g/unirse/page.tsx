@@ -27,25 +27,26 @@ export default async function JoinGroupPage({
 	const claims = await verifyGroupInviteToken(token);
 	if (!claims) {
 		return (
-			<div className="flex flex-col gap-2">
-				<h1 className="font-serif text-2xl font-semibold">Enlace no válido</h1>
-				<p className="text-sm text-muted-foreground">
-					Este enlace de invitación no vale. Pide uno nuevo al administrador del
-					grupo.
-				</p>
-			</div>
+			<JoinError
+				title="Enlace no válido"
+				message="Este enlace de invitación no vale. Pide uno nuevo al administrador del grupo."
+			/>
 		);
 	}
 
 	const result = await joinGroupWithToken(token);
 	if (!result.ok) {
-		return (
-			<div className="flex flex-col gap-2">
-				<h1 className="font-serif text-2xl font-semibold">No pudiste unirte</h1>
-				<p className="text-sm text-muted-foreground">{result.error}</p>
-			</div>
-		);
+		return <JoinError title="No pudiste unirte" message={result.error} />;
 	}
 
 	redirect(`/g/${result.slug}`);
+}
+
+function JoinError({ title, message }: { title: string; message: string }) {
+	return (
+		<div className="flex flex-col gap-2">
+			<h1 className="font-serif text-2xl font-semibold">{title}</h1>
+			<p className="text-sm text-muted-foreground">{message}</p>
+		</div>
+	);
 }

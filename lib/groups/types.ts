@@ -1,5 +1,3 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
 export type GroupVisibility = "public" | "private";
 export type GroupRole = "admin" | "member";
 
@@ -44,9 +42,11 @@ export type GroupContextValue = {
 
 /** Normaliza un nombre a slug url-safe (misma regla que create_group en SQL). */
 export function slugify(name: string): string {
-	const ascii = name.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+	const ascii = name
+		.trim()
+		.toLowerCase()
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "");
 	const slug = ascii.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 	return slug || "grupo";
 }
-
-export type GroupDb = SupabaseClient;

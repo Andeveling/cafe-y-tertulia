@@ -5,6 +5,11 @@ import { MemberAvatar } from "@/components/member-avatar";
 import type { MyGroup } from "@/lib/groups/types";
 
 export function GroupCard({ group }: { group: MyGroup }) {
+	const onlineLabel =
+		group.online_count === 0
+			? "Nadie en línea ahora"
+			: `${group.online_count} en línea`;
+	const roleLabel = group.role === "admin" ? "Administras" : "Miembro";
 	return (
 		<Link
 			href={`/g/${group.slug}`}
@@ -15,11 +20,7 @@ export function GroupCard({ group }: { group: MyGroup }) {
 				<div className="min-w-0">
 					<p className="truncate font-semibold">{group.name}</p>
 					<p className="text-sm text-muted-foreground">
-						{group.online_count === 0
-							? "Nadie en línea ahora"
-							: `${group.online_count} en línea`}
-						{" · "}
-						{group.role === "admin" ? "Administras" : "Miembro"}
+						{onlineLabel} {" · "} {roleLabel}
 					</p>
 				</div>
 			</div>

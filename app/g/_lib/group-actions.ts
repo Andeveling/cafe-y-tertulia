@@ -7,6 +7,7 @@ import {
 	verifyGroupInviteToken,
 } from "@/app/g/_lib/group-invite";
 import { isActiveMember } from "@/app/materials/_lib/members";
+import type { GroupVisibility } from "@/lib/groups/types";
 import type { ActionResult } from "@/lib/server-action";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -15,31 +16,49 @@ export type CreateGroupInput = {
 	name: string;
 	description?: string | null;
 	avatar?: string | null;
-	visibility: "public" | "private";
+	visibility: GroupVisibility;
 };
+
+function isGroupVisibility(value: unknown): value is GroupVisibility {
+	return value === "public" || value === "private";
+}
+
+type Db = SupabaseClient;
+
+/** database.types aún no incluye groups: se usa el cliente sin tipar. */
+function untyped(supabase: Awaited<ReturnType<typeof createClient>>): Db {
+	return supabase as unknown as Db;
+}
+
+/** Sesión + membresía activa, o el ActionResult de error correspondiente. */
+async function requireActiveMember(): Promise<
+	{ supabase: Db; userId: string } | { error: ActionResult }
+> {
+	const supabase = untyped(await createClient());
+	const {
+		data: { user },
+	} = await supabase.auth.getUser();
+	if (!user) return { error: { ok: false, error: "Debes iniciar sesión." } };
+	if (!(await isActiveMember(supabase, user.id))) {
+		return { error: { ok: false, error: "Debes ser miembro activo." } };
+	}
+	return { supabase, userId: user.id };
+}
 
 export async function createGroup(
 	input: CreateGroupInput,
 ): Promise<ActionResult & { slug?: string }> {
 	const name = input.name.trim();
 	if (!name) return { ok: false, error: "El nombre es obligatorio." };
-	if (input.visibility !== "public" && input.visibility !== "private") {
+	if (!isGroupVisibility(input.visibility)) {
 		return { ok: false, error: "Visibilidad no válida." };
 	}
-	const supabase = await createClient();
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
-	if (!user) return { ok: false, error: "Debes iniciar sesión." };
-	if (!(await isActiveMember(supabase, user.id))) {
-		return { ok: false, error: "Debes ser miembro activo." };
-	}
-	// Cast local: database.types aún no incluye groups (se regenera tras
-	// aplicar la migración en el entorno con Supabase en vivo).
-	const db = supabase as unknown as SupabaseClient;
+	const session = await requireActiveMember();
+	if ("error" in session) return session.error;
+	const { supabase } = session;
 	// Contrato convergente con #71: create_group devuelve el uuid del grupo
 	// (o una fila {id} en variantes futuras); el slug lo resuelve el trigger.
-	const { data, error } = await db.rpc("create_group", {
+	const { data, error } = await supabase.rpc("create_group", {
 		p_name: name,
 		p_description: input.description ?? null,
 		p_avatar: input.avatar ?? null,
@@ -49,7 +68,7 @@ export async function createGroup(
 	const newId =
 		typeof data === "string" ? data : (data as { id?: string } | null)?.id;
 	if (!newId) return { ok: false, error: "No se pudo crear el grupo." };
-	const { data: row } = await db
+	const { data: row } = await supabase
 		.from("groups")
 		.select("slug")
 		.eq("id", newId)
@@ -60,16 +79,10 @@ export async function createGroup(
 
 /** Unirse a una pública con Unirse (las privadas fallan: solo por enlace). */
 export async function joinGroup(groupId: string): Promise<ActionResult> {
-	const supabase = await createClient();
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
-	if (!user) return { ok: false, error: "Debes iniciar sesión." };
-	if (!(await isActiveMember(supabase, user.id))) {
-		return { ok: false, error: "Debes ser miembro activo." };
-	}
-	const db = supabase as unknown as SupabaseClient;
-	const { error } = await db.rpc("join_group", { p_group_id: groupId });
+	const session = await requireActiveMember();
+	if ("error" in session) return session.error;
+	const { supabase } = session;
+	const { error } = await supabase.rpc("join_group", { p_group_id: groupId });
 	if (error) return { ok: false, error: error.message };
 	revalidatePath("/g");
 	return { ok: true };
@@ -80,20 +93,14 @@ export async function joinGroup(groupId: string): Promise<ActionResult> {
  * (preguntas, materiales, etc.) permanecen como memoria del grupo.
  */
 export async function leaveGroup(groupId: string): Promise<ActionResult> {
-	const supabase = await createClient();
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
-	if (!user) return { ok: false, error: "Debes iniciar sesión." };
-	if (!(await isActiveMember(supabase, user.id))) {
-		return { ok: false, error: "Debes ser miembro activo." };
-	}
-	const db = supabase as unknown as SupabaseClient;
-	const { error } = await db
+	const session = await requireActiveMember();
+	if ("error" in session) return session.error;
+	const { supabase, userId } = session;
+	const { error } = await supabase
 		.from("group_members")
 		.delete()
 		.eq("group_id", groupId)
-		.eq("member_id", user.id);
+		.eq("member_id", userId);
 	if (error) return { ok: false, error: error.message };
 	revalidatePath("/g");
 	return { ok: true };
@@ -109,14 +116,9 @@ export async function joinGroupWithToken(
 ): Promise<ActionResult & { slug?: string }> {
 	const claims = await verifyGroupInviteToken(token);
 	if (!claims) return { ok: false, error: "Este enlace no es válido." };
-	const supabase = await createClient();
-	const {
-		data: { user },
-	} = await supabase.auth.getUser();
-	if (!user) return { ok: false, error: "Debes iniciar sesión." };
-	if (!(await isActiveMember(supabase, user.id))) {
-		return { ok: false, error: "Debes ser miembro activo." };
-	}
+	const session = await requireActiveMember();
+	if ("error" in session) return session.error;
+	const { userId } = session;
 	const admin = createAdminClient() as unknown as SupabaseClient;
 	const { data: invite } = await admin
 		.from("group_invites")
@@ -129,18 +131,13 @@ export async function joinGroupWithToken(
 		token_hash: string | null;
 		expires_at: string;
 	} | null;
-	if (
-		!row ||
-		row.group_id !== claims.groupId ||
-		row.token_hash !== hashGroupInviteToken(token) ||
-		Date.parse(row.expires_at) < Date.now()
-	) {
+	if (!isUsableInvite(row, claims.groupId, token)) {
 		return { ok: false, error: "Este enlace ya no vale. Pide uno nuevo." };
 	}
 	const { error: joinError } = await admin
 		.from("group_members")
 		.upsert(
-			{ group_id: row.group_id, member_id: user.id, role: "member" },
+			{ group_id: row.group_id, member_id: userId, role: "member" },
 			{ onConflict: "group_id,member_id" },
 		);
 	if (joinError) return { ok: false, error: joinError.message };
@@ -151,4 +148,24 @@ export async function joinGroupWithToken(
 		.maybeSingle();
 	revalidatePath("/g");
 	return { ok: true, slug: (group as { slug?: string } | null)?.slug };
+}
+
+type InviteRow = {
+	id: string;
+	group_id: string;
+	token_hash: string | null;
+	expires_at: string;
+} | null;
+
+/** La invitación existe, es del grupo, coincide el hash y no caducó. */
+function isUsableInvite(
+	row: InviteRow,
+	groupId: string,
+	token: string,
+	now = Date.now(),
+): row is NonNullable<InviteRow> {
+	if (!row) return false;
+	if (row.group_id !== groupId) return false;
+	if (row.token_hash !== hashGroupInviteToken(token)) return false;
+	return Date.parse(row.expires_at) >= now;
 }

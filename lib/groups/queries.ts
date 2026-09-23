@@ -1,10 +1,14 @@
 import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { GroupRole, MyGroup, PublicGroupCard } from "@/lib/groups/types";
-import { slugify } from "@/lib/groups/types";
+import type {
+	GroupRole,
+	GroupVisibility,
+	MyGroup,
+	PublicGroupCard,
+} from "@/lib/groups/types";
 
-export { slugify };
+export { slugify } from "@/lib/groups/types";
 
 type Db = SupabaseClient;
 
@@ -19,7 +23,7 @@ type MembershipRow = {
 		name: string;
 		description: string | null;
 		avatar: string | null;
-		visibility: "public" | "private";
+		visibility: GroupVisibility;
 	} | null;
 };
 
@@ -42,6 +46,16 @@ function tally(rows: CountRow[] | null): Map<string, number> {
 		map.set(r.group_id, (map.get(r.group_id) ?? 0) + 1);
 	}
 	return map;
+}
+
+function increment(map: Map<string, number>, key: string): void {
+	map.set(key, (map.get(key) ?? 0) + 1);
+}
+
+/** Filas {data, error} de Supabase → lista tolerante (error = ceros). */
+function rowsOrNull(res: { data: unknown; error: unknown }): CountRow[] | null {
+	if (res.error) return null;
+	return res.data as CountRow[] | null;
 }
 
 /**
@@ -69,6 +83,7 @@ export async function getMyGroups(
 	if (mine.length === 0) return [];
 
 	const ids = mine.map((m) => m.group.id);
+	const idSet = new Set(ids);
 	const { data: roster } = await supabase
 		.from("group_members")
 		.select("group_id, member:members(last_seen)")
@@ -77,12 +92,12 @@ export async function getMyGroups(
 	const now = Date.now();
 	const memberCount = new Map<string, number>();
 	const onlineCount = new Map<string, number>();
-	for (const r of ((roster ?? []) as unknown as RosterRow[]).filter((x) =>
-		ids.includes(x.group_id),
-	)) {
-		memberCount.set(r.group_id, (memberCount.get(r.group_id) ?? 0) + 1);
+	const rosterRows = (roster ?? []) as unknown as RosterRow[];
+	for (const r of rosterRows) {
+		if (!idSet.has(r.group_id)) continue;
+		increment(memberCount, r.group_id);
 		if (isOnline(r.member?.last_seen ?? null, now)) {
-			onlineCount.set(r.group_id, (onlineCount.get(r.group_id) ?? 0) + 1);
+			increment(onlineCount, r.group_id);
 		}
 	}
 
@@ -129,19 +144,9 @@ export async function getPublicCatalog(
 		supabase.from("sessions").select("group_id").in("group_id", ids),
 	]);
 
-	const members = tally(
-		membersRes.error ? null : (membersRes.data as unknown as CountRow[] | null),
-	);
-	const materials = tally(
-		materialsRes.error
-			? null
-			: (materialsRes.data as unknown as CountRow[] | null),
-	);
-	const sessions = tally(
-		sessionsRes.error
-			? null
-			: (sessionsRes.data as unknown as CountRow[] | null),
-	);
+	const members = tally(rowsOrNull(membersRes));
+	const materials = tally(rowsOrNull(materialsRes));
+	const sessions = tally(rowsOrNull(sessionsRes));
 
 	return pubs.map((g) => ({
 		...g,
@@ -157,7 +162,7 @@ export type GroupBySlug = {
 	name: string;
 	description: string | null;
 	avatar: string | null;
-	visibility: "public" | "private";
+	visibility: GroupVisibility;
 	role: GroupRole | null;
 };
 
@@ -175,7 +180,7 @@ export async function getGroupBySlug(
 
 	if (error) throw error;
 	if (data == null) return null;
-	const g = data as GroupBySlug;
+	const g = data as Omit<GroupBySlug, "role">;
 
 	const { data: membership } = await supabase
 		.from("group_members")
@@ -186,4 +191,91 @@ export async function getGroupBySlug(
 
 	const role = (membership as { role: GroupRole } | null)?.role ?? null;
 	return { ...g, role };
+}
+
+export type GroupRosterRow = {
+	id: string;
+	display_name: string;
+	avatar: string | null;
+	last_seen: string | null;
+	role: GroupRole;
+};
+
+type GroupRosterDbRow = {
+	role: GroupRole;
+	member: {
+		id: string;
+		display_name: string;
+		avatar: string | null;
+		last_seen: string | null;
+	} | null;
+};
+
+/** Miembros del grupo con presencia persistida (para GroupRoster). */
+export async function getGroupRoster(
+	supabase: Db,
+	groupId: string,
+): Promise<GroupRosterRow[]> {
+	// Cast local: database.types aún no incluye groups (ver group-actions).
+	const db = supabase as unknown as SupabaseClient;
+	const { data } = await db
+		.from("group_members")
+		.select("role, member:members(id, display_name, avatar, last_seen)")
+		.eq("group_id", groupId);
+	const rows = (data ?? []) as unknown as GroupRosterDbRow[];
+	return rows.flatMap((r) =>
+		r.member == null
+			? []
+			: [
+					{
+						id: r.member.id,
+						display_name: r.member.display_name,
+						avatar: r.member.avatar,
+						last_seen: r.member.last_seen,
+						role: r.role,
+					},
+				],
+	);
+}
+
+export type GroupSettingsMemberRow = {
+	id: string;
+	display_name: string;
+	avatar: string | null;
+	role: GroupRole;
+};
+
+type GroupSettingsMemberDbRow = {
+	role: GroupRole;
+	member: {
+		id: string;
+		display_name: string;
+		avatar: string | null;
+	} | null;
+};
+
+/** Miembros del grupo sin last_seen (para la página de ajustes). */
+export async function getGroupSettingsMembers(
+	supabase: Db,
+	groupId: string,
+): Promise<GroupSettingsMemberRow[]> {
+	// Cast local: database.types aún no incluye groups (ver group-actions).
+	const db = supabase as unknown as SupabaseClient;
+	const { data } = await db
+		.from("group_members")
+		.select("role, member:members(id, display_name, avatar)")
+		.eq("group_id", groupId);
+	const rows = (data ?? []) as unknown as GroupSettingsMemberDbRow[];
+	return rows.flatMap((r) =>
+		r.member == null
+			? []
+			: [
+					{
+						id: r.member.id,
+						display_name: r.member.display_name,
+						avatar: r.member.avatar,
+						role: r.role,
+					},
+				],
+	);
 }

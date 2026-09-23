@@ -14,6 +14,13 @@ export function PublicCatalog({ groups }: { groups: PublicGroupCard[] }) {
 	const router = useRouter();
 	const [pending, start] = useTransition();
 
+	function handleJoin(groupId: string) {
+		start(async () => {
+			await joinGroup(groupId);
+			router.refresh();
+		});
+	}
+
 	if (groups.length === 0) {
 		return (
 			<p className="text-sm text-muted-foreground">
@@ -44,12 +51,7 @@ export function PublicCatalog({ groups }: { groups: PublicGroupCard[] }) {
 					<button
 						type="button"
 						disabled={pending}
-						onClick={() =>
-							start(async () => {
-								await joinGroup(g.id);
-								router.refresh();
-							})
-						}
+						onClick={() => handleJoin(g.id)}
 						className="mt-3 rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground disabled:opacity-50"
 					>
 						Unirse

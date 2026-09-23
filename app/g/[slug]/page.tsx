@@ -1,10 +1,13 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { notFound, redirect } from "next/navigation";
 import { GroupSwitcher } from "@/app/g/_components/group-switcher";
 import { LeaveGroupButton } from "@/app/g/_components/leave-group-button";
 import { GroupRoster } from "@/app/g/[slug]/_components/group-roster";
 import { getCurrentMember } from "@/lib/current-member";
-import { getGroupBySlug, getMyGroups } from "@/lib/groups/queries";
+import {
+	getGroupBySlug,
+	getGroupRoster,
+	getMyGroups,
+} from "@/lib/groups/queries";
 
 export async function generateMetadata({
 	params,
@@ -38,36 +41,7 @@ export default async function GroupHomePage({
 	]);
 	if (!group || group.role == null) notFound();
 
-	// Cast local: database.types aún no incluye groups (ver group-actions).
-	const db = supabase as unknown as SupabaseClient;
-	const { data: roster } = await db
-		.from("group_members")
-		.select("role, member:members(id, display_name, avatar, last_seen)")
-		.eq("group_id", group.id);
-
-	const members = (
-		(roster as unknown as {
-			role: "admin" | "member";
-			member: {
-				id: string;
-				display_name: string;
-				avatar: string | null;
-				last_seen: string | null;
-			} | null;
-		}[]) ?? []
-	).flatMap((r) =>
-		r.member == null
-			? []
-			: [
-					{
-						id: r.member.id,
-						display_name: r.member.display_name,
-						avatar: r.member.avatar,
-						last_seen: r.member.last_seen,
-						role: r.role,
-					},
-				],
-	);
+	const members = await getGroupRoster(supabase, group.id);
 
 	return (
 		<div className="flex flex-col gap-6">

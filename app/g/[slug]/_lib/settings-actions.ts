@@ -8,17 +8,23 @@ import {
 	signGroupInviteToken,
 } from "@/app/g/_lib/group-invite";
 import { isActiveMember } from "@/app/materials/_lib/members";
-import type { GroupRole } from "@/lib/groups/types";
+import type { GroupRole, GroupVisibility } from "@/lib/groups/types";
 import type { ActionResult } from "@/lib/server-action";
 import { createClient } from "@/lib/supabase/server";
 
+type Db = SupabaseClient;
+
+/** database.types aún no incluye groups: se usa el cliente sin tipar. */
+function untyped(supabase: Awaited<ReturnType<typeof createClient>>): Db {
+	return supabase as unknown as Db;
+}
+
 async function ownRole(
-	supabase: SupabaseClient,
+	supabase: Db,
 	groupId: string,
 	userId: string,
 ): Promise<GroupRole | null> {
-	const db = supabase as unknown as SupabaseClient;
-	const { data } = await db
+	const { data } = await supabase
 		.from("group_members")
 		.select("role")
 		.eq("group_id", groupId)
@@ -28,7 +34,7 @@ async function ownRole(
 }
 
 async function requireGroupAdmin(groupId: string) {
-	const supabase = await createClient();
+	const supabase = untyped(await createClient());
 	const {
 		data: { user },
 	} = await supabase.auth.getUser();
@@ -50,12 +56,17 @@ export async function updateGroup(
 		name?: string;
 		description?: string | null;
 		avatar?: string | null;
-		visibility?: "public" | "private";
+		visibility?: GroupVisibility;
 	},
 ): Promise<ActionResult> {
 	const { supabase, user } = await requireGroupAdmin(groupId);
 	if (!user) return { ok: false, error: "Solo un administrador puede editar." };
-	const patch: Record<string, string | null> = {};
+	const patch: {
+		name?: string;
+		description?: string | null;
+		avatar?: string | null;
+		visibility?: GroupVisibility;
+	} = {};
 	if (input.name !== undefined) {
 		const name = input.name.trim();
 		if (!name) return { ok: false, error: "El nombre es obligatorio." };
@@ -70,8 +81,10 @@ export async function updateGroup(
 		patch.visibility = input.visibility;
 	}
 	if (Object.keys(patch).length === 0) return { ok: true };
-	const db = supabase as unknown as SupabaseClient;
-	const { error } = await db.from("groups").update(patch).eq("id", groupId);
+	const { error } = await supabase
+		.from("groups")
+		.update(patch)
+		.eq("id", groupId);
 	if (error) return { ok: false, error: error.message };
 	revalidatePath("/g");
 	return { ok: true };
@@ -89,8 +102,7 @@ export async function updateMemberRole(
 	if (role !== "admin" && role !== "member") {
 		return { ok: false, error: "Rol no válido." };
 	}
-	const db = supabase as unknown as SupabaseClient;
-	const { error } = await db.rpc("update_member_role", {
+	const { error } = await supabase.rpc("update_member_role", {
 		p_group_id: groupId,
 		p_member_id: memberId,
 		p_role: role,
@@ -108,8 +120,7 @@ export async function removeMember(
 	const { supabase, user } = await requireGroupAdmin(groupId);
 	if (!user)
 		return { ok: false, error: "Solo un administrador puede expulsar." };
-	const db = supabase as unknown as SupabaseClient;
-	const { error } = await db.rpc("remove_member", {
+	const { error } = await supabase.rpc("remove_member", {
 		p_group_id: groupId,
 		p_member_id: memberId,
 	});
@@ -128,8 +139,7 @@ export async function deleteGroup(
 ): Promise<ActionResult & { slug?: string }> {
 	const { supabase, user } = await requireGroupAdmin(groupId);
 	if (!user) return { ok: false, error: "Solo un administrador puede borrar." };
-	const db = supabase as unknown as SupabaseClient;
-	const { data } = await db
+	const { data } = await supabase
 		.from("groups")
 		.select("slug")
 		.eq("id", groupId)
@@ -138,7 +148,7 @@ export async function deleteGroup(
 	if (!slug || slug !== confirmSlug.trim()) {
 		return { ok: false, error: "Escribe el slug del grupo para confirmar." };
 	}
-	const { error } = await db.rpc("delete_group", { p_group_id: groupId });
+	const { error } = await supabase.rpc("delete_group", { p_group_id: groupId });
 	if (error) return { ok: false, error: error.message };
 	revalidatePath("/g");
 	return { ok: true, slug };
@@ -154,15 +164,14 @@ export async function createInviteLink(
 	const { supabase, user } = await requireGroupAdmin(groupId);
 	if (!user)
 		return { ok: false, error: "Solo un administrador puede invitar." };
-	const db = supabase as unknown as SupabaseClient;
-	const { data, error } = await db.rpc("invite_to_group", {
+	const { data, error } = await supabase.rpc("invite_to_group", {
 		p_group_id: groupId,
 	});
 	if (error) return { ok: false, error: error.message };
 	const inviteId = typeof data === "string" ? data : null;
 	if (!inviteId) return { ok: false, error: "No se pudo crear la invitación." };
 	const token = await signGroupInviteToken({ inviteId, groupId });
-	const { error: hashError } = await db
+	const { error: hashError } = await supabase
 		.from("group_invites")
 		.update({ token_hash: hashGroupInviteToken(token) })
 		.eq("id", inviteId);
@@ -178,8 +187,7 @@ export async function revokeInviteLink(
 	const { supabase, user } = await requireGroupAdmin(groupId);
 	if (!user)
 		return { ok: false, error: "Solo un administrador puede revocar." };
-	const db = supabase as unknown as SupabaseClient;
-	const { error } = await db
+	const { error } = await supabase
 		.from("group_invites")
 		.delete()
 		.eq("id", inviteId)

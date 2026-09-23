@@ -49,7 +49,7 @@ const TOPIC = "club-roster";
  * Canal de presencia por grupo (PRD #69): dentro del grupo A solo se ve
  * presencia de A. Sin grupo se mantiene el canal histórico del club.
  */
-export function presenceTopic(groupId: string | undefined): string {
+export function presenceTopic(groupId?: string): string {
 	return groupId ? `group-${groupId}-roster` : TOPIC;
 }
 
@@ -176,7 +176,7 @@ function acquireRoster(
 	userId: string,
 	salaId: string | undefined,
 	listener: RosterListener,
-	groupId: string | undefined,
+	groupId?: string,
 ): () => void {
 	const topic = presenceTopic(groupId);
 	if (shared && (shared.userId !== userId || shared.topic !== topic)) {
