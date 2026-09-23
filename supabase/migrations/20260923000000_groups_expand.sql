@@ -15,7 +15,7 @@
 --     (sin NOT NULL aún, sin FKs: eso es el contract del #74).
 --  7. Unicidades globales re-scopeadas por grupo (key de badges/categorías,
 --     temporada abierta): si no, create_group no puede sembrar y falla.
---  8. RPCs create_group (grupo + admin creador + siembra desde el plantilla),
+--  8. RPCs create_group (grupo + admin creador + siembra desde la plantilla),
 --     join_group (solo públicas) y leave_group (promociona al más antiguo
 --     si sale el único admin). Los aportes permanecen: solo se borra la
 --     fila de group_members.
@@ -140,9 +140,9 @@ grant all on public.groups, public.group_members to service_role;
 do $$
 declare
 	v_nojau_id uuid;
-	v_oldest uuid;
+	v_oldest_member_id uuid;
 begin
-	select id into v_oldest
+	select id into v_oldest_member_id
 	from public.members
 	where status = 'active'
 	order by created_at asc, id asc
@@ -153,7 +153,7 @@ begin
 		'nojau',
 		'Grupo inicial: reúne los datos y Miembros previos a multi-grupo (PRD #69).',
 		'private',
-		v_oldest
+		v_oldest_member_id
 	)
 	returning id into v_nojau_id;
 
@@ -163,11 +163,11 @@ begin
 	where status = 'active'
 	on conflict do nothing;
 
-	if v_oldest is not null then
+	if v_oldest_member_id is not null then
 		update public.group_members
 		set role = 'admin'
 		where group_id = v_nojau_id
-		and member_id = v_oldest;
+		and member_id = v_oldest_member_id;
 	end if;
 end
 $$;
@@ -175,6 +175,8 @@ $$;
 -- ============================================================
 -- 6. group_id nullable en contenido + backfill a nojau
 -- ============================================================
+-- El id de nojau se resuelve una sola vez; las 20 tablas quedan explícitas
+-- para que un fallo señale la tabla exacta.
 
 alter table public.materials add column group_id uuid;
 alter table public.sessions add column group_id uuid;
@@ -197,26 +199,37 @@ alter table public.votes add column group_id uuid;
 alter table public.hearts add column group_id uuid;
 alter table public.convocatorias add column group_id uuid;
 
-update public.materials set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.sessions set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.categories set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.material_categories set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.session_categories set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.seasons set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.badges set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.awards set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.counts set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.season_recognitions set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.trivias set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.questions set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.draws set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.assignments set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.session_participants set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.takes set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.trivia_rounds set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.votes set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.hearts set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
-update public.convocatorias set group_id = (select id from public.groups where name = 'nojau') where group_id is null;
+do $$
+declare
+	v_nojau_id uuid;
+begin
+	select id into v_nojau_id
+	from public.groups
+	where name = 'nojau'
+	limit 1;
+
+	update public.materials set group_id = v_nojau_id where group_id is null;
+	update public.sessions set group_id = v_nojau_id where group_id is null;
+	update public.categories set group_id = v_nojau_id where group_id is null;
+	update public.material_categories set group_id = v_nojau_id where group_id is null;
+	update public.session_categories set group_id = v_nojau_id where group_id is null;
+	update public.seasons set group_id = v_nojau_id where group_id is null;
+	update public.badges set group_id = v_nojau_id where group_id is null;
+	update public.awards set group_id = v_nojau_id where group_id is null;
+	update public.counts set group_id = v_nojau_id where group_id is null;
+	update public.season_recognitions set group_id = v_nojau_id where group_id is null;
+	update public.trivias set group_id = v_nojau_id where group_id is null;
+	update public.questions set group_id = v_nojau_id where group_id is null;
+	update public.draws set group_id = v_nojau_id where group_id is null;
+	update public.assignments set group_id = v_nojau_id where group_id is null;
+	update public.session_participants set group_id = v_nojau_id where group_id is null;
+	update public.takes set group_id = v_nojau_id where group_id is null;
+	update public.trivia_rounds set group_id = v_nojau_id where group_id is null;
+	update public.votes set group_id = v_nojau_id where group_id is null;
+	update public.hearts set group_id = v_nojau_id where group_id is null;
+	update public.convocatorias set group_id = v_nojau_id where group_id is null;
+end
+$$;
 
 -- ============================================================
 -- 7. Unicidades globales re-scopeadas por grupo
@@ -239,8 +252,9 @@ create unique index seasons_one_open_per_group
 -- ============================================================
 
 -- Crea el grupo, deja al creador como admin y siembra el estándar copiando
--- al grupo plantilla (nojau; si se borró, el más antiguo): así la siembra va
--- con el catálogo vigente sin hardcodear filas. Más la temporada del mes.
+-- del grupo plantilla (nojau; si se borró, del grupo más antiguo): así la
+-- siembra va con el catálogo vigente sin hardcodear filas. Más la temporada
+-- del mes.
 create function public.create_group(
 	p_name text,
 	p_description text default null,
@@ -253,6 +267,7 @@ security definer
 set search_path = public
 as $$
 declare
+	v_name text := trim(p_name);
 	v_group_id uuid;
 	v_template_id uuid;
 	v_month_start timestamptz;
@@ -261,13 +276,13 @@ begin
 		raise exception 'Solo los Miembros activos pueden crear grupos'
 			using errcode = '42501';
 	end if;
-	if p_name is null or char_length(trim(p_name)) = 0 then
+	if v_name is null or char_length(v_name) = 0 then
 		raise exception 'El nombre del grupo es obligatorio'
 			using errcode = 'P0001';
 	end if;
 
 	insert into public.groups (name, description, avatar, visibility, created_by)
-	values (trim(p_name), p_description, p_avatar, coalesce(p_visibility, 'private'), auth.uid())
+	values (v_name, p_description, p_avatar, coalesce(p_visibility, 'private'), auth.uid())
 	returning id into v_group_id;
 
 	insert into public.group_members (group_id, member_id, role)
@@ -358,7 +373,7 @@ set search_path = public
 as $$
 declare
 	v_role public.group_member_role;
-	v_replacement uuid;
+	v_replacement_member_id uuid;
 begin
 	select role into v_role
 	from public.group_members
@@ -379,7 +394,7 @@ begin
 			where group_id = p_group_id and role = 'admin'
 		)
 	then
-		select member_id into v_replacement
+		select member_id into v_replacement_member_id
 		from public.group_members
 		where group_id = p_group_id
 		order by created_at asc, member_id asc
@@ -389,7 +404,7 @@ begin
 			update public.group_members
 			set role = 'admin'
 			where group_id = p_group_id
-			and member_id = v_replacement;
+			and member_id = v_replacement_member_id;
 		end if;
 	end if;
 end

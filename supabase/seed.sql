@@ -105,7 +105,7 @@ $$;
 do $$
 declare
   v_nojau_id uuid;
-  v_oldest uuid;
+  v_oldest_member_id uuid;
 begin
   select id into v_nojau_id from public.groups where name = 'nojau' limit 1;
   if v_nojau_id is null then
@@ -122,17 +122,17 @@ begin
     select 1 from public.group_members
     where group_id = v_nojau_id and role = 'admin'
   ) then
-    select member_id into v_oldest
+    select member_id into v_oldest_member_id
     from public.group_members
     where group_id = v_nojau_id
     order by created_at asc, member_id asc
     limit 1;
 
-    if v_oldest is not null then
+    if v_oldest_member_id is not null then
       update public.group_members
       set role = 'admin'
       where group_id = v_nojau_id
-      and member_id = v_oldest;
+      and member_id = v_oldest_member_id;
     end if;
   end if;
 end
