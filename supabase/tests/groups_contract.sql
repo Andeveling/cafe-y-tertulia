@@ -185,7 +185,7 @@ select ok(
 set local role authenticated;
 set local request.jwt.claim.sub = 'd1111111-1111-1111-1111-111111111111';
 
--- 12-13. group_id inmutable (UPDATE no migra entre grupos).
+-- 12. group_id inmutable (UPDATE no migra entre grupos).
 do $$
 begin
 	update public.materials set group_id = (select id from public.groups where name = 'Grupo Contract B')
@@ -203,13 +203,13 @@ select is(
 	'12. El material no migra de grupo por UPDATE'
 );
 
--- 14-15. Anon no lee materials ni sessions.
+-- 13-14. Anon no lee materials ni sessions.
 reset request.jwt.claim.sub;
 set local role anon;
 select is((select count(*) from public.materials), 0::bigint, '13. Anon no lee materials');
 select is((select count(*) from public.sessions), 0::bigint, '14. Anon no lee sessions');
 
--- 16. Salir revoca: A2 deja A y ya no ve su contenido.
+-- 15-16. Salir revoca: A2 deja A y ya no ve su contenido.
 set local role authenticated;
 set local request.jwt.claim.sub = 'd2222222-2222-2222-2222-222222222222';
 select public.leave_group((select id from public.groups where name = 'Grupo Contract A'));
@@ -224,7 +224,7 @@ select is(
 	'16. Salir quita el grupo de Mis Grupos (privada sigue invisible)'
 );
 
--- 17. is_member() sigue vivo solo para plataforma (catálogo público).
+-- 17-18. is_member() sigue vivo solo para plataforma (catálogo público).
 select ok(
 	(select pg_get_functiondef(oid) ilike '%is_member%')
 	from pg_proc where proname = 'is_member' limit 1,

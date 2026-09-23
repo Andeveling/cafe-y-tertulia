@@ -809,13 +809,13 @@ security definer
 set search_path = public
 as $$
 declare
-	v_ass_group uuid;
-	v_ses_group uuid;
+	v_assignment_group uuid;
+	v_assignment_session uuid;
 begin
-	select group_id, session_id into v_ass_group, v_ses_group
+	select group_id, session_id into v_assignment_group, v_assignment_session
 	from public.assignments where id = new.assignment_id;
-	if v_ass_group is distinct from new.group_id
-		or v_ses_group is distinct from new.session_id
+	if v_assignment_group is distinct from new.group_id
+		or v_assignment_session is distinct from new.session_id
 	then
 		raise exception 'El corazón vive en el grupo de su intervención'
 			using errcode = 'P0001';
@@ -857,7 +857,8 @@ as $$
 declare
 	v_badge_group uuid;
 	v_ses_group uuid;
-	v_sea_group uuid;
+	v_season_id uuid;
+	v_season_group uuid;
 begin
 	select group_id into v_badge_group from public.badges where id = new.badge_id;
 	if v_badge_group is distinct from new.group_id then
@@ -884,10 +885,10 @@ begin
 	end if;
 	-- La temporada se deriva de la sesión cuando hay una: misma regla.
 	if new.session_id is not null then
-		select s.season_id into v_sea_group from public.sessions s where s.id = new.session_id;
-		if v_sea_group is not null then
-			select group_id into v_sea_group from public.seasons where id = v_sea_group;
-			if v_sea_group is distinct from new.group_id then
+		select s.season_id into v_season_id from public.sessions s where s.id = new.session_id;
+		if v_season_id is not null then
+			select group_id into v_season_group from public.seasons where id = v_season_id;
+			if v_season_group is distinct from new.group_id then
 				raise exception 'La temporada y su insignia deben ser del mismo grupo'
 					using errcode = 'P0001';
 			end if;
@@ -909,10 +910,10 @@ security definer
 set search_path = public
 as $$
 declare
-	v_sea_group uuid;
+	v_season_group uuid;
 begin
-	select group_id into v_sea_group from public.seasons where id = new.season_id;
-	if v_sea_group is distinct from new.group_id then
+	select group_id into v_season_group from public.seasons where id = new.season_id;
+	if v_season_group is distinct from new.group_id then
 		raise exception 'El conteo vive en el grupo de su temporada'
 			using errcode = 'P0001';
 	end if;
@@ -943,10 +944,10 @@ security definer
 set search_path = public
 as $$
 declare
-	v_sea_group uuid;
+	v_season_group uuid;
 begin
-	select group_id into v_sea_group from public.seasons where id = new.season_id;
-	if v_sea_group is distinct from new.group_id then
+	select group_id into v_season_group from public.seasons where id = new.season_id;
+	if v_season_group is distinct from new.group_id then
 		raise exception 'El reconocimiento vive en el grupo de su temporada'
 			using errcode = 'P0001';
 	end if;
@@ -979,10 +980,10 @@ security definer
 set search_path = public
 as $$
 declare
-	v_group uuid;
+	v_parent_group uuid;
 begin
-	select group_id into v_group from public.takes where id = coalesce(new.take_id, old.take_id);
-	if v_group is null then
+	select group_id into v_parent_group from public.takes where id = coalesce(new.take_id, old.take_id);
+	if v_parent_group is null then
 		raise exception 'El take no existe'
 			using errcode = 'P0001';
 	end if;
@@ -990,7 +991,7 @@ begin
 		select 1
 		from public.group_members gm
 		join public.members m on m.id = gm.member_id
-		where gm.group_id = v_group
+		where gm.group_id = v_parent_group
 		and gm.member_id = coalesce(new.member_id, old.member_id)
 		and m.status = 'active'
 	) then
@@ -1045,10 +1046,10 @@ security definer
 set search_path = public
 as $$
 declare
-	v_group uuid;
+	v_parent_group uuid;
 begin
-	select group_id into v_group from public.trivia_rounds where id = coalesce(new.round_id, old.round_id);
-	if v_group is null then
+	select group_id into v_parent_group from public.trivia_rounds where id = coalesce(new.round_id, old.round_id);
+	if v_parent_group is null then
 		raise exception 'La ronda no existe'
 			using errcode = 'P0001';
 	end if;
@@ -1056,7 +1057,7 @@ begin
 		select 1
 		from public.group_members gm
 		join public.members m on m.id = gm.member_id
-		where gm.group_id = v_group
+		where gm.group_id = v_parent_group
 		and gm.member_id = coalesce(new.member_id, old.member_id)
 		and m.status = 'active'
 	) then
@@ -1079,10 +1080,10 @@ security definer
 set search_path = public
 as $$
 declare
-	v_group uuid;
+	v_parent_group uuid;
 begin
-	select group_id into v_group from public.trivia_rounds where id = coalesce(new.round_id, old.round_id);
-	if v_group is null then
+	select group_id into v_parent_group from public.trivia_rounds where id = coalesce(new.round_id, old.round_id);
+	if v_parent_group is null then
 		raise exception 'La ronda no existe'
 			using errcode = 'P0001';
 	end if;
@@ -1090,7 +1091,7 @@ begin
 		select 1
 		from public.group_members gm
 		join public.members m on m.id = gm.member_id
-		where gm.group_id = v_group
+		where gm.group_id = v_parent_group
 		and gm.member_id = coalesce(new.member_id, old.member_id)
 		and m.status = 'active'
 	) then
@@ -1110,41 +1111,49 @@ create trigger trivia_hits_group_coherence
 -- 6. Gamificación per-grupo
 -- ============================================================
 -- Cada pregunta alimenta la temporada abierta DE SU grupo y la insignia
--- first_question DE SU grupo. Maestro en A, semilla en B: posible.
+-- first_question DE SU grupo.
 
 create or replace function public.record_question_gamification()
-returns trigger language plpgsql security definer set search_path = public
+returns trigger
+language plpgsql
+security definer
+set search_path = public
 as $$
-declare season uuid; badge uuid; n integer; v_group uuid;
+declare
+	v_group_id uuid;
+	v_season_id uuid;
+	v_badge_id uuid;
+	v_count integer;
 begin
-  v_group := new.group_id;
-  if v_group is null then
-    select group_id into v_group from public.sessions where id = new.session_id;
-  end if;
-  if v_group is null then return new; end if;
+	v_group_id := new.group_id;
+	if v_group_id is null then
+		select group_id into v_group_id from public.sessions where id = new.session_id;
+	end if;
+	if v_group_id is null then return new; end if;
 
-  select id into season from public.seasons
-  where group_id = v_group and status = 'open'
-  order by starts_at desc limit 1;
-  if season is null then return new; end if;
+	select id into v_season_id from public.seasons
+	where group_id = v_group_id and status = 'open'
+	order by starts_at desc limit 1;
+	if v_season_id is null then return new; end if;
 
-  update public.counts
-    set value = value + 1
-    where member_id = new.author_id and event = 'question_created' and season_id = season;
-  if not found then
-    insert into public.counts (member_id, event, season_id, group_id, value)
-      values (new.author_id, 'question_created', season, v_group, 1);
-  end if;
-  select value into n from public.counts where member_id = new.author_id and event = 'question_created' and season_id = season;
-  select id into badge from public.badges where group_id = v_group and key = 'first_question';
-  if n = 1 and badge is not null
-    and not exists (select 1 from public.awards where badge_id = badge and member_id = new.author_id and group_id = v_group)
-  then
-    insert into public.awards (badge_id, member_id, session_id, group_id, trigger)
-    values (badge, new.author_id, new.session_id, v_group, 'first_question');
-  end if;
-  return new;
-end $$;
+	update public.counts
+		set value = value + 1
+		where member_id = new.author_id and event = 'question_created' and season_id = v_season_id;
+	if not found then
+		insert into public.counts (member_id, event, season_id, group_id, value)
+			values (new.author_id, 'question_created', v_season_id, v_group_id, 1);
+	end if;
+	select value into v_count from public.counts where member_id = new.author_id and event = 'question_created' and season_id = v_season_id;
+	select id into v_badge_id from public.badges where group_id = v_group_id and key = 'first_question';
+	if v_count = 1 and v_badge_id is not null
+		and not exists (select 1 from public.awards where badge_id = v_badge_id and member_id = new.author_id and group_id = v_group_id)
+	then
+		insert into public.awards (badge_id, member_id, session_id, group_id, trigger)
+		values (v_badge_id, new.author_id, new.session_id, v_group_id, 'first_question');
+	end if;
+	return new;
+end;
+$$;
 
 -- La asistencia se registra en la temporada (ya por grupo tras el lote A)
 -- con su group_id: salir del grupo no arrastra conteos ajenos.
@@ -1155,42 +1164,42 @@ security definer
 set search_path = public
 as $$
 declare
-  season uuid;
-  v_group uuid;
-  participant record;
+	v_season_id uuid;
+	v_group_id uuid;
+	v_participant record;
 begin
-  if old.status <> 'in_progress' or new.status <> 'closed' then
-    return new;
-  end if;
+	if old.status <> 'in_progress' or new.status <> 'closed' then
+		return new;
+	end if;
 
-  season := new.season_id;
-  if season is null then
-    select id into season from public.seasons
-    where group_id = new.group_id and status = 'open'
-    order by starts_at desc limit 1;
-    if season is null then return new; end if;
-  end if;
+	v_season_id := new.season_id;
+	if v_season_id is null then
+		select id into v_season_id from public.seasons
+		where group_id = new.group_id and status = 'open'
+		order by starts_at desc limit 1;
+		if v_season_id is null then return new; end if;
+	end if;
 
-  select group_id into v_group from public.seasons where id = season;
-  if v_group is null then v_group := new.group_id; end if;
+	select group_id into v_group_id from public.seasons where id = v_season_id;
+	if v_group_id is null then v_group_id := new.group_id; end if;
 
-  for participant in
-    select sp.member_id
-    from public.session_participants sp
-    where sp.session_id = new.id
-  loop
-    update public.counts
-      set value = value + 1
-      where member_id = participant.member_id
-        and event = 'session_attended'
-        and season_id = season;
-    if not found then
-      insert into public.counts (member_id, event, season_id, group_id, value)
-        values (participant.member_id, 'session_attended', season, v_group, 1);
-    end if;
-  end loop;
+	for v_participant in
+		select sp.member_id
+		from public.session_participants sp
+		where sp.session_id = new.id
+	loop
+		update public.counts
+			set value = value + 1
+			where member_id = v_participant.member_id
+				and event = 'session_attended'
+				and season_id = v_season_id;
+		if not found then
+			insert into public.counts (member_id, event, season_id, group_id, value)
+				values (v_participant.member_id, 'session_attended', v_season_id, v_group_id, 1);
+		end if;
+	end loop;
 
-  return new;
+	return new;
 end;
 $$;
 
@@ -1202,81 +1211,81 @@ security definer
 set search_path = public
 as $$
 declare
-  r trivia_rounds%rowtype;
-  correct int;
-  a record;
-  winner uuid;
-  top_hits int;
-  ties int;
-  badge uuid;
-  season uuid;
-  v_group uuid;
+	v_round public.trivia_rounds%rowtype;
+	v_correct int;
+	v_answer record;
+	v_winner_id uuid;
+	v_top_hits int;
+	v_ties int;
+	v_badge_id uuid;
+	v_season_id uuid;
+	v_group_id uuid;
 begin
-  select tr.* into r
-  from trivia_rounds tr
-  join sessions s on s.id = tr.session_id
-  where tr.id = target_round_id and s.moderator_id = auth.uid();
-  if not found then raise exception 'Solo el moderador'; end if;
-  if r.status = 'board' then return; end if;
+	select tr.* into v_round
+	from public.trivia_rounds tr
+	join public.sessions s on s.id = tr.session_id
+	where tr.id = target_round_id and s.moderator_id = auth.uid();
+	if not found then raise exception 'Solo el moderador'; end if;
+	if v_round.status = 'board' then return; end if;
 
-  v_group := r.group_id;
-  if v_group is null then
-    select group_id into v_group from sessions where id = r.session_id;
-  end if;
-  if v_group is not null and not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
+	v_group_id := v_round.group_id;
+	if v_group_id is null then
+		select group_id into v_group_id from public.sessions where id = v_round.session_id;
+	end if;
+	if v_group_id is not null and not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
 
-  if not r.locked then
-    select correct_index into correct
-    from trivia_items
-    where trivia_id = r.trivia_id and sort_order = r.question_index + 1;
-    for a in
-      select member_id, option_index from trivia_answers
-      where round_id = target_round_id and question_index = r.question_index
-    loop
-      if a.option_index = correct then
-        insert into trivia_hits (round_id, member_id, hits)
-        values (target_round_id, a.member_id, 1)
-        on conflict (round_id, member_id)
-        do update set hits = trivia_hits.hits + 1;
-      end if;
-    end loop;
-  end if;
+	if not v_round.locked then
+		select correct_index into v_correct
+		from public.trivia_items
+		where trivia_id = v_round.trivia_id and sort_order = v_round.question_index + 1;
+		for v_answer in
+			select member_id, option_index from public.trivia_answers
+			where round_id = target_round_id and question_index = v_round.question_index
+		loop
+			if v_answer.option_index = v_correct then
+				insert into public.trivia_hits (round_id, member_id, hits)
+				values (target_round_id, v_answer.member_id, 1)
+				on conflict (round_id, member_id)
+				do update set hits = public.trivia_hits.hits + 1;
+			end if;
+		end loop;
+	end if;
 
-  update trivia_rounds set status = 'board', locked = false where id = target_round_id;
+	update public.trivia_rounds set status = 'board', locked = false where id = target_round_id;
 
-  select max(hits) into top_hits from trivia_hits where round_id = target_round_id;
-  if top_hits is null or top_hits <= 0 then return; end if;
+	select max(hits) into v_top_hits from public.trivia_hits where round_id = target_round_id;
+	if v_top_hits is null or v_top_hits <= 0 then return; end if;
 
-  select count(*) into ties from trivia_hits
-  where round_id = target_round_id and hits = top_hits;
-  if ties <> 1 then return; end if;
+	select count(*) into v_ties from public.trivia_hits
+	where round_id = target_round_id and hits = v_top_hits;
+	if v_ties <> 1 then return; end if;
 
-  select member_id into winner from trivia_hits
-  where round_id = target_round_id and hits = top_hits;
+	select member_id into v_winner_id from public.trivia_hits
+	where round_id = target_round_id and hits = v_top_hits;
 
-  if v_group is null then return; end if;
-  select id into badge from badges where group_id = v_group and key = 'elephant_memory';
-  if badge is null then return; end if;
+	if v_group_id is null then return; end if;
+	select id into v_badge_id from public.badges where group_id = v_group_id and key = 'elephant_memory';
+	if v_badge_id is null then return; end if;
 
-  if not exists (
-    select 1 from awards where badge_id = badge and member_id = winner and group_id = v_group
-  ) then
-    insert into awards (badge_id, member_id, session_id, group_id, trigger)
-    values (badge, winner, r.session_id, v_group, 'trivia_won');
-  end if;
+	if not exists (
+		select 1 from public.awards where badge_id = v_badge_id and member_id = v_winner_id and group_id = v_group_id
+	) then
+		insert into public.awards (badge_id, member_id, session_id, group_id, trigger)
+		values (v_badge_id, v_winner_id, v_round.session_id, v_group_id, 'trivia_won');
+	end if;
 
-  select id into season from seasons where group_id = v_group and status = 'open' order by starts_at desc limit 1;
-  if season is not null then
-    update counts set value = value + 1
-    where member_id = winner and event = 'trivia_won' and season_id = season;
-    if not found then
-      insert into counts (member_id, event, season_id, group_id, value)
-      values (winner, 'trivia_won', season, v_group, 1);
-    end if;
-  end if;
+	select id into v_season_id from public.seasons where group_id = v_group_id and status = 'open' order by starts_at desc limit 1;
+	if v_season_id is not null then
+		update public.counts set value = value + 1
+		where member_id = v_winner_id and event = 'trivia_won' and season_id = v_season_id;
+		if not found then
+			insert into public.counts (member_id, event, season_id, group_id, value)
+			values (v_winner_id, 'trivia_won', v_season_id, v_group_id, 1);
+		end if;
+	end if;
 end;
 $$;
 
@@ -1288,49 +1297,49 @@ security definer
 set search_path = public
 as $$
 declare
-  assignee_session uuid;
-  author uuid;
-  season uuid;
-  v_group uuid;
+	v_session_id uuid;
+	v_author_id uuid;
+	v_season_id uuid;
+	v_group_id uuid;
 begin
-  select a.session_id into assignee_session
-  from public.assignments a
-  join public.sessions s on s.id = a.session_id
-  where a.id = target_assignment_id
-    and a.state = 'exposition'
-    and s.status = 'in_progress'
-    and s.moderator_id = auth.uid();
-  if not found then
-    raise exception 'Solo el Moderador puede extender en Exposición';
-  end if;
+	select a.session_id into v_session_id
+	from public.assignments a
+	join public.sessions s on s.id = a.session_id
+	where a.id = target_assignment_id
+		and a.state = 'exposition'
+		and s.status = 'in_progress'
+		and s.moderator_id = auth.uid();
+	if not found then
+		raise exception 'Solo el Moderador puede extender en Exposición';
+	end if;
 
-  select s.group_id into v_group from public.sessions s where s.id = assignee_session;
-  if v_group is not null and not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
+	select s.group_id into v_group_id from public.sessions s where s.id = v_session_id;
+	if v_group_id is not null and not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
 
-  update public.assignments
-  set phase_started_at = coalesce(phase_started_at, now()) - interval '60 seconds'
-  where id = target_assignment_id;
+	update public.assignments
+	set phase_started_at = coalesce(phase_started_at, now()) - interval '60 seconds'
+	where id = target_assignment_id;
 
-  select q.author_id into author
-  from public.assignments a
-  join public.questions q on q.id = a.question_id
-  where a.id = target_assignment_id;
+	select q.author_id into v_author_id
+	from public.assignments a
+	join public.questions q on q.id = a.question_id
+	where a.id = target_assignment_id;
 
-  if v_group is null then return; end if;
-  select id into season from public.seasons
-  where group_id = v_group and status = 'open' order by starts_at desc limit 1;
-  if season is null then return; end if;
+	if v_group_id is null then return; end if;
+	select id into v_season_id from public.seasons
+	where group_id = v_group_id and status = 'open' order by starts_at desc limit 1;
+	if v_season_id is null then return; end if;
 
-  update public.counts
-  set value = value + 1
-  where member_id = author and event = 'question_hot' and season_id = season;
-  if not found then
-    insert into public.counts (member_id, event, season_id, group_id, value)
-    values (author, 'question_hot', season, v_group, 1);
-  end if;
+	update public.counts
+	set value = value + 1
+	where member_id = v_author_id and event = 'question_hot' and season_id = v_season_id;
+	if not found then
+		insert into public.counts (member_id, event, season_id, group_id, value)
+		values (v_author_id, 'question_hot', v_season_id, v_group_id, 1);
+	end if;
 end;
 $$;
 
@@ -1345,69 +1354,69 @@ set search_path = public
 stable
 as $$
 declare
-  sessions_total int := 0;
-  insignias_count int := 0;
-  lvl int := 0;
-  title text := '';
-  current_threshold int := 0;
-  next_threshold int := 1;
-  next_title text := 'Novato';
-  next_insignias_required int := 0;
+	v_sessions_total int := 0;
+	v_insignias_count int := 0;
+	v_level int := 0;
+	v_title text := '';
+	v_current_threshold int := 0;
+	v_next_threshold int := 1;
+	v_next_title text := 'Novato';
+	v_next_insignias_required int := 0;
 begin
-  if p_group_id is null then
-    select coalesce(sum(value), 0) into sessions_total
-    from public.counts
-    where member_id = target_member_id
-      and event = 'session_attended';
-    select count(*) into insignias_count
-    from public.awards a
-    join public.badges b on b.id = a.badge_id
-    where a.member_id = target_member_id
-      and b.kind = 'individual';
-  else
-    select coalesce(sum(value), 0) into sessions_total
-    from public.counts
-    where member_id = target_member_id
-      and event = 'session_attended'
-      and group_id = p_group_id;
-    select count(*) into insignias_count
-    from public.awards a
-    join public.badges b on b.id = a.badge_id
-    where a.member_id = target_member_id
-      and a.group_id = p_group_id
-      and b.kind = 'individual';
-  end if;
+	if p_group_id is null then
+		select coalesce(sum(value), 0) into v_sessions_total
+		from public.counts
+		where member_id = target_member_id
+			and event = 'session_attended';
+		select count(*) into v_insignias_count
+		from public.awards a
+		join public.badges b on b.id = a.badge_id
+		where a.member_id = target_member_id
+			and b.kind = 'individual';
+	else
+		select coalesce(sum(value), 0) into v_sessions_total
+		from public.counts
+		where member_id = target_member_id
+			and event = 'session_attended'
+			and group_id = p_group_id;
+		select count(*) into v_insignias_count
+		from public.awards a
+		join public.badges b on b.id = a.badge_id
+		where a.member_id = target_member_id
+			and a.group_id = p_group_id
+			and b.kind = 'individual';
+	end if;
 
-  if sessions_total >= 50 and insignias_count >= 3 then
-    lvl := 5; title := 'Sabio'; current_threshold := 50;
-    next_threshold := 50; next_title := 'Sabio'; next_insignias_required := 3;
-  elsif sessions_total >= 25 and insignias_count >= 2 then
-    lvl := 4; title := 'Veterano'; current_threshold := 25;
-    next_threshold := 50; next_title := 'Sabio'; next_insignias_required := 3;
-  elsif sessions_total >= 12 and insignias_count >= 1 then
-    lvl := 3; title := 'Habitual'; current_threshold := 12;
-    next_threshold := 25; next_title := 'Veterano'; next_insignias_required := 2;
-  elsif sessions_total >= 5 then
-    lvl := 2; title := 'Parroquiano'; current_threshold := 5;
-    next_threshold := 12; next_title := 'Habitual'; next_insignias_required := 1;
-  elsif sessions_total >= 1 then
-    lvl := 1; title := 'Novato'; current_threshold := 1;
-    next_threshold := 5; next_title := 'Parroquiano'; next_insignias_required := 0;
-  else
-    lvl := 0; title := ''; current_threshold := 0;
-    next_threshold := 1; next_title := 'Novato'; next_insignias_required := 0;
-  end if;
+	if v_sessions_total >= 50 and v_insignias_count >= 3 then
+		v_level := 5; v_title := 'Sabio'; v_current_threshold := 50;
+		v_next_threshold := 50; v_next_title := 'Sabio'; v_next_insignias_required := 3;
+	elsif v_sessions_total >= 25 and v_insignias_count >= 2 then
+		v_level := 4; v_title := 'Veterano'; v_current_threshold := 25;
+		v_next_threshold := 50; v_next_title := 'Sabio'; v_next_insignias_required := 3;
+	elsif v_sessions_total >= 12 and v_insignias_count >= 1 then
+		v_level := 3; v_title := 'Habitual'; v_current_threshold := 12;
+		v_next_threshold := 25; v_next_title := 'Veterano'; v_next_insignias_required := 2;
+	elsif v_sessions_total >= 5 then
+		v_level := 2; v_title := 'Parroquiano'; v_current_threshold := 5;
+		v_next_threshold := 12; v_next_title := 'Habitual'; v_next_insignias_required := 1;
+	elsif v_sessions_total >= 1 then
+		v_level := 1; v_title := 'Novato'; v_current_threshold := 1;
+		v_next_threshold := 5; v_next_title := 'Parroquiano'; v_next_insignias_required := 0;
+	else
+		v_level := 0; v_title := ''; v_current_threshold := 0;
+		v_next_threshold := 1; v_next_title := 'Novato'; v_next_insignias_required := 0;
+	end if;
 
-  return jsonb_build_object(
-    'level', lvl,
-    'title', title,
-    'sessions_attended', sessions_total,
-    'insignias_count', insignias_count,
-    'current_threshold', current_threshold,
-    'next_threshold', next_threshold,
-    'next_title', next_title,
-    'next_insignias_required', next_insignias_required
-  );
+	return jsonb_build_object(
+		'level', v_level,
+		'title', v_title,
+		'sessions_attended', v_sessions_total,
+		'insignias_count', v_insignias_count,
+		'current_threshold', v_current_threshold,
+		'next_threshold', v_next_threshold,
+		'next_title', v_next_title,
+		'next_insignias_required', v_next_insignias_required
+	);
 end;
 $$;
 
@@ -1417,143 +1426,163 @@ grant execute on function public.compute_member_level(uuid, uuid) to authenticat
 -- triviantes, debate intenso, exploradores, club de plata). El badge y el
 -- award viven en el grupo del evento.
 create or replace function public.check_mesa_llena()
-returns void language plpgsql security definer set search_path = public
+returns void
+language plpgsql
+security definer
+set search_path = public
 as $$
 declare
-  session_rec record;
-  v_badge_id uuid;
-  v_group uuid;
-  v_active int;
+	v_session record;
+	v_badge_id uuid;
+	v_group_id uuid;
+	v_active int;
 begin
-  for session_rec in
-    select s.id, s.group_id, s.created_at
-    from sessions s
-    where s.status in ('closed', 'archived') and s.group_id is not null
-    order by s.created_at
-  loop
-    v_group := session_rec.group_id;
-    select id into v_badge_id from badges where group_id = v_group and key = 'mesa_llena';
-    if v_badge_id is null then continue; end if;
-    if exists (select 1 from awards a where a.badge_id = v_badge_id and a.group_id = v_group) then
-      continue;
-    end if;
-    select count(*) into v_active from group_members gm
-    join members m on m.id = gm.member_id
-    where gm.group_id = v_group and m.status = 'active';
-    if v_active < 2 then continue; end if;
-    if (
-      select count(distinct sp.member_id)
-      from session_participants sp
-      where sp.session_id = session_rec.id
-        and sp.role != 'spectator'
-    ) >= v_active then
-      insert into awards (badge_id, member_id, session_id, group_id, trigger)
-      values (v_badge_id, null, session_rec.id, v_group, 'mesa_llena');
-    end if;
-  end loop;
-end $$;
+	for v_session in
+		select s.id, s.group_id, s.created_at
+		from public.sessions s
+		where s.status in ('closed', 'archived') and s.group_id is not null
+		order by s.created_at
+	loop
+		v_group_id := v_session.group_id;
+		select id into v_badge_id from public.badges where group_id = v_group_id and key = 'mesa_llena';
+		if v_badge_id is null then continue; end if;
+		if exists (select 1 from public.awards a where a.badge_id = v_badge_id and a.group_id = v_group_id) then
+			continue;
+		end if;
+		select count(*) into v_active from public.group_members gm
+		join public.members m on m.id = gm.member_id
+		where gm.group_id = v_group_id and m.status = 'active';
+		if v_active < 2 then continue; end if;
+		if (
+			select count(distinct sp.member_id)
+			from public.session_participants sp
+			where sp.session_id = v_session.id
+				and sp.role != 'spectator'
+		) >= v_active then
+			insert into public.awards (badge_id, member_id, session_id, group_id, trigger)
+			values (v_badge_id, null, v_session.id, v_group_id, 'mesa_llena');
+		end if;
+	end loop;
+end;
+$$;
 
 create or replace function public.check_triviantes(target_session_id uuid)
-returns void language plpgsql security definer set search_path = public
+returns void
+language plpgsql
+security definer
+set search_path = public
 as $$
 declare
-  participant_count int;
-  answerer_count int;
-  v_badge_id uuid;
-  v_group uuid;
+	v_participant_count int;
+	v_answerer_count int;
+	v_badge_id uuid;
+	v_group_id uuid;
 begin
-  select group_id into v_group from sessions where id = target_session_id;
-  if v_group is null then return; end if;
-  select id into v_badge_id from badges where group_id = v_group and key = 'triviantes';
-  if v_badge_id is null then return; end if;
-  if exists (select 1 from awards a where a.badge_id = v_badge_id and a.group_id = v_group) then
-    return;
-  end if;
-  select count(*) into participant_count
-  from session_participants
-  where session_id = target_session_id and role != 'spectator';
-  if participant_count < 2 then return; end if;
-  select count(distinct ta.member_id) into answerer_count
-  from trivia_answers ta
-  join trivia_rounds tr on tr.id = ta.round_id
-  where tr.session_id = target_session_id;
-  if answerer_count >= participant_count then
-    insert into awards (badge_id, member_id, session_id, group_id, trigger)
-    values (v_badge_id, null, target_session_id, v_group, 'triviantes');
-  end if;
-end $$;
+	select group_id into v_group_id from public.sessions where id = target_session_id;
+	if v_group_id is null then return; end if;
+	select id into v_badge_id from public.badges where group_id = v_group_id and key = 'triviantes';
+	if v_badge_id is null then return; end if;
+	if exists (select 1 from public.awards a where a.badge_id = v_badge_id and a.group_id = v_group_id) then
+		return;
+	end if;
+	select count(*) into v_participant_count
+	from public.session_participants
+	where session_id = target_session_id and role != 'spectator';
+	if v_participant_count < 2 then return; end if;
+	select count(distinct ta.member_id) into v_answerer_count
+	from public.trivia_answers ta
+	join public.trivia_rounds tr on tr.id = ta.round_id
+	where tr.session_id = target_session_id;
+	if v_answerer_count >= v_participant_count then
+		insert into public.awards (badge_id, member_id, session_id, group_id, trigger)
+		values (v_badge_id, null, target_session_id, v_group_id, 'triviantes');
+	end if;
+end;
+$$;
 
 create or replace function public.check_debate_intenso(target_session_id uuid)
-returns void language plpgsql security definer set search_path = public
+returns void
+language plpgsql
+security definer
+set search_path = public
 as $$
 declare
-  question_count int;
-  v_badge_id uuid;
-  v_group uuid;
+	v_question_count int;
+	v_badge_id uuid;
+	v_group_id uuid;
 begin
-  select group_id into v_group from sessions where id = target_session_id;
-  if v_group is null then return; end if;
-  select id into v_badge_id from badges where group_id = v_group and key = 'debate_intenso';
-  if v_badge_id is null then return; end if;
-  if exists (select 1 from awards a where a.badge_id = v_badge_id and a.group_id = v_group) then
-    return;
-  end if;
-  select count(*) into question_count
-  from questions
-  where session_id = target_session_id;
-  if question_count >= 10 then
-    insert into awards (badge_id, member_id, session_id, group_id, trigger)
-    values (v_badge_id, null, target_session_id, v_group, 'debate_intenso');
-  end if;
-end $$;
+	select group_id into v_group_id from public.sessions where id = target_session_id;
+	if v_group_id is null then return; end if;
+	select id into v_badge_id from public.badges where group_id = v_group_id and key = 'debate_intenso';
+	if v_badge_id is null then return; end if;
+	if exists (select 1 from public.awards a where a.badge_id = v_badge_id and a.group_id = v_group_id) then
+		return;
+	end if;
+	select count(*) into v_question_count
+	from public.questions
+	where session_id = target_session_id;
+	if v_question_count >= 10 then
+		insert into public.awards (badge_id, member_id, session_id, group_id, trigger)
+		values (v_badge_id, null, target_session_id, v_group_id, 'debate_intenso');
+	end if;
+end;
+$$;
 
 create or replace function public.check_exploradores()
-returns void language plpgsql security definer set search_path = public
+returns void
+language plpgsql
+security definer
+set search_path = public
 as $$
 declare
-  g record;
-  material_count int;
-  v_badge_id uuid;
+	v_group record;
+	v_material_count int;
+	v_badge_id uuid;
 begin
-  for g in select id from groups loop
-    select id into v_badge_id from badges where group_id = g.id and key = 'exploradores';
-    if v_badge_id is null then continue; end if;
-    if exists (select 1 from awards a where a.badge_id = v_badge_id and a.group_id = g.id) then
-      continue;
-    end if;
-    select count(*) into material_count
-    from materials
-    where group_id = g.id and status in ('in_progress', 'finished');
-    if material_count >= 5 then
-      insert into awards (badge_id, member_id, session_id, group_id, trigger)
-      values (v_badge_id, null, null, g.id, 'exploradores');
-    end if;
-  end loop;
-end $$;
+	for v_group in select id from public.groups loop
+		select id into v_badge_id from public.badges where group_id = v_group.id and key = 'exploradores';
+		if v_badge_id is null then continue; end if;
+		if exists (select 1 from public.awards a where a.badge_id = v_badge_id and a.group_id = v_group.id) then
+			continue;
+		end if;
+		select count(*) into v_material_count
+		from public.materials
+		where group_id = v_group.id and status in ('in_progress', 'finished');
+		if v_material_count >= 5 then
+			insert into public.awards (badge_id, member_id, session_id, group_id, trigger)
+			values (v_badge_id, null, null, v_group.id, 'exploradores');
+		end if;
+	end loop;
+end;
+$$;
 
 create or replace function public.check_club_de_plata()
-returns void language plpgsql security definer set search_path = public
+returns void
+language plpgsql
+security definer
+set search_path = public
 as $$
 declare
-  g record;
-  session_count int;
-  v_badge_id uuid;
+	v_group record;
+	v_session_count int;
+	v_badge_id uuid;
 begin
-  for g in select id from groups loop
-    select id into v_badge_id from badges where group_id = g.id and key = 'club_de_plata';
-    if v_badge_id is null then continue; end if;
-    if exists (select 1 from awards a where a.badge_id = v_badge_id and a.group_id = g.id) then
-      continue;
-    end if;
-    select count(*) into session_count
-    from sessions
-    where group_id = g.id and status in ('closed', 'archived');
-    if session_count >= 25 then
-      insert into awards (badge_id, member_id, session_id, group_id, trigger)
-      values (v_badge_id, null, null, g.id, 'club_de_plata');
-    end if;
-  end loop;
-end $$;
+	for v_group in select id from public.groups loop
+		select id into v_badge_id from public.badges where group_id = v_group.id and key = 'club_de_plata';
+		if v_badge_id is null then continue; end if;
+		if exists (select 1 from public.awards a where a.badge_id = v_badge_id and a.group_id = v_group.id) then
+			continue;
+		end if;
+		select count(*) into v_session_count
+		from public.sessions
+		where group_id = v_group.id and status in ('closed', 'archived');
+		if v_session_count >= 25 then
+			insert into public.awards (badge_id, member_id, session_id, group_id, trigger)
+			values (v_badge_id, null, null, v_group.id, 'club_de_plata');
+		end if;
+	end loop;
+end;
+$$;
 
 -- ============================================================
 -- 7. RPCs de sala/minijuegos/rating con cerradura por grupo
@@ -1572,55 +1601,55 @@ security definer
 set search_path = public
 as $$
 declare
-  tid uuid;
-  item jsonb;
-  i int := 0;
-  n int;
-  v_group uuid;
+	v_trivia_id uuid;
+	v_item jsonb;
+	v_sort_order int := 0;
+	v_item_count int;
+	v_group_id uuid;
 begin
-  if not public.is_member() then
-    raise exception 'Solo miembros';
-  end if;
-  select group_id into v_group from materials where id = p_material_id;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de este material'
-      using errcode = '42501';
-  end if;
-  if not exists (
-    select 1 from sessions s
-    where s.material_id = p_material_id and s.status = 'preparation' and s.group_id = v_group
-  ) then
-    raise exception 'Solo en preparación';
-  end if;
+	if not public.is_member() then
+		raise exception 'Solo miembros';
+	end if;
+	select group_id into v_group_id from public.materials where id = p_material_id;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de este material'
+			using errcode = '42501';
+	end if;
+	if not exists (
+		select 1 from public.sessions s
+		where s.material_id = p_material_id and s.status = 'preparation' and s.group_id = v_group_id
+	) then
+		raise exception 'Solo en preparación';
+	end if;
 
-  n := jsonb_array_length(p_items);
-  if n < 3 or n > 5 then
-    raise exception 'Una trivia necesita 3 a 5 preguntas';
-  end if;
+	v_item_count := jsonb_array_length(p_items);
+	if v_item_count < 3 or v_item_count > 5 then
+		raise exception 'Una trivia necesita 3 a 5 preguntas';
+	end if;
 
-  insert into trivias (material_id, group_id, author_id, title)
-  values (p_material_id, v_group, auth.uid(), trim(p_title))
-  returning id into tid;
+	insert into public.trivias (material_id, group_id, author_id, title)
+	values (p_material_id, v_group_id, auth.uid(), trim(p_title))
+	returning id into v_trivia_id;
 
-  for item in select * from jsonb_array_elements(p_items)
-  loop
-    i := i + 1;
-    insert into trivia_items (trivia_id, prompt, options, correct_index, sort_order)
-    values (
-      tid,
-      trim(item->>'prompt'),
-      array[
-        item->'options'->>0,
-        item->'options'->>1,
-        item->'options'->>2,
-        item->'options'->>3
-      ],
-      (item->>'correct_index')::int,
-      i
-    );
-  end loop;
+	for v_item in select * from jsonb_array_elements(p_items)
+	loop
+		v_sort_order := v_sort_order + 1;
+		insert into public.trivia_items (trivia_id, prompt, options, correct_index, sort_order)
+		values (
+			v_trivia_id,
+			trim(v_item->>'prompt'),
+			array[
+				v_item->'options'->>0,
+				v_item->'options'->>1,
+				v_item->'options'->>2,
+				v_item->'options'->>3
+			],
+			(v_item->>'correct_index')::int,
+			v_sort_order
+		);
+	end loop;
 
-  return tid;
+	return v_trivia_id;
 end;
 $$;
 
@@ -1634,57 +1663,57 @@ security definer
 set search_path = public
 as $$
 declare
-  rid uuid;
-  mid uuid;
-  n int;
-  v_group uuid;
-  v_trivia_group uuid;
+	v_round_id uuid;
+	v_material_id uuid;
+	v_count int;
+	v_group_id uuid;
+	v_trivia_group uuid;
 begin
-  select group_id into v_group from sessions where id = target_session_id;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
-  select material_id into mid from sessions
-  where id = target_session_id and status = 'in_progress' and moderator_id = auth.uid() and group_id = v_group;
-  if mid is null then
-    raise exception 'Solo el moderador en sesión en curso';
-  end if;
+	select group_id into v_group_id from public.sessions where id = target_session_id;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
+	select material_id into v_material_id from public.sessions
+	where id = target_session_id and status = 'in_progress' and moderator_id = auth.uid() and group_id = v_group_id;
+	if v_material_id is null then
+		raise exception 'Solo el moderador en sesión en curso';
+	end if;
 
-  select group_id into v_trivia_group from trivias where id = target_trivia_id;
-  if v_trivia_group is distinct from v_group then
-    raise exception 'Trivia no pertenece al grupo de la sesión'
-      using errcode = 'P0001';
-  end if;
+	select group_id into v_trivia_group from public.trivias where id = target_trivia_id;
+	if v_trivia_group is distinct from v_group_id then
+		raise exception 'Trivia no pertenece al grupo de la sesión'
+			using errcode = 'P0001';
+	end if;
 
-  if not exists (
-    select 1 from trivias t where t.id = target_trivia_id and t.material_id = mid
-  ) then
-    raise exception 'Trivia no pertenece al material';
-  end if;
+	if not exists (
+		select 1 from public.trivias t where t.id = target_trivia_id and t.material_id = v_material_id
+	) then
+		raise exception 'Trivia no pertenece al material';
+	end if;
 
-  select count(*) into n from trivia_rounds where session_id = target_session_id;
-  if n >= 2 then
-    raise exception 'Máximo 2 trivias por sesión';
-  end if;
+	select count(*) into v_count from public.trivia_rounds where session_id = target_session_id;
+	if v_count >= 2 then
+		raise exception 'Máximo 2 trivias por sesión';
+	end if;
 
-  if exists (
-    select 1 from trivia_rounds
-    where session_id = target_session_id and status = 'live'
-  ) then
-    raise exception 'Ya hay una trivia en curso';
-  end if;
+	if exists (
+		select 1 from public.trivia_rounds
+		where session_id = target_session_id and status = 'live'
+	) then
+		raise exception 'Ya hay una trivia en curso';
+	end if;
 
-  select count(*) into n from trivia_items where trivia_id = target_trivia_id;
-  if n < 3 or n > 5 then
-    raise exception 'Trivia inválida';
-  end if;
+	select count(*) into v_count from public.trivia_items where trivia_id = target_trivia_id;
+	if v_count < 3 or v_count > 5 then
+		raise exception 'Trivia inválida';
+	end if;
 
-  insert into trivia_rounds (session_id, group_id, trivia_id)
-  values (target_session_id, v_group, target_trivia_id)
-  returning id into rid;
+	insert into public.trivia_rounds (session_id, group_id, trivia_id)
+	values (target_session_id, v_group_id, target_trivia_id)
+	returning id into v_round_id;
 
-  return rid;
+	return v_round_id;
 end;
 $$;
 
@@ -1698,35 +1727,35 @@ security definer
 set search_path = public
 as $$
 declare
-  r trivia_rounds%rowtype;
-  v_group uuid;
+	v_round public.trivia_rounds%rowtype;
+	v_group_id uuid;
 begin
-  if not public.is_member() then raise exception 'Solo miembros'; end if;
-  select * into r from trivia_rounds where id = target_round_id;
-  if not found then raise exception 'No hay pregunta abierta'; end if;
-  v_group := r.group_id;
-  if v_group is null then
-    select group_id into v_group from sessions where id = r.session_id;
-  end if;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
-  if r.status <> 'live' or r.locked then
-    raise exception 'No hay pregunta abierta';
-  end if;
-  if p_option_index < 0 or p_option_index > 3 then
-    raise exception 'Opción inválida';
-  end if;
-  if not exists (
-    select 1 from sessions s where s.id = r.session_id and s.status = 'in_progress'
-  ) then
-    raise exception 'Sesión no en curso';
-  end if;
+	if not public.is_member() then raise exception 'Solo miembros'; end if;
+	select * into v_round from public.trivia_rounds where id = target_round_id;
+	if not found then raise exception 'No hay pregunta abierta'; end if;
+	v_group_id := v_round.group_id;
+	if v_group_id is null then
+		select group_id into v_group_id from public.sessions where id = v_round.session_id;
+	end if;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
+	if v_round.status <> 'live' or v_round.locked then
+		raise exception 'No hay pregunta abierta';
+	end if;
+	if p_option_index < 0 or p_option_index > 3 then
+		raise exception 'Opción inválida';
+	end if;
+	if not exists (
+		select 1 from public.sessions s where s.id = v_round.session_id and s.status = 'in_progress'
+	) then
+		raise exception 'Sesión no en curso';
+	end if;
 
-  insert into trivia_answers (round_id, member_id, question_index, option_index)
-  values (target_round_id, auth.uid(), r.question_index, p_option_index)
-  on conflict do nothing;
+	insert into public.trivia_answers (round_id, member_id, question_index, option_index)
+	values (target_round_id, auth.uid(), v_round.question_index, p_option_index)
+	on conflict do nothing;
 end;
 $$;
 
@@ -1740,35 +1769,35 @@ security definer
 set search_path = public
 as $$
 declare
-  tid uuid;
-  n int;
-  v_group uuid;
+	v_take_id uuid;
+	v_count int;
+	v_group_id uuid;
 begin
-  select group_id into v_group from sessions where id = target_session_id;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
-  if not exists (
-    select 1 from sessions
-    where id = target_session_id and status = 'in_progress' and moderator_id = auth.uid()
-  ) then
-    raise exception 'Solo el moderador en sesión en curso';
-  end if;
+	select group_id into v_group_id from public.sessions where id = target_session_id;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
+	if not exists (
+		select 1 from public.sessions
+		where id = target_session_id and status = 'in_progress' and moderator_id = auth.uid()
+	) then
+		raise exception 'Solo el moderador en sesión en curso';
+	end if;
 
-  if exists (select 1 from takes where session_id = target_session_id and status = 'open') then
-    raise exception 'Ya hay un take abierto';
-  end if;
+	if exists (select 1 from public.takes where session_id = target_session_id and status = 'open') then
+		raise exception 'Ya hay un take abierto';
+	end if;
 
-  select count(*) into n from takes where session_id = target_session_id;
-  if n >= 3 then
-    raise exception 'Máximo 3 takes por sesión';
-  end if;
+	select count(*) into v_count from public.takes where session_id = target_session_id;
+	if v_count >= 3 then
+		raise exception 'Máximo 3 takes por sesión';
+	end if;
 
-  insert into takes (session_id, group_id, prompt, created_by)
-  values (target_session_id, v_group, trim(p_prompt), auth.uid())
-  returning id into tid;
-  return tid;
+	insert into public.takes (session_id, group_id, prompt, created_by)
+	values (target_session_id, v_group_id, trim(p_prompt), auth.uid())
+	returning id into v_take_id;
+	return v_take_id;
 end;
 $$;
 
@@ -1782,28 +1811,28 @@ security definer
 set search_path = public
 as $$
 declare
-  v_group uuid;
+	v_group_id uuid;
 begin
-  if not public.is_member() then raise exception 'Solo miembros'; end if;
-  select group_id into v_group from takes where id = target_take_id;
-  if v_group is null then
-    select group_id into v_group from sessions s join takes tk on tk.session_id = s.id where tk.id = target_take_id;
-  end if;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
-  if not exists (
-    select 1 from takes tk
-    join sessions s on s.id = tk.session_id
-    where tk.id = target_take_id and tk.status = 'open' and s.status = 'in_progress'
-  ) then
-    raise exception 'Take no abierto';
-  end if;
+	if not public.is_member() then raise exception 'Solo miembros'; end if;
+	select group_id into v_group_id from public.takes where id = target_take_id;
+	if v_group_id is null then
+		select group_id into v_group_id from public.sessions s join public.takes tk on tk.session_id = s.id where tk.id = target_take_id;
+	end if;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
+	if not exists (
+		select 1 from public.takes tk
+		join public.sessions s on s.id = tk.session_id
+		where tk.id = target_take_id and tk.status = 'open' and s.status = 'in_progress'
+	) then
+		raise exception 'Take no abierto';
+	end if;
 
-  insert into take_votes (take_id, member_id, position)
-  values (target_take_id, auth.uid(), p_position)
-  on conflict do nothing;
+	insert into public.take_votes (take_id, member_id, position)
+	values (target_take_id, auth.uid(), p_position)
+	on conflict do nothing;
 end;
 $$;
 
@@ -1817,36 +1846,36 @@ security definer
 set search_path = public
 as $$
 declare
-  v_group uuid;
+	v_group_id uuid;
 begin
-  if not public.is_member() then raise exception 'Solo miembros'; end if;
-  select group_id into v_group from sessions where id = target_session_id;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
-  if p_stars < 1 or p_stars > 5 then raise exception 'Estrellas 1-5'; end if;
+	if not public.is_member() then raise exception 'Solo miembros'; end if;
+	select group_id into v_group_id from public.sessions where id = target_session_id;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
+	if p_stars < 1 or p_stars > 5 then raise exception 'Estrellas 1-5'; end if;
 
-  if not exists (
-    select 1 from sessions s
-    where s.id = target_session_id
-      and s.status = 'in_progress'
-      and s.rating_open
-  ) then
-    raise exception 'Votación cerrada';
-  end if;
+	if not exists (
+		select 1 from public.sessions s
+		where s.id = target_session_id
+			and s.status = 'in_progress'
+			and s.rating_open
+	) then
+		raise exception 'Votación cerrada';
+	end if;
 
-  if not exists (
-    select 1 from session_participants sp
-    where sp.session_id = target_session_id and sp.member_id = auth.uid()
-  ) then
-    raise exception 'Solo participantes confirmados';
-  end if;
+	if not exists (
+		select 1 from public.session_participants sp
+		where sp.session_id = target_session_id and sp.member_id = auth.uid()
+	) then
+		raise exception 'Solo participantes confirmados';
+	end if;
 
-  insert into votes (session_id, group_id, member_id, stars)
-  values (target_session_id, v_group, auth.uid(), p_stars)
-  on conflict (session_id, member_id)
-  do update set stars = excluded.stars;
+	insert into public.votes (session_id, group_id, member_id, stars)
+	values (target_session_id, v_group_id, auth.uid(), p_stars)
+	on conflict (session_id, member_id)
+	do update set stars = excluded.stars;
 end;
 $$;
 
@@ -1861,68 +1890,68 @@ security definer
 set search_path = public
 as $$
 declare
-  a_rec record;
-  sess_id uuid;
-  v_group uuid;
-  question_author_id uuid;
+	v_assignment record;
+	v_session_id uuid;
+	v_group_id uuid;
+	v_question_author_id uuid;
 begin
-  if not public.is_member() then raise exception 'Solo miembros'; end if;
-  if p_phase not in ('exposition', 'complement') then
-    raise exception 'Fase inválida para corazones';
-  end if;
-  if p_value < 1 or p_value > 5 then raise exception 'Valor 1-5'; end if;
+	if not public.is_member() then raise exception 'Solo miembros'; end if;
+	if p_phase not in ('exposition', 'complement') then
+		raise exception 'Fase inválida para corazones';
+	end if;
+	if p_value < 1 or p_value > 5 then raise exception 'Valor 1-5'; end if;
 
-  select a.id, a.session_id, a.group_id, a.assignee_id, a.question_id, a.state
-  into a_rec
-  from assignments a
-  where a.id = target_assignment_id and a.state = p_phase;
+	select a.id, a.session_id, a.group_id, a.assignee_id, a.question_id, a.state
+	into v_assignment
+	from public.assignments a
+	where a.id = target_assignment_id and a.state = p_phase;
 
-  if not found then
-    raise exception 'La intervención no está en esa fase';
-  end if;
+	if not found then
+		raise exception 'La intervención no está en esa fase';
+	end if;
 
-  sess_id := a_rec.session_id;
-  v_group := a_rec.group_id;
-  if v_group is null then
-    select group_id into v_group from sessions where id = sess_id;
-  end if;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
+	v_session_id := v_assignment.session_id;
+	v_group_id := v_assignment.group_id;
+	if v_group_id is null then
+		select group_id into v_group_id from public.sessions where id = v_session_id;
+	end if;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
 
-  if not exists (
-    select 1 from sessions
-    where id = sess_id and status = 'in_progress'
-  ) then
-    raise exception 'Sesión no en curso';
-  end if;
+	if not exists (
+		select 1 from public.sessions
+		where id = v_session_id and status = 'in_progress'
+	) then
+		raise exception 'Sesión no en curso';
+	end if;
 
-  if not exists (
-    select 1 from session_participants sp
-    where sp.session_id = sess_id
-      and sp.member_id = auth.uid()
-  ) then
-    raise exception 'Solo participantes presentes';
-  end if;
+	if not exists (
+		select 1 from public.session_participants sp
+		where sp.session_id = v_session_id
+			and sp.member_id = auth.uid()
+	) then
+		raise exception 'Solo participantes presentes';
+	end if;
 
-  if p_phase = 'exposition' and a_rec.assignee_id = auth.uid() then
-    raise exception 'No puedes votar en tu propia exposición';
-  end if;
+	if p_phase = 'exposition' and v_assignment.assignee_id = auth.uid() then
+		raise exception 'No puedes votar en tu propia exposición';
+	end if;
 
-  if p_phase = 'complement' then
-    select q.author_id into question_author_id
-    from questions q where q.id = a_rec.question_id;
+	if p_phase = 'complement' then
+		select q.author_id into v_question_author_id
+		from public.questions q where q.id = v_assignment.question_id;
 
-    if question_author_id = auth.uid() then
-      raise exception 'No puedes votar en tu propio complemento';
-    end if;
-  end if;
+		if v_question_author_id = auth.uid() then
+			raise exception 'No puedes votar en tu propio complemento';
+		end if;
+	end if;
 
-  insert into hearts (assignment_id, member_id, phase, value, session_id, group_id)
-  values (target_assignment_id, auth.uid(), p_phase, p_value, sess_id, v_group)
-  on conflict (assignment_id, member_id, phase)
-  do update set value = excluded.value;
+	insert into public.hearts (assignment_id, member_id, phase, value, session_id, group_id)
+	values (target_assignment_id, auth.uid(), p_phase, p_value, v_session_id, v_group_id)
+	on conflict (assignment_id, member_id, phase)
+	do update set value = excluded.value;
 end;
 $$;
 
@@ -1934,40 +1963,40 @@ security definer
 set search_path = public
 as $$
 declare
-  s sessions%rowtype;
-  voted int;
-  total int;
-  my_stars int;
+	v_session public.sessions%rowtype;
+	v_voted int;
+	v_total int;
+	v_my_stars int;
 begin
-  if not public.is_member() then raise exception 'Solo miembros'; end if;
-  select * into s from sessions where id = target_session_id;
-  if not found then return null; end if;
-  if s.group_id is null or not public.is_group_member(s.group_id) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
+	if not public.is_member() then raise exception 'Solo miembros'; end if;
+	select * into v_session from public.sessions where id = target_session_id;
+	if not found then return null; end if;
+	if v_session.group_id is null or not public.is_group_member(v_session.group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
 
-  select count(*) into total from session_participants where session_id = target_session_id;
-  select count(*) into voted from votes where session_id = target_session_id;
-  select stars into my_stars from votes
-  where session_id = target_session_id and member_id = auth.uid();
+	select count(*) into v_total from public.session_participants where session_id = target_session_id;
+	select count(*) into v_voted from public.votes where session_id = target_session_id;
+	select stars into v_my_stars from public.votes
+	where session_id = target_session_id and member_id = auth.uid();
 
-  return jsonb_build_object(
-    'sessionId', s.id,
-    'materialId', s.material_id,
-    'ratingOpen', s.rating_open,
-    'ratingAvg', s.rating_avg,
-    'ratingCount', s.rating_count,
-    'voted', voted,
-    'total', total,
-    'myStars', my_stars,
-    'isModerator', s.moderator_id = auth.uid(),
-    'isParticipant', exists (
-      select 1 from session_participants sp
-      where sp.session_id = s.id and sp.member_id = auth.uid()
-    ),
-    'sessionStatus', s.status
-  );
+	return jsonb_build_object(
+		'sessionId', v_session.id,
+		'materialId', v_session.material_id,
+		'ratingOpen', v_session.rating_open,
+		'ratingAvg', v_session.rating_avg,
+		'ratingCount', v_session.rating_count,
+		'voted', v_voted,
+		'total', v_total,
+		'myStars', v_my_stars,
+		'isModerator', v_session.moderator_id = auth.uid(),
+		'isParticipant', exists (
+			select 1 from public.session_participants sp
+			where sp.session_id = v_session.id and sp.member_id = auth.uid()
+		),
+		'sessionStatus', v_session.status
+	);
 end;
 $$;
 
@@ -1978,95 +2007,95 @@ security definer
 set search_path = public
 as $$
 declare
-  r trivia_rounds%rowtype;
-  item trivia_items%rowtype;
-  n int;
-  answered int;
-  my_ans int;
-  opt_counts int[] := array[0,0,0,0];
-  board jsonb := '[]'::jsonb;
-  winner_id uuid;
-  winner_name text;
-  v_group uuid;
+	v_round public.trivia_rounds%rowtype;
+	v_item public.trivia_items%rowtype;
+	v_question_count int;
+	v_answered int;
+	v_my_option int;
+	v_option_counts int[] := array[0,0,0,0];
+	v_board jsonb := '[]'::jsonb;
+	v_winner_id uuid;
+	v_winner_name text;
+	v_group_id uuid;
 begin
-  if not public.is_member() then raise exception 'Solo miembros'; end if;
-  select * into r from trivia_rounds where id = target_round_id;
-  if not found then return null; end if;
-  v_group := r.group_id;
-  if v_group is null then
-    select group_id into v_group from sessions where id = r.session_id;
-  end if;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
+	if not public.is_member() then raise exception 'Solo miembros'; end if;
+	select * into v_round from public.trivia_rounds where id = target_round_id;
+	if not found then return null; end if;
+	v_group_id := v_round.group_id;
+	if v_group_id is null then
+		select group_id into v_group_id from public.sessions where id = v_round.session_id;
+	end if;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
 
-  select count(*) into n from trivia_items where trivia_id = r.trivia_id;
-  select * into item from trivia_items
-  where trivia_id = r.trivia_id and sort_order = r.question_index + 1;
+	select count(*) into v_question_count from public.trivia_items where trivia_id = v_round.trivia_id;
+	select * into v_item from public.trivia_items
+	where trivia_id = v_round.trivia_id and sort_order = v_round.question_index + 1;
 
-  select count(*) into answered from trivia_answers
-  where round_id = r.id and question_index = r.question_index;
+	select count(*) into v_answered from public.trivia_answers
+	where round_id = v_round.id and question_index = v_round.question_index;
 
-  select option_index into my_ans from trivia_answers
-  where round_id = r.id and question_index = r.question_index and member_id = auth.uid();
+	select option_index into v_my_option from public.trivia_answers
+	where round_id = v_round.id and question_index = v_round.question_index and member_id = auth.uid();
 
-  if r.locked or r.status = 'board' then
-    select array[
-      count(*) filter (where option_index = 0),
-      count(*) filter (where option_index = 1),
-      count(*) filter (where option_index = 2),
-      count(*) filter (where option_index = 3)
-    ] into opt_counts
-    from trivia_answers
-    where round_id = r.id and question_index = r.question_index;
-  end if;
+	if v_round.locked or v_round.status = 'board' then
+		select array[
+			count(*) filter (where option_index = 0),
+			count(*) filter (where option_index = 1),
+			count(*) filter (where option_index = 2),
+			count(*) filter (where option_index = 3)
+		] into v_option_counts
+		from public.trivia_answers
+		where round_id = v_round.id and question_index = v_round.question_index;
+	end if;
 
-  if r.status = 'board' then
-    select coalesce(jsonb_agg(jsonb_build_object(
-      'memberId', h.member_id,
-      'displayName', m.display_name,
-      'hits', h.hits
-    ) order by h.hits desc, m.display_name), '[]'::jsonb)
-    into board
-    from trivia_hits h
-    join members m on m.id = h.member_id
-    where h.round_id = r.id;
+	if v_round.status = 'board' then
+		select coalesce(jsonb_agg(jsonb_build_object(
+			'memberId', h.member_id,
+			'displayName', m.display_name,
+			'hits', h.hits
+		) order by h.hits desc, m.display_name), '[]'::jsonb)
+		into v_board
+		from public.trivia_hits h
+		join public.members m on m.id = h.member_id
+		where h.round_id = v_round.id;
 
-    select h.member_id, m.display_name into winner_id, winner_name
-    from trivia_hits h
-    join members m on m.id = h.member_id
-    where h.round_id = r.id
-    order by h.hits desc
-    limit 1;
+		select h.member_id, m.display_name into v_winner_id, v_winner_name
+		from public.trivia_hits h
+		join public.members m on m.id = h.member_id
+		where h.round_id = v_round.id
+		order by h.hits desc
+		limit 1;
 
-    if winner_id is not null then
-      if (select count(*) from trivia_hits where round_id = r.id and hits = (
-        select max(hits) from trivia_hits where round_id = r.id
-      )) <> 1 or (select max(hits) from trivia_hits where round_id = r.id) <= 0 then
-        winner_id := null;
-        winner_name := null;
-      end if;
-    end if;
-  end if;
+		if v_winner_id is not null then
+			if (select count(*) from public.trivia_hits where round_id = v_round.id and hits = (
+				select max(hits) from public.trivia_hits where round_id = v_round.id
+			)) <> 1 or (select max(hits) from public.trivia_hits where round_id = v_round.id) <= 0 then
+				v_winner_id := null;
+				v_winner_name := null;
+			end if;
+		end if;
+	end if;
 
-  return jsonb_build_object(
-    'roundId', r.id,
-    'sessionId', r.session_id,
-    'triviaId', r.trivia_id,
-    'status', r.status,
-    'questionIndex', r.question_index,
-    'questionCount', n,
-    'locked', r.locked,
-    'prompt', case when r.status = 'live' then item.prompt else null end,
-    'options', case when r.status = 'live' then to_jsonb(item.options) else null end,
-    'answeredCount', answered,
-    'myOption', my_ans,
-    'optionCounts', case when r.locked or r.status = 'board' then to_jsonb(opt_counts) else null end,
-    'scoreboard', board,
-    'winnerId', winner_id,
-    'winnerName', winner_name
-  );
+	return jsonb_build_object(
+		'roundId', v_round.id,
+		'sessionId', v_round.session_id,
+		'triviaId', v_round.trivia_id,
+		'status', v_round.status,
+		'questionIndex', v_round.question_index,
+		'questionCount', v_question_count,
+		'locked', v_round.locked,
+		'prompt', case when v_round.status = 'live' then v_item.prompt else null end,
+		'options', case when v_round.status = 'live' then to_jsonb(v_item.options) else null end,
+		'answeredCount', v_answered,
+		'myOption', v_my_option,
+		'optionCounts', case when v_round.locked or v_round.status = 'board' then to_jsonb(v_option_counts) else null end,
+		'scoreboard', v_board,
+		'winnerId', v_winner_id,
+		'winnerName', v_winner_name
+	);
 end;
 $$;
 
@@ -2077,66 +2106,66 @@ security definer
 set search_path = public
 as $$
 declare
-  live_id uuid;
-  board_id uuid;
-  open_take uuid;
-  bank jsonb;
-  takes_json jsonb;
-  v_group uuid;
+	v_live_round_id uuid;
+	v_board_round_id uuid;
+	v_open_take_id uuid;
+	v_bank jsonb;
+	v_takes jsonb;
+	v_group_id uuid;
 begin
-  if not public.is_member() then raise exception 'Solo miembros'; end if;
-  select group_id into v_group from sessions where id = target_session_id;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
+	if not public.is_member() then raise exception 'Solo miembros'; end if;
+	select group_id into v_group_id from public.sessions where id = target_session_id;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
 
-  select id into live_id from trivia_rounds
-  where session_id = target_session_id and status = 'live'
-  order by created_at desc limit 1;
+	select id into v_live_round_id from public.trivia_rounds
+	where session_id = target_session_id and status = 'live'
+	order by created_at desc limit 1;
 
-  select id into board_id from trivia_rounds
-  where session_id = target_session_id and status = 'board'
-  order by created_at desc limit 1;
+	select id into v_board_round_id from public.trivia_rounds
+	where session_id = target_session_id and status = 'board'
+	order by created_at desc limit 1;
 
-  select id into open_take from takes
-  where session_id = target_session_id and status = 'open'
-  order by created_at desc limit 1;
+	select id into v_open_take_id from public.takes
+	where session_id = target_session_id and status = 'open'
+	order by created_at desc limit 1;
 
-  select coalesce(jsonb_agg(jsonb_build_object(
-    'id', t.id,
-    'title', t.title,
-    'itemCount', (select count(*) from trivia_items i where i.trivia_id = t.id)
-  ) order by t.created_at), '[]'::jsonb)
-  into bank
-  from trivias t
-  join sessions s on s.material_id = t.material_id
-  where s.id = target_session_id and t.group_id = v_group;
+	select coalesce(jsonb_agg(jsonb_build_object(
+		'id', t.id,
+		'title', t.title,
+		'itemCount', (select count(*) from public.trivia_items i where i.trivia_id = t.id)
+	) order by t.created_at), '[]'::jsonb)
+	into v_bank
+	from public.trivias t
+	join public.sessions s on s.material_id = t.material_id
+	where s.id = target_session_id and t.group_id = v_group_id;
 
-  select coalesce(jsonb_agg(jsonb_build_object(
-    'id', tk.id,
-    'prompt', tk.prompt,
-    'status', tk.status,
-    'counts', (
-      select jsonb_build_object(
-        'agree', count(*) filter (where position = 'agree'),
-        'disagree', count(*) filter (where position = 'disagree'),
-        'neutral', count(*) filter (where position = 'neutral')
-      ) from take_votes v where v.take_id = tk.id
-    )
-  ) order by tk.created_at), '[]'::jsonb)
-  into takes_json
-  from takes tk where tk.session_id = target_session_id;
+	select coalesce(jsonb_agg(jsonb_build_object(
+		'id', tk.id,
+		'prompt', tk.prompt,
+		'status', tk.status,
+		'counts', (
+			select jsonb_build_object(
+				'agree', count(*) filter (where position = 'agree'),
+				'disagree', count(*) filter (where position = 'disagree'),
+				'neutral', count(*) filter (where position = 'neutral')
+			) from public.take_votes v where v.take_id = tk.id
+		)
+	) order by tk.created_at), '[]'::jsonb)
+	into v_takes
+	from public.takes tk where tk.session_id = target_session_id;
 
-  return jsonb_build_object(
-    'liveRoundId', live_id,
-    'lastBoardRoundId', board_id,
-    'openTakeId', open_take,
-    'bank', bank,
-    'takes', takes_json,
-    'triviaRoundCount', (select count(*) from trivia_rounds where session_id = target_session_id),
-    'takeCount', (select count(*) from takes where session_id = target_session_id)
-  );
+	return jsonb_build_object(
+		'liveRoundId', v_live_round_id,
+		'lastBoardRoundId', v_board_round_id,
+		'openTakeId', v_open_take_id,
+		'bank', v_bank,
+		'takes', v_takes,
+		'triviaRoundCount', (select count(*) from public.trivia_rounds where session_id = target_session_id),
+		'takeCount', (select count(*) from public.takes where session_id = target_session_id)
+	);
 end;
 $$;
 
@@ -2150,40 +2179,45 @@ security definer
 set search_path = public
 as $$
 declare
-  new_draw uuid;
-  v_group uuid;
+	v_draw_id uuid;
+	v_group_id uuid;
 begin
-  select group_id into v_group from sessions where id = target_session_id;
-  if v_group is null or not public.is_group_member(v_group) then
-    raise exception 'No perteneces al grupo de esta sesión'
-      using errcode = '42501';
-  end if;
-  if not exists (select 1 from sessions where id = target_session_id and moderator_id = auth.uid() and status = 'lobby') then
-    raise exception 'Solo el Moderador puede ejecutar el Sorteo en el lobby';
-  end if;
-  if exists (select 1 from draws where session_id = target_session_id) then
-    raise exception 'El Sorteo solo puede ejecutarse una vez';
-  end if;
+	select group_id into v_group_id from public.sessions where id = target_session_id;
+	if v_group_id is null or not public.is_group_member(v_group_id) then
+		raise exception 'No perteneces al grupo de esta sesión'
+			using errcode = '42501';
+	end if;
+	if not exists (
+		select 1 from public.sessions
+		where id = target_session_id and moderator_id = auth.uid() and status = 'lobby'
+	) then
+		raise exception 'Solo el Moderador puede ejecutar el Sorteo en el lobby';
+	end if;
+	if exists (select 1 from public.draws where session_id = target_session_id) then
+		raise exception 'El Sorteo solo puede ejecutarse una vez';
+	end if;
 
-  insert into draws (session_id, group_id, status) values (target_session_id, v_group, 'hidden') returning id into new_draw;
-  with eligible as (
-    select sp.member_id, row_number() over (order by gen_random_uuid()) as slot
-    from session_participants sp
-    where sp.session_id = target_session_id and not sp.opt_out
-  ), questions as (
-    select q.id, q.author_id, row_number() over (order by gen_random_uuid()) as slot
-    from questions q
-    where q.session_id = target_session_id and not q.outside_draw and q.group_id = v_group
-  ), pairs as (
-    select q.id as question_id, e.member_id, row_number() over (order by gen_random_uuid()) as reveal_order
-    from questions q cross join eligible e
-    where q.author_id <> e.member_id
-    order by gen_random_uuid()
-    limit (select count(*) from eligible)
-  )
-  insert into assignments (session_id, group_id, question_id, assignee_id, reveal_order, draw_id)
-  select target_session_id, v_group, question_id, member_id, reveal_order, new_draw from pairs;
+	insert into public.draws (session_id, group_id, status)
+	values (target_session_id, v_group_id, 'hidden')
+	returning id into v_draw_id;
+	with eligible as (
+		select sp.member_id, row_number() over (order by gen_random_uuid()) as slot
+		from public.session_participants sp
+		where sp.session_id = target_session_id and not sp.opt_out
+	), questions as (
+		select q.id, q.author_id, row_number() over (order by gen_random_uuid()) as slot
+		from public.questions q
+		where q.session_id = target_session_id and not q.outside_draw and q.group_id = v_group_id
+	), pairs as (
+		select q.id as question_id, e.member_id, row_number() over (order by gen_random_uuid()) as reveal_order
+		from public.questions q cross join eligible e
+		where q.author_id <> e.member_id
+		order by gen_random_uuid()
+		limit (select count(*) from eligible)
+	)
+	insert into public.assignments (session_id, group_id, question_id, assignee_id, reveal_order, draw_id)
+	select target_session_id, v_group_id, question_id, member_id, reveal_order, v_draw_id from pairs;
 
-  return new_draw;
+	return v_draw_id;
 end;
 $$;

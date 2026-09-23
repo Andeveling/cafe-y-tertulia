@@ -1,7 +1,7 @@
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 /**
  * [multi-grupo] 05 Contract (#74, PRD #69, ADR-0013).
@@ -18,12 +18,7 @@ import { describe, expect, it } from "vitest";
  */
 
 const MIGRATION = "20260923000003_groups_contract.sql";
-const migrationPath = join(
-	process.cwd(),
-	"supabase",
-	"migrations",
-	MIGRATION,
-);
+const migrationPath = join(process.cwd(), "supabase", "migrations", MIGRATION);
 
 const SCOPED_TABLES = [
 	"materials",
@@ -55,20 +50,15 @@ function readMigration(): string {
 
 describe("contract: migración existe y cierra el modelo (#74)", () => {
 	it("la migración del contract existe", () => {
-		expect(existsSync(migrationPath), `falta supabase/migrations/${MIGRATION}`).toBe(
-			true,
-		);
+		expect(
+			existsSync(migrationPath),
+			`falta supabase/migrations/${MIGRATION}`,
+		).toBe(true);
 	});
 
 	it("group_id NOT NULL en las 20 tablas scopeadas", () => {
 		const sql = readMigration();
 		expect(sql.length).toBeGreaterThan(0);
-		for (const t of SCOPED_TABLES) {
-			expect(
-				sql.includes(t) && /SET NOT NULL/i.test(sql),
-				`${t} sin NOT NULL`,
-			).toBe(true);
-		}
 		// Verificación explícita por tabla: ALTER ... ALTER COLUMN group_id SET NOT NULL
 		for (const t of SCOPED_TABLES) {
 			const re = new RegExp(
@@ -86,9 +76,10 @@ describe("contract: migración existe y cierra el modelo (#74)", () => {
 				`foreign\\s+key\\s*\\(\\s*group_id\\s*\\)\\s+references\\s+(?:public\\.)?groups\\s*\\(\\s*id\\s*\\)\\s+on\\s+delete\\s+cascade`,
 				"i",
 			);
-			expect(re.test(sql), `${t}: falta FK a groups(id) ON DELETE CASCADE`).toBe(
-				true,
-			);
+			expect(
+				re.test(sql),
+				`${t}: falta FK a groups(id) ON DELETE CASCADE`,
+			).toBe(true);
 		}
 	});
 
@@ -123,10 +114,12 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const hasEnv = Boolean(URL && ANON_KEY && SERVICE_KEY);
 
 let sb!: SupabaseClient;
+let anonFor: (email: string, password: string) => Promise<SupabaseClient>;
+
 const TEST_PASSWORD = "pass-123456";
 type TestMember = { id: string; email: string; password: string };
 const ids = { users: [] as string[], groupA: "", groupB: "" };
-const users: { a?: TestMember; b?: TestMember; out?: TestMember } = {};
+const testUsers: { a?: TestMember; b?: TestMember; out?: TestMember } = {};
 const uniqueEmail = (p: string) =>
 	`${p}${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.local`;
 
@@ -145,14 +138,66 @@ async function createActiveMember(email: string, password: string) {
 	return { id: data.user.id, email, password };
 }
 
-// El setup de integración vive dentro del describe para no tocar la red
-// cuando no hay env (el archivo estático debe pasar en CI sin Supabase).
-describe.skipIf(!hasEnv)("contract: aislamiento verificado en DB (#74)", () => {
-	beforeAllSetup();
-	afterAllTeardown();
+beforeAll(async () => {
+	if (!hasEnv) return;
+	sb = createClient(URL!, SERVICE_KEY!, {
+		auth: { autoRefreshToken: false, persistSession: false },
+	});
+	anonFor = async (email: string, password: string) => {
+		const client = createClient(URL!, ANON_KEY!);
+		const { error } = await client.auth.signInWithPassword({
+			email,
+			password,
+		});
+		if (error) throw error;
+		return client;
+	};
 
+	const a = await createActiveMember(uniqueEmail("contract-a"), TEST_PASSWORD);
+	const b = await createActiveMember(uniqueEmail("contract-b"), TEST_PASSWORD);
+	const out = await createActiveMember(
+		uniqueEmail("contract-out"),
+		TEST_PASSWORD,
+	);
+	const { data: gA } = await sb
+		.from("groups")
+		.insert({ name: "Contract A", visibility: "public", created_by: a.id })
+		.select("id")
+		.single();
+	const { data: gB } = await sb
+		.from("groups")
+		.insert({ name: "Contract B", visibility: "private", created_by: b.id })
+		.select("id")
+		.single();
+	ids.groupA = (gA as { id: string }).id;
+	ids.groupB = (gB as { id: string }).id;
+	await sb
+		.from("group_members")
+		.insert({ group_id: ids.groupA, member_id: a.id, role: "admin" });
+	await sb
+		.from("group_members")
+		.insert({ group_id: ids.groupB, member_id: b.id, role: "admin" });
+	testUsers.a = a;
+	testUsers.b = b;
+	testUsers.out = out;
+});
+
+afterAll(async () => {
+	if (!hasEnv) return;
+	if (ids.groupA) await sb.from("groups").delete().eq("id", ids.groupA);
+	if (ids.groupB) await sb.from("groups").delete().eq("id", ids.groupB);
+	for (const id of ids.users) {
+		try {
+			await sb.auth.admin.deleteUser(id);
+		} catch {
+			/* noop */
+		}
+	}
+});
+
+describe.skipIf(!hasEnv)("contract: aislamiento verificado en DB (#74)", () => {
 	it("no-miembro no ve grupos privados ni su contenido", async () => {
-		const client = await anonFor(users.out!.email, TEST_PASSWORD);
+		const client = await anonFor(testUsers.out!.email, TEST_PASSWORD);
 		const { data: groups } = await client.from("groups").select("id");
 		const seen = (groups ?? []).map((r: { id: string }) => r.id);
 		expect(seen).not.toContain(ids.groupB);
@@ -161,7 +206,7 @@ describe.skipIf(!hasEnv)("contract: aislamiento verificado en DB (#74)", () => {
 	});
 
 	it("miembro de A no lee/escribe nada de B", async () => {
-		const client = await anonFor(users.a!.email, TEST_PASSWORD);
+		const client = await anonFor(testUsers.a!.email, TEST_PASSWORD);
 		const { data: groups } = await client.from("groups").select("id");
 		const seen = (groups ?? []).map((r: { id: string }) => r.id);
 		expect(seen).toContain(ids.groupA);
@@ -170,7 +215,7 @@ describe.skipIf(!hasEnv)("contract: aislamiento verificado en DB (#74)", () => {
 			title: "Intruso contract",
 			kind: "book",
 			author: "X",
-			created_by: users.a!.id,
+			created_by: testUsers.a!.id,
 			group_id: ids.groupB,
 		});
 		expect(error).not.toBeNull();
@@ -181,15 +226,14 @@ describe.skipIf(!hasEnv)("contract: aislamiento verificado en DB (#74)", () => {
 			title: "Sin grupo",
 			kind: "book",
 			author: "X",
-			created_by: users.a!.id,
+			created_by: testUsers.a!.id,
 			group_id: null,
 		});
 		expect(error).not.toBeNull();
 	});
 
 	it("anon no lee materials ni sessions", async () => {
-		const { createClient: mk } = await import("@supabase/supabase-js");
-		const anon = mk(URL!, ANON_KEY!);
+		const anon = createClient(URL!, ANON_KEY!);
 		const { data: mats } = await anon.from("materials").select("id");
 		expect(mats ?? []).toHaveLength(0);
 		const { data: sess } = await anon.from("sessions").select("id");
@@ -201,8 +245,8 @@ describe.skipIf(!hasEnv)("contract: aislamiento verificado en DB (#74)", () => {
 			.from("group_members")
 			.delete()
 			.eq("group_id", ids.groupA)
-			.eq("member_id", users.a!.id);
-		const client = await anonFor(users.a!.email, TEST_PASSWORD);
+			.eq("member_id", testUsers.a!.id);
+		const client = await anonFor(testUsers.a!.email, TEST_PASSWORD);
 		const { data: mats } = await client.from("materials").select("id");
 		expect(mats ?? []).toHaveLength(0);
 		const { data: groups } = await client.from("groups").select("id");
@@ -210,57 +254,3 @@ describe.skipIf(!hasEnv)("contract: aislamiento verificado en DB (#74)", () => {
 		expect(seen).not.toContain(ids.groupA);
 	});
 });
-
-// Helpers con lazy-init para no ejecutarse sin env.
-import { afterAll, beforeAll } from "vitest";
-function beforeAllSetup() {
-	beforeAll(async () => {
-		if (!hasEnv) return;
-		sb = createClient(URL!, SERVICE_KEY!, {
-			auth: { autoRefreshToken: false, persistSession: false },
-		});
-		const a = await createActiveMember(uniqueEmail("contract-a"), TEST_PASSWORD);
-		const b = await createActiveMember(uniqueEmail("contract-b"), TEST_PASSWORD);
-		const out = await createActiveMember(
-			uniqueEmail("contract-out"),
-			TEST_PASSWORD,
-		);
-		const { data: gA } = await sb
-			.from("groups")
-			.insert({ name: "Contract A", visibility: "public", created_by: a.id })
-			.select("id")
-			.single();
-		const { data: gB } = await sb
-			.from("groups")
-			.insert({ name: "Contract B", visibility: "private", created_by: b.id })
-			.select("id")
-			.single();
-		ids.groupA = (gA as { id: string }).id;
-		ids.groupB = (gB as { id: string }).id;
-		await sb.from("group_members").insert({ group_id: ids.groupA, member_id: a.id, role: "admin" });
-		await sb.from("group_members").insert({ group_id: ids.groupB, member_id: b.id, role: "admin" });
-		users.a = a;
-		users.b = b;
-		users.out = out;
-	});
-}
-function afterAllTeardown() {
-	afterAll(async () => {
-		if (!hasEnv) return;
-		if (ids.groupA) await sb.from("groups").delete().eq("id", ids.groupA);
-		if (ids.groupB) await sb.from("groups").delete().eq("id", ids.groupB);
-		for (const id of ids.users) {
-			try {
-				await sb.auth.admin.deleteUser(id);
-			} catch {
-				/* noop */
-			}
-		}
-	});
-}
-async function anonFor(email: string, password: string) {
-	const client = createClient(URL!, ANON_KEY!);
-	const { error } = await client.auth.signInWithPassword({ email, password });
-	if (error) throw error;
-	return client;
-}

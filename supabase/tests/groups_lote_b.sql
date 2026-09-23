@@ -133,7 +133,7 @@ select ok(
 set local role authenticated;
 set local request.jwt.claim.sub = 'b1111111-1111-1111-1111-111111111111';
 
--- 7-8. Trivias y takes por grupo.
+-- 7-10. Trivias y takes por grupo.
 select is(
 	(select count(*) from public.trivias where title = 'Trivia A'),
 	1::bigint,
@@ -187,7 +187,7 @@ select ok(
 	'12. Miembro de A no vota en la sesión de B'
 );
 
--- 13-14. Gamificación por grupo (siembra + conteo de la pregunta de A).
+-- 13-17. Gamificación por grupo (siembra + conteo de la pregunta de A).
 select ok(
 	(select count(*) from public.badges
 	 where group_id = (select id from public.groups where name = 'Grupo LoteB A')) > 0,
@@ -218,7 +218,7 @@ select is(
 	'17. Miembro de A no ve las insignias otorgadas en B'
 );
 
--- 18. Sorteo en A no mezcla preguntas de B (execute_draw como moderador A).
+-- 18-20. Sorteo en A no mezcla preguntas de B (execute_draw como moderador A).
 select ok(
 	(select public.execute_draw('d0000000-0000-0000-0000-000000000001')) is not null,
 	'18. El moderador ejecuta el sorteo en su grupo'
@@ -238,7 +238,7 @@ select is(
 	'20. Miembro de A no ve el sorteo de B'
 );
 
--- 21. Take_votes transitiva: voto propio en A sí, en B no.
+-- 21-22. Take_votes transitiva: voto propio en A sí, en B no.
 insert into public.take_votes (take_id, member_id, position)
 values ('a0000000-0000-0000-0000-000000000001', 'b1111111-1111-1111-1111-111111111111', 'agree');
 select is(
@@ -257,7 +257,7 @@ exception
 end $$;
 select ok(true, '22. Votar el take de B falla (RLS o coherencia)');
 
--- 23-24. Anon ya no lee el lote B; salir revoca.
+-- 23-24. Anon ya no lee el lote B.
 reset request.jwt.claim.sub;
 set local role anon;
 select is((select count(*) from public.questions), 0::bigint, '23. Anon no lee questions');
