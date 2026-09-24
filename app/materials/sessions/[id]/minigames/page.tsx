@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Minijuegos · Café y Tertulia" };
+export const metadata = { title: "Minijuegos · Café y Tertulias" };
 
 /** /minigames redirige a la Sala (ticket #31 — bandeja del Debate). */
 export default async function MinigamesPage({

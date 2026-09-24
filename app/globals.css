@@ -88,84 +88,13 @@
 }
 
 /*
-  Café y Tertulia — Sophisticated Lounge (DESIGN.md)
+  Café y Tertulias — Sophisticated Lounge (DESIGN.md)
   ────────────────────────────────────────────────
-  Surface #1c110c + Amber #ffcd97 / Miel #e8b06f — hushed, premium, slow.
-  Radius: 0.5rem (buttons) / 1rem (cards) — DESIGN.md rounded.
+  Una sola escena: espresso #1c110c + ámbar #ffcd97 / miel #e8b06f.
+  No hay tema claro. `class="dark"` en <html> mantiene las variantes `dark:`.
   Gamificación = miel (`--reward`), no arcoiris.
 */
 :root {
-	--background: oklch(0.965 0.022 82);
-	--foreground: oklch(0.28 0.04 48);
-	--card: oklch(0.985 0.014 85);
-	--card-foreground: oklch(0.28 0.04 48);
-	--popover: oklch(0.99 0.01 85);
-	--popover-foreground: oklch(0.28 0.04 48);
-	--primary: #ffcd97;
-	--primary-foreground: #472a00;
-	--primary-container: #e8b06f;
-	--on-primary-container: #694209;
-	--secondary: #c9c6c2;
-	--secondary-foreground: #31302d;
-	--muted: oklch(0.94 0.025 80);
-	--muted-foreground: oklch(0.5 0.03 50);
-	--accent: oklch(0.91 0.05 62);
-	--accent-foreground: oklch(0.32 0.05 45);
-	--destructive: oklch(0.55 0.16 28);
-	--destructive-foreground: oklch(0.98 0.02 85);
-	--border: #504539;
-	--input: #504539;
-	--ring: #ffcd97;
-	--chart-1: #ffcd97;
-	--chart-2: #e8b06f;
-	--chart-3: #c9c6c2;
-	--chart-4: #e9d2c6;
-	--chart-5: #9d8e80;
-	--radius: 0.5rem;
-	--sidebar: oklch(0.95 0.02 78);
-	--sidebar-foreground: oklch(0.28 0.04 48);
-	--sidebar-primary: #ffcd97;
-	--sidebar-primary-foreground: #472a00;
-	--sidebar-accent: oklch(0.9 0.05 75);
-	--sidebar-accent-foreground: oklch(0.32 0.05 45);
-	--sidebar-border: #504539;
-	--sidebar-ring: #ffcd97;
-	--reward: #e8b06f;
-	--reward-foreground: #472a00;
-	--rank-1: #ffcd97;
-	--rank-2: #c9c6c2;
-	--rank-3: #e9d2c6;
-	--progress-track: #40322c;
-	--progress-fill: #ffcd97;
-	--font-heading: var(--font-literata);
-	--shadow-color: oklch(0.38 0.05 48);
-	--shadow-opacity: 0.1;
-	--shadow-blur: 16px;
-	--shadow-spread: 0px;
-	--shadow-x: 0;
-	--shadow-y: 6px;
-	--shadow-2xs: 0 1px 2px 0px oklch(0.38 0.05 48 / 0.05);
-	--shadow-xs: 0 1px 3px 0px oklch(0.38 0.05 48 / 0.06);
-	--shadow-sm:
-		0 1px 2px 0px oklch(0.38 0.05 48 / 0.06),
-		0 2px 6px -1px oklch(0.38 0.05 48 / 0.08);
-	--shadow:
-		0 2px 4px 0px oklch(0.38 0.05 48 / 0.06),
-		0 6px 16px -4px oklch(0.38 0.05 48 / 0.1);
-	--shadow-md:
-		0 4px 8px -2px oklch(0.38 0.05 48 / 0.08),
-		0 10px 20px -6px oklch(0.38 0.05 48 / 0.12);
-	--shadow-lg:
-		0 8px 16px -4px oklch(0.38 0.05 48 / 0.1),
-		0 18px 32px -8px oklch(0.38 0.05 48 / 0.14);
-	--shadow-xl:
-		0 16px 28px -8px oklch(0.38 0.05 48 / 0.12),
-		0 24px 40px -12px oklch(0.38 0.05 48 / 0.16);
-	--shadow-2xl: 0 28px 50px -12px oklch(0.38 0.05 48 / 0.22);
-}
-
-.dark {
-	/* DESIGN.md — Sophisticated Lounge dark */
 	--background: #1c110c;
 	--foreground: #f5ded5;
 	--card: #291d17;
@@ -192,6 +121,7 @@
 	--chart-3: #c9c6c2;
 	--chart-4: #e9d2c6;
 	--chart-5: #9d8e80;
+	--radius: 0.5rem;
 	--sidebar: #251913;
 	--sidebar-foreground: #f5ded5;
 	--sidebar-primary: #ffcd97;
@@ -210,6 +140,28 @@
 	--font-heading: var(--font-literata);
 	--shadow-color: oklch(0.12 0.02 55);
 	--shadow-opacity: 0.5;
+	--shadow-blur: 16px;
+	--shadow-spread: 0px;
+	--shadow-x: 0;
+	--shadow-y: 6px;
+	--shadow-2xs: 0 1px 2px 0px oklch(0.12 0.02 55 / 0.05);
+	--shadow-xs: 0 1px 3px 0px oklch(0.12 0.02 55 / 0.06);
+	--shadow-sm:
+		0 1px 2px 0px oklch(0.12 0.02 55 / 0.06),
+		0 2px 6px -1px oklch(0.12 0.02 55 / 0.08);
+	--shadow:
+		0 2px 4px 0px oklch(0.12 0.02 55 / 0.06),
+		0 6px 16px -4px oklch(0.12 0.02 55 / 0.1);
+	--shadow-md:
+		0 4px 8px -2px oklch(0.12 0.02 55 / 0.08),
+		0 10px 20px -6px oklch(0.12 0.02 55 / 0.12);
+	--shadow-lg:
+		0 8px 16px -4px oklch(0.12 0.02 55 / 0.1),
+		0 18px 32px -8px oklch(0.12 0.02 55 / 0.14);
+	--shadow-xl:
+		0 16px 28px -8px oklch(0.12 0.02 55 / 0.12),
+		0 24px 40px -12px oklch(0.12 0.02 55 / 0.16);
+	--shadow-2xl: 0 28px 50px -12px oklch(0.12 0.02 55 / 0.22);
 }
 
 @layer base {
@@ -218,22 +170,16 @@
 	}
 	html {
 		@apply font-sans;
+		color-scheme: dark;
 	}
 	body {
 		@apply bg-background text-base text-foreground;
-		background-image: radial-gradient(
-			80rem 36rem at 50% -12%,
-			color-mix(in oklch, var(--secondary) 45%, transparent),
-			transparent 62%
-		);
-		background-attachment: fixed;
-	}
-	.dark body {
 		background-image: radial-gradient(
 			80rem 40rem at 50% -16%,
 			color-mix(in oklch, var(--primary) 14%, transparent),
 			transparent 60%
 		);
+		background-attachment: fixed;
 	}
 	h1,
 	h2,

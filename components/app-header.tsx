@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import type { MemberLevel } from "@/app/profile/_lib/gamification-actions";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Progress } from "@/components/ui/progress";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useSidebarPreference } from "@/hooks/use-sidebar-preference";
@@ -82,7 +81,6 @@ export function AppHeader({ level }: { level?: MemberLevel | null }) {
 				<div className="min-w-0 flex-1" />
 			)}
 			{level && <MemberLevelBar level={level} />}
-			<ThemeToggle />
 		</header>
 	);
 }

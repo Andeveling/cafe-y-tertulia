@@ -19,7 +19,7 @@ import {
 import { roomSurface } from "@/app/materials/_lib/room-sync";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Sala · Café y Tertulia" };
+export const metadata = { title: "Sala · Café y Tertulias" };
 export const dynamic = "force-dynamic";
 
 export default async function RoomPage({

@@ -5,7 +5,7 @@ import { getCurrentMember } from "@/lib/current-member";
 import { LAST_GROUP_COOKIE, landingPath } from "@/lib/groups/active-group";
 import { getMyGroups } from "@/lib/groups/queries";
 
-export const metadata = { title: "Sesiones · Café y Tertulia" };
+export const metadata = { title: "Sesiones · Café y Tertulias" };
 
 /** `/` no es un club. Abre el último Grupo, el único, o Mis Grupos. */
 export default async function HomePage() {

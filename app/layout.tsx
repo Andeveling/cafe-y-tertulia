@@ -8,14 +8,12 @@ import "./globals.css";
 import { ConvocatoriaInbox } from "@/app/_components/convocatoria-inbox";
 import { getMemberLevel } from "@/app/profile/_lib/gamification-actions";
 import { AppShell } from "@/components/app-shell";
-import { ThemeProvider } from "@/components/theme-provider";
 import {
 	SIDEBAR_COOKIE_NAME,
 	sidebarOpenFromCookie,
 } from "@/lib/sidebar-preference";
 import { siteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
-import { THEME_INIT_SCRIPT } from "@/lib/theme-script";
 import { cn } from "@/lib/utils";
 
 const literata = Literata({
@@ -112,8 +110,8 @@ export default async function RootLayout({
 	return (
 		<html
 			lang="es"
-			suppressHydrationWarning
 			className={cn(
+				"dark",
 				"h-full",
 				"antialiased",
 				literata.variable,
@@ -123,9 +121,6 @@ export default async function RootLayout({
 			)}
 		>
 			<body className="min-h-full">
-				<Script id="theme-init" strategy="beforeInteractive">
-					{THEME_INIT_SCRIPT}
-				</Script>
 				{process.env.NODE_ENV === "development" && (
 					<Script
 						src="//unpkg.com/react-grab/dist/index.global.js"
@@ -133,27 +128,20 @@ export default async function RootLayout({
 						strategy="afterInteractive"
 					/>
 				)}
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="dark"
-					enableSystem
-					disableTransitionOnChange
+				<AppShell
+					user={navUser}
+					groups={groups}
+					rememberedSlug={rememberedSlug}
+					defaultOpen={defaultSidebarOpen}
+					level={memberLevel}
+					inbox={
+						user && memberStatus === "active" ? (
+							<ConvocatoriaInbox userId={user.id} />
+						) : null
+					}
 				>
-					<AppShell
-						user={navUser}
-						groups={groups}
-						rememberedSlug={rememberedSlug}
-						defaultOpen={defaultSidebarOpen}
-						level={memberLevel}
-						inbox={
-							user && memberStatus === "active" ? (
-								<ConvocatoriaInbox userId={user.id} />
-							) : null
-						}
-					>
-						{children}
-					</AppShell>
-				</ThemeProvider>
+					{children}
+				</AppShell>
 			</body>
 		</html>
 	);

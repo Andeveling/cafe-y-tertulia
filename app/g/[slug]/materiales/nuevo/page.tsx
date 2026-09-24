@@ -10,7 +10,7 @@ import { inactiveMemberDestination } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 import { getGroupBySlug } from "@/lib/groups/queries";
 
-export const metadata = { title: "Proponer material · Café y Tertulia" };
+export const metadata = { title: "Proponer material · Café y Tertulias" };
 
 export default async function NewGroupMaterialPage({
 	params,

@@ -5,7 +5,7 @@ import { inactiveMemberDestination } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 import { getGroupBySlug, getGroupRoster } from "@/lib/groups/queries";
 
-export const metadata = { title: "Sesiones · Café y Tertulia" };
+export const metadata = { title: "Sesiones · Café y Tertulias" };
 
 export default async function GroupSessionsPage({
 	params,

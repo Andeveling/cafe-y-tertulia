@@ -15,7 +15,7 @@ import {
 import { getMemberMastery } from "@/lib/member-mastery";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Miembro · Café y Tertulia" };
+export const metadata = { title: "Miembro · Café y Tertulias" };
 
 export default async function MemberProfilePage({
 	params,

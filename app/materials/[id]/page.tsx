@@ -46,7 +46,7 @@ import {
 } from "../_lib/materials";
 
 export const metadata = {
-	title: "Material · Café y Tertulia",
+	title: "Material · Café y Tertulias",
 };
 
 const KIND_ICON: Record<MaterialKind, typeof Book01Icon> = {

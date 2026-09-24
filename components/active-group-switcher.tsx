@@ -62,10 +62,7 @@ export function ActiveGroupSwitcher({
 							className="min-w-0 flex-1"
 							render={<Link href="/g" />}
 						>
-							<GroupLabel
-								eyebrow="Café y Tertulias"
-								title="Sin grupo"
-							/>
+							<GroupLabel title="Sin grupo" />
 						</SidebarMenuButton>
 					</div>
 				</SidebarMenuItem>
@@ -87,10 +84,7 @@ export function ActiveGroupSwitcher({
 							className="min-w-0 flex-1"
 							render={<Link href={hrefForGroup(active.slug, section)} />}
 						>
-							<GroupLabel
-								eyebrow="Café y Tertulias"
-								title={active.name}
-							/>
+							<GroupLabel title={active.name} />
 						</SidebarMenuButton>
 					</div>
 				</SidebarMenuItem>
@@ -115,7 +109,7 @@ export function ActiveGroupSwitcher({
 								/>
 							}
 						>
-							<GroupLabel eyebrow="Café y Tertulias" title={title} />
+							<GroupLabel title={title} />
 							<HugeiconsIcon
 								icon={ArrowDown01Icon}
 								className="ml-auto size-4 opacity-60 group-data-[collapsible=icon]:hidden"
@@ -157,15 +151,10 @@ export function ActiveGroupSwitcher({
 	);
 }
 
-function GroupLabel({ eyebrow, title }: { eyebrow: string; title: string }) {
+function GroupLabel({ title }: { title: string }) {
 	return (
-		<span className="grid min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-			<span className="truncate text-xs text-sidebar-foreground/60">
-				{eyebrow}
-			</span>
-			<span className="truncate font-semibold text-sm tracking-tight">
-				{title}
-			</span>
+		<span className="min-w-0 flex-1 truncate text-left font-semibold text-sm tracking-tight group-data-[collapsible=icon]:hidden">
+			{title}
 		</span>
 	);
 }

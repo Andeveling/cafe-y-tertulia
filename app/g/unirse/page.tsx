@@ -3,7 +3,7 @@ import { joinGroupWithToken } from "@/app/g/_lib/group-actions";
 import { verifyGroupInviteToken } from "@/app/g/_lib/group-invite";
 import { getCurrentMember } from "@/lib/current-member";
 
-export const metadata = { title: "Unirse al grupo · Café y Tertulia" };
+export const metadata = { title: "Unirse al grupo · Café y Tertulias" };
 
 /**
  * /g/unirse?token=… — canje del enlace de Invitación a un Grupo privado.

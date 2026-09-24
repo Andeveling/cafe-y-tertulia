@@ -59,10 +59,10 @@ A premium, unhurried companion for intellectual conversation — not a meeting t
 
 ## Brand Commitments
 
-- **Name:** Café y Tertulias (or "Café y Tertulia" — both used interchangeably in codebase)
-- **Aesthetic:** "Private Club" — warmth of a high-end coffee lounge or traditional literary circle. Hushed, premium, inviting. Modern Corporate with Tactile Warmth.
+- **Name:** Café y Tertulias. "Tertulia" is the ritual word, not the product name.
+- **Aesthetic:** "Private Club" — warmth of a high-end coffee lounge or traditional literary circle. Hushed, premium, inviting. Salón a media luz, not a corporate tool.
 - **Typography:** Literata (serif, headlines) + Manrope (sans-serif, UI/body). Dual-font strategy.
-- **Palette:** Deep espresso background, warm amber accents. Dark mode only in current implementation.
+- **Palette:** Deep espresso background, warm amber accents. Dark only. The scene is the nocturnal tertulia; there is no light theme.
 - **Voice:** In Spanish. Premium but not pretentious. The app speaks when needed, not to fill space.
 - **Gamification principle:** "Miel, no neón" — rewards use the same Lounge palette, never extra colors. Reward = warmth, not arcade.
 - **DESIGN.md exists** with full design system: colors, typography, spacing, elevation, shapes, component specs, gamification tokens.

@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getRoomSnapshot } from "@/app/materials/_lib/room";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Escenario · Café y Tertulia" };
+export const metadata = { title: "Escenario · Café y Tertulias" };
 
 /** /stage redirige a /room (ticket #44 — el debate vive en la Sala). */
 export default async function StagePage({

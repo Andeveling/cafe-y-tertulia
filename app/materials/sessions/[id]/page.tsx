@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Sesión · Histórico · Café y Tertulia" };
+export const metadata = { title: "Sesión · Histórico · Café y Tertulias" };
 
 export default async function SessionHistoryPage({
 	params,

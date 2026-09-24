@@ -11,7 +11,7 @@ export async function generateMetadata({
 	params: Promise<{ slug: string }>;
 }) {
 	const { slug } = await params;
-	return { title: `${slug} · Café y Tertulia` };
+	return { title: `${slug} · Café y Tertulias` };
 }
 
 /**

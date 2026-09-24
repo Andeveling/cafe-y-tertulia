@@ -124,31 +124,31 @@ components:
   button-primary:
     backgroundColor: '{colors.primary}'
     textColor: '{colors.on-primary}'
-    rounded: '{rounded.DEFAULT}'
+    rounded: '{rounded.lg}'
     padding: '0 14px'
     height: '2.5rem'
   button-primary-hover:
     backgroundColor: '{colors.primary}'
     textColor: '{colors.on-primary}'
-    rounded: '{rounded.DEFAULT}'
+    rounded: '{rounded.lg}'
     padding: '0 14px'
     height: '2.5rem'
   button-secondary:
     backgroundColor: '{colors.secondary}'
     textColor: '{colors.on-secondary}'
-    rounded: '{rounded.DEFAULT}'
+    rounded: '{rounded.lg}'
     padding: '0 14px'
     height: '2.5rem'
   button-outline:
     backgroundColor: '{colors.background}'
     textColor: '{colors.primary}'
-    rounded: '{rounded.DEFAULT}'
+    rounded: '{rounded.lg}'
     padding: '0 14px'
     height: '2.5rem'
   button-ghost:
     backgroundColor: '{colors.background}'
     textColor: '{colors.on-surface}'
-    rounded: '{rounded.DEFAULT}'
+    rounded: '{rounded.lg}'
     padding: '0 14px'
     height: '2.5rem'
   card:
@@ -181,7 +181,7 @@ components:
 
 Café y Tertulias es un salón privado a media luz — no una herramienta, no una red social. La interfaz es un compañero hushed y premium que acompaña el ritual semanal de conversación intelectual. Evoca la calidez de un lounge de café de alto nivel y el recogimiento de un círculo literario tradicional: maderas oscuras, luz ámbar, tipografía que invita a quedarse.
 
-El sistema es **Modern Corporate with Tactile Warmth**. Oscuro por decisión de escena — lectura nocturna, videollamada íntima — no por categoría. La jerarquía se construye con capas tonales y tipografía impecable, no con sombras pesadas ni bordes agresivos. Todo respira: el espacio es la jerarquía. La gamificación es miel, no neón — un único acento cálido sobre una base de tierras desaturadas.
+El sistema es un **salón a media luz**, no una herramienta corporativa. Oscuro por decisión de escena — lectura nocturna, videollamada íntima — y no hay modo claro. La jerarquía se construye con capas tonales y tipografía impecable, no con sombras pesadas ni bordes agresivos. Todo respira: el espacio es la jerarquía. La gamificación es miel, no neón — un único acento cálido sobre una base de tierras desaturadas.
 
 **Key Characteristics:**
 - Hushed, premium y slow — prima la contemplación sobre el clic frenético
@@ -227,7 +227,7 @@ Una paleta espresso profunda con un único acento ámbar cálido; el resto son t
 
 ### Named Rules
 **The One Warm Voice Rule.** Solo ámbar/miel compite por atención. Nunca ámbar + chart + destructive juntos en una misma vista. La gamificación vive en feedback y vitrina, no en el dashboard hero.
-**The Lounge Is Dark Rule.** El mundo es oscuro por escena (tertulia nocturna, luz baja). El modo claro existe como inversión oklch suave (background oklch(0.965 0.022 82)), no como identidad alternativa.
+**The Lounge Is Dark Rule.** El mundo es oscuro por escena (tertulia nocturna, luz baja). No hay modo claro ni inversión diurna. Un segundo tema sería otra marca, y el ámbar de este sistema desaparece sobre papel.
 
 ## Typography
 
@@ -242,7 +242,7 @@ Una paleta espresso profunda con un único acento ámbar cálido; el resto son t
 - **Headline-lg** (Literata 600, 32px / 40px, -0.01em; 28px / 36px en móvil): Títulos de página y secciones principales.
 - **Headline-md / CardTitle** (Literata 600, 24px / 32px): Títulos de card y bloques. .font-heading en CardTitle (16px/leading-snug en implementación).
 - **Body-lg** (Manrope 400, 18px / 28px): Lead, descripciones largas. Medida 65–75ch.
-- **Body-md** (Manrope 400, 16px / 24px): Cuerpo por defecto. Base del sistema.
+- **Body-md** (Manrope 400, 16px / 24px): UI densa (`text-sm`). El cuerpo de lectura por defecto en la app es 18px (`text-base` en `body`).
 - **Body-sm** (Manrope 400, 14px / 20px): Secundarios, descripciones de card, metadatos.
 - **Label-md** (Manrope 600, 12px / 16px, 0.05em uppercase): Badges, LevelBadge, etiquetas. Siempre uppercase + tracking amplio.
 - **Label-sm** (Manrope 600, 11px / 16px, 0.08em uppercase, `text-label-sm`): Micro-labels en pills, contadores y captions (En la palabra, La mesa, Tu misión, Intervención N/M).
@@ -259,7 +259,7 @@ Contenedor máximo 1200px (container-max) con gutters de 24px. En desktop, márg
 
 Separación entre secciones: xxl 48px para "breathing room" premium y sensación pausada. Padding interno de cards: md 16px o lg 24px para mantener espaciosidad. Tight groups (gap 8–16px) dentro de un bloque, generous separation (32–48px) entre bloques. Más espacio por encima del heading que por debajo.
 
-El layout es dark-first con un radial-gradient sutil anclado arriba al centro (80rem × 40rem, primary 14% en dark; secondary 45% en light, transparent 60–62%) sobre background fijo — un halo ámbar que aporta profundidad sin competir con el contenido. Sidebar fija 16rem (18rem en móvil, 3rem colapsada) con estado persistido en cookie.
+El layout es oscuro, con un radial-gradient sutil anclado arriba al centro (80rem × 40rem, primary 14%, transparent 60%) sobre background fijo — un halo ámbar que aporta profundidad sin competir con el contenido. Sidebar fija 16rem (18rem en móvil, 3rem colapsada) con estado persistido en cookie.
 
 Breakpoints implícitos Tailwind (sm 640px, md 768px, lg 1024px). Densidad lounge/gamified — control heights 2.5rem por defecto (xs 1.75rem, sm 2.25rem, lg 2.75rem), no dashboard compacto.
 
@@ -281,7 +281,7 @@ El sistema evita sombras pesadas; la profundidad se comunica con **capas tonales
 - **shadow-lg** (`0 8px 16px -4px / 0.1 + 0 18px 32px -8px / 0.14`): Dialogs y sheets.
 - **shadow-xl / 2xl** (`0 16px 28px -8px / 0.12 + 0 24px 40px / 0.16` y `0 28px 50px / 0.22`): Overlays máximos. En dark, shadow-color oklch(0.12 0.02 55) con opacity 0.5 para mantener calidez.
 
-Color de sombra oklch(0.38 0.05 48) en light (earth), oklch(0.12 0.02 55) en dark. Siempre con offset Y y blur suave — nunca halo centrado sin offset.
+Color de sombra oklch(0.12 0.02 55). Siempre con offset Y y blur suave — nunca halo centrado sin offset.
 
 ### Named Rules
 **The Flat-By-Default Rule.** Las superficies son planas en reposo. Las sombras aparecen solo como respuesta a estado (hover, focus, elevación de overlay). Si no hay interacción, no hay sombra.
@@ -305,7 +305,7 @@ Bordes siempre 1px, nunca gruesos. Outline-variant #504539 para contenedores, ou
 ### Buttons
 Suave, táctil y contenido. No levita; responde con color y micro-desplazamiento.
 
-- **Shape:** rounded-lg (0.5rem) por defecto; xs/sm usan `min(0.75rem, 10–12px)` para mantener proporción en tamaños pequeños.
+- **Shape:** rounded-lg (1rem) por defecto — el mueble, no el dashboard de 8px. xs/sm usan `min(0.75rem, 10–12px)` para mantener proporción en tamaños pequeños.
 - **Primary (default):** bg-primary #ffcd97 con texto #472a00. Hover bg-primary/80. Focus ring 3px en ring/50. Active translate-y-px. Altura 2.5rem (control-height), gap 1.5, px 3.5. Tamaños xs 1.75rem, sm 2.25rem, lg 2.75rem, icon cuadrado.
 - **Secondary:** bg-secondary #c9c6c2 texto #31302d. Hover color-mix con foreground 5%.
 - **Outline:** border-border bg-background, hover muted. En dark: border-input con bg-input/30.
@@ -319,20 +319,20 @@ Suave, táctil y contenido. No levita; responde con color y micro-desplazamiento
 
 ### Cards / Containers
 - **Corner Style:** rounded-xl (1rem) por defecto; overflow-hidden.
-- **Background:** bg-card #291d17 (dark) / oklch(0.985 0.014 85) light. Texto card-foreground.
+- **Background:** bg-card #291d17. Texto card-foreground.
 - **Shadow Strategy:** Flat-by-default; ring-1 ring-foreground/10 como definición sutil. Sin shadow en reposo.
 - **Border:** ring 1px foreground/10; CardFooter con border-t y bg-muted/50 cuando existe.
 - **Internal Padding:** variable --card-spacing: 16px por defecto (spacing 4), 12px en size sm. Header/Content/Footer respetan el spacing token. Headings usan gap 1–4 entre bloques.
 
 ### Inputs / Fields
-- **Style:** h-2.5rem, rounded-lg, border-input #504539, bg-transparent (light) / input/30 en dark. px-3, text-base (md:text-sm). Placeholder muted-foreground.
+- **Style:** h-2.5rem, rounded-lg, border-input #504539, bg-input/30. px-3, text-base (md:text-sm). Placeholder muted-foreground.
 - **Focus:** border-ring #ffcd97 + ring 3px ring/50.
 - **Error:** aria-invalid border-destructive + ring destructive/20.
 - **Disabled:** bg-input/50 (dark /80), opacity 50, cursor not-allowed.
 - **File inputs:** file:h-6, border-0, text-sm medium.
 
 ### Navigation
-- **Sidebar:** bg-sidebar #251913 (dark) / oklch(0.95 0.02 78) light. Ancho 16rem, móvil 18rem, colapsada 3rem (icon). Toggle con Hugeicons SidebarLeftIcon, shortcut "b". Active item: bg-sidebar-primary #ffcd97 texto #472a00 (soft amber). Inactivo: crema low-opacity. Separators en outline-variant. Tooltips en colapsado. Cookie sidebar_state persiste 7 días. Sheet en móvil.
+- **Sidebar:** bg-sidebar #251913. Ancho 16rem, móvil 18rem, colapsada 3rem (icon). Toggle con Hugeicons SidebarLeftIcon, shortcut "b". Active item: bg-sidebar-primary #ffcd97 texto #472a00 (soft amber). Inactivo: crema low-opacity. Separators en outline-variant. Tooltips en colapsado. Cookie sidebar_state persiste 7 días. Sheet en móvil. La marca es el isotipo, no una ceja sobre el nombre del grupo.
 - **AppHeader:** Contiene LevelBadge (gamificación quieta) y acciones de navegación.
 - **Tabs/Pagination/Breadcrumb:** Usan muted y primary para activo; tipografía Manrope.
 
@@ -370,4 +370,4 @@ Suave, táctil y contenido. No levita; responde con color y micro-desplazamiento
 - **Don't usar glifos Unicode o emoji como iconos.** Iconos Hugeicons dibujados, un solo stroke y peso, 16–24px inline SVG.
 - **Don't usar máscaras geométricas para recortar fotos.** O matte alpha real o sin recorte.
 - **Don't competir con CTAs desde la gamificación.** Dashboard = 0 gamificación salvo LevelBadge. Sala/Rating/Cierre = recompensa.
-- **Don't elegir light/dark por categoría.** Elige por escena de uso: tertulia nocturna = dark first; lectura diurna = light como inversión calmada.
+- **Don't ofrecer un modo claro.** La escena es la tertulia nocturna. Un toggle de tema parte la marca en dos y el ámbar deja de leerse.

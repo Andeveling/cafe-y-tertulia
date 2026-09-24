@@ -4,7 +4,7 @@ import { inactiveMemberDestination } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 import { getMyGroups, getPublicCatalog } from "@/lib/groups/queries";
 
-export const metadata = { title: "Mis grupos · Café y Tertulia" };
+export const metadata = { title: "Mis grupos · Café y Tertulias" };
 
 /**
  * /g — Mis Grupos: mis grupos con presencia + catálogo público.

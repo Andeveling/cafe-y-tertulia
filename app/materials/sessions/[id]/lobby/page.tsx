@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getRoomSnapshot } from "@/app/materials/_lib/room";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "Lobby · Café y Tertulia" };
+export const metadata = { title: "Lobby · Café y Tertulias" };
 
 /** /lobby redirige a /room (ticket #44 — Presentes y Sorteo viven en la Sala). */
 export default async function LobbyPage({
