@@ -8,14 +8,18 @@ export type Category = {
 	icon: string;
 };
 
-/** Todas las categorías del club, en orden alfabético. */
+/** Todas las categorías del grupo (o todas si no se especifica grupo), en orden alfabético. */
 export async function listCategories(
 	supabase: MaterialsClient,
+	groupId?: string,
 ): Promise<Category[]> {
-	const { data, error } = await supabase
+	let query = supabase
 		.from("categories")
-		.select("id, key, name, icon")
-		.order("name");
+		.select("id, key, name, icon");
+	if (groupId) {
+		query = query.eq("group_id" as never, groupId);
+	}
+	const { data, error } = await query.order("name");
 	if (error) throw error;
 	return data;
 }

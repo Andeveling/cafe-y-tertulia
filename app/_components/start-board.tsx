@@ -200,6 +200,7 @@ export function StartBoard({
 					sessions={sessions}
 					rosterMembers={rosterMembers}
 					userId={userId}
+					groupId={groupId}
 					collapsible
 				/>
 			</div>
@@ -216,6 +217,7 @@ export function StartBoard({
 						sessions={sessions}
 						rosterMembers={rosterMembers}
 						userId={userId}
+						groupId={groupId}
 					/>
 					{create}
 					{guide}

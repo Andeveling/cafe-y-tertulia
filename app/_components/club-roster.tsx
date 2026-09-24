@@ -2,6 +2,7 @@
 
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import Link from "next/link";
 import { useMemo, useTransition } from "react";
 import { toast } from "sonner";
 import { resuelveConvocatoria } from "@/app/_lib/convocatoria";
@@ -22,14 +23,17 @@ export function ClubRoster({
 	sessions,
 	rosterMembers,
 	userId,
+	groupId,
 	collapsible = false,
 }: {
 	sessions: BoardSession[];
 	rosterMembers: RosterMember[];
 	userId?: string;
+	/** Grupo del roster: su canal de presencia (issue #77, ADR-0013). */
+	groupId?: string;
 	collapsible?: boolean;
 }) {
-	const roster = useClubPresence(userId, rosterMembers);
+	const roster = useClubPresence(userId, rosterMembers, { groupId });
 	const [pending, startTransition] = useTransition();
 	const online = roster.filter((m) => m.online).length;
 	const canLlamar = sessions.some(
@@ -59,7 +63,10 @@ export function ClubRoster({
 					<li key={m.id}>
 						{i > 0 && <Separator />}
 						<div className="flex items-center justify-between gap-2 py-2">
-							<span className="flex min-w-0 items-center gap-2">
+							<Link
+								href={`/members/${m.id}`}
+								className="flex min-w-0 items-center gap-2 rounded-md"
+							>
 								<MemberAvatar
 									name={m.display_name || "Miembro"}
 									avatar={m.avatar}
@@ -68,7 +75,7 @@ export function ClubRoster({
 									className={m.online ? "ring-1 ring-primary/40" : "opacity-40"}
 								/>
 								<span className="truncate text-sm">{m.display_name}</span>
-							</span>
+							</Link>
 							{canLlamar &&
 								(fila?.llamable ? (
 									<Button

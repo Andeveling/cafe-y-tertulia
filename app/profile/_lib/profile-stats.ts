@@ -15,9 +15,14 @@ export type BadgePartition = {
 export function partitionBadges(badges: MemberBadge[]): BadgePartition {
 	const individual: MemberBadge[] = [];
 	const collective: MemberBadge[] = [];
+	const seen = new Set<string>();
 	let earnedIndividual = 0;
 	let earnedCollective = 0;
 	for (const b of badges) {
+		// El catálogo puede traer claves repetidas; la primera gana para
+		// mantener keys React únicas.
+		if (seen.has(b.key)) continue;
+		seen.add(b.key);
 		if (b.kind === "individual") {
 			individual.push(b);
 			if (b.earned) earnedIndividual += 1;

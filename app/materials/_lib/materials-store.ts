@@ -20,6 +20,7 @@ export type MaterialWithSessionsCount = {
 
 export type MaterialDetail = {
 	id: string;
+	group_id: string;
 	title: string;
 	kind: MaterialKind;
 	author: string;
@@ -87,7 +88,7 @@ export const findMaterialById = cache(
 		const { data, error } = await supabase
 			.from("materials")
 			.select(
-				"id, title, kind, author, status, created_at, image_url, source_url, rating_avg, rating_count, sessions(id, range, status, scheduled_at, created_at, rating_avg, rating_count, moderator_id)",
+				"id, group_id, title, kind, author, status, created_at, image_url, source_url, rating_avg, rating_count, sessions(id, range, status, scheduled_at, created_at, rating_avg, rating_count, moderator_id)",
 			)
 			.eq("id", id)
 			.maybeSingle();
@@ -97,6 +98,7 @@ export const findMaterialById = cache(
 
 		return {
 			id: data.id,
+			group_id: data.group_id,
 			title: data.title,
 			kind: data.kind,
 			author: data.author,

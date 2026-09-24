@@ -118,27 +118,30 @@ export default async function MaterialDetailPage({
 }) {
 	const { id } = await params;
 	const supabase = await createClient();
-	const [material, bank, milestones, categories, materialCategories, authData] =
-		await Promise.all([
-			getMaterial(id),
-			listMaterialTrivias(supabase, id).catch(() => []),
-			getClubMilestones(supabase).catch(() => []),
-			listCategories(supabase).catch(() => []),
-			getMaterialCategories(supabase, id).catch(() => []),
-			supabase.auth.getUser().then(({ data }) => data.user),
-		]);
+	const [material, bank, milestones, authData] = await Promise.all([
+		getMaterial(id),
+		listMaterialTrivias(supabase, id).catch(() => []),
+		getClubMilestones(supabase).catch(() => []),
+		supabase.auth.getUser().then(({ data }) => data.user),
+	]);
 
 	if (!material) {
 		notFound();
 	}
 
 	const viewer = authData ?? null;
-	const canTag = viewer
-		? await isActiveMember(supabase, viewer.id).catch(() => false)
-		: false;
-	const mastery = viewer
-		? await getMemberMastery(supabase, viewer.id).catch(() => [])
-		: [];
+	const [categories, materialCategories, canTag, mastery] = await Promise.all([
+		listCategories(supabase, material.group_id).catch(() => []),
+		getMaterialCategories(supabase, id).catch(() => []),
+		viewer
+			? isActiveMember(supabase, viewer.id).catch(() => false)
+			: Promise.resolve(false),
+		viewer
+			? getMemberMastery(supabase, viewer.id, material.group_id).catch(
+					() => [],
+				)
+			: Promise.resolve([]),
+	]);
 
 	const showTriviaBank = material.sessions.some(
 		(s) => s.status === "preparation",

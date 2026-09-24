@@ -25,6 +25,7 @@ export type MemberMastery = {
 export async function getMemberMastery(
 	supabase: MaterialsClient,
 	memberId: string,
+	groupId?: string,
 ): Promise<MemberMastery[]> {
 	const { data: parts, error: partsError } = await supabase
 		.from("session_participants")
@@ -34,7 +35,7 @@ export async function getMemberMastery(
 	if (partsError) throw partsError;
 	const sessionIds = [...new Set((parts ?? []).map((p) => p.session_id))];
 
-	const all = await listCategories(supabase);
+	const all = await listCategories(supabase, groupId);
 	const empty = all
 		.map((category) => ({ category, points: 0, level: masteryLevelFor(0) }))
 		.sort((a, b) => a.category.name.localeCompare(b.category.name));

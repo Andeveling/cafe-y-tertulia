@@ -125,8 +125,11 @@ export function BadgeVitrina({
 			<div className="flex flex-col gap-8">
 				{recognitions.length > 0 && (
 					<div className="flex flex-col gap-3">
-						{recognitions.map((r) => (
-							<RecognitionBanner key={r.category} recognition={r} />
+						{recognitions.map((r, index) => (
+							<RecognitionBanner
+								key={`${r.category}-${r.seasonMonth}-${index}`}
+								recognition={r}
+							/>
 						))}
 					</div>
 				)}

@@ -52,17 +52,22 @@ export function ActiveGroupSwitcher({
 		return (
 			<SidebarMenu>
 				<SidebarMenuItem>
-					<SidebarMenuButton
-						size="lg"
-						tooltip="Sin grupo"
-						className="gap-3"
-						render={<Link href="/g" />}
-					>
-						<BrandMark />
-						<span className="truncate font-semibold text-sm tracking-tight group-data-[collapsible=icon]:hidden">
-							Sin grupo
-						</span>
-					</SidebarMenuButton>
+					<div className="flex w-full items-center gap-3">
+						<Link href="/" aria-label="Café y Tertulias — inicio">
+							<BrandMark />
+						</Link>
+						<SidebarMenuButton
+							size="lg"
+							tooltip="Sin grupo"
+							className="min-w-0 flex-1"
+							render={<Link href="/g" />}
+						>
+							<GroupLabel
+								eyebrow="Café y Tertulias"
+								title="Sin grupo"
+							/>
+						</SidebarMenuButton>
+					</div>
 				</SidebarMenuItem>
 			</SidebarMenu>
 		);
@@ -72,20 +77,22 @@ export function ActiveGroupSwitcher({
 		return (
 			<SidebarMenu>
 				<SidebarMenuItem>
-					<SidebarMenuButton
-						size="lg"
-						tooltip={active.name}
-						className="gap-3"
-						render={<Link href={hrefForGroup(active.slug, section)} />}
-					>
-						<BrandMark />
-						<span className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-							<span className="sr-only">Café y Tertulias — </span>
-							<span className="truncate font-semibold text-sm tracking-tight">
-								{active.name}
-							</span>
-						</span>
-					</SidebarMenuButton>
+					<div className="flex w-full items-center gap-3">
+						<Link href="/" aria-label="Café y Tertulias — inicio">
+							<BrandMark />
+						</Link>
+						<SidebarMenuButton
+							size="lg"
+							tooltip={active.name}
+							className="min-w-0 flex-1"
+							render={<Link href={hrefForGroup(active.slug, section)} />}
+						>
+							<GroupLabel
+								eyebrow="Café y Tertulias"
+								title={active.name}
+							/>
+						</SidebarMenuButton>
+					</div>
 				</SidebarMenuItem>
 			</SidebarMenu>
 		);
@@ -94,28 +101,26 @@ export function ActiveGroupSwitcher({
 	return (
 		<SidebarMenu>
 			<SidebarMenuItem>
-				<DropdownMenu>
-					<DropdownMenuTrigger
-						render={
-							<SidebarMenuButton
-								size="lg"
-								tooltip={title}
-								className="gap-3 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-							/>
-						}
-					>
+				<div className="flex w-full items-center gap-3">
+					<Link href="/" aria-label="Café y Tertulias — inicio">
 						<BrandMark />
-						<span className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
-							<span className="sr-only">Café y Tertulias — </span>
-							<span className="truncate font-semibold text-sm tracking-tight">
-								{title}
-							</span>
-						</span>
-						<HugeiconsIcon
-							icon={ArrowDown01Icon}
-							className="ml-auto size-4 opacity-60 group-data-[collapsible=icon]:hidden"
-						/>
-					</DropdownMenuTrigger>
+					</Link>
+					<DropdownMenu>
+						<DropdownMenuTrigger
+							render={
+								<SidebarMenuButton
+									size="lg"
+									tooltip={title}
+									className="min-w-0 flex-1 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+								/>
+							}
+						>
+							<GroupLabel eyebrow="Café y Tertulias" title={title} />
+							<HugeiconsIcon
+								icon={ArrowDown01Icon}
+								className="ml-auto size-4 opacity-60 group-data-[collapsible=icon]:hidden"
+							/>
+						</DropdownMenuTrigger>
 					<DropdownMenuContent
 						className="min-w-56 rounded-lg"
 						side={isMobile ? "bottom" : "right"}
@@ -145,9 +150,23 @@ export function ActiveGroupSwitcher({
 							Crear grupo
 						</DropdownMenuItem>
 					</DropdownMenuContent>
-				</DropdownMenu>
+					</DropdownMenu>
+				</div>
 			</SidebarMenuItem>
 		</SidebarMenu>
+	);
+}
+
+function GroupLabel({ eyebrow, title }: { eyebrow: string; title: string }) {
+	return (
+		<span className="grid min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
+			<span className="truncate text-xs text-sidebar-foreground/60">
+				{eyebrow}
+			</span>
+			<span className="truncate font-semibold text-sm tracking-tight">
+				{title}
+			</span>
+		</span>
 	);
 }
 

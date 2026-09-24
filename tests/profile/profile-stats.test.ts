@@ -48,6 +48,20 @@ describe("partitionBadges", () => {
 		expect(p.earnedCollective).toBe(1);
 	});
 
+	it("deduplica claves repetidas del catálogo", () => {
+		const badges = [
+			badge({ key: "a", kind: "individual", earned: true }),
+			badge({ key: "a", kind: "individual", earned: false }),
+			badge({ key: "c", kind: "collective", earned: true }),
+			badge({ key: "c", kind: "collective", earned: true }),
+		];
+		const p = partitionBadges(badges);
+		expect(p.individual.map((b) => b.key)).toEqual(["a"]);
+		expect(p.collective.map((b) => b.key)).toEqual(["c"]);
+		expect(p.totalIndividual).toBe(1);
+		expect(p.earnedCollective).toBe(1);
+	});
+
 	it("vacío no rompe", () => {
 		expect(partitionBadges([])).toMatchObject({
 			earnedIndividual: 0,
