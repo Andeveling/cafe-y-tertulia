@@ -17,7 +17,7 @@ export async function listCategories(
 		.from("categories")
 		.select("id, key, name, icon");
 	if (groupId) {
-		query = query.eq("group_id" as never, groupId);
+		query = query.eq("group_id", groupId);
 	}
 	const { data, error } = await query.order("name");
 	if (error) throw error;

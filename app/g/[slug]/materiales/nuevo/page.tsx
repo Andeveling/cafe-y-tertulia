@@ -3,6 +3,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MaterialForm } from "@/app/materials/_components/material-form";
+import { listCategories } from "@/app/materials/_lib/categories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getCurrentMember } from "@/lib/current-member";
@@ -22,6 +23,10 @@ export default async function NewGroupMaterialPage({
 
 	const group = await getGroupBySlug(supabase, slug, member.id);
 	if (!group || group.role == null) notFound();
+
+	const categories = await listCategories(supabase, group.id).catch(
+		() => [],
+	);
 
 	return (
 		<div className="flex w-full max-w-xl flex-col gap-6">
@@ -43,7 +48,11 @@ export default async function NewGroupMaterialPage({
 					</p>
 				</CardHeader>
 				<CardContent>
-					<MaterialForm groupId={group.id} slug={slug} />
+					<MaterialForm
+						groupId={group.id}
+						slug={slug}
+						categories={categories}
+					/>
 				</CardContent>
 			</Card>
 		</div>

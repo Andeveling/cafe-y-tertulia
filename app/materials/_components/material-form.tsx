@@ -1,14 +1,24 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusSignIcon } from "@hugeicons/core-free-icons";
+import {
+	ClapperboardIcon,
+	FeatherIcon,
+	Idea01Icon,
+	LandmarkIcon,
+	NewspaperIcon,
+	PlusSignIcon,
+	Tag01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import type { Category } from "@/app/materials/_lib/categories";
 import { optionalHttpsUrl } from "@/app/materials/_lib/material-urls";
 import { createMaterial } from "@/app/materials/_lib/materials-actions";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -25,6 +35,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+
+const CATEGORY_ICON: Record<string, typeof Idea01Icon> = {
+	filosofia: Idea01Icon,
+	cine: ClapperboardIcon,
+	actualidad: NewspaperIcon,
+	poesia: FeatherIcon,
+	historia: LandmarkIcon,
+};
 
 const MATERIAL_KIND_OPTIONS = ["book", "podcast", "video", "article"] as const;
 
@@ -44,6 +62,7 @@ const materialFormSchema = z.object({
 	kind: z.enum(MATERIAL_KIND_OPTIONS),
 	imageUrl: optionalHttpsUrl("La imagen").optional(),
 	sourceUrl: optionalHttpsUrl("La fuente").optional(),
+	categoryIds: z.array(z.string()).optional(),
 });
 
 type MaterialFormValues = z.infer<typeof materialFormSchema>;
@@ -51,10 +70,12 @@ type MaterialFormValues = z.infer<typeof materialFormSchema>;
 export function MaterialForm({
 	groupId,
 	slug,
+	categories,
 	onSuccess,
 }: {
 	groupId: string;
 	slug: string;
+	categories?: Category[];
 	onSuccess?: () => void;
 }) {
 	const [isPending, startTransition] = useTransition();
@@ -77,6 +98,7 @@ export function MaterialForm({
 				author: data.author,
 				imageUrl: data.imageUrl,
 				sourceUrl: data.sourceUrl,
+				categoryIds: data.categoryIds ?? [],
 				groupId,
 				slug,
 			});
@@ -207,6 +229,51 @@ export function MaterialForm({
 					)}
 				/>
 			</FieldGroup>
+
+			{categories && categories.length > 0 && (
+				<Controller
+					name="categoryIds"
+					control={form.control}
+					render={({ field }) => (
+						<Field>
+							<FieldLabel>Categorías</FieldLabel>
+							<div
+								className="flex flex-wrap gap-2"
+								role="group"
+								aria-label="Categorías del material"
+							>
+								{categories.map((c) => {
+									const picked = field.value ?? [];
+									const on = picked.includes(c.id);
+									return (
+										<button
+											key={c.id}
+											type="button"
+											onClick={() => {
+												const current = field.value ?? [];
+												const next = on
+													? current.filter((id: string) => id !== c.id)
+													: [...current, c.id];
+												field.onChange(next);
+											}}
+											aria-pressed={on}
+										>
+											<Badge variant={on ? "default" : "outline"}>
+												<HugeiconsIcon
+													icon={CATEGORY_ICON[c.key] ?? Tag01Icon}
+													size={14}
+													data-icon="inline-start"
+												/>{" "}
+												{c.name}
+											</Badge>
+										</button>
+									);
+								})}
+							</div>
+						</Field>
+					)}
+				/>
+			)}
 
 			<Button type="submit" disabled={isPending}>
 				<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />

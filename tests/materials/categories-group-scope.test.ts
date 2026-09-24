@@ -11,7 +11,7 @@ function mockSupabase(rows: { id: string; key: string; name: string; icon: strin
 	const builder = { eq, order };
 	const select = vi.fn().mockReturnValue(builder);
 	const from = vi.fn().mockReturnValue({ select });
-	return { from, select, eq, order } as never;
+	return { from, select, eq, order };
 }
 
 beforeEach(() => {
@@ -25,7 +25,10 @@ describe("listCategories", () => {
 			{ id: "c2", key: "cine", name: "Cine", icon: "ClapperboardIcon" },
 		]);
 
-		const result = await listCategories(supabase, GROUP_A);
+		const result = await listCategories(
+			supabase as never,
+			GROUP_A,
+		);
 
 		expect(result).toHaveLength(2);
 		expect(result.map((c) => c.name).sort()).toEqual(["Cine", "Filosofía"]);
@@ -37,7 +40,7 @@ describe("listCategories", () => {
 			{ id: "c1", key: "filosofia", name: "Filosofía", icon: "Idea01Icon" },
 		]);
 
-		const result = await listCategories(supabase);
+		const result = await listCategories(supabase as never);
 
 		expect(result).toHaveLength(1);
 		expect(supabase.eq).not.toHaveBeenCalled();

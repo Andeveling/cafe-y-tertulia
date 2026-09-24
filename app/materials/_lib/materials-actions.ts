@@ -26,28 +26,55 @@ function materialUrlsOrError(input: MaterialInput): ActionResult | null {
 }
 
 export async function createMaterial(
-	input: MaterialInput & { groupId: string; slug: string },
+	input: MaterialInput & {
+		groupId: string;
+		slug: string;
+		categoryIds?: string[];
+	},
 ): Promise<ActionResult> {
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase, user }) => {
 			const urlError = materialUrlsOrError(input);
 			if (urlError) return urlError;
-			const { error } = await supabase.from("materials").insert({
-				title: input.title.trim(),
-				kind: input.kind,
-				author: input.author.trim(),
-				image_url: toNullableUrl(input.imageUrl),
-				source_url: toNullableUrl(input.sourceUrl),
-				created_by: user!.id,
-				group_id: input.groupId,
-			});
+			const { data: material, error } = await supabase
+				.from("materials")
+				.insert({
+					title: input.title.trim(),
+					kind: input.kind,
+					author: input.author.trim(),
+					image_url: toNullableUrl(input.imageUrl),
+					source_url: toNullableUrl(input.sourceUrl),
+					created_by: user!.id,
+					group_id: input.groupId,
+				})
+				.select("id")
+				.single();
 
-			if (error) {
+			if (error || !material) {
 				return {
 					ok: false,
-					error: `No se pudo crear el material: ${error.message}`,
+					error: `No se pudo crear el material: ${error?.message ?? ""}`,
 				};
+			}
+
+			if (input.categoryIds && input.categoryIds.length > 0) {
+				const unique = [...new Set(input.categoryIds)];
+				const { error: catError } = await supabase
+					.from("material_categories")
+					.insert(
+						unique.map((category_id) => ({
+							material_id: material.id,
+							category_id,
+							group_id: input.groupId,
+						})),
+					);
+				if (catError) {
+					return {
+						ok: false,
+						error: `No se pudieron asignar categorías: ${catError.message}`,
+					};
+				}
 			}
 
 			revalidatePath(`/g/${input.slug}/materiales`);
