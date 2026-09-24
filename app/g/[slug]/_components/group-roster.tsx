@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import { MemberAvatar } from "@/components/member-avatar";
 import { useClubPresence } from "@/hooks/use-club-presence";
@@ -54,13 +55,18 @@ export function GroupRoster({
 						key={m.id}
 						className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2"
 					>
-						<MemberAvatar
-							name={m.display_name}
-							avatar={m.avatar}
-							size="sm"
-							badge={m.online}
-						/>
-						<span className="text-sm font-medium">{m.display_name}</span>
+						<Link
+							href={`/members/${m.id}`}
+							className="flex min-w-0 flex-1 items-center gap-2 rounded-md"
+						>
+							<MemberAvatar
+								name={m.display_name}
+								avatar={m.avatar}
+								size="sm"
+								badge={m.online}
+							/>
+							<span className="text-sm font-medium">{m.display_name}</span>
+						</Link>
 						{roleByMemberId.get(m.id) === "admin" ? (
 							<span className="text-xs text-muted-foreground">admin</span>
 						) : null}

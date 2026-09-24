@@ -290,11 +290,25 @@ export function useClubPresence(
 	const base = members.map((m) => {
 		const payload = tracks[m.id]?.[0];
 		const lastSeenDb = toMs(m.last_seen);
-		const ultimaVez = payload ? payload.last_active : lastSeenDb;
-		// Gracia: sin payload pero con last_seen fresco (<90 s) sigue vivo.
-		const vivo =
-			!!payload ||
-			(lastSeenDb !== null && ahora - lastSeenDb < UMBRAL_DESCONECTADO_MS);
+		// Con grupo, el canal group-{id}-roster es la única fuente: el
+		// last_seen global delata actividad en otros grupos (issue #77).
+		const isGroupScoped = groupId != null;
+		let ultimaVez: number | null;
+		let vivo: boolean;
+		if (payload) {
+			ultimaVez = payload.last_active;
+			vivo = true;
+		} else if (isGroupScoped) {
+			// Sin payload en el canal del grupo: offline, sin fallback global.
+			ultimaVez = null;
+			vivo = false;
+		} else {
+			// Gracia: sin payload pero con last_seen fresco (<90 s) sigue vivo.
+			// Solo en el canal histórico; con grupo, vivo = payload del grupo.
+			ultimaVez = lastSeenDb;
+			vivo =
+				lastSeenDb !== null && ahora - lastSeenDb < UMBRAL_DESCONECTADO_MS;
+		}
 		const otraSalaId =
 			typeof payload?.session_id === "string" ? payload.session_id : null;
 		const enSala = otraSalaId !== null;
