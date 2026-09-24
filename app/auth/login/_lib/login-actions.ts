@@ -2,23 +2,16 @@
 
 import { redirect } from "next/navigation";
 import { parseForm } from "@/app/_lib/form-helpers";
-import { memberRedirect, safeNextPath } from "@/lib/auth/redirect";
+import { memberRedirect, safeNextPath, withNext } from "@/lib/auth/redirect";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { loginSchema } from "../_schemas/login-schema";
 
 export async function signIn(formData: FormData) {
+	const rawNext = formData.get("next");
+	const next = safeNextPath(typeof rawNext === "string" ? rawNext : undefined);
 	const parsed = await parseForm(loginSchema, formData);
-	const next = safeNextPath(
-		typeof formData.get("next") === "string"
-			? (formData.get("next") as string)
-			: undefined,
-	);
 	if (!parsed.ok) {
-		redirect(
-			next === "/"
-				? "/auth/login?error=invalid"
-				: `/auth/login?error=invalid&next=${encodeURIComponent(next)}`,
-		);
+		redirect(withNext("/auth/login?error=invalid", next));
 	}
 
 	const email = parsed.data.email.toLowerCase();
@@ -38,10 +31,8 @@ export async function signIn(formData: FormData) {
 		redirect(`/auth/login?${params.toString()}`);
 	}
 
-	// Solo `activo` entra (ADR-0014: la cuenta es abierta, el cierre vive
-	// en el Grupo). `baja` conserva sus aportes como memoria pero no entra;
-	// `invitado` es el estado intermedio del padrinazgo derogado y migra al
-	// registro abierto en vez de abrir una rama nueva.
+	// Solo `activo` entra (ADR-0014): `baja` conserva sus aportes como
+	// memoria pero no entra; `invitado` migra al registro abierto.
 	const { data: member } = await supabase
 		.from("members")
 		.select("status")
@@ -50,9 +41,7 @@ export async function signIn(formData: FormData) {
 
 	if (!member || member.status !== "active") {
 		await supabase.auth.signOut();
-		redirect(
-			memberRedirect(next === "/" ? undefined : next, member?.status ?? null),
-		);
+		redirect(memberRedirect(next, member?.status ?? null));
 	}
 
 	redirect(next);

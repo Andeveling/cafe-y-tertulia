@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { inactiveMemberDestination } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 import { GroupProvider } from "@/lib/groups/group-context";
 import { getGroupBySlug } from "@/lib/groups/queries";
@@ -19,8 +20,8 @@ export default async function GroupLayout({
 	const { member, supabase } = await getCurrentMember();
 
 	if (!member) redirect("/auth/login");
-	if (member.status === "left") redirect("/auth/login?error=left");
-	if (member.status !== "active") redirect("/auth/register");
+	const inactiveDestination = inactiveMemberDestination(member.status);
+	if (inactiveDestination) redirect(inactiveDestination);
 
 	const group = await getGroupBySlug(supabase, slug, member.id);
 	if (!group || group.role == null) notFound();

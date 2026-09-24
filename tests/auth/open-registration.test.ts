@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { registerSchema } from "@/app/auth/register/_schemas/register-schema";
-import { memberRedirect } from "@/lib/auth/redirect";
+import {
+	inactiveMemberDestination,
+	memberRedirect,
+	withNext,
+} from "@/lib/auth/redirect";
 
 /**
  * Registro abierto + Invitación vincula (#78, ADR-0014).
@@ -51,5 +55,38 @@ describe("puerta de Miembro no activo", () => {
 
 	it("activo no redirige", () => {
 		expect(memberRedirect("/g", "active")).toBe("/g");
+	});
+});
+
+describe("destino de Miembro inactivo", () => {
+	it("activo entra, baja va a login con aviso, resto va a registro", () => {
+		expect(inactiveMemberDestination("active")).toBeNull();
+		expect(inactiveMemberDestination("left")).toBe("/auth/login?error=left");
+		expect(inactiveMemberDestination("invited")).toBe("/auth/register");
+		expect(inactiveMemberDestination(null)).toBe("/auth/register");
+		expect(inactiveMemberDestination(undefined)).toBe("/auth/register");
+	});
+});
+
+describe("retorno withNext", () => {
+	it("omite el parámetro en la raíz para URLs canónicas", () => {
+		expect(withNext("/auth/register", "/")).toBe("/auth/register");
+		expect(withNext("/auth/register", undefined)).toBe("/auth/register");
+	});
+
+	it("preserva el destino interno", () => {
+		expect(withNext("/auth/register", "/g/unirse?token=abc")).toBe(
+			"/auth/register?next=%2Fg%2Funirse%3Ftoken%3Dabc",
+		);
+	});
+
+	it("agrega con & cuando ya hay query", () => {
+		expect(withNext("/auth/login?error=invalid", "/g")).toBe(
+			"/auth/login?error=invalid&next=%2Fg",
+		);
+	});
+
+	it("nunca apunta afuera", () => {
+		expect(withNext("/auth/login", "https://evil.test/x")).toBe("/auth/login");
 	});
 });

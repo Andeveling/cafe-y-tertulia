@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { safeNextPath } from "@/lib/auth/redirect";
+import { safeNextPath, withNext } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 import { RegisterForm } from "./_components/register-form";
 
@@ -19,10 +19,7 @@ export default async function RegisterPage({
 	if (member?.status === "active") {
 		redirect(next);
 	}
-	const loginHref =
-		next === "/"
-			? "/auth/login"
-			: `/auth/login?next=${encodeURIComponent(next)}`;
+	const loginHref = withNext("/auth/login", next);
 
 	return (
 		<div className="flex min-h-dvh flex-1 flex-col items-center justify-center px-4">

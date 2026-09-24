@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useActionState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { type Control, Controller, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -11,7 +11,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { signUp } from "../_lib/register-actions";
+import { type RegisterState, signUp } from "../_lib/register-actions";
 import {
 	type RegisterValues,
 	registerSchema,
@@ -48,23 +48,7 @@ export function RegisterForm({
 		formAction(formData);
 	}
 
-	const alert =
-		formState?.error === "taken" ? (
-			<>
-				Ese email ya tiene cuenta.{" "}
-				<a
-					href={loginHref}
-					className="font-medium text-primary underline underline-offset-4"
-				>
-					Iniciá sesión
-				</a>{" "}
-				en vez de crear un duplicado.
-			</>
-		) : formState?.error === "failed" ? (
-			"No pudimos crear tu cuenta. Intentá de nuevo."
-		) : formState?.error === "invalid" ? (
-			"Revisá los datos: email válido, nombre de al menos 2 letras y contraseña de al menos 6 caracteres."
-		) : null;
+	const alertContent = getAlertContent(formState, loginHref);
 
 	return (
 		<div className="space-y-6">
@@ -78,98 +62,48 @@ export function RegisterForm({
 				</p>
 			</div>
 
-			{alert && (
+			{alertContent && (
 				<div
 					role="alert"
 					className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
 				>
-					{alert}
+					{alertContent}
 				</div>
 			)}
 
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 				<input type="hidden" {...form.register("next")} />
-				<Controller
+				<RegisterField
+					control={form.control}
 					name="email"
-					control={form.control}
-					render={({ field, fieldState }) => (
-						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel htmlFor="email">Email</FieldLabel>
-							<FieldContent>
-								<Input
-									{...field}
-									id="email"
-									type="email"
-									autoComplete="email"
-									aria-invalid={fieldState.invalid}
-									placeholder="tucorreo@ejemplo.com"
-								/>
-							</FieldContent>
-							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-						</Field>
-					)}
+					label="Email"
+					type="email"
+					autoComplete="email"
+					placeholder="tucorreo@ejemplo.com"
 				/>
-				<Controller
+				<RegisterField
+					control={form.control}
 					name="displayName"
-					control={form.control}
-					render={({ field, fieldState }) => (
-						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel htmlFor="displayName">Nombre visible</FieldLabel>
-							<FieldContent>
-								<Input
-									{...field}
-									id="displayName"
-									type="text"
-									autoComplete="nickname"
-									aria-invalid={fieldState.invalid}
-									placeholder="Tu nombre en la plataforma"
-								/>
-							</FieldContent>
-							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-						</Field>
-					)}
+					label="Nombre visible"
+					type="text"
+					autoComplete="nickname"
+					placeholder="Tu nombre en la plataforma"
 				/>
-				<Controller
+				<RegisterField
+					control={form.control}
 					name="password"
-					control={form.control}
-					render={({ field, fieldState }) => (
-						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel htmlFor="password">Contraseña</FieldLabel>
-							<FieldContent>
-								<Input
-									{...field}
-									id="password"
-									type="password"
-									autoComplete="new-password"
-									aria-invalid={fieldState.invalid}
-									placeholder="Mínimo 6 caracteres"
-								/>
-							</FieldContent>
-							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-						</Field>
-					)}
+					label="Contraseña"
+					type="password"
+					autoComplete="new-password"
+					placeholder="Mínimo 6 caracteres"
 				/>
-				<Controller
-					name="confirmPassword"
+				<RegisterField
 					control={form.control}
-					render={({ field, fieldState }) => (
-						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel htmlFor="confirmPassword">
-								Confirmar contraseña
-							</FieldLabel>
-							<FieldContent>
-								<Input
-									{...field}
-									id="confirmPassword"
-									type="password"
-									autoComplete="new-password"
-									aria-invalid={fieldState.invalid}
-									placeholder="Repetí la contraseña"
-								/>
-							</FieldContent>
-							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-						</Field>
-					)}
+					name="confirmPassword"
+					label="Confirmar contraseña"
+					type="password"
+					autoComplete="new-password"
+					placeholder="Repetí la contraseña"
 				/>
 				<Button type="submit" className="w-full" disabled={isPending}>
 					{isPending ? "Creando…" : "Crear cuenta"}
@@ -186,5 +120,66 @@ export function RegisterForm({
 				</a>
 			</p>
 		</div>
+	);
+}
+
+function getAlertContent(state: RegisterState, loginHref: string) {
+	if (!state) return null;
+	if (state.error === "taken") {
+		return (
+			<>
+				Ese email ya tiene cuenta.{" "}
+				<a
+					href={loginHref}
+					className="font-medium text-primary underline underline-offset-4"
+				>
+					Iniciá sesión
+				</a>{" "}
+				en vez de crear un duplicado.
+			</>
+		);
+	}
+	if (state.error === "failed") {
+		return "No pudimos crear tu cuenta. Intentá de nuevo.";
+	}
+	return "Revisá los datos: email válido, nombre de al menos 2 letras y contraseña de al menos 6 caracteres.";
+}
+
+function RegisterField({
+	control,
+	name,
+	label,
+	type,
+	autoComplete,
+	placeholder,
+}: {
+	control: Control<RegisterValues>;
+	name: "email" | "displayName" | "password" | "confirmPassword";
+	label: string;
+	type: string;
+	autoComplete: string;
+	placeholder: string;
+}) {
+	return (
+		<Controller
+			name={name}
+			control={control}
+			render={({ field, fieldState }) => (
+				<Field data-invalid={fieldState.invalid}>
+					<FieldLabel htmlFor={name}>{label}</FieldLabel>
+					<FieldContent>
+						<Input
+							{...field}
+							id={name}
+							type={type}
+							autoComplete={autoComplete}
+							aria-invalid={fieldState.invalid}
+							placeholder={placeholder}
+						/>
+					</FieldContent>
+					{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+				</Field>
+			)}
+		/>
 	);
 }

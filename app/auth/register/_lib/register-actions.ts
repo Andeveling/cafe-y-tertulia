@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { parseForm } from "@/app/_lib/form-helpers";
-import { safeNextPath } from "@/lib/auth/redirect";
+import { safeNextPath, withNext } from "@/lib/auth/redirect";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { registerSchema } from "../_schemas/register-schema";
@@ -62,9 +62,8 @@ export async function signUp(
 		password: parsed.data.password,
 	});
 	if (signInError) {
-		redirect(
-			`/auth/login?email=${encodeURIComponent(email)}&next=${encodeURIComponent(next)}`,
-		);
+		const params = new URLSearchParams({ email });
+		redirect(withNext(`/auth/login?${params.toString()}`, next));
 	}
 
 	redirect(next);

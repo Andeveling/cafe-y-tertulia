@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/app/auth/login/_components/login-form";
-import { safeNextPath } from "@/lib/auth/redirect";
+import { safeNextPath, withNext } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 
 export const metadata: Metadata = {
@@ -46,10 +46,7 @@ export default async function LoginPage({
 		redirect(safeNextPath(params.next));
 	}
 	const next = safeNextPath(params.next);
-	const registerHref =
-		next === "/"
-			? "/auth/register"
-			: `/auth/register?next=${encodeURIComponent(next)}`;
+	const registerHref = withNext("/auth/register", next);
 
 	return (
 		<div className="flex min-h-dvh flex-1 flex-col items-center justify-center px-4">

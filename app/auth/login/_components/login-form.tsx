@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { signIn } from "../_lib/login-actions";
-import { LoginValues, loginSchema } from "../_schemas/login-schema";
+import { type LoginValues, loginSchema } from "../_schemas/login-schema";
 
 export function LoginForm({
 	defaultEmail,
@@ -45,7 +45,6 @@ export function LoginForm({
 
 	return (
 		<form onSubmit={onSubmit} className="space-y-4">
-			<input type="hidden" name="next" value={next} />
 			<Controller
 				name="email"
 				control={control}
