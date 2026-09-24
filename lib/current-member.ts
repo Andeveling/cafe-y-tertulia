@@ -4,8 +4,8 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 
 /**
  * The current member (their public.members row), or null when there is no
- * session. Every authenticated area of the app needs a members row — the
- * club is a closed list (ADR 0005).
+ * session. The account is open (ADR-0014): anyone registers and gets an
+ * `active` row with no group; the closure lives in each Group.
  */
 export async function getCurrentMember() {
 	const supabase = await createServerClient();

@@ -11,7 +11,8 @@ export default async function HomePage() {
 	const { member, supabase } = await getCurrentMember();
 
 	if (!member) redirect("/auth/login");
-	if (member.status !== "active") redirect("/auth/invite");
+	if (member.status === "left") redirect("/auth/login?error=left");
+	if (member.status !== "active") redirect("/auth/register");
 
 	const groups = await getMyGroups(supabase, member.id);
 	const cookieStore = await cookies();

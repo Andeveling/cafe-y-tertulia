@@ -1,30 +1,37 @@
 import { redirect } from "next/navigation";
+import { safeNextPath } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
+import { RegisterForm } from "./_components/register-form";
 
-export default async function RegisterPage() {
+/**
+ * Registro abierto (ADR-0014): cualquiera crea su cuenta de Miembro sin
+ * padrino. El `next` conserva el retorno (p. ej. /g/unirse?token=…) a
+ * través del alta para canjear en un solo gesto.
+ */
+export default async function RegisterPage({
+	searchParams,
+}: {
+	searchParams: Promise<{ next?: string; email?: string }>;
+}) {
+	const params = await searchParams;
+	const next = safeNextPath(params.next);
 	const { member } = await getCurrentMember();
 	if (member?.status === "active") {
-		redirect("/");
+		redirect(next);
 	}
+	const loginHref =
+		next === "/"
+			? "/auth/login"
+			: `/auth/login?next=${encodeURIComponent(next)}`;
 
 	return (
 		<div className="flex min-h-dvh flex-1 flex-col items-center justify-center px-4">
-			<div className="w-full max-w-sm space-y-4 text-center">
-				<h1 className="text-2xl font-semibold tracking-tight">
-					Hace falta el enlace
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					El alta al club es por Invitación. Pedile el enlace a tu padrino.
-				</p>
-				<p className="text-sm text-muted-foreground">
-					¿Ya tenés cuenta?{" "}
-					<a
-						href="/auth/login"
-						className="font-medium text-primary underline underline-offset-4"
-					>
-						Iniciá sesión
-					</a>
-				</p>
+			<div className="w-full max-w-sm space-y-6">
+				<RegisterForm
+					defaultEmail={params.email}
+					next={next}
+					loginHref={loginHref}
+				/>
 			</div>
 		</div>
 	);

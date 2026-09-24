@@ -17,7 +17,8 @@ export default async function MisGruposPage({
 	const { member, supabase } = await getCurrentMember();
 
 	if (!member) redirect("/auth/login");
-	if (member.status !== "active") redirect("/auth/invite");
+	if (member.status === "left") redirect("/auth/login?error=left");
+	if (member.status !== "active") redirect("/auth/register");
 
 	const [myGroups, catalog] = await Promise.all([
 		getMyGroups(supabase, member.id),

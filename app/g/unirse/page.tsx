@@ -6,8 +6,10 @@ import { getCurrentMember } from "@/lib/current-member";
 export const metadata = { title: "Unirse al grupo · Café y Tertulia" };
 
 /**
- * /g/unirse?token=… — canje del enlace de invitación a un grupo privado.
- * Sin sesión va a login y vuelve con el token.
+ * /g/unirse?token=… — canje del enlace de Invitación a un Grupo privado.
+ * Sin cuenta va a registro con retorno: registrarse mete al Grupo en un
+ * solo gesto (el token sobrevive vía `next`). Re-canjear siendo ya
+ * Miembro del Grupo es idempotente: entra sin error ni duplicado.
  */
 export default async function JoinGroupPage({
 	searchParams,
@@ -17,19 +19,20 @@ export default async function JoinGroupPage({
 	const { token } = await searchParams;
 	if (!token) redirect("/g");
 
+	const next = `/g/unirse?token=${token}`;
+	const registerWithReturn = `/auth/register?next=${encodeURIComponent(next)}`;
+
 	const { member } = await getCurrentMember();
-	if (!member)
-		redirect(
-			`/auth/login?next=${encodeURIComponent(`/g/unirse?token=${token}`)}`,
-		);
-	if (member.status !== "active") redirect("/auth/invite");
+	if (!member) redirect(registerWithReturn);
+	if (member.status === "left") redirect("/auth/login?error=left");
+	if (member.status !== "active") redirect(registerWithReturn);
 
 	const claims = await verifyGroupInviteToken(token);
 	if (!claims) {
 		return (
 			<JoinError
 				title="Enlace no válido"
-				message="Este enlace de invitación no vale. Pide uno nuevo al administrador del grupo."
+				message="Este enlace de invitación no vale. Pedile uno nuevo al administrador del grupo."
 			/>
 		);
 	}

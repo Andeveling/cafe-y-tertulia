@@ -19,7 +19,8 @@ export default async function GroupMaterialsPage({
 	const { slug } = await params;
 	const { member, supabase } = await getCurrentMember();
 	if (!member) redirect("/auth/login");
-	if (member.status !== "active") redirect("/auth/invite");
+	if (member.status === "left") redirect("/auth/login?error=left");
+	if (member.status !== "active") redirect("/auth/register");
 
 	const group = await getGroupBySlug(supabase, slug, member.id);
 	if (!group || group.role == null) notFound();
