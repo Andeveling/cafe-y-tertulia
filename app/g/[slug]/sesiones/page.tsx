@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { StartBoard } from "@/app/_components/start-board";
 import { getMaterialOptions, getOpenSessions } from "@/app/_lib/home";
+import { inactiveMemberDestination } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 import { getGroupBySlug, getGroupRoster } from "@/lib/groups/queries";
 
@@ -14,7 +15,8 @@ export default async function GroupSessionsPage({
 	const { slug } = await params;
 	const { member, supabase } = await getCurrentMember();
 	if (!member) redirect("/auth/login");
-	if (member.status !== "active") redirect("/auth/invite");
+	const inactiveDestination = inactiveMemberDestination(member.status);
+	if (inactiveDestination) redirect(inactiveDestination);
 
 	const group = await getGroupBySlug(supabase, slug, member.id);
 	if (!group || group.role == null) redirect("/g");

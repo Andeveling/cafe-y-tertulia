@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/app/auth/login/_components/login-form";
+import { safeNextPath, withNext } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 
 export const metadata: Metadata = {
@@ -35,14 +36,17 @@ export default async function LoginPage({
 	searchParams: Promise<{
 		error?: string;
 		email?: string;
+		next?: string;
 		password_updated?: string;
 	}>;
 }) {
 	const params = await searchParams;
 	const { member } = await getCurrentMember();
 	if (member) {
-		redirect("/");
+		redirect(safeNextPath(params.next));
 	}
+	const next = safeNextPath(params.next);
+	const registerHref = withNext("/auth/register", next);
 
 	return (
 		<div className="flex min-h-dvh flex-1 flex-col items-center justify-center px-4">
@@ -79,8 +83,7 @@ export default async function LoginPage({
 						role="status"
 						className="rounded-lg border border-border px-4 py-3 text-sm text-muted-foreground"
 					>
-						Todavía no activaste tu membresía. Revisá el enlace de invitación
-						que recibiste por email.
+						Ese padrinazgo ya no vale. Creá tu cuenta en el registro abierto.
 					</div>
 				)}
 
@@ -93,15 +96,15 @@ export default async function LoginPage({
 					</div>
 				)}
 
-				<LoginForm defaultEmail={params.email} />
+				<LoginForm defaultEmail={params.email} next={next} />
 
 				<p className="text-center text-sm text-muted-foreground">
-					¿Te invitaron al club?{" "}
+					¿Todavía no tenés cuenta?{" "}
 					<a
-						href="/auth/register"
+						href={registerHref}
 						className="font-medium text-primary underline underline-offset-4"
 					>
-						Usá tu invitación
+						Creá una
 					</a>
 				</p>
 				<p className="text-center text-sm text-muted-foreground">

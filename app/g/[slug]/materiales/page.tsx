@@ -6,6 +6,7 @@ import { MaterialsGrid } from "@/app/materials/_components/materials-grid";
 import { getMaterials } from "@/app/materials/_lib/materials";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { inactiveMemberDestination } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 import { getGroupBySlug } from "@/lib/groups/queries";
 
@@ -19,7 +20,8 @@ export default async function GroupMaterialsPage({
 	const { slug } = await params;
 	const { member, supabase } = await getCurrentMember();
 	if (!member) redirect("/auth/login");
-	if (member.status !== "active") redirect("/auth/invite");
+	const inactiveDestination = inactiveMemberDestination(member.status);
+	if (inactiveDestination) redirect(inactiveDestination);
 
 	const group = await getGroupBySlug(supabase, slug, member.id);
 	if (!group || group.role == null) notFound();

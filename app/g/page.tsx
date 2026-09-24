@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { MisGruposView } from "@/app/g/_components/mis-grupos-view";
+import { inactiveMemberDestination } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 import { getMyGroups, getPublicCatalog } from "@/lib/groups/queries";
 
@@ -17,7 +18,8 @@ export default async function MisGruposPage({
 	const { member, supabase } = await getCurrentMember();
 
 	if (!member) redirect("/auth/login");
-	if (member.status !== "active") redirect("/auth/invite");
+	const inactiveDestination = inactiveMemberDestination(member.status);
+	if (inactiveDestination) redirect(inactiveDestination);
 
 	const [myGroups, catalog] = await Promise.all([
 		getMyGroups(supabase, member.id),

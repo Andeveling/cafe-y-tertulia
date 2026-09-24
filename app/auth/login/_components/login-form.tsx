@@ -14,9 +14,15 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { signIn } from "../_lib/login-actions";
-import { LoginValues, loginSchema } from "../_schemas/login-schema";
+import { type LoginValues, loginSchema } from "../_schemas/login-schema";
 
-export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
+export function LoginForm({
+	defaultEmail,
+	next,
+}: {
+	defaultEmail?: string;
+	next: string;
+}) {
 	const [isPending, startTransition] = useTransition();
 	const [showPassword, setShowPassword] = useState(false);
 	const { control, handleSubmit } = useForm<LoginValues>({
@@ -32,6 +38,7 @@ export function LoginForm({ defaultEmail }: { defaultEmail?: string }) {
 			const formData = new FormData();
 			formData.set("email", data.email);
 			formData.set("password", data.password);
+			formData.set("next", next);
 			await signIn(formData);
 		});
 	});

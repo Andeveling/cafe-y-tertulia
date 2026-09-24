@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { LeaveGroupButton } from "@/app/g/_components/leave-group-button";
 import { GroupRoster } from "@/app/g/[slug]/_components/group-roster";
+import { inactiveMemberDestination } from "@/lib/auth/redirect";
 import { getCurrentMember } from "@/lib/current-member";
 import { getGroupBySlug, getGroupRoster } from "@/lib/groups/queries";
 
@@ -28,7 +29,8 @@ export default async function GroupHomePage({
 	const { member, supabase } = await getCurrentMember();
 
 	if (!member) redirect("/auth/login");
-	if (member.status !== "active") redirect("/auth/invite");
+	const inactiveDestination = inactiveMemberDestination(member.status);
+	if (inactiveDestination) redirect(inactiveDestination);
 
 	const group = await getGroupBySlug(supabase, slug, member.id);
 	if (!group || group.role == null) notFound();
