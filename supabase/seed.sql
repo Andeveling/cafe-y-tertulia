@@ -137,3 +137,87 @@ begin
   end if;
 end
 $$;
+
+-- Dos grupos más para probar la vida multi-grupo (mismo Miembro, varios
+-- Grupos, contenidos separados): "Familia" (privado) y "Trabajo" (público).
+-- No se usa create_group porque exige auth.uid() y el seed corre sin sesión.
+-- Se replica su siembra: categorías e insignias copiadas de la plantilla
+-- (nojau) + temporada del mes. Idempotente por nombre de grupo.
+do $$
+declare
+  g record;
+  v_template_id uuid;
+  v_month_start timestamptz := date_trunc('month', now());
+  v_group_id uuid;
+  v_oldest_member_id uuid;
+begin
+  select id into v_template_id from public.groups where name = 'nojau' limit 1;
+
+  for g in
+    select * from (values
+      ('Familia', 'El grupo de casa', 'private'),
+      ('Trabajo', 'El grupo de la oficina', 'public')
+    ) as t(name, description, visibility)
+  loop
+    select id into v_group_id
+    from public.groups
+    where name = g.name
+    limit 1;
+
+    if v_group_id is null then
+      insert into public.groups (name, description, visibility)
+      values (
+        g.name, g.description, g.visibility::public.group_visibility
+      )
+      returning id into v_group_id;
+      raise notice 'Seed: creado grupo % (%)', g.name, v_group_id;
+    end if;
+
+    -- Todos los Miembros activos entran como miembros (probar el conmutador
+    -- con cualquier login semilla).
+    insert into public.group_members (group_id, member_id, role)
+    select v_group_id, id, 'member'
+    from public.members
+    where status = 'active'
+    on conflict do nothing;
+
+    -- Al menos un admin: el más antiguo, si no hay ninguno.
+    if not exists (
+      select 1 from public.group_members
+      where group_id = v_group_id and role = 'admin'
+    ) then
+      select member_id into v_oldest_member_id
+      from public.group_members
+      where group_id = v_group_id
+      order by created_at asc, member_id asc
+      limit 1;
+
+      if v_oldest_member_id is not null then
+        update public.group_members
+        set role = 'admin'
+        where group_id = v_group_id
+        and member_id = v_oldest_member_id;
+      end if;
+    end if;
+
+    -- Siembra estándar (igual que create_group).
+    if v_template_id is not null and v_template_id <> v_group_id then
+      insert into public.categories (group_id, key, name, icon)
+      select v_group_id, key, name, icon
+      from public.categories
+      where group_id = v_template_id
+      on conflict do nothing;
+
+      insert into public.badges (group_id, key, emoji, name, description, kind)
+      select v_group_id, key, emoji, name, description, kind
+      from public.badges
+      where group_id = v_template_id
+      on conflict do nothing;
+    end if;
+
+    insert into public.seasons (group_id, starts_at, ends_at)
+    values (v_group_id, v_month_start, v_month_start + interval '1 month')
+    on conflict do nothing;
+  end loop;
+end
+$$;
