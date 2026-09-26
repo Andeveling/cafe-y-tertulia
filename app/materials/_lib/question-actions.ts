@@ -32,7 +32,7 @@ export async function createQuestionAction(
 			// El material se deriva de la Sesión (nunca del formulario).
 			const { data: session, error: sessionError } = await supabase
 				.from("sessions")
-				.select("material_id")
+				.select("material_id, group_id")
 				.eq("id", sessionId)
 				.maybeSingle();
 
@@ -46,6 +46,7 @@ export async function createQuestionAction(
 					materialId: session.material_id,
 					authorId: user!.id,
 					text,
+					groupId: session.group_id,
 				});
 			} catch {
 				return {

@@ -10,6 +10,7 @@ import {
 const sessionId = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
 const materialId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
 const authorId = "11111111-1111-1111-1111-111111111111";
+const groupId = "22222222-2222-2222-2222-222222222222";
 
 describe("getSessionPool", () => {
 	it("devuelve las Preguntas del pool de una Sesión con el autor", async () => {
@@ -130,7 +131,13 @@ describe("createQuestion", () => {
 
 		const question = await createQuestion(
 			{ from },
-			{ sessionId, materialId, authorId, text: "¿Qué opinas del capítulo 2?" },
+			{
+				sessionId,
+				materialId,
+				authorId,
+				text: "¿Qué opinas del capítulo 2?",
+				groupId,
+			},
 		);
 
 		expect(insert).toHaveBeenCalledWith({
@@ -138,6 +145,7 @@ describe("createQuestion", () => {
 			material_id: materialId,
 			author_id: authorId,
 			text: "¿Qué opinas del capítulo 2?",
+			group_id: groupId,
 		});
 		expect(question?.text).toBe("¿Qué opinas del capítulo 2?");
 	});
@@ -152,7 +160,10 @@ describe("createQuestion", () => {
 		const from = vi.fn().mockReturnValue({ insert });
 
 		await expect(
-			createQuestion({ from }, { sessionId, materialId, authorId, text: "¿?" }),
+			createQuestion(
+				{ from },
+				{ sessionId, materialId, authorId, text: "¿?", groupId },
+			),
 		).rejects.toThrow("RLS");
 	});
 });

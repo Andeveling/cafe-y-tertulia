@@ -23,11 +23,21 @@ export async function saveQuestion(
 				return { ok: false, error: "La pregunta no puede estar vacía." };
 			}
 
+			const { data: session, error: sessionError } = await supabase
+				.from("sessions")
+				.select("group_id")
+				.eq("id", sessionId)
+				.maybeSingle();
+			if (sessionError || !session) {
+				return { ok: false, error: "La Sesión no existe." };
+			}
+
 			const { error } = await supabase.from("questions").insert({
 				session_id: sessionId,
 				material_id: materialId,
 				author_id: user!.id,
 				text: trimmed,
+				group_id: session.group_id,
 			});
 
 			if (error) return { ok: false, error: error.message };
@@ -126,12 +136,21 @@ export async function confirmPresence(
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase, user }) => {
+			const { data: session, error: sessionError } = await supabase
+				.from("sessions")
+				.select("group_id")
+				.eq("id", sessionId)
+				.maybeSingle();
+			if (sessionError || !session) {
+				return { ok: false, error: "La Sesión no existe." };
+			}
 			const { error } = await supabase.from("session_participants").upsert(
 				{
 					session_id: sessionId,
 					member_id: user!.id,
 					role: "member" as const,
 					opt_out: false,
+					group_id: session.group_id,
 				},
 				{ onConflict: "session_id,member_id" },
 			);

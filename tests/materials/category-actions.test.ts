@@ -17,6 +17,7 @@ vi.mock("next/cache", () => ({
 
 const materialId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
 const userId = "11111111-1111-1111-1111-111111111111";
+const groupId = "22222222-2222-2222-2222-222222222222";
 
 function mockClient(opts: { active: boolean; knownIds: string[] }) {
 	const deleteEq = vi.fn().mockResolvedValue({ error: null });
@@ -26,9 +27,10 @@ function mockClient(opts: { active: boolean; knownIds: string[] }) {
 			return {
 				select: vi.fn().mockReturnValue({
 					eq: vi.fn().mockReturnValue({
-						maybeSingle: vi
-							.fn()
-							.mockResolvedValue({ data: { id: materialId }, error: null }),
+						maybeSingle: vi.fn().mockResolvedValue({
+							data: { id: materialId, group_id: groupId },
+							error: null,
+						}),
 					}),
 				}),
 			};
@@ -115,8 +117,8 @@ describe("setMaterialCategories", () => {
 		expect(result).toEqual({ ok: true });
 		expect(deleteEq).toHaveBeenCalledWith("material_id", materialId);
 		expect(insert).toHaveBeenCalledWith([
-			{ material_id: materialId, category_id: "c1" },
-			{ material_id: materialId, category_id: "c2" },
+			{ material_id: materialId, category_id: "c1", group_id: groupId },
+			{ material_id: materialId, category_id: "c2", group_id: groupId },
 		]);
 	});
 });

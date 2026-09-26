@@ -12,11 +12,20 @@ export async function seatIfAbsent(
 	sessionId: string,
 	userId: string,
 ): Promise<{ seated: boolean; error?: string }> {
+	const { data: session, error: sessionError } = await supabase
+		.from("sessions")
+		.select("group_id")
+		.eq("id", sessionId)
+		.maybeSingle();
+	if (sessionError || !session) {
+		return { seated: false, error: "La Sesión no existe." };
+	}
 	const { error } = await supabase.from("session_participants").insert({
 		session_id: sessionId,
 		member_id: userId,
 		role: "member",
 		opt_out: false,
+		group_id: session.group_id,
 	});
 	if (!error) return { seated: true };
 	if (error.code === "23505") return { seated: false };

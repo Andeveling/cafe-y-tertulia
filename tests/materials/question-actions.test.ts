@@ -33,6 +33,7 @@ vi.mock("next/cache", () => ({
 
 const sessionId = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
 const materialId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+const groupId = "22222222-2222-2222-2222-222222222222";
 const prevState: ActionResult = { ok: true };
 
 function mockAuth(userId: string | null) {
@@ -48,7 +49,7 @@ function mockAuth(userId: string | null) {
 		});
 	const from = vi.fn().mockImplementation((table: string) => {
 		if (table === "sessions") {
-			return { select: byId({ material_id: materialId }) };
+			return { select: byId({ material_id: materialId, group_id: groupId }) };
 		}
 		if (table === "questions") {
 			return { select: byId({ material_id: materialId }) };
@@ -134,6 +135,7 @@ describe("createQuestionAction", () => {
 			materialId,
 			authorId: "11111111-1111-1111-1111-111111111111",
 			text: "¿Qué opinas del capítulo 2?",
+			groupId,
 		});
 		expect(revalidatePath).toHaveBeenCalledWith(`/materials/${materialId}`);
 	});

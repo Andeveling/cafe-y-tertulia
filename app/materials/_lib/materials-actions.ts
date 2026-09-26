@@ -139,6 +139,10 @@ export async function createSession(input: {
 		run: async ({ supabase, user }) => {
 			let materialId = input.materialId ?? null;
 			if (input.material) {
+				if (!input.groupId) {
+					return { ok: false, error: "Grupo requerido." };
+				}
+				const groupId = input.groupId;
 				const urlError = materialUrlsOrError(input.material);
 				if (urlError) return urlError;
 				const { data, error } = await supabase
@@ -150,7 +154,7 @@ export async function createSession(input: {
 						image_url: toNullableUrl(input.material.imageUrl),
 						source_url: toNullableUrl(input.material.sourceUrl),
 						created_by: user!.id,
-						group_id: input.groupId,
+						group_id: groupId,
 					})
 					.select("id")
 					.single();

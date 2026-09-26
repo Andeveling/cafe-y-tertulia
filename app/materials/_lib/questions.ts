@@ -42,6 +42,7 @@ export type CreateQuestionInput = {
 	materialId: string | null;
 	authorId: string;
 	text: string;
+	groupId: string;
 };
 
 /**
@@ -109,6 +110,7 @@ export async function createQuestion(
 			material_id: input.materialId,
 			author_id: input.authorId,
 			text: input.text,
+			group_id: input.groupId,
 		})
 		.select()
 		.single();

@@ -16,7 +16,7 @@ export async function setMaterialCategories(
 		run: async ({ supabase }) => {
 			const { data: material, error: materialError } = await supabase
 				.from("materials")
-				.select("id")
+				.select("id, group_id")
 				.eq("id", materialId)
 				.maybeSingle();
 			if (materialError || !material) {
@@ -51,6 +51,7 @@ export async function setMaterialCategories(
 						picked.map((category_id) => ({
 							material_id: materialId,
 							category_id,
+							group_id: material.group_id,
 						})),
 					);
 				if (insertError) {
