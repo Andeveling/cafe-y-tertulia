@@ -21,14 +21,24 @@ export type TurnoAprecio = {
  * Se deriva una sola vez por render en `RoomPanel`; las Etapas la reciben
  * hecha. Puro y testeable sin React.
  */
+/**
+ * Mínimo para salir de Preguntas: al menos dos miembros, cada uno con
+ * una pregunta. Cero personas no es "todos tienen pregunta".
+ */
+export const MIN_READY_TO_LEAVE_QUESTIONS = 2;
+
 export type SalaView = {
 	members: RoomParticipant[];
 	spectators: RoomParticipant[];
 	moderatorName: string | null;
 	/** Miembros con ≥1 pregunta (condición de Listo). */
 	questionAuthorIds: Set<string>;
-	/** Nombres de miembros sin pregunta — aviso de avance del Moderador. */
-	notReadyNames: string[];
+	/** Gate de Listo: quién falta, conteo y si se puede avanzar. */
+	missingIds: string[];
+	readyCount: number;
+	missingCount: number;
+	canAdvance: boolean;
+	headline: string;
 	/** Asignaciones sin completar — aviso de avance a Cierre. */
 	remainingInterventions: number;
 	/** Autor de la Intervención activa — null fuera de `active`. */
@@ -60,9 +70,24 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 			?.displayName ?? null;
 
 	const questionAuthorIds = new Set(snapshot.questions.map((q) => q.authorId));
-	const notReadyNames = members
-		.filter((p) => !p.optOut && !questionAuthorIds.has(p.memberId))
-		.map((p) => p.displayName);
+	const drawMembers = members.filter((p) => !p.optOut);
+	const missingIds = drawMembers
+		.filter((p) => !questionAuthorIds.has(p.memberId))
+		.map((p) => p.memberId);
+	const readyCount = drawMembers.length - missingIds.length;
+	const canAdvance = readyCount >= MIN_READY_TO_LEAVE_QUESTIONS;
+
+	let headline: string;
+	if (!canAdvance) {
+		headline =
+			readyCount === 0
+				? "Nadie tiene pregunta. Hacen falta al menos 2."
+				: `Hay ${readyCount} con pregunta. Hacen falta al menos 2.`;
+	} else if (missingIds.length > 0) {
+		headline = `Faltan ${missingIds.length}: ¿esperamos o entran mirando?`;
+	} else {
+		headline = "Todos tienen pregunta.";
+	}
 
 	const remainingInterventions = snapshot.assignments.filter(
 		(a) => a.state !== "complete",
@@ -124,7 +149,11 @@ export function deriveSalaView(snapshot: RoomSnapshot): SalaView {
 		spectators,
 		moderatorName,
 		questionAuthorIds,
-		notReadyNames,
+		missingIds,
+		readyCount,
+		missingCount: missingIds.length,
+		canAdvance,
+		headline,
 		remainingInterventions,
 		debateAuthorId,
 		debateProgress,

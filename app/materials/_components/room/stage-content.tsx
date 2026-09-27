@@ -10,7 +10,7 @@ import type {
 	TriviaRoundSnapshot,
 } from "@/app/materials/_lib/minigames";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
-import { executeDraw } from "@/app/materials/_lib/room-actions";
+import { advanceToDraw } from "@/app/materials/_lib/room-actions";
 
 import { PresenceStage } from "./presence-stage";
 import { QuestionsStage } from "./questions-stage";
@@ -72,7 +72,7 @@ export function StageContent({
 					userId={userId}
 					isModerator={isModerator}
 					pending={pending}
-					onExecute={() => run(() => executeDraw(snapshot.sessionId))}
+					onExecute={() => run(() => advanceToDraw(snapshot.sessionId))}
 				/>
 			);
 		case "debate": {

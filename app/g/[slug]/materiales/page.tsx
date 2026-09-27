@@ -6,8 +6,7 @@ import { MaterialsGrid } from "@/app/materials/_components/materials-grid";
 import { getMaterials } from "@/app/materials/_lib/materials";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { inactiveMemberDestination } from "@/lib/auth/redirect";
-import { getCurrentMember } from "@/lib/current-member";
+import { requireGroupPage } from "@/lib/groups/page-gate";
 import { getGroupBySlug } from "@/lib/groups/queries";
 
 export const metadata = { title: "Materiales · Café y Tertulias" };
@@ -18,13 +17,7 @@ export default async function GroupMaterialsPage({
 	params: Promise<{ slug: string }>;
 }) {
 	const { slug } = await params;
-	const { member, supabase } = await getCurrentMember();
-	if (!member) redirect("/auth/login");
-	const inactiveDestination = inactiveMemberDestination(member.status);
-	if (inactiveDestination) redirect(inactiveDestination);
-
-	const group = await getGroupBySlug(supabase, slug, member.id);
-	if (!group || group.role == null) notFound();
+	const { group } = await requireGroupPage(slug);
 
 	const materials = await getMaterials(group.id);
 

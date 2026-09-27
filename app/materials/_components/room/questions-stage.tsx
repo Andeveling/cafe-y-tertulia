@@ -12,7 +12,6 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { LeaveSessionButton } from "@/app/materials/_components/leave-session-button";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
-import { questionsAdvance } from "@/app/materials/_lib/questions-advance";
 import {
 	advanceRoomStage,
 	deleteQuestion,
@@ -64,8 +63,7 @@ export function QuestionsStage({
 	advanceFor?: Record<string, "wait" | "spectator">;
 	onAdvanceForChange?: (next: Record<string, "wait" | "spectator">) => void;
 }) {
-	const { sessionId, materialId, questions, participants, moderatorId } =
-		snapshot;
+	const { sessionId, questions, participants, moderatorId } = snapshot;
 	const { pending, run } = useRoomMutation();
 	const [text, setText] = useState("");
 	const [editingId, setEditingId] = useState<string | null>(null);
@@ -79,15 +77,11 @@ export function QuestionsStage({
 	const myQuestions = questions.filter((q) => q.isMine);
 	const myCount = myQuestions.length;
 	const me = participants.find((p) => p.memberId === userId) ?? null;
-	const gate = questionsAdvance({
-		participants,
-		questionAuthorIds: view.questionAuthorIds,
-	});
-	const missingIds = new Set(gate.missingIds);
+	const missingIds = new Set(view.missingIds);
 	/** Faltan: en sala, no espectadores, sin pregunta. */
 	const missing = participants.filter((p) => missingIds.has(p.memberId));
 	/** Ir de espectador exige mesa mínima: 3+ en sala y 2+ con pregunta. */
-	const canSpectate = participants.length >= 3 && gate.readyCount >= 2;
+	const canSpectate = participants.length >= 3 && view.readyCount >= 2;
 
 	useEffect(() => {
 		if (snapshot.status !== "lobby" || me) return;
@@ -118,7 +112,7 @@ export function QuestionsStage({
 		const trimmed = text.trim();
 		if (!trimmed || pending) return;
 		run(
-			() => saveQuestion(sessionId, materialId, trimmed),
+			() => saveQuestion(sessionId, trimmed),
 			() => {
 				setText("");
 				toast.success(`Pregunta ${myCount + 1} enviada`);
@@ -464,8 +458,8 @@ export function QuestionsStage({
 					aria-label="Revisión del moderador"
 					className="flex flex-col gap-3 border-t border-border/60 pt-4"
 				>
-					<p className="text-sm font-medium">{gate.headline}</p>
-					{gate.canAdvance &&
+					<p className="text-sm font-medium">{view.headline}</p>
+					{view.canAdvance &&
 						missing.map((m) => {
 							const decision = advanceFor?.[m.memberId] ?? "wait";
 							return (

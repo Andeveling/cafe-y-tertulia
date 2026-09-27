@@ -6,8 +6,7 @@ import { MaterialForm } from "@/app/materials/_components/material-form";
 import { listCategories } from "@/app/materials/_lib/categories";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { inactiveMemberDestination } from "@/lib/auth/redirect";
-import { getCurrentMember } from "@/lib/current-member";
+import { requireGroupPage } from "@/lib/groups/page-gate";
 import { getGroupBySlug } from "@/lib/groups/queries";
 
 export const metadata = { title: "Proponer material · Café y Tertulias" };
@@ -18,17 +17,9 @@ export default async function NewGroupMaterialPage({
 	params: Promise<{ slug: string }>;
 }) {
 	const { slug } = await params;
-	const { member, supabase } = await getCurrentMember();
-	if (!member) redirect("/auth/login");
-	const inactiveDestination = inactiveMemberDestination(member.status);
-	if (inactiveDestination) redirect(inactiveDestination);
+	const { supabase, group } = await requireGroupPage(slug);
 
-	const group = await getGroupBySlug(supabase, slug, member.id);
-	if (!group || group.role == null) notFound();
-
-	const categories = await listCategories(supabase, group.id).catch(
-		() => [],
-	);
+	const categories = await listCategories(supabase, group.id).catch(() => []);
 
 	return (
 		<div className="flex w-full max-w-xl flex-col gap-6">

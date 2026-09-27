@@ -9,10 +9,13 @@ function roomPath(sessionId: string) {
 	return `/materials/sessions/${sessionId}/room`;
 }
 
-/** Crea una Pregunta en la sesión. author_id = auth.uid() (RLS). */
+/**
+ * Crea una Pregunta en la sesión. author_id = auth.uid() (RLS). El Material
+ * se deriva de la Sesión, nunca del llamador: una sola firma para la Sala,
+ * el tablero y la página del Material.
+ */
 export async function saveQuestion(
 	sessionId: string,
-	materialId: string | null,
 	text: string,
 ): Promise<ActionResult> {
 	return runServerAction({
@@ -25,7 +28,7 @@ export async function saveQuestion(
 
 			const { data: session, error: sessionError } = await supabase
 				.from("sessions")
-				.select("group_id")
+				.select("material_id, group_id")
 				.eq("id", sessionId)
 				.maybeSingle();
 			if (sessionError || !session) {
@@ -34,13 +37,44 @@ export async function saveQuestion(
 
 			const { error } = await supabase.from("questions").insert({
 				session_id: sessionId,
-				material_id: materialId,
+				material_id: session.material_id,
 				author_id: user!.id,
 				text: trimmed,
 				group_id: session.group_id,
 			});
 
 			if (error) return { ok: false, error: error.message };
+		},
+		revalidate: async () => [roomPath(sessionId)],
+	});
+}
+
+/**
+ * El Moderador marca/desmarca "Fuera de sorteo" (duplicada o fuera de
+ * contexto). El RLS ya limita el UPDATE al moderador de la Sesión; el
+ * conteo da un error legible cuando nadie tocó filas.
+ */
+export async function toggleOutsideDrawQuestion(
+	sessionId: string,
+	questionId: string,
+	outsideDraw: boolean,
+): Promise<ActionResult> {
+	return runServerAction({
+		requireAuth: true,
+		run: async ({ supabase }) => {
+			const { error, count } = await supabase
+				.from("questions")
+				.update({ outside_draw: outsideDraw }, { count: "exact" })
+				.eq("id", questionId);
+
+			if (error) return { ok: false, error: error.message };
+			if (!count) {
+				return {
+					ok: false,
+					error:
+						"No se pudo marcar la pregunta. Solo el moderador de la Sesión puede hacerlo.",
+				};
+			}
 		},
 		revalidate: async () => [roomPath(sessionId)],
 	});
@@ -227,35 +261,48 @@ export async function advanceRoomStage(
 	});
 }
 
-/** Ejecuta el Sorteo una vez (RPC execute_draw). */
-export async function executeDraw(sessionId: string): Promise<ActionResult> {
-	return runServerAction({
-		requireAuth: true,
-		run: async ({ supabase }) => {
-			const { error } = await supabase.rpc("execute_draw", {
-				target_session_id: sessionId,
-			});
-
-			if (error) return { ok: false, error: error.message };
-		},
-		revalidate: async () => [roomPath(sessionId)],
-	});
-}
-
 /**
  * Avanza a Sorteo y ejecuta el sorteo en la misma acción: entrar a la
- * etapa ES sortear. Si el sorteo falla, la etapa ya avanzó y la Sala
- * muestra el paso previo con reintentar (fallback honesto, sin bloqueo).
+ * etapa ES sortear. La acción decide — el nav solo la llama cuando la
+ * vista pide Sorteo:
+ * - etapa previa sin sorteo: avanza y sortea;
+ * - Sorteo ya ejecutado: avance normal, sin re-sortear (el RPC lo
+ *   prohibiría);
+ * - etapa ya en Sorteo sin sorteo: reintenta solo el sorteo (mismo camino
+ *   que el reintentar de la ceremonia).
+ * Si el sorteo falla, la etapa ya avanzó y la Sala muestra el paso previo
+ * con reintentar (fallback honesto, sin bloqueo).
  */
 export async function advanceToDraw(sessionId: string): Promise<ActionResult> {
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase }) => {
-			const { error: advanceError } = await supabase.rpc("advance_room_stage", {
-				target_session_id: sessionId,
-				new_stage: "draw" as Database["public"]["Enums"]["room_stage"],
-			});
-			if (advanceError) return { ok: false, error: advanceError.message };
+			const { data: session } = await supabase
+				.from("sessions")
+				.select("room_stage")
+				.eq("id", sessionId)
+				.maybeSingle();
+			if (!session) {
+				return { ok: false, error: "La Sesión no existe." };
+			}
+
+			if (session.room_stage !== "draw") {
+				const { error: advanceError } = await supabase.rpc(
+					"advance_room_stage",
+					{
+						target_session_id: sessionId,
+						new_stage: "draw" as Database["public"]["Enums"]["room_stage"],
+					},
+				);
+				if (advanceError) return { ok: false, error: advanceError.message };
+			}
+
+			const { data: existingDraw } = await supabase
+				.from("draws")
+				.select("id")
+				.eq("session_id", sessionId)
+				.maybeSingle();
+			if (existingDraw) return;
 
 			const { error: drawError } = await supabase.rpc("execute_draw", {
 				target_session_id: sessionId,

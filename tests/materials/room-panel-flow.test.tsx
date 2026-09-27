@@ -47,7 +47,6 @@ vi.mock("@/app/materials/_lib/room-actions", () => ({
 	deleteQuestion: vi.fn(async () => ({ ok: true })),
 	editQuestion: vi.fn(async () => ({ ok: true })),
 	ensureRoomSeat: vi.fn(async () => ({ ok: true })),
-	executeDraw: vi.fn(async () => ({ ok: true })),
 	saveQuestion: vi.fn(async () => ({ ok: true })),
 	setSpectator: vi.fn(async () => ({ ok: true })),
 	toggleOptOut: vi.fn(async () => ({ ok: true })),
@@ -201,10 +200,12 @@ describe("RoomPanel", () => {
 		await user.click(
 			screen.getByRole("button", { name: "Continuar a Sorteo" }),
 		);
+		// Con sorteo previo el nav sigue llamando a la acción: ella decide
+		// no re-sortear (ver advanceToDraw en room-actions.test.ts).
 		await waitFor(() => {
-			expect(advanceRoomStage).toHaveBeenCalledWith("sess-1", "draw");
+			expect(advanceToDraw).toHaveBeenCalledWith("sess-1");
 		});
-		expect(advanceToDraw).not.toHaveBeenCalled();
+		expect(advanceRoomStage).not.toHaveBeenCalled();
 	});
 
 	it("sin miembros en la mesa el avance queda bloqueado", () => {
@@ -391,7 +392,9 @@ describe("RoomPanel", () => {
 		expect(
 			screen.getByRole("button", { name: "Continuar a Cierre" }),
 		).toBeTruthy();
-		expect(screen.getByRole("button", { name: "Volver a Sorteo" })).toBeTruthy();
+		expect(
+			screen.getByRole("button", { name: "Volver a Sorteo" }),
+		).toBeTruthy();
 
 		rerender(
 			<RoomPanel

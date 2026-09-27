@@ -1,47 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { HEARTBEAT_MS } from "@/lib/presencia/estado";
 import {
-	type EstadoPresencia,
-	formateaUltimaVez,
-	HEARTBEAT_MS,
-	ordenaPorEstado,
-	resuelveEstado,
-	UMBRAL_DESCONECTADO_MS,
-} from "@/lib/presencia/estado";
+	buildRoster,
+	type PresenceRosterMember,
+	type RosterMember,
+} from "@/lib/presencia/roster";
 import { createClient } from "@/lib/supabase/client";
 
-export type RosterMember = {
-	id: string;
-	display_name: string;
-	/** Src del catálogo (`members.avatar`) o null = iniciales. */
-	avatar?: string | null;
-	last_seen?: string | null;
-};
-
-export type PresenceRosterMember = RosterMember & {
-	estado: EstadoPresencia;
-	/** ms epoch de última vez conocida (presence o last_seen). */
-	ultimaVez: number | null;
-	/** Etiqueta lista para UI (“ahora mismo”, “hace 5 min”). */
-	ultimaVezTexto: string;
-	/** True si está en una sala distinta a la mía (o en alguna sala desde home). */
-	enOtraSala: boolean;
-	/** Compat: vivo en Presence (dentro de gracia). */
-	online: boolean;
-};
+export type { PresenceRosterMember, RosterMember };
 
 type TrackPayload = {
 	user_id: string;
 	last_active: number;
 	session_id?: string | null;
 };
-
-function toMs(iso: string | null | undefined): number | null {
-	if (!iso) return null;
-	const t = Date.parse(iso);
-	return Number.isNaN(t) ? null : t;
-}
 
 const TOPIC = "club-roster";
 
@@ -287,46 +261,5 @@ export function useClubPresence(
 		};
 	}, [userId, salaId, groupId]);
 
-	const base = members.map((m) => {
-		const payload = tracks[m.id]?.[0];
-		const lastSeenDb = toMs(m.last_seen);
-		// Con grupo, el canal group-{id}-roster es la única fuente: el
-		// last_seen global delata actividad en otros grupos (issue #77).
-		const isGroupScoped = groupId != null;
-		let ultimaVez: number | null;
-		let vivo: boolean;
-		if (payload) {
-			ultimaVez = payload.last_active;
-			vivo = true;
-		} else if (isGroupScoped) {
-			// Sin payload en el canal del grupo: offline, sin fallback global.
-			ultimaVez = null;
-			vivo = false;
-		} else {
-			// Gracia: sin payload pero con last_seen fresco (<90 s) sigue vivo.
-			// Solo en el canal histórico; con grupo, vivo = payload del grupo.
-			ultimaVez = lastSeenDb;
-			vivo =
-				lastSeenDb !== null && ahora - lastSeenDb < UMBRAL_DESCONECTADO_MS;
-		}
-		const otraSalaId =
-			typeof payload?.session_id === "string" ? payload.session_id : null;
-		const enSala = otraSalaId !== null;
-		const estado = resuelveEstado({
-			vivo,
-			enSala,
-			ultimaActividad: payload?.last_active ?? lastSeenDb ?? 0,
-			ahora,
-		});
-		return {
-			...m,
-			estado,
-			ultimaVez,
-			ultimaVezTexto: formateaUltimaVez(ultimaVez, ahora),
-			enOtraSala: salaId ? enSala && otraSalaId !== salaId : enSala,
-			online: vivo,
-		};
-	});
-
-	return ordenaPorEstado(base);
+	return buildRoster({ members, tracks, ahora, groupId, salaId });
 }

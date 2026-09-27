@@ -1,19 +1,14 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { inactiveMemberDestination } from "@/lib/auth/redirect";
-import { getCurrentMember } from "@/lib/current-member";
 import { LAST_GROUP_COOKIE, landingPath } from "@/lib/groups/active-group";
+import { requireActiveMemberPage } from "@/lib/groups/page-gate";
 import { getMyGroups } from "@/lib/groups/queries";
 
 export const metadata = { title: "Sesiones · Café y Tertulias" };
 
 /** `/` no es un club. Abre el último Grupo, el único, o Mis Grupos. */
 export default async function HomePage() {
-	const { member, supabase } = await getCurrentMember();
-
-	if (!member) redirect("/auth/login");
-	const inactiveDestination = inactiveMemberDestination(member.status);
-	if (inactiveDestination) redirect(inactiveDestination);
+	const { member, supabase } = await requireActiveMemberPage();
 
 	const groups = await getMyGroups(supabase, member.id);
 	const cookieStore = await cookies();

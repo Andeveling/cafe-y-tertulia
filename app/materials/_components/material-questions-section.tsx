@@ -2,7 +2,6 @@ import { QuestionPool } from "@/app/materials/_components/question-pool";
 import type { QuestionWithAuthor } from "../_lib/questions";
 
 type MaterialQuestionsSectionProps = {
-	materialId: string;
 	sessionId: string;
 	sessionRange: string;
 	questions: QuestionWithAuthor[];
@@ -16,7 +15,6 @@ type MaterialQuestionsSectionProps = {
  * marcar "Fuera de sorteo". Los datos los carga la página (una query por vista).
  */
 export function MaterialQuestionsSection({
-	materialId,
 	sessionId,
 	sessionRange,
 	questions,
@@ -28,7 +26,6 @@ export function MaterialQuestionsSection({
 			questions={questions}
 			sessionId={sessionId}
 			sessionRange={sessionRange}
-			materialId={materialId}
 			currentUserId={currentUserId}
 			isModerator={isModerator}
 		/>

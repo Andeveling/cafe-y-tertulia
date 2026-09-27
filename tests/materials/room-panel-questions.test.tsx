@@ -49,7 +49,6 @@ vi.mock("@/app/materials/_lib/room-actions", () => ({
 	deleteQuestion: vi.fn(async () => ({ ok: true })),
 	editQuestion: vi.fn(async () => ({ ok: true })),
 	ensureRoomSeat: vi.fn(async () => ({ ok: true })),
-	executeDraw: vi.fn(async () => ({ ok: true })),
 	saveQuestion: vi.fn(async () => ({ ok: true })),
 	setSpectator: vi.fn(async () => ({ ok: true })),
 	toggleOptOut: vi.fn(async () => ({ ok: true })),
@@ -130,11 +129,7 @@ describe("RoomPanel", () => {
 		await user.click(screen.getByRole("button", { name: "Enviar pregunta" }));
 
 		await waitFor(() => {
-			expect(saveQuestion).toHaveBeenCalledWith(
-				"sess-1",
-				"mat-1",
-				"¿Por qué duele?",
-			);
+			expect(saveQuestion).toHaveBeenCalledWith("sess-1", "¿Por qué duele?");
 		});
 		expect(toast.success).toHaveBeenCalledWith("Pregunta 1 enviada");
 		expect(refresh).toHaveBeenCalled();

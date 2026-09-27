@@ -153,9 +153,9 @@ export function ModeratorNav({
 			onAdvance();
 			return;
 		}
-		// Entrar a Sorteo ES sortear (una sola vez): mata el paso previo.
-		// Al volver a una Sorteo ya sorteada, avance normal sin re-sortear.
-		if (next === "draw" && !snapshot.draw.done) {
+		// Entrar a Sorteo ES sortear: la acción decide (avanzar, sortear,
+		// no re-sortear o reintentar). El nav solo rutea según la vista.
+		if (next === "draw") {
 			run(() => advanceToDraw(snapshot.sessionId));
 			return;
 		}

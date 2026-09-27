@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { MemberAvatar } from "@/components/member-avatar";
 import { useClubPresence } from "@/hooks/use-club-presence";
 import type { GroupRole } from "@/lib/groups/types";
+import { countOnline } from "@/lib/presencia/roster";
 
 export type GroupRosterEntry = {
 	id: string;
@@ -42,7 +43,7 @@ export function GroupRoster({
 		[members],
 	);
 	const roster = useClubPresence(userId, presenceMembers, { groupId });
-	const onlineCount = roster.filter((m) => m.online).length;
+	const onlineCount = countOnline(roster);
 
 	return (
 		<section aria-label="Miembros" className="flex flex-col gap-2">

@@ -56,13 +56,14 @@ export function AppSidebar({
 
 	if (pathname.startsWith("/auth")) return null;
 
-	const active = resolveActiveGroup(groups, pathname, rememberedSlug);
-	const canInvite = active?.role === "admin" && active.visibility === "private";
+	const activeGroup = resolveActiveGroup(groups, pathname, rememberedSlug);
+	const canInvite =
+		activeGroup?.role === "admin" && activeGroup.visibility === "private";
 
 	return (
 		<Sidebar collapsible="offcanvas">
 			<SidebarHeader className="flex h-16 shrink-0 items-center border-b border-sidebar-border px-2">
-				<ActiveGroupSwitcher groups={groups} rememberedSlug={rememberedSlug} />
+				<ActiveGroupSwitcher groups={groups} activeGroup={activeGroup} />
 			</SidebarHeader>
 
 			<SidebarContent className="gap-0">
@@ -74,16 +75,16 @@ export function AppSidebar({
 						<SidebarGroupContent>
 							<SidebarMenu className="gap-0.5">
 								{navClub.map((item) => {
-									const href = active
-										? `/g/${active.slug}/${item.section}`
+									const href = activeGroup
+										? `/g/${activeGroup.slug}/${item.section}`
 										: "/g";
 									return (
 										<SidebarMenuItem key={item.title}>
 											<SidebarMenuButton
-												tooltip={active ? item.title : "Elige un grupo"}
-												disabled={!active}
-												isActive={!!active && pathname.startsWith(href)}
-												render={active ? <Link href={href} /> : undefined}
+												tooltip={activeGroup ? item.title : "Elige un grupo"}
+												disabled={!activeGroup}
+												isActive={!!activeGroup && pathname.startsWith(href)}
+												render={activeGroup ? <Link href={href} /> : undefined}
 												className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
 											>
 												<HugeiconsIcon icon={item.icon} />
@@ -97,9 +98,9 @@ export function AppSidebar({
 										<SidebarMenuButton
 											tooltip="Invitar"
 											isActive={pathname.startsWith(
-												`/g/${active.slug}/ajustes`,
+												`/g/${activeGroup.slug}/ajustes`,
 											)}
-											render={<Link href={`/g/${active.slug}/ajustes`} />}
+											render={<Link href={`/g/${activeGroup.slug}/ajustes`} />}
 											className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
 										>
 											<HugeiconsIcon icon={UserAdd01Icon} />

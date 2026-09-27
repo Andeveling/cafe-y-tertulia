@@ -11,7 +11,12 @@ export type RoomRosterMember = {
 	avatar: string | null;
 };
 
-/** Miembros activos del club: universo invitable a la Sala. */
+/**
+ * Miembros activos del club: universo invitable a la Sala.
+ *
+ * Seam interno de la Sala: solo la página de la Sala importa este módulo
+ * (ver regla roster-via-sala-page en .dependency-cruiser.cjs).
+ */
 export async function getRoomRosterMembers(
 	supabase: Db,
 ): Promise<RoomRosterMember[]> {

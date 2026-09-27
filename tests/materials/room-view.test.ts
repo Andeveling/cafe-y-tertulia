@@ -113,13 +113,62 @@ describe("deriveSalaView", () => {
 		expect(view.moderatorName).toBe("Ana");
 		expect(view.questionAuthorIds.has("m-1")).toBe(true);
 		expect(view.questionAuthorIds.has("m-2")).toBe(false);
-		expect(view.notReadyNames).toEqual(["Luis"]);
+		expect(view.missingIds).toEqual(["m-2"]);
 		expect(view.warnings).not.toContain("Luis");
 		expect(view.remainingInterventions).toBe(1);
 		expect(view.debateAuthorId).toBe("m-1");
 		expect(view.debateProgress).toEqual({ current: 1, total: 2 });
 		// a-2 está activa y no hay ocultas: nadie sigue.
 		expect(view.debateNextAssigneeName).toBeNull();
+	});
+
+	it("deriva el gate de Listo: faltan, conteo y avance", () => {
+		const view = deriveSalaView({ ...base, roomStage: "questions" });
+
+		expect(view.missingIds).toEqual(["m-2"]);
+		expect(view.readyCount).toBe(1);
+		expect(view.missingCount).toBe(1);
+		expect(view.canAdvance).toBe(false);
+		expect(view.headline).toBe("Hay 1 con pregunta. Hacen falta al menos 2.");
+	});
+
+	it("abre el avance con dos Listos y avisa el faltante", () => {
+		const ready = deriveSalaView({
+			...base,
+			roomStage: "questions",
+			questions: [
+				...base.questions,
+				{
+					id: "q-2",
+					authorId: "m-2",
+					authorName: "Luis",
+					authorAvatar: null,
+					text: "¿Y el final?",
+					isMine: false,
+					outsideDraw: false,
+					createdAt: "2026-01-01",
+				},
+			],
+		});
+
+		expect(ready.canAdvance).toBe(true);
+		expect(ready.missingCount).toBe(0);
+		expect(ready.headline).toBe("Todos tienen pregunta.");
+	});
+
+	it("no cuenta espectadores ni quien mira para el gate", () => {
+		const view = deriveSalaView({
+			...base,
+			roomStage: "questions",
+			participants: [
+				{ ...base.participants[0], optOut: true },
+				base.participants[1],
+				base.participants[2],
+			],
+		});
+
+		expect(view.readyCount).toBe(0);
+		expect(view.canAdvance).toBe(false);
 	});
 
 	it("resuelve quién sigue en exponer", () => {
@@ -223,7 +272,7 @@ describe("deriveSalaView", () => {
 		});
 		expect(view.members).toEqual([]);
 		expect(view.moderatorName).toBeNull();
-		expect(view.notReadyNames).toEqual([]);
+		expect(view.missingIds).toEqual([]);
 		expect(view.debateProgress).toBeNull();
 	});
 
@@ -328,7 +377,7 @@ describe("deriveSalaView", () => {
 			debate: null,
 		});
 		expect(draw.next).toBe("debate");
-		expect(draw.notReadyNames).toEqual(["Luis"]);
+		expect(draw.missingIds).toEqual(["m-2"]);
 		expect(draw.warnings).toEqual([]);
 
 		const presence = deriveSalaView({

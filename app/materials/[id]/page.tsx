@@ -436,7 +436,6 @@ export default async function MaterialDetailPage({
 												{session.status === "preparation" && currentUserId && (
 													<div className="mt-3">
 														<MaterialQuestionsSection
-															materialId={material.id}
 															sessionId={session.id}
 															sessionRange={session.range ?? ""}
 															questions={poolsBySession.get(session.id) ?? []}

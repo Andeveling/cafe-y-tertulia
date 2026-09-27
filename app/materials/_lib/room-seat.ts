@@ -6,6 +6,9 @@ import type { Database } from "@/lib/supabase/database.types";
 /**
  * Sienta al miembro en la mesa si aún no está. No pisa un Espectador
  * ni un opt-out: el conflicto de clave se ignora.
+ *
+ * Seam interno de la Sala: solo room-actions y la página de la Sala
+ * importan este módulo (ver regla seat-via-sala en .dependency-cruiser.cjs).
  */
 export async function seatIfAbsent(
 	supabase: SupabaseClient<Database>,

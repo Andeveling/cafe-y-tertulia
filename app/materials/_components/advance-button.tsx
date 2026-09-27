@@ -8,13 +8,13 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { SESSION_LIFECYCLE_LABELS } from "@/app/materials/_lib/constants";
 import type { SessionStatus } from "@/app/materials/_lib/materials";
 import {
 	advanceMaterial,
 	advanceSession,
 	closeSessionAction,
 } from "@/app/materials/_lib/materials-actions";
-import { SESSION_LIFECYCLE_LABELS } from "@/app/materials/_lib/session-lifecycle";
 import { Button } from "@/components/ui/button";
 import type { ActionResult } from "@/lib/server-action";
 

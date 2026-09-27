@@ -2,9 +2,7 @@
  * @vitest-environment jsdom
  */
 import { cleanup, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { GroupSwitcher } from "@/app/g/_components/group-switcher";
 import { MisGruposView } from "@/app/g/_components/mis-grupos-view";
 import { PublicCatalog } from "@/app/g/_components/public-catalog";
 
@@ -85,16 +83,6 @@ describe("MisGruposView", () => {
 		);
 		expect(container.textContent).not.toMatch(/pregunta secreta/i);
 		expect(screen.getByText("Filosofía")).toBeInTheDocument();
-	});
-});
-
-describe("GroupSwitcher", () => {
-	it("navega al grupo elegido sin cerrar sesión", async () => {
-		render(<GroupSwitcher groups={myGroups} currentSlug="nojau" />);
-		const user = userEvent.setup();
-		await user.click(screen.getByRole("button", { name: /cambiar de grupo/i }));
-		await user.click(screen.getByText("Cine"));
-		expect(push).toHaveBeenCalledWith("/g/cine");
 	});
 });
 

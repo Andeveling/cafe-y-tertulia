@@ -69,6 +69,41 @@ module.exports = {
 			to: { path: "app/materials/" },
 		},
 
+		// ── Regla 7: seat de la Sala solo vía actions o página ───────────────
+		{
+			name: "seat-via-sala",
+			comment:
+				"room-seat es seam interno: solo room-actions y la página de la Sala lo importan.",
+			severity: "error",
+			from: {
+				pathNot:
+					"app/materials/_lib/room-actions(\\.ts)?$|app/materials/sessions/\\[id\\]/room/page(\\.tsx)?$",
+			},
+			to: { path: "app/materials/_lib/room-seat(\\.ts)?$" },
+		},
+
+		// ── Regla 8: roster de la Sala solo vía su página ───────────────────
+		{
+			name: "roster-via-sala-page",
+			comment:
+				"room-roster es seam interno: solo la página de la Sala lo importa.",
+			severity: "error",
+			from: {
+				pathNot: "app/materials/sessions/\\[id\\]/room/page\\.tsx$",
+			},
+			to: { path: "app/materials/_lib/room-roster(\\.ts)?$" },
+		},
+
+		// ── Regla 9: gate del Grupo solo vía el seam ────────────────────────
+		{
+			name: "grupo-gate-via-seam",
+			comment:
+				"Las páginas de /g/{slug} resuelven miembro+grupo vía page-gate, nunca directo.",
+			severity: "error",
+			from: { path: "app/g/\\[slug\\]/" },
+			to: { path: "lib/(current-member|auth/redirect)" },
+		},
+
 		// ── Reglas base ─────────────────────────────────────────────────────
 		{
 			name: "not-to-deprecated",

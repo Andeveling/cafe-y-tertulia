@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { createQuestionAction } from "@/app/materials/_lib/question-actions";
+import { saveQuestion } from "@/app/materials/_lib/room-actions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -33,10 +33,7 @@ export function PrepareQuestionForm({
 				}
 				setError(null);
 				start(async () => {
-					const fd = new FormData();
-					fd.set("session_id", sessionId);
-					fd.set("text", text);
-					const result = await createQuestionAction({ ok: true }, fd);
+					const result = await saveQuestion(sessionId, text);
 					if (!result.ok) {
 						setError(result.error);
 						return;

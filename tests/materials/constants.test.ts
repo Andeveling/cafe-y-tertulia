@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SESSION_LIFECYCLE_LABELS } from "@/app/materials/_lib/session-lifecycle";
+import { SESSION_LIFECYCLE_LABELS } from "@/app/materials/_lib/constants";
 
 describe("SESSION_LIFECYCLE_LABELS", () => {
 	it("nombra la acción contextual de cada estado", () => {

@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { GroupSettingsView } from "@/app/g/[slug]/_components/group-settings-view";
-import { inactiveMemberDestination } from "@/lib/auth/redirect";
-import { getCurrentMember } from "@/lib/current-member";
+import { requireGroupPage } from "@/lib/groups/page-gate";
 import { getGroupBySlug, getGroupSettingsMembers } from "@/lib/groups/queries";
 
 /**
@@ -14,14 +13,7 @@ export default async function GroupSettingsPage({
 	params: Promise<{ slug: string }>;
 }) {
 	const { slug } = await params;
-	const { member, supabase } = await getCurrentMember();
-
-	if (!member) redirect("/auth/login");
-	const inactiveDestination = inactiveMemberDestination(member.status);
-	if (inactiveDestination) redirect(inactiveDestination);
-
-	const group = await getGroupBySlug(supabase, slug, member.id);
-	if (!group || group.role == null) notFound();
+	const { member, supabase, group } = await requireGroupPage(slug);
 
 	const members = await getGroupSettingsMembers(supabase, group.id);
 

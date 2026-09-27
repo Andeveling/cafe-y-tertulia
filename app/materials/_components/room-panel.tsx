@@ -12,7 +12,7 @@ import type {
 	TriviaRoundSnapshot,
 } from "@/app/materials/_lib/minigames";
 import type { InviteRosterMember } from "@/app/materials/_lib/presence-invite";
-import { questionsAdvance } from "@/app/materials/_lib/questions-advance";
+
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import {
 	advanceRoomStage,
@@ -56,13 +56,9 @@ export function RoomPanel({
 	const [advanceFor, setAdvanceFor] = useState<
 		Record<string, "wait" | "spectator">
 	>({});
-	const questionsGate =
-		snapshot.roomStage === "questions"
-			? questionsAdvance({
-					participants: snapshot.participants,
-					questionAuthorIds: view.questionAuthorIds,
-				})
-			: null;
+	// El gate de Listo vive en la vista derivada: una sola cuenta para
+	// el nav y las Etapas, sin recalcular.
+	const questionsGate = snapshot.roomStage === "questions" ? view : null;
 
 	return (
 		<div className="flex flex-col gap-6">

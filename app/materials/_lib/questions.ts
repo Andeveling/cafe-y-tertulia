@@ -37,17 +37,10 @@ function mapPoolRow(row: QuestionPoolRow): QuestionWithAuthor {
 	};
 }
 
-export type CreateQuestionInput = {
-	sessionId: string;
-	materialId: string | null;
-	authorId: string;
-	text: string;
-	groupId: string;
-};
-
 /**
- * Pool de Preguntas de una Sesión: todas las aportadas, presente o no su autor
- * (SPEC §4.1 · ADR 0001). Solo visibles para Miembros (RLS).
+ * Pool de Preguntas de una Sesión para memoria e Historial: todas las
+ * aportadas. Cuáles entran al Sorteo lo decide el Sorteo 1:1 (ADR-0008:
+ * solo presentes que no miran). Solo visible para Miembros (RLS).
  */
 export async function getSessionPool(
 	supabase: Db,
@@ -93,45 +86,4 @@ export async function getSessionPools(
 		bySession.set(mapped.sessionId, list);
 	}
 	return bySession;
-}
-
-/**
- * Un Miembro activo aporta una Pregunta a una Sesión en `preparation`.
- * La autoría se registra y no puede falsearse (RLS: author_id = auth.uid()).
- */
-export async function createQuestion(
-	supabase: Db,
-	input: CreateQuestionInput,
-): Promise<QuestionRow | null> {
-	const { data, error } = await supabase
-		.from("questions")
-		.insert({
-			session_id: input.sessionId,
-			material_id: input.materialId,
-			author_id: input.authorId,
-			text: input.text,
-			group_id: input.groupId,
-		})
-		.select()
-		.single();
-
-	if (error) throw error;
-	return data;
-}
-
-/**
- * Marca/desmarca "Fuera de sorteo" (duplicada o fuera de contexto). Solo el
- * moderador de la Sesión (RLS). El texto y la autoría quedan inmutables.
- */
-export async function toggleOutsideDraw(
-	supabase: Db,
-	questionId: string,
-	outsideDraw: boolean,
-): Promise<void> {
-	const { error } = await supabase
-		.from("questions")
-		.update({ outside_draw: outsideDraw })
-		.eq("id", questionId);
-
-	if (error) throw error;
 }

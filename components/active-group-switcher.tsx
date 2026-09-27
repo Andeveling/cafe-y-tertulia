@@ -20,11 +20,7 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
-import {
-	hrefForGroup,
-	resolveActiveGroup,
-	sectionFromGroupPath,
-} from "@/lib/groups/active-group";
+import { hrefForGroup, sectionFromGroupPath } from "@/lib/groups/active-group";
 import type { GroupRole, GroupVisibility } from "@/lib/groups/types";
 
 export type SwitcherGroup = {
@@ -36,17 +32,20 @@ export type SwitcherGroup = {
 
 export function ActiveGroupSwitcher({
 	groups,
-	rememberedSlug,
+	activeGroup,
 }: {
 	groups: SwitcherGroup[];
-	rememberedSlug: string | null;
+	/**
+	 * Grupo activo resuelto una sola vez por el AppSidebar: la URL manda,
+	 * la memoria solo orienta. El switcher renderiza, no resuelve.
+	 */
+	activeGroup: SwitcherGroup | null;
 }) {
 	const pathname = usePathname();
 	const { isMobile } = useSidebar();
-	const active = resolveActiveGroup(groups, pathname, rememberedSlug);
 	const section = sectionFromGroupPath(pathname);
 	const title =
-		active?.name ?? (groups.length === 0 ? "Sin grupo" : "Elige un grupo");
+		activeGroup?.name ?? (groups.length === 0 ? "Sin grupo" : "Elige un grupo");
 
 	if (groups.length === 0) {
 		return (
@@ -70,7 +69,7 @@ export function ActiveGroupSwitcher({
 		);
 	}
 
-	if (groups.length === 1 && active) {
+	if (groups.length === 1 && activeGroup) {
 		return (
 			<SidebarMenu>
 				<SidebarMenuItem>
@@ -80,11 +79,11 @@ export function ActiveGroupSwitcher({
 						</Link>
 						<SidebarMenuButton
 							size="lg"
-							tooltip={active.name}
+							tooltip={activeGroup.name}
 							className="min-w-0 flex-1"
-							render={<Link href={hrefForGroup(active.slug, section)} />}
+							render={<Link href={hrefForGroup(activeGroup.slug, section)} />}
 						>
-							<GroupLabel title={active.name} />
+							<GroupLabel title={activeGroup.name} />
 						</SidebarMenuButton>
 					</div>
 				</SidebarMenuItem>
@@ -115,35 +114,35 @@ export function ActiveGroupSwitcher({
 								className="ml-auto size-4 opacity-60 group-data-[collapsible=icon]:hidden"
 							/>
 						</DropdownMenuTrigger>
-					<DropdownMenuContent
-						className="min-w-56 rounded-lg"
-						side={isMobile ? "bottom" : "right"}
-						align="start"
-						sideOffset={4}
-					>
-						<DropdownMenuGroup>
-							<DropdownMenuLabel>Grupos</DropdownMenuLabel>
-							{groups.map((group) => (
-								<DropdownMenuItem
-									key={group.slug}
-									render={<Link href={hrefForGroup(group.slug, section)} />}
-									className="gap-2"
-								>
-									<span className="flex-1 truncate">{group.name}</span>
-									{group.slug === active?.slug ? (
-										<HugeiconsIcon icon={Tick02Icon} className="size-4" />
-									) : null}
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuGroup>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem render={<Link href="/g" />}>
-							Mis grupos
-						</DropdownMenuItem>
-						<DropdownMenuItem render={<Link href="/g?crear=1" />}>
-							Crear grupo
-						</DropdownMenuItem>
-					</DropdownMenuContent>
+						<DropdownMenuContent
+							className="min-w-56 rounded-lg"
+							side={isMobile ? "bottom" : "right"}
+							align="start"
+							sideOffset={4}
+						>
+							<DropdownMenuGroup>
+								<DropdownMenuLabel>Grupos</DropdownMenuLabel>
+								{groups.map((group) => (
+									<DropdownMenuItem
+										key={group.slug}
+										render={<Link href={hrefForGroup(group.slug, section)} />}
+										className="gap-2"
+									>
+										<span className="flex-1 truncate">{group.name}</span>
+										{group.slug === activeGroup?.slug ? (
+											<HugeiconsIcon icon={Tick02Icon} className="size-4" />
+										) : null}
+									</DropdownMenuItem>
+								))}
+							</DropdownMenuGroup>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem render={<Link href="/g" />}>
+								Mis grupos
+							</DropdownMenuItem>
+							<DropdownMenuItem render={<Link href="/g?crear=1" />}>
+								Crear grupo
+							</DropdownMenuItem>
+						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
 			</SidebarMenuItem>

@@ -1,8 +1,5 @@
-import { notFound, redirect } from "next/navigation";
-import { inactiveMemberDestination } from "@/lib/auth/redirect";
-import { getCurrentMember } from "@/lib/current-member";
 import { GroupProvider } from "@/lib/groups/group-context";
-import { getGroupBySlug } from "@/lib/groups/queries";
+import { requireGroupPage } from "@/lib/groups/page-gate";
 
 /**
  * Layout de /g/{slug}: resuelve el grupo, exige membresía (las privadas
@@ -17,14 +14,7 @@ export default async function GroupLayout({
 	children: React.ReactNode;
 }) {
 	const { slug } = await params;
-	const { member, supabase } = await getCurrentMember();
-
-	if (!member) redirect("/auth/login");
-	const inactiveDestination = inactiveMemberDestination(member.status);
-	if (inactiveDestination) redirect(inactiveDestination);
-
-	const group = await getGroupBySlug(supabase, slug, member.id);
-	if (!group || group.role == null) notFound();
+	const { group } = await requireGroupPage(slug);
 
 	return (
 		<GroupProvider

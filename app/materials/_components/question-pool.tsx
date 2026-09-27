@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useActionState, useEffect, useId, useRef, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Badge } from "@/components/ui/badge";
@@ -15,23 +15,16 @@ import {
 } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import {
-	type ActionResult,
-	createQuestionAction,
-	toggleOutsideDrawAction,
-} from "../_lib/question-actions";
 import type { QuestionWithAuthor } from "../_lib/questions";
+import { saveQuestion, toggleOutsideDrawQuestion } from "../_lib/room-actions";
 
 type QuestionPoolProps = {
 	questions: QuestionWithAuthor[];
 	sessionId: string;
 	sessionRange: string;
-	materialId: string;
 	currentUserId: string;
 	isModerator: boolean;
 };
-
-const initialCreateState: ActionResult = { ok: true };
 
 const createQuestionSchema = z.object({
 	text: z.string().trim().min(1, "La pregunta no puede estar vacía."),
@@ -43,19 +36,12 @@ export function QuestionPool({
 	questions,
 	sessionId,
 	sessionRange,
-	materialId,
 	currentUserId,
 	isModerator,
 }: QuestionPoolProps) {
-	const [createState, createAction, createPending] = useActionState(
-		createQuestionAction,
-		initialCreateState,
-	);
-	const [toggleState, toggleAction, togglePending] = useActionState(
-		toggleOutsideDrawAction,
-		initialCreateState,
-	);
-	const [isPending, startTransition] = useTransition();
+	const [pending, startTransition] = useTransition();
+	const [createError, setCreateError] = useState<string | null>(null);
+	const [toggleError, setToggleError] = useState<string | null>(null);
 	const fieldId = useId();
 	const form = useForm<CreateQuestionValues>({
 		resolver: zodResolver(createQuestionSchema),
@@ -63,34 +49,29 @@ export function QuestionPool({
 			text: "",
 		},
 	});
-	const justSubmitted = useRef(false);
-
-	// Reset only after the server action resolved successfully: createState
-	// changes after the async action settles, so the reset lives here instead
-	// of in onSubmit (where the previous state would be stale).
-	useEffect(() => {
-		if (justSubmitted.current && createState.ok) {
-			form.reset();
-			justSubmitted.current = false;
-		}
-	}, [createState, form]);
 
 	function onSubmit(data: CreateQuestionValues) {
-		justSubmitted.current = true;
+		setCreateError(null);
 		startTransition(async () => {
-			const formData = new FormData();
-			formData.set("session_id", sessionId);
-			formData.set("material_id", materialId);
-			formData.set("text", data.text);
-			await createAction(formData);
+			const result = await saveQuestion(sessionId, data.text);
+			if (!result.ok) {
+				setCreateError(result.error);
+				return;
+			}
+			form.reset();
 		});
 	}
 
-	async function onToggle(questionId: string, outsideDraw: boolean) {
-		const formData = new FormData();
-		formData.set("question_id", questionId);
-		formData.set("outside_draw", String(outsideDraw));
-		await toggleAction(formData);
+	function onToggle(questionId: string, outsideDraw: boolean) {
+		setToggleError(null);
+		startTransition(async () => {
+			const result = await toggleOutsideDrawQuestion(
+				sessionId,
+				questionId,
+				outsideDraw,
+			);
+			if (!result.ok) setToggleError(result.error);
+		});
 	}
 
 	return (
@@ -100,8 +81,8 @@ export function QuestionPool({
 					Preguntas del pool
 				</h4>
 				<p className="text-sm text-muted-foreground">
-					Aportes abiertos para la Sesión {sessionRange}. Todas las Preguntas
-					aportadas entran al Sorteo, presente o no su autor.
+					Aportes abiertos para la Sesión {sessionRange}. Entran al Sorteo las
+					de presentes que no miran.
 				</p>
 			</div>
 			<form
@@ -130,13 +111,13 @@ export function QuestionPool({
 						)}
 					/>
 				</FieldGroup>
-				{!createState.ok && (
+				{createError && (
 					<p role="alert" className="text-destructive text-xs">
-						{createState.error}
+						{createError}
 					</p>
 				)}
 				<div className="flex justify-end">
-					<Button type="submit" disabled={createPending || isPending}>
+					<Button type="submit" disabled={pending}>
 						Aportar
 					</Button>
 				</div>
@@ -168,7 +149,7 @@ export function QuestionPool({
 									<label className="flex items-center gap-2 text-xs">
 										<Switch
 											checked={question.outsideDraw}
-											disabled={togglePending}
+											disabled={pending}
 											onCheckedChange={(checked) =>
 												onToggle(question.id, checked)
 											}
@@ -187,9 +168,9 @@ export function QuestionPool({
 					</li>
 				)}
 			</ul>
-			{!toggleState.ok && (
+			{toggleError && (
 				<p role="alert" className="text-destructive text-xs">
-					{toggleState.error}
+					{toggleError}
 				</p>
 			)}
 		</section>

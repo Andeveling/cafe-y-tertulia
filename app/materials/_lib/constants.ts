@@ -39,3 +39,16 @@ export const SESSION_NEXT_STATUS: Record<SessionStatus, SessionStatus | null> =
 		closed: "archived",
 		archived: null,
 	};
+
+/**
+ * Etiqueta del botón de avance según estado. La tarjeta del material es
+ * pasiva: estas etiquetas solo se usan en la Sala.
+ */
+export const SESSION_LIFECYCLE_LABELS: Record<
+	Exclude<SessionStatus, "archived" | "lobby">,
+	string
+> = {
+	preparation: "Abrir sala",
+	in_progress: "Cerrar sesión",
+	closed: "Archivar",
+};

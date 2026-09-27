@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import { type RosterMember, useClubPresence } from "@/hooks/use-club-presence";
+import { countOnline } from "@/lib/presencia/roster";
 import type { BoardSession } from "./board-helpers";
 
 export function ClubRoster({
@@ -35,7 +36,7 @@ export function ClubRoster({
 }) {
 	const roster = useClubPresence(userId, rosterMembers, { groupId });
 	const [pending, startTransition] = useTransition();
-	const online = roster.filter((m) => m.online).length;
+	const online = countOnline(roster);
 	const canLlamar = sessions.some(
 		(s) =>
 			s.moderator_id === userId &&
