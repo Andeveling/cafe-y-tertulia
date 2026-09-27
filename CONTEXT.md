@@ -65,7 +65,7 @@ Porción del Material que aborda una Sesión concreta (ej. "Capítulos 1-3", "Ep
 _Avoid_: Capítulo (como entidad), episodio, sección
 
 **Categoría**:
-Tema duradero del Grupo (ej. filosofía, cine, actualidad) que agrupa Materiales y Sesiones. Un Material pertenece a una o varias; la Sesión con Material hereda las de su Material, y la Sesión sin Material lleva las suyas propias o ninguna.
+Tema duradero del Grupo (ej. filosofía, cine, desarrollo personal, hábitos y productividad, salud y bienestar, emprendimiento) que agrupa Materiales y Sesiones. Un Material pertenece a una o varias; la Sesión con Material hereda las de su Material, y la Sesión sin Material lleva las suyas propias o ninguna.
 _Avoid_: Tema (como término de modelo), tag, etiqueta
 
 **Maestría**:

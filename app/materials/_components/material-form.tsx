@@ -4,11 +4,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	ClapperboardIcon,
 	FeatherIcon,
+	HealthIcon,
 	Idea01Icon,
 	LandmarkIcon,
 	NewspaperIcon,
 	PlusSignIcon,
+	Rocket01Icon,
+	SparklesIcon,
 	Tag01Icon,
+	Target02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useTransition } from "react";
@@ -42,6 +46,10 @@ const CATEGORY_ICON: Record<string, typeof Idea01Icon> = {
 	actualidad: NewspaperIcon,
 	poesia: FeatherIcon,
 	historia: LandmarkIcon,
+	"desarrollo-personal": SparklesIcon,
+	"habitos-productividad": Target02Icon,
+	"salud-bienestar": HealthIcon,
+	emprendimiento: Rocket01Icon,
 };
 
 const MATERIAL_KIND_OPTIONS = ["book", "podcast", "video", "article"] as const;

@@ -1,56 +1,68 @@
--- Tests para Categorías (issues #59/#60/#61).
+-- Tests para Categorías (issues #59/#60/#61, grupo-propias desde #71).
 -- Seam: categories/material_categories/session_categories + guard
--- session_categories_guard + RLS is_member.
+-- session_categories_guard + RLS por grupo. El grupo se crea con
+-- create_group, que siembra las 9 categorías del estándar.
 
 begin;
-select plan(8);
+select plan(9);
 
 -- ============================================================
--- Fixtures
+-- Fixtures: un Miembro activo + un invitado; el activo crea su grupo
 -- ============================================================
 
 insert into auth.users (id, email) values
-	('11111111-1111-1111-1111-111111111111', 'miembro@club.test'),
-	('44444444-4444-4444-4444-444444444444', 'externo@club.test');
+	('11111111-1111-1111-1111-111111111111', 'miembro-cat@club.test'),
+	('44444444-4444-4444-4444-444444444444', 'externo-cat@club.test');
 
 insert into public.members (id, status, display_name) values
-	('11111111-1111-1111-1111-111111111111', 'active', 'Miembro'),
-	('44444444-4444-4444-4444-444444444444', 'invited', 'Invitado');
+	('11111111-1111-1111-1111-111111111111', 'active', 'Miembro Cat'),
+	('44444444-4444-4444-4444-444444444444', 'invited', 'Invitado Cat');
 
-insert into public.materials (id, title, kind, author, created_by) values
-	('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Libro de prueba', 'book', 'Alguien', '11111111-1111-1111-1111-111111111111');
+set local role authenticated;
+set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
+select public.create_group('Grupo Cat', 'Grupo de prueba de categorías', null, 'private');
+reset role;
+reset request.jwt.claim.sub;
 
-insert into public.sessions (id, material_id, range, status, moderator_id) values
-	('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Cap 1-3', 'preparation', '11111111-1111-1111-1111-111111111111'),
-	('cccccccc-cccc-cccc-cccc-cccccccccccc', null, null, 'preparation', '11111111-1111-1111-1111-111111111111'),
-	('dddddddd-dddd-dddd-dddd-dddddddddddd', null, null, 'closed', '11111111-1111-1111-1111-111111111111');
+-- Contenido del grupo (setup como superusuario, salta RLS).
+insert into public.materials (id, group_id, title, kind, author, created_by) values
+	('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', (select id from public.groups where name = 'Grupo Cat'), 'Libro de prueba', 'book', 'Alguien', '11111111-1111-1111-1111-111111111111');
+
+insert into public.sessions (id, group_id, material_id, range, status, moderator_id) values
+	('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', (select id from public.groups where name = 'Grupo Cat'), 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Cap 1-3', 'preparation', '11111111-1111-1111-1111-111111111111'),
+	('cccccccc-cccc-cccc-cccc-cccccccccccc', (select id from public.groups where name = 'Grupo Cat'), null, null, 'preparation', '11111111-1111-1111-1111-111111111111'),
+	('dddddddd-dddd-dddd-dddd-dddddddddddd', (select id from public.groups where name = 'Grupo Cat'), null, null, 'closed', '11111111-1111-1111-1111-111111111111');
 
 -- ============================================================
 -- Tests
 -- ============================================================
 
--- 1. Seeds: 5 categorías con icono HugeIcons.
+-- 1. Siembra: 9 categorías con icono HugeIcons (5 base + 4 de crecimiento).
 select is(
-	(select count(*) from public.categories where icon is not null and icon <> ''),
-	5::bigint,
-	'1. Hay 5 categorías con icono'
+	(select count(*) from public.categories
+		where group_id = (select id from public.groups where name = 'Grupo Cat')
+		and icon is not null and icon <> ''),
+	9::bigint,
+	'1. Hay 9 categorías con icono'
 );
 
--- 2. Un miembro activo ve las categorías.
+-- 2. Un miembro del grupo ve sus categorías.
 set local role authenticated;
 set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
 
 select is(
-	(select count(*) from public.categories),
-	5::bigint,
-	'2. Un miembro activo ve las 5 categorías'
+	(select count(*) from public.categories
+		where group_id = (select id from public.groups where name = 'Grupo Cat')),
+	9::bigint,
+	'2. Un miembro del grupo ve las 9 categorías'
 );
 
--- 3. Un invitado no ve las categorías.
+-- 3. Un invitado no ve las categorías del grupo.
 set local request.jwt.claim.sub = '44444444-4444-4444-4444-444444444444';
 
 select is(
-	(select count(*) from public.categories),
+	(select count(*) from public.categories
+		where group_id = (select id from public.groups where name = 'Grupo Cat')),
 	0::bigint,
 	'3. Un invitado no ve categorías'
 );
@@ -58,8 +70,11 @@ select is(
 -- 4. Un miembro asigna categorías a un material.
 set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
 
-insert into public.material_categories (material_id, category_id)
-select 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', id from public.categories where key = 'filosofia';
+insert into public.material_categories (material_id, category_id, group_id)
+select 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', id, (select id from public.groups where name = 'Grupo Cat')
+from public.categories
+where key = 'filosofia'
+and group_id = (select id from public.groups where name = 'Grupo Cat');
 
 select ok(
 	exists (
@@ -71,15 +86,21 @@ select ok(
 
 -- 5. La sesión con material hereda: etiquetado directo se rechaza.
 select throws_ok(
-	$$insert into public.session_categories (session_id, category_id)
-	select 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', id from public.categories where key = 'filosofia'$$,
+	$$insert into public.session_categories (session_id, category_id, group_id)
+	select 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', id, (select id from public.groups where name = 'Grupo Cat')
+	from public.categories
+	where key = 'filosofia'
+	and group_id = (select id from public.groups where name = 'Grupo Cat')$$,
 	'P0001', null,
 	'5. La sesión con material rechaza categorías propias'
 );
 
 -- 6. La sesión sin material acepta categorías propias (opcional).
-insert into public.session_categories (session_id, category_id)
-select 'cccccccc-cccc-cccc-cccc-cccccccccccc', id from public.categories where key = 'cine';
+insert into public.session_categories (session_id, category_id, group_id)
+select 'cccccccc-cccc-cccc-cccc-cccccccccccc', id, (select id from public.groups where name = 'Grupo Cat')
+from public.categories
+where key = 'cine'
+and group_id = (select id from public.groups where name = 'Grupo Cat');
 
 select ok(
 	exists (
@@ -91,8 +112,11 @@ select ok(
 
 -- 7. La sesión cerrada rechaza cambios.
 select throws_ok(
-	$$insert into public.session_categories (session_id, category_id)
-	select 'dddddddd-dddd-dddd-dddd-dddddddddddd', id from public.categories where key = 'cine'$$,
+	$$insert into public.session_categories (session_id, category_id, group_id)
+	select 'dddddddd-dddd-dddd-dddd-dddddddddddd', id, (select id from public.groups where name = 'Grupo Cat')
+	from public.categories
+	where key = 'cine'
+	and group_id = (select id from public.groups where name = 'Grupo Cat')$$,
 	'P0001', null,
 	'7. La sesión cerrada rechaza categorías'
 );
@@ -105,6 +129,17 @@ select is(
 	(select count(*) from public.session_categories where session_id = 'cccccccc-cccc-cccc-cccc-cccccccccccc'),
 	0::bigint,
 	'8. Quitar la categoría en sesión abierta funciona'
+);
+
+-- 9. Las 4 categorías de crecimiento existen en el grupo.
+select is(
+	(select count(*) from public.categories
+		where group_id = (select id from public.groups where name = 'Grupo Cat')
+		and key in (
+			'desarrollo-personal', 'habitos-productividad', 'salud-bienestar', 'emprendimiento'
+		)),
+	4::bigint,
+	'9. Existen las categorías de crecimiento'
 );
 
 -- ============================================================
