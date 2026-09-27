@@ -22,10 +22,7 @@ import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { SessionScheduler } from "@/app/materials/_components/session-scheduler";
 import { StepIndicator } from "@/app/materials/_components/step-indicator";
 import { TriviaBank } from "@/app/materials/_components/trivia-bank";
-import {
-	getMaterialCategories,
-	listCategories,
-} from "@/app/materials/_lib/categories";
+import { getMaterialCategories } from "@/app/materials/_lib/categories";
 import { isActiveMember } from "@/app/materials/_lib/members";
 import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
 import {
@@ -130,16 +127,13 @@ export default async function MaterialDetailPage({
 	}
 
 	const viewer = authData ?? null;
-	const [categories, materialCategories, canTag, mastery] = await Promise.all([
-		listCategories(supabase, material.group_id).catch(() => []),
+	const [materialCategories, canTag, mastery] = await Promise.all([
 		getMaterialCategories(supabase, id).catch(() => []),
 		viewer
 			? isActiveMember(supabase, viewer.id).catch(() => false)
 			: Promise.resolve(false),
 		viewer
-			? getMemberMastery(supabase, viewer.id, material.group_id).catch(
-					() => [],
-				)
+			? getMemberMastery(supabase, viewer.id, material.group_id).catch(() => [])
 			: Promise.resolve([]),
 	]);
 
@@ -241,11 +235,9 @@ export default async function MaterialDetailPage({
 									/>
 								)}
 							</div>
-							{categories.length > 0 && (
+							{materialCategories.length > 0 && (
 								<MaterialCategories
-									materialId={material.id}
-									all={categories}
-									initialIds={materialCategories.map((c) => c.id)}
+									categories={materialCategories}
 									mastery={mastery
 										.filter((m) =>
 											materialCategories.some((c) => c.id === m.category.id),
@@ -256,7 +248,6 @@ export default async function MaterialDetailPage({
 											level: m.level,
 											points: m.points,
 										}))}
-									canEdit={canTag}
 								/>
 							)}
 							{material.status !== "proposed" && (
