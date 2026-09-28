@@ -81,8 +81,9 @@ export function QuestionPool({
 					Preguntas del pool
 				</h4>
 				<p className="text-sm text-muted-foreground">
-					Aportes abiertos para la Sesión {sessionRange}. Entran al Sorteo las
-					de presentes que no miran.
+					Aportes abiertos para la Sesión {sessionRange}. Solo ves el texto de
+					las tuyas; las demás se revelan en el Sorteo. Entran al Sorteo las de
+					presentes que no miran.
 				</p>
 			</div>
 			<form
@@ -124,7 +125,7 @@ export function QuestionPool({
 			</form>
 
 			<ul className="flex flex-col gap-3">
-				{questions.map((question) => {
+				{questions.map((question, index) => {
 					const isMine = question.authorId === currentUserId;
 					return (
 						<li
@@ -132,9 +133,16 @@ export function QuestionPool({
 							className="flex flex-col gap-2 rounded-md border border-border p-3"
 						>
 							<div className="flex items-start justify-between gap-2">
-								<p className="min-w-0 text-sm leading-relaxed break-words">
-									{question.text}
-								</p>
+								{isMine && question.text ? (
+									<p className="min-w-0 text-sm leading-relaxed break-words">
+										{question.text}
+									</p>
+								) : (
+									<p className="min-w-0 text-sm leading-relaxed break-words text-muted-foreground italic">
+										Pregunta oculta hasta el sorteo — la magia se revela en la
+										tertulia.
+									</p>
+								)}
 								{question.outsideDraw && (
 									<Badge variant="secondary">Fuera de sorteo</Badge>
 								)}
@@ -142,8 +150,8 @@ export function QuestionPool({
 							<div className="flex items-center justify-between gap-2">
 								<p className="text-xs text-muted-foreground">
 									{isMine
-										? "Tu pregunta"
-										: `Aportada por ${question.authorName}`}
+										? "Tu pregunta · enviada ✓"
+										: `Aportada por ${question.authorName} · enviada ✓`}
 								</p>
 								{isModerator && (
 									<label className="flex items-center gap-2 text-xs">
@@ -153,7 +161,7 @@ export function QuestionPool({
 											onCheckedChange={(checked) =>
 												onToggle(question.id, checked)
 											}
-											aria-label={`Fuera de sorteo: ${question.text.length > 80 ? `${question.text.slice(0, 80)}…` : question.text}`}
+											aria-label={`Fuera de sorteo: pregunta ${index + 1} de ${question.authorName}`}
 										/>
 										Fuera de sorteo
 									</label>

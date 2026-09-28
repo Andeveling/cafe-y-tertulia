@@ -14,7 +14,8 @@ export type QuestionWithAuthor = {
 	sessionId: string;
 	materialId: string | null;
 	authorId: string;
-	text: string;
+	/** Texto solo del autor; null para el resto hasta la Intervención (la magia). */
+	text: string | null;
 	outsideDraw: boolean;
 	createdAt: string;
 	authorName: string;
@@ -24,13 +25,16 @@ type QuestionPoolRow = QuestionRow & {
 	members: { display_name: string } | null;
 };
 
-function mapPoolRow(row: QuestionPoolRow): QuestionWithAuthor {
+function mapPoolRow(
+	row: QuestionPoolRow,
+	viewerId?: string,
+): QuestionWithAuthor {
 	return {
 		id: row.id,
 		sessionId: row.session_id,
 		materialId: row.material_id,
 		authorId: row.author_id,
-		text: row.text,
+		text: viewerId != null && row.author_id === viewerId ? row.text : null,
 		outsideDraw: row.outside_draw,
 		createdAt: row.created_at,
 		authorName: row.members?.display_name ?? "Miembro del club",
@@ -38,13 +42,15 @@ function mapPoolRow(row: QuestionPoolRow): QuestionWithAuthor {
 }
 
 /**
- * Pool de Preguntas de una Sesión para memoria e Historial: todas las
- * aportadas. Cuáles entran al Sorteo lo decide el Sorteo 1:1 (ADR-0008:
- * solo presentes que no miran). Solo visible para Miembros (RLS).
+ * Pool de Preguntas de una Sesión en preparación: los demás solo ven autor y
+ * estado (enviada), nunca el texto — solo su autor lo ve hasta la
+ * Intervención que lo revela. Cuáles entran al Sorteo lo decide el Sorteo 1:1
+ * (ADR-0008: solo presentes que no miran). Solo visible para Miembros (RLS).
  */
 export async function getSessionPool(
 	supabase: Db,
 	sessionId: string,
+	viewerId?: string,
 ): Promise<QuestionWithAuthor[]> {
 	const { data, error } = await supabase
 		.from("questions")
@@ -54,7 +60,9 @@ export async function getSessionPool(
 
 	if (error) throw error;
 
-	return ((data ?? []) as QuestionPoolRow[]).map(mapPoolRow);
+	return ((data ?? []) as QuestionPoolRow[]).map((row) =>
+		mapPoolRow(row, viewerId),
+	);
 }
 
 /**
@@ -64,6 +72,7 @@ export async function getSessionPool(
 export async function getSessionPools(
 	supabase: Db,
 	sessionIds: string[],
+	viewerId?: string,
 ): Promise<Map<string, QuestionWithAuthor[]>> {
 	const bySession = new Map<string, QuestionWithAuthor[]>();
 	for (const id of sessionIds) {
@@ -80,7 +89,7 @@ export async function getSessionPools(
 	if (error) throw error;
 
 	for (const row of (data ?? []) as QuestionPoolRow[]) {
-		const mapped = mapPoolRow(row);
+		const mapped = mapPoolRow(row, viewerId);
 		const list = bySession.get(mapped.sessionId) ?? [];
 		list.push(mapped);
 		bySession.set(mapped.sessionId, list);

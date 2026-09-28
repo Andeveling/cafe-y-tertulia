@@ -11,7 +11,8 @@ type MaterialQuestionsSectionProps = {
 
 /**
  * Sección "Preguntas del pool" de la página de material (SPEC §4.1): muestra
- * el pool de la Sesión y permite a los Miembros aportar. El moderador puede
+ * el pool de la Sesión y permite a los Miembros aportar. Solo el autor ve el
+ * texto; los demás ven autor y estado hasta el Sorteo. El moderador puede
  * marcar "Fuera de sorteo". Los datos los carga la página (una query por vista).
  */
 export function MaterialQuestionsSection({

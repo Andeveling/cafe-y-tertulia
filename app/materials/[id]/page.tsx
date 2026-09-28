@@ -149,7 +149,7 @@ export default async function MaterialDetailPage({
 
 	if (prepIds.length > 0 && viewer && canTag) {
 		currentUserId = viewer.id;
-		poolsBySession = await getSessionPools(supabase, prepIds);
+		poolsBySession = await getSessionPools(supabase, prepIds, viewer.id);
 	}
 
 	const closedCount = material.sessions.filter(
