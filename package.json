@@ -24,6 +24,7 @@
 	},
 	"dependencies": {
 		"@ai-hero/sandcastle": "^0.12.0",
+		"@ai-sdk/openai": "^4.0.78",
 		"@base-ui/react": "^1.8.0",
 		"@hookform/resolvers": "^5.9.1",
 		"@hugeicons/core-free-icons": "^4.3.5",
@@ -31,6 +32,8 @@
 		"@shadcn/react": "^0.3.1",
 		"@supabase/ssr": "^0.12.7",
 		"@supabase/supabase-js": "^2.116.0",
+		"@vercel/connect": "2.2.0",
+		"ai": "^7.0.118",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",

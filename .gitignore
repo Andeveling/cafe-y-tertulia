@@ -42,6 +42,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# eve runtime state
+.eve
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
