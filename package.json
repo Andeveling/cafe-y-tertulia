@@ -14,6 +14,7 @@
 		"sand": "bunx tsx .sandcastle/main.ts",
 		"sand:clean": "sh scripts/clean-sandcastle-worktrees.sh",
 		"test:watch": "vitest",
+		"test:ui": "node scripts/vitest-ui.mjs",
 		"coverage": "vitest run --coverage",
 		"coverage:html": "vitest run --coverage --coverage.reporter=html",
 		"test:e2e": "playwright test",
