@@ -1,6 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Enums } from "@/lib/supabase/database.types";
-import "server-only";
+
+// Sin `server-only` a propósito: este módulo es puro (etiquetas y tipos) y lo
+// importa AdvanceButton, un Client Component. El acceso a datos vive en
+// materials-store.ts, que sí está marcado server-only.
 
 export type MaterialsClient = Pick<SupabaseClient<Database>, "from">;
 
