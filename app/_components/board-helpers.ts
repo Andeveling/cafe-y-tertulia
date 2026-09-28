@@ -79,12 +79,20 @@ export function sessionOpensSala(status: BoardSession["status"]): boolean {
 	return status === "preparation";
 }
 
-/** Fecha pactada = aún no se abre desde el tablero. Sala viva sí. */
+/**
+ * Sala viva siempre entra. En preparación se abre sin fecha, o cuando el día
+ * pactado ya llegó (hoy o antes). Una fecha futura sigue sin botón.
+ */
 export function sessionHasBoardCta(
 	s: Pick<BoardSession, "status" | "scheduled_at">,
+	now: Date = new Date(),
 ): boolean {
 	if (s.status === "lobby" || s.status === "in_progress") return true;
-	return s.status === "preparation" && !s.scheduled_at;
+	if (s.status !== "preparation") return false;
+	if (!s.scheduled_at) return true;
+	const scheduled = new Date(s.scheduled_at);
+	if (Number.isNaN(scheduled.getTime())) return false;
+	return differenceInCalendarDays(scheduled, now) <= 0;
 }
 
 export function othersHeading(others: BoardSession[]): string {

@@ -60,17 +60,46 @@ describe("sessionCta", () => {
 	});
 });
 
+function localNoon(year: number, month: number, day: number): Date {
+	return new Date(year, month - 1, day, 12, 0, 0, 0);
+}
+
 describe("sessionHasBoardCta", () => {
-	it("preparation con fecha pactada no ofrece abrir sala", () => {
-		expect(sessionHasBoardCta(prep)).toBe(false);
+	const now = localNoon(2026, 9, 28);
+
+	it("preparation con fecha futura no ofrece abrir sala", () => {
+		expect(
+			sessionHasBoardCta(
+				{ ...prep, scheduled_at: localNoon(2026, 10, 5).toISOString() },
+				now,
+			),
+		).toBe(false);
+	});
+
+	it("preparation el día de la sesión ofrece abrir sala", () => {
+		expect(
+			sessionHasBoardCta(
+				{ ...prep, scheduled_at: localNoon(2026, 9, 28).toISOString() },
+				now,
+			),
+		).toBe(true);
+	});
+
+	it("preparation con fecha ya pasada ofrece abrir sala", () => {
+		expect(
+			sessionHasBoardCta(
+				{ ...prep, scheduled_at: localNoon(2026, 9, 14).toISOString() },
+				now,
+			),
+		).toBe(true);
 	});
 
 	it("preparation sin fecha sí ofrece abrir sala", () => {
-		expect(sessionHasBoardCta({ ...prep, scheduled_at: null })).toBe(true);
+		expect(sessionHasBoardCta({ ...prep, scheduled_at: null }, now)).toBe(true);
 	});
 
 	it("sala viva ofrece entrar aunque tenga fecha", () => {
-		expect(sessionHasBoardCta(live)).toBe(true);
+		expect(sessionHasBoardCta(live, now)).toBe(true);
 	});
 });
 
