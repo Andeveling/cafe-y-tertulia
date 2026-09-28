@@ -33,7 +33,7 @@ export function AvatarPicker({
 		<form action={formAction} className="flex flex-col gap-4">
 			<fieldset>
 				<legend className="sr-only">Elegí tu avatar</legend>
-				<div className="grid grid-cols-6 gap-2 sm:grid-cols-7">
+				<div className="grid grid-cols-5 gap-2.5 sm:grid-cols-7">
 					<label title="Sin avatar (iniciales)" className="cursor-pointer">
 						<input
 							type="radio"

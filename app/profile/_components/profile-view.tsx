@@ -95,7 +95,7 @@ export function ProfileView({
 						</CardContent>
 					</Card>
 
-					<Card>
+					<Card className="md:col-span-2">
 						<CardHeader>
 							<CardTitle className="text-lg">
 								<h2>Membresía</h2>

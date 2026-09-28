@@ -15,10 +15,10 @@ export function HeroSkeleton() {
 		<div
 			role="status"
 			aria-label="Cargando tu camino en el club"
-			className="animate-pulse rounded-xl border border-border/60 bg-card p-6 md:p-8"
+			className="rounded-xl border border-border/60 bg-card p-6 motion-safe:animate-pulse md:p-8"
 		>
 			<div className="h-24 w-2/3 rounded-lg bg-muted" />
-			<span className="sr-only">Cargando…</span>
+			<span className="sr-only">Cargando tu camino en el club…</span>
 		</div>
 	);
 }
@@ -120,7 +120,7 @@ export async function HeroSection({
 							</p>
 						</div>
 
-						<dl className="grid grid-cols-3 gap-3">
+						<dl className="grid grid-cols-3 gap-2 sm:gap-3">
 							{heroStats({
 								sessions: level.sessionsAttended,
 								badges: `${earnedIndividual}/${totalIndividual}`,
@@ -133,7 +133,7 @@ export async function HeroSection({
 									<dt className="text-label-sm font-medium text-muted-foreground">
 										{s.label}
 									</dt>
-									<dd className="font-heading text-2xl font-semibold text-foreground tabular-nums">
+									<dd className="font-heading text-xl font-semibold text-foreground tabular-nums sm:text-2xl">
 										{s.value}
 										<span className="mt-0.5 block font-sans text-label-sm font-medium text-muted-foreground">
 											{s.hint}

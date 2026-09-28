@@ -94,6 +94,7 @@ export default async function MemberProfilePage({
 						<p className="text-sm text-muted-foreground">Aún sin maestrías.</p>
 					) : (
 						<MasteryStrip
+							perspective="other"
 							items={mastery.map((m) => ({
 								categoryId: m.category.id,
 								categoryName: m.category.name,

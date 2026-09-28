@@ -66,7 +66,6 @@ export function LeaveClubDialog() {
 					value={input}
 					onChange={(e) => setInput(e.target.value)}
 					placeholder={CONFIRM_TEXT}
-					autoFocus
 					aria-label="Confirmar baja"
 				/>
 

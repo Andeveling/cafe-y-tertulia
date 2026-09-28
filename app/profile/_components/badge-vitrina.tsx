@@ -26,11 +26,19 @@ function BadgeSlot({ badge }: { badge: MemberBadge }) {
 		badge.earned && badge.earnedDate
 			? formatEarnedDate(badge.earnedDate)
 			: null;
+	const fullDateLabel =
+		badge.earned && badge.earnedDate
+			? new Date(badge.earnedDate).toLocaleDateString("es", {
+					day: "numeric",
+					month: "long",
+					year: "numeric",
+				})
+			: null;
 	const ariaLabel = badge.earned
-		? dateLabel
-			? `${badge.name}, ${dateLabel}`
+		? fullDateLabel
+			? `${badge.name}, conseguida el ${fullDateLabel}`
 			: badge.name
-		: "Insignia bloqueada";
+		: `${badge.name}, aún sin conseguir`;
 	const icon = getBadgeIcon(badge.key);
 
 	return (
@@ -50,11 +58,11 @@ function BadgeSlot({ badge }: { badge: MemberBadge }) {
 				>
 					{badge.earned && <HugeiconsIcon icon={icon} size={40} />}
 				</div>
-				{badge.earned && (
-					<p className="mt-2 line-clamp-2 text-center text-xs font-medium leading-tight text-foreground">
-						{badge.name}
-					</p>
-				)}
+				<p
+					className={`mt-2 line-clamp-2 text-center text-xs font-medium leading-tight ${badge.earned ? "text-foreground" : "text-muted-foreground"}`}
+				>
+					{badge.name}
+				</p>
 				{dateLabel && (
 					<p className="text-label-sm text-muted-foreground tabular-nums">
 						{dateLabel}
@@ -67,12 +75,18 @@ function BadgeSlot({ badge }: { badge: MemberBadge }) {
 						<>
 							<p className="font-semibold">{badge.name}</p>
 							<p className="text-xs opacity-90">{badge.description}</p>
-							{badge.context && (
-								<p className="text-xs opacity-75">{badge.context}</p>
+							{fullDateLabel && (
+								<p className="text-xs opacity-75">
+									Conseguida el {fullDateLabel}
+								</p>
 							)}
 						</>
 					) : (
-						<p className="text-xs">Todavía no desbloqueada.</p>
+						<>
+							<p className="font-semibold">{badge.name}</p>
+							<p className="text-xs opacity-90">{badge.description}</p>
+							<p className="text-xs opacity-75">Aún sin conseguir.</p>
+						</>
 					)}
 				</div>
 			</TooltipContent>
@@ -96,10 +110,10 @@ function RecognitionBanner({
 			/>
 			<div className="min-w-0">
 				<p className="text-sm font-semibold text-foreground">
-					Reconocimiento de la temporada
+					{recognition.label}
 				</p>
 				<p className="text-xs text-muted-foreground">
-					{recognition.label} — {recognition.seasonMonth}
+					Reconocimiento · {recognition.seasonMonth}
 				</p>
 			</div>
 		</div>
@@ -120,6 +134,18 @@ export function BadgeVitrina({
 		earnedCollective,
 	} = partitionBadges(badges);
 
+	if (
+		individual.length === 0 &&
+		collective.length === 0 &&
+		recognitions.length === 0
+	) {
+		return (
+			<p className="text-sm text-muted-foreground">
+				Aún no hay insignias en este grupo.
+			</p>
+		);
+	}
+
 	return (
 		<TooltipProvider>
 			<div className="flex flex-col gap-8">
@@ -139,12 +165,12 @@ export function BadgeVitrina({
 						<h3 className="font-heading text-lg text-foreground">
 							Insignias{" "}
 							<span className="font-sans text-sm font-normal text-muted-foreground">
-								{earnedCount} de {individual.length}
+								{earnedCount} de {individual.length} conseguidas
 							</span>
 						</h3>
 						<InfoButton
 							title="Insignias"
-							description="Logros individuales que recompensan tu participación. Se ganan automáticamente al cumplir un objetivo (como crear tu primera pregunta) o el moderador las otorga en vivo durante el debate."
+							description="Tus logros individuales. Se consiguen al participar —por ejemplo, al crear tu primera pregunta— o cuando el Moderador te otorga una durante el debate."
 						/>
 					</div>
 					<div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
@@ -152,19 +178,25 @@ export function BadgeVitrina({
 							<BadgeSlot key={b.key} badge={b} />
 						))}
 					</div>
+					{earnedCount === 0 && individual.length > 0 && (
+						<p className="text-sm text-muted-foreground">
+							Aún no conseguiste ninguna. Crea una pregunta para la próxima
+							sesión y empieza la colección.
+						</p>
+					)}
 				</div>
 
 				<div className="flex flex-col gap-4">
 					<div className="flex items-center gap-1.5">
 						<h3 className="font-heading text-lg text-foreground">
-							Hitos del club{" "}
+							Hitos del grupo{" "}
 							<span className="font-sans text-sm font-normal text-muted-foreground">
-								{earnedCollective} de {collective.length}
+								{earnedCollective} de {collective.length} conseguidos
 							</span>
 						</h3>
 						<InfoButton
-							title="Hitos del club"
-							description="Logros colectivos que el club alcanza como grupo: el primer libro terminado, 50 sesiones realizadas, 100 preguntas debatidas. No pertenecen a un miembro sino a todos."
+							title="Hitos del grupo"
+							description="Los logros de tu grupo entero, como terminar el primer material o alcanzar 50 sesiones. Son del grupo, no individuales."
 						/>
 					</div>
 					<div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
@@ -172,6 +204,11 @@ export function BadgeVitrina({
 							<BadgeSlot key={b.key} badge={b} />
 						))}
 					</div>
+					{earnedCollective === 0 && collective.length > 0 && (
+						<p className="text-sm text-muted-foreground">
+							El grupo aún no consiguió hitos. Cada sesión cuenta.
+						</p>
+					)}
 				</div>
 			</div>
 		</TooltipProvider>

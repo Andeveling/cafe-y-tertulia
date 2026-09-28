@@ -13,7 +13,7 @@ export function VitrinaSkeleton() {
 		<div
 			role="status"
 			aria-label="Cargando vitrina"
-			className="animate-pulse rounded-xl border border-border/60 bg-card p-6"
+			className="rounded-xl border border-border/60 bg-card p-6 motion-safe:animate-pulse"
 		>
 			<div className="h-6 w-1/3 rounded-lg bg-muted" />
 			<div className="mt-4 grid grid-cols-3 gap-4 sm:grid-cols-6">
@@ -21,7 +21,7 @@ export function VitrinaSkeleton() {
 					<div key={i} className="aspect-square rounded-lg bg-muted" />
 				))}
 			</div>
-			<span className="sr-only">Cargando…</span>
+			<span className="sr-only">Cargando vitrina…</span>
 		</div>
 	);
 }
@@ -36,10 +36,10 @@ export async function VitrinaSection({ memberId }: { memberId: string }) {
 				<CardHeader>
 					<div className="min-w-0">
 						<CardTitle className="font-heading text-xl">
-							<h2 id="vitrina-heading">Vitrina de la tertulia</h2>
+							<h2 id="vitrina-heading">Vitrina</h2>
 						</CardTitle>
 						<CardDescription>
-							Tus insignias y los hitos que el club consiguió contigo.
+							Tus insignias y los hitos conseguidos con tu grupo.
 						</CardDescription>
 					</div>
 				</CardHeader>

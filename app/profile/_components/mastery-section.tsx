@@ -14,19 +14,19 @@ export function MasterySkeleton() {
 		<div
 			role="status"
 			aria-label="Cargando maestrías"
-			className="mt-12 animate-pulse rounded-xl border border-border/60 bg-card p-6"
+			className="mt-12 rounded-xl border border-border/60 bg-card p-6 motion-safe:animate-pulse"
 		>
 			<div className="h-6 w-1/4 rounded-lg bg-muted" />
-			<div className="mt-4 flex gap-2">
-				<div className="h-8 w-32 rounded-full bg-muted" />
-				<div className="h-8 w-32 rounded-full bg-muted" />
+			<div className="mt-4 flex flex-col gap-3">
+				<div className="h-16 rounded-xl bg-muted" />
+				<div className="h-16 rounded-xl bg-muted" />
 			</div>
-			<span className="sr-only">Cargando…</span>
+			<span className="sr-only">Cargando maestrías…</span>
 		</div>
 	);
 }
 
-/** Maestrías por categoría. Vacío → null (sin sección). Hace stream con Suspense. */
+/** Maestrías con avance. Error → null (sin sección); sin puntos → empty en la tira. Hace stream con Suspense. */
 export async function MasterySection({ memberId }: { memberId: string }) {
 	const supabase = await createClient();
 	const mastery = await getMemberMastery(supabase, memberId).catch(() => []);
