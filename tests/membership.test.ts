@@ -15,7 +15,9 @@ import type { Database } from "@/lib/supabase/database.types";
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SERVICE_KEY =
+	process.env.SUPABASE_SERVICE_ROLE_KEY ??
+	process.env.SUPABASE_SECRET_KEY!;
 
 if (!URL || !ANON_KEY || !SERVICE_KEY) {
 	throw new Error(
@@ -310,20 +312,28 @@ describe("membership: closed club by invitation (ADR 0005)", () => {
 		expect(self?.display_name).toBe("Invitada Aceptada");
 	});
 
-	it("blocks a member from self-promoting via the Data API (no members UPDATE policy)", async () => {
+	it("blocks a member from self-promoting via the Data API (last_seen-only trigger)", async () => {
 		const email = uniqueEmail("selfpromo");
 		const user = await createMember(email, "selfpromo-password-123", "invited");
 		const { anon } = await signIn(email, "selfpromo-password-123");
 
-		// The acceptance is server-side (ADR 0005): an UPDATE to one's own row
-		// matches no policy and silently affects 0 rows.
+		// The acceptance is server-side (ADR 0005): since ADR 0010 the own-row
+		// UPDATE policy exists but the trigger rejects touching status.
 		const { data, error } = await anon
 			.from("members")
 			.update({ status: "active" })
 			.eq("id", user.id)
 			.select();
-		expect(error).toBeNull();
-		expect(data).toHaveLength(0);
+		expect(error?.code).toBe("P0001");
+		expect(error?.message).toMatch(/Solo se puede actualizar last_seen/);
+		expect(data ?? []).toHaveLength(0);
+
+		const { data: row } = await admin
+			.from("members")
+			.select("status")
+			.eq("id", user.id)
+			.single();
+		expect(row?.status).toBe("invited");
 	});
 
 	it("lets the invitee list their own pending invitations with a real session", async () => {

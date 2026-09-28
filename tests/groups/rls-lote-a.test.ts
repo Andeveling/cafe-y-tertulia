@@ -17,7 +17,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SERVICE_KEY =
+	process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
 const hasEnv = Boolean(URL && ANON_KEY && SERVICE_KEY);
 
 // Cliente sin tipos generados: database.types.ts aún no incluye groups ni

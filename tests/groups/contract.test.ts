@@ -110,7 +110,8 @@ describe("contract: migración existe y cierra el modelo (#74)", () => {
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SERVICE_KEY =
+	process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
 const hasEnv = Boolean(URL && ANON_KEY && SERVICE_KEY);
 
 let sb!: SupabaseClient;
@@ -249,8 +250,33 @@ describe.skipIf(!hasEnv)("contract: aislamiento verificado en DB (#74)", () => {
 		const client = await anonFor(testUsers.a!.email, TEST_PASSWORD);
 		const { data: mats } = await client.from("materials").select("id");
 		expect(mats ?? []).toHaveLength(0);
-		const { data: groups } = await client.from("groups").select("id");
-		const seen = (groups ?? []).map((r: { id: string }) => r.id);
-		expect(seen).not.toContain(ids.groupA);
+
+		// El catálogo público sigue listando el grupo (groups_select_member_or_public);
+		// lo que se revoca es el contenido y el grupo privado.
+		const { data: gC } = await sb
+			.from("groups")
+			.insert({
+				name: "Contract C",
+				visibility: "private",
+				created_by: testUsers.a!.id,
+			})
+			.select("id")
+			.single();
+		const groupC = (gC as { id: string }).id;
+		await sb
+			.from("group_members")
+			.insert({ group_id: groupC, member_id: testUsers.a!.id, role: "admin" });
+		const { data: before } = await client.from("groups").select("id");
+		expect((before ?? []).map((r: { id: string }) => r.id)).toContain(groupC);
+		await sb
+			.from("group_members")
+			.delete()
+			.eq("group_id", groupC)
+			.eq("member_id", testUsers.a!.id);
+		const { data: after } = await client.from("groups").select("id");
+		expect((after ?? []).map((r: { id: string }) => r.id)).not.toContain(
+			groupC,
+		);
+		await sb.from("groups").delete().eq("id", groupC);
 	});
 });
