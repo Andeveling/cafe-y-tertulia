@@ -17,7 +17,6 @@ import {
 	EmptyHeader,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { RosterMember } from "@/hooks/use-club-presence";
 import { cn } from "@/lib/utils";
@@ -151,7 +150,6 @@ export function StartBoard({
 						<h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
 							{othersHeading(others)}
 						</h2>
-						<Separator />
 					</div>
 					<ToggleGroup
 						variant="outline"
