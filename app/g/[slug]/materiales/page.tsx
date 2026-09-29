@@ -1,13 +1,10 @@
-import { Book01Icon, PlusSignIcon } from "@hugeicons/core-free-icons";
+import { Book01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
 import { MaterialsGrid } from "@/app/materials/_components/materials-grid";
+import { PostuladosSection } from "@/app/materials/_components/postulados-section";
 import { getMaterials } from "@/app/materials/_lib/materials";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireGroupPage } from "@/lib/groups/page-gate";
-import { getGroupBySlug } from "@/lib/groups/queries";
 
 export const metadata = { title: "Materiales · Café y Tertulias" };
 
@@ -17,24 +14,15 @@ export default async function GroupMaterialsPage({
 	params: Promise<{ slug: string }>;
 }) {
 	const { slug } = await params;
-	const { group } = await requireGroupPage(slug);
+	const { group, member } = await requireGroupPage(slug);
 
 	const materials = await getMaterials(group.id);
 
 	return (
 		<div className="flex flex-col gap-6">
-			<div className="flex items-center justify-between gap-4">
-				<p className="text-sm text-muted-foreground">
-					La estantería de {group.name}.
-				</p>
-				<Button
-					nativeButton={false}
-					render={<Link href={`/g/${slug}/materiales/nuevo`} />}
-				>
-					<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
-					Proponer material
-				</Button>
-			</div>
+			<p className="text-sm text-muted-foreground">
+				La estantería de {group.name} solo crece por sorteo o pacto.
+			</p>
 
 			{materials.length === 0 ? (
 				<Card>
@@ -51,6 +39,8 @@ export default async function GroupMaterialsPage({
 			) : (
 				<MaterialsGrid materials={materials} />
 			)}
+
+			<PostuladosSection groupId={group.id} slug={slug} memberId={member.id} />
 		</div>
 	);
 }

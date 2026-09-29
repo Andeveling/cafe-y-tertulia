@@ -1,10 +1,12 @@
 import "server-only";
+import { listBiblioteca } from "./biblioteca-store";
 import {
 	findMaterialById,
 	listMaterials,
 	type MaterialDetail,
 	type MaterialWithSessionsCount,
 } from "./materials-store";
+import { listPostulaciones, type Postulacion } from "./postulacion-store";
 
 // Re-exports para compatibilidad: los consumidores existentes importan de "./materials"
 export {
@@ -17,9 +19,30 @@ export {
 	type SessionStatus,
 } from "./constants";
 export { getClubMilestones, getMemberProfile } from "./member-profile";
+export {
+	canApprovePact,
+	cancelOtherPendingPacts,
+	hasQuorum,
+	isPactExpired,
+	needsFallbackToDraw,
+	PACT_WINDOW_DAYS,
+	type PactMode,
+	type PactReference,
+	type PactStatus,
+	pactExpiresAt,
+	quorumNeeded,
+} from "./pacto-material";
+export { listPendingPacts } from "./pacto-material-store";
 export type { SessionHistory } from "./session-history";
 export { getSessionHistory } from "./session-history";
-export type { MaterialDetail, MaterialWithSessionsCount };
+export {
+	buildDrawPool,
+	canNominate as canNominateMaterial,
+	isValidDrawPool as isValidMaterialDrawPool,
+	markWinner as markMaterialDrawWinner,
+} from "./sorteo-material";
+export { listMaterialDraws, listNominations } from "./sorteo-material-store";
+export type { MaterialDetail, MaterialWithSessionsCount, Postulacion };
 
 /**
  * Lista de materiales del club con su estado en el pipeline (SPEC §4.1).
@@ -41,4 +64,20 @@ export async function getMaterials(
  */
 export async function getMaterial(id: string): Promise<MaterialDetail | null> {
 	return findMaterialById(id);
+}
+
+/**
+ * Biblioteca personal del Miembro en sesión (#86): solo lo suyo.
+ */
+export async function getBiblioteca() {
+	return listBiblioteca();
+}
+
+/**
+ * Postulados activos de un Grupo (#86): lo único que el Grupo ve.
+ */
+export async function getPostulaciones(
+	groupId: string,
+): Promise<Postulacion[]> {
+	return listPostulaciones(groupId);
 }

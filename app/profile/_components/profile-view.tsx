@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { AvatarPicker } from "@/app/profile/_components/avatar-picker";
+import { BibliotecaSection } from "@/app/profile/_components/biblioteca-section";
 import {
 	HeroSection,
 	HeroSkeleton,
@@ -59,6 +60,17 @@ export function ProfileView({
 			{/* ── Maestrías ─────────────────────────────────────────────────── */}
 			<Suspense fallback={<MasterySkeleton />}>
 				<MasterySection memberId={memberId} />
+			</Suspense>
+
+			{/* ── Biblioteca personal ───────────────────────────────────────── */}
+			<Suspense
+				fallback={
+					<p className="mt-12 text-sm text-muted-foreground">
+						Cargando tu biblioteca…
+					</p>
+				}
+			>
+				<BibliotecaSection />
 			</Suspense>
 
 			{/* ── Ajustes tranquilos ──────────────────────────────────────── */}
