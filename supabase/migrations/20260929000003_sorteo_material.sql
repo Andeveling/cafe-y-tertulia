@@ -46,12 +46,15 @@ create table if not exists public.library_items (
 );
 
 comment on table public.library_items is 'Biblioteca personal global por Miembro (#89, PRD #86): candidatos privados, empieza vacía.';
-comment on column public.library_items.shared_once is 'Marca ya-compartido: el original sigue en Biblioteca tras ganar.';
 
 -- La migración 02 (#88) ya pudo crear library_items sin shared_once:
--- evolución idempotente si la tabla existe de antes.
+-- evolución idempotente si la tabla existe de antes. El ADD va antes
+-- del COMMENT: en remoto la tabla ya existe sin la columna y el
+-- COMMENT fallaría (columna inexistente) si corriera primero.
 alter table public.library_items
 	add column if not exists shared_once boolean not null default false;
+
+comment on column public.library_items.shared_once is 'Marca ya-compartido: el original sigue en Biblioteca tras ganar.';
 
 create index if not exists library_items_owner_idx
 	on public.library_items (owner_id);
