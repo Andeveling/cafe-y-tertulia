@@ -285,7 +285,10 @@ export default async function MaterialDetailPage({
 						</div>
 
 						<div className="shrink-0 pt-1">
-							<NewSessionDialog materialId={material.id} />
+							<NewSessionDialog
+								materialId={material.id}
+								groupId={material.group_id}
+							/>
 						</div>
 					</div>
 

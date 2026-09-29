@@ -64,12 +64,29 @@ export async function createSession(input: {
 		run: async ({ supabase }) => {
 			const materialId = input.materialId ?? undefined;
 			const range = input.range?.trim() || undefined;
+			// Quien está en más de un Grupo no puede inferir el destino.
+			// El Material ya sabe el suyo; sin eso el RPC dice "Grupo requerido".
+			let groupId = input.groupId;
+			if (materialId) {
+				const { data: material, error: materialError } = await supabase
+					.from("materials")
+					.select("group_id")
+					.eq("id", materialId)
+					.maybeSingle();
+				if (materialError || !material) {
+					return {
+						ok: false,
+						error: "No se pudo crear la sesión: Material no encontrado",
+					};
+				}
+				groupId = material.group_id;
+			}
 
 			const { data: sessionId, error } = await supabase.rpc("create_session", {
 				p_material_id: materialId,
 				p_range: range,
 				p_scheduled_at: input.scheduledAt ?? undefined,
-				p_group_id: input.groupId,
+				p_group_id: groupId,
 			});
 
 			if (error || !sessionId) {
@@ -80,7 +97,7 @@ export async function createSession(input: {
 			}
 
 			revalidatePath("/");
-			if (input.groupId) revalidatePath("/g");
+			if (groupId) revalidatePath("/g");
 			if (materialId) revalidatePath(`/materials/${materialId}`);
 			return { ok: true, sessionId };
 		},

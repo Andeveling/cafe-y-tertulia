@@ -13,7 +13,13 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 
-export function NewSessionDialog({ materialId }: { materialId: string }) {
+export function NewSessionDialog({
+	materialId,
+	groupId,
+}: {
+	materialId: string;
+	groupId: string;
+}) {
 	const [open, setOpen] = useState(false);
 
 	return (
@@ -36,6 +42,7 @@ export function NewSessionDialog({ materialId }: { materialId: string }) {
 				<div className="pt-2">
 					<SessionForm
 						materialId={materialId}
+						groupId={groupId}
 						onSuccess={() => setOpen(false)}
 					/>
 				</div>

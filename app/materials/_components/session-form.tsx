@@ -21,9 +21,11 @@ type SessionFormValues = z.infer<typeof sessionFormSchema>;
 
 export function SessionForm({
 	materialId,
+	groupId,
 	onSuccess,
 }: {
 	materialId: string;
+	groupId: string;
 	onSuccess?: () => void;
 }) {
 	const [isPending, startTransition] = useTransition();
@@ -38,6 +40,7 @@ export function SessionForm({
 	function onSubmit(data: SessionFormValues) {
 		startTransition(async () => {
 			const result = await createSession({
+				groupId,
 				materialId,
 				range: data.range,
 				scheduledAt: scheduledAt?.toISOString() ?? null,
