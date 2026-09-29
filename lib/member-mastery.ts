@@ -18,9 +18,8 @@ export type MemberMastery = {
  * Maestría de un miembro por categoría (issue #61).
  * Solo cuentan sesiones cerradas o en histórico donde participó sin ser
  * espectador. Aportar = autor de ≥1 pregunta o exposición/complemento
- * (asignado que llegó a complemento). Devuelve todas
- * las categorías (0 puntos = Semilla) para que el recorrido sea visible
- * desde cero.
+ * (asignado que llegó a complemento). Devuelve todas las categorías
+ * (0 puntos = Semilla) para que el recorrido sea visible desde cero.
  */
 export async function getMemberMastery(
 	supabase: MaterialsClient,

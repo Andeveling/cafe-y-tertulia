@@ -137,7 +137,11 @@ export type RoomAssignment = {
 	aprecioComplementCount: number;
 };
 
-/** Snapshot del cierre — solo presente cuando roomStage = 'cierre'. */
+/**
+ * Marcador de la etapa Cierre — solo presente cuando roomStage = 'cierre'.
+ * Sin pendientes propios: `{}` indica etapa activa y `z.object({})` descarta
+ * las claves legadas (`open_trivia`, `open_takes`) del RPC anterior.
+ */
 export type RoomCierreSnapshot = Record<string, never>;
 
 export type RoomSnapshot = {

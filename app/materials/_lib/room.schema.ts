@@ -199,6 +199,9 @@ const DebateSchema = z
 	.nullable()
 	.catch(null) as unknown as z.ZodType<RoomDebateSnapshot | null>;
 
+// El Cierre ya no expone pendientes: objeto vacío como marcador de etapa.
+// `z.object({})` elimina las claves legadas (`open_trivia`, `open_takes`)
+// para que un RPC anterior no rompa la decodificación.
 const CierreSchema = z
 	.object({})
 	.nullable()

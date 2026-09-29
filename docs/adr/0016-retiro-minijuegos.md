@@ -4,7 +4,7 @@ Las Sesiones existen para debatir en la Sala. Los Minijuegos (Trivia + Takes) qu
 
 ## Status: accepted
 
-Se retiran Trivia y Takes de la base y del código en un solo corte (issue #85): siete tablas y tres enums eliminados, RPCs de ciclo y lectura eliminados, ramas de Histórico, Hitos y Maestría retiradas, Cierre simplificado (ya no bloquea por trivia en curso ni votación abierta; mantiene Sorteo revelado). Sorteo, Rating y Aprecio quedan intactos. DROP directo sin exportación: cero filas en la nube vinculada.
+Se retiran Trivia y Takes de la base y del código en un solo corte (issue #85): siete tablas y tres enums eliminados, RPCs de ciclo y lectura eliminados, ramas de Histórico, Hitos y Maestría retiradas, Cierre simplificado (ya no bloquea por trivia en curso ni takes abiertos; mantiene Sorteo revelado y el gate de Rating en la UI). Sorteo, Rating y Aprecio quedan intactos. DROP directo sin exportación: cero filas en la nube vinculada.
 
 ## Considered Options
 

@@ -47,13 +47,14 @@ export function CierreStage({
 }: Props) {
 	const router = useRouter();
 	const ratingFailed = hasMaterial && !rating;
-	const blocked =
-		ratingFailed || (hasMaterial && (rating?.ratingOpen ?? false));
-	const blockReason = ratingFailed
-		? "No se pudo cargar el rating. Reintenta antes de cerrar."
-		: hasMaterial && rating?.ratingOpen
-			? "Cierra la votación del rating antes de cerrar."
-			: null;
+	const ratingOpen = hasMaterial && rating?.ratingOpen === true;
+	const blocked = ratingFailed || ratingOpen;
+	let blockReason: string | null = null;
+	if (ratingFailed) {
+		blockReason = "No se pudo cargar el rating. Reintenta antes de cerrar.";
+	} else if (ratingOpen) {
+		blockReason = "Cierra la votación del rating antes de cerrar.";
+	}
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -140,18 +141,12 @@ function PendingChecklist({
 	ratingFailed: boolean;
 	showRating: boolean;
 }) {
-	const items: PendingItem[] = [
-		...(showRating
-			? [
-					{
-						label: ratingFailed
-							? "Rating sin cargar (reintenta)"
-							: "Rating del material abierto",
-						pending: ratingFailed || ratingOpen,
-					},
-				]
-			: []),
-	];
+	const ratingLabel = ratingFailed
+		? "Rating sin cargar (reintenta)"
+		: "Rating del material abierto";
+	const items: PendingItem[] = showRating
+		? [{ label: ratingLabel, pending: ratingFailed || ratingOpen }]
+		: [];
 	const allClear = items.every((i) => !i.pending);
 
 	return (
