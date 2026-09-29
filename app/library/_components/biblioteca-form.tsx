@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusSignIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import Link from "next/link";
 import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -92,7 +93,8 @@ export function BibliotecaForm({
 							<Input
 								{...field}
 								id={field.name}
-								placeholder="El nombre del viento"
+								autoComplete="off"
+								placeholder="Ej.: El nombre del viento"
 								aria-invalid={fieldState.invalid}
 							/>
 							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -109,7 +111,8 @@ export function BibliotecaForm({
 							<Input
 								{...field}
 								id={field.name}
-								placeholder="Patrick Rothfuss"
+								autoComplete="off"
+								placeholder="Ej.: Patrick Rothfuss"
 								aria-invalid={fieldState.invalid}
 							/>
 							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -157,68 +160,91 @@ export function BibliotecaForm({
 						</Field>
 					)}
 				/>
-
-				<Controller
-					name="sourceUrl"
-					control={form.control}
-					render={({ field, fieldState }) => (
-						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel htmlFor={field.name}>Fuente (opcional)</FieldLabel>
-							<Input
-								{...field}
-								value={field.value ?? ""}
-								id={field.name}
-								inputMode="url"
-								placeholder="https://…"
-								aria-invalid={fieldState.invalid}
-							/>
-							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-						</Field>
-					)}
-				/>
-
-				<Controller
-					name="imageUrl"
-					control={form.control}
-					render={({ field, fieldState }) => (
-						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel htmlFor={field.name}>Imagen (opcional)</FieldLabel>
-							<Input
-								{...field}
-								value={field.value ?? ""}
-								id={field.name}
-								inputMode="url"
-								placeholder="https://…"
-								aria-invalid={fieldState.invalid}
-							/>
-							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-						</Field>
-					)}
-				/>
-
-				<Controller
-					name="motive"
-					control={form.control}
-					render={({ field, fieldState }) => (
-						<Field data-invalid={fieldState.invalid}>
-							<FieldLabel htmlFor={field.name}>Motivo (opcional)</FieldLabel>
-							<Textarea
-								{...field}
-								value={field.value ?? ""}
-								id={field.name}
-								placeholder="Por qué lo guardas…"
-								aria-invalid={fieldState.invalid}
-							/>
-							{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-						</Field>
-					)}
-				/>
 			</FieldGroup>
+
+			<details className="rounded-lg border border-dashed px-3 py-2 open:pb-3">
+				<summary className="cursor-pointer py-1 text-sm font-medium">
+					Añade contexto (opcional)
+				</summary>
+				<FieldGroup className="pt-2">
+					<Controller
+						name="sourceUrl"
+						control={form.control}
+						render={({ field, fieldState }) => (
+							<Field data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor={field.name}>Fuente (opcional)</FieldLabel>
+								<Input
+									{...field}
+									value={field.value ?? ""}
+									id={field.name}
+									type="url"
+									inputMode="url"
+									autoComplete="off"
+									placeholder="https://…"
+									aria-invalid={fieldState.invalid}
+								/>
+								{fieldState.invalid && (
+									<FieldError errors={[fieldState.error]} />
+								)}
+							</Field>
+						)}
+					/>
+
+					<Controller
+						name="imageUrl"
+						control={form.control}
+						render={({ field, fieldState }) => (
+							<Field data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor={field.name}>Imagen (opcional)</FieldLabel>
+								<Input
+									{...field}
+									value={field.value ?? ""}
+									id={field.name}
+									type="url"
+									inputMode="url"
+									autoComplete="off"
+									placeholder="https://…"
+									aria-invalid={fieldState.invalid}
+								/>
+								{fieldState.invalid && (
+									<FieldError errors={[fieldState.error]} />
+								)}
+							</Field>
+						)}
+					/>
+
+					<Controller
+						name="motive"
+						control={form.control}
+						render={({ field, fieldState }) => (
+							<Field data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor={field.name}>Motivo (opcional)</FieldLabel>
+								<Textarea
+									{...field}
+									value={field.value ?? ""}
+									id={field.name}
+									placeholder="Ej.: por qué lo guardas…"
+									aria-invalid={fieldState.invalid}
+								/>
+								{fieldState.invalid && (
+									<FieldError errors={[fieldState.error]} />
+								)}
+							</Field>
+						)}
+					/>
+				</FieldGroup>
+			</details>
 
 			<Button type="submit" disabled={isPending}>
 				<HugeiconsIcon icon={PlusSignIcon} data-icon="inline-start" />
 				{item ? "Guardar cambios" : "Guardar en mi biblioteca"}
 			</Button>
+			<p className="text-sm text-muted-foreground">
+				Después podrás postularlo a tu grupo.{" "}
+				<Link href="/g" className="underline">
+					Ver mis grupos
+				</Link>
+			</p>
 		</form>
 	);
 }

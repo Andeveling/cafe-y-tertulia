@@ -8,7 +8,7 @@ import {
 	normalizeBibliotecaInput,
 } from "./biblioteca-schema";
 
-const BIBLIOTECA_REVALIDATE = ["/profile"] as const;
+const BIBLIOTECA_REVALIDATE = ["/library"] as const;
 
 /**
  * Valida y normaliza en un solo paso: los opcionales llegan como

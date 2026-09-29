@@ -3,6 +3,7 @@
 import {
 	Book01Icon,
 	Home01Icon,
+	LibraryIcon,
 	UserAdd01Icon,
 	UserCircleIcon,
 } from "@hugeicons/core-free-icons";
@@ -35,7 +36,10 @@ const navClub = [
 	{ title: "Materiales", section: "materiales" as const, icon: Book01Icon },
 ];
 
-const navCuenta = [{ title: "Perfil", url: "/profile", icon: UserCircleIcon }];
+const navCuenta = [
+	{ title: "Biblioteca", url: "/library", icon: LibraryIcon },
+	{ title: "Perfil", url: "/profile", icon: UserCircleIcon },
+];
 
 export type AppSidebarUser = {
 	name: string;

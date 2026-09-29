@@ -52,6 +52,7 @@ function clubHeading(
 		return { title: "Materiales", as: "p" };
 	if (pathname === "/invite") return { title: "Invitar", as: "h1" };
 	if (pathname === "/profile") return { title: "Perfil", as: "p" };
+	if (pathname === "/library") return { title: "Biblioteca", as: "p" };
 	if (pathname.startsWith("/members/")) return { title: "Miembro", as: "p" };
 	return null;
 }

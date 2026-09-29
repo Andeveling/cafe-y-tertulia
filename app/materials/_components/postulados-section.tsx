@@ -47,7 +47,7 @@ async function PostularDesdeBiblioteca({
 		return (
 			<p className="text-sm text-muted-foreground">
 				Guarda candidatos en{" "}
-				<Link href="/profile" className="underline">
+				<Link href="/library" className="underline">
 					tu biblioteca
 				</Link>{" "}
 				para postularlos aquí.
