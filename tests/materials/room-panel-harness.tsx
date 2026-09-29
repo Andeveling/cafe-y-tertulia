@@ -3,7 +3,6 @@
  */
 import { render } from "@testing-library/react";
 import { RoomPanel } from "@/app/materials/_components/room-panel";
-import type { MinigameState } from "@/app/materials/_lib/minigames";
 import type {
 	RoomParticipant,
 	RoomQuestion,
@@ -64,7 +63,6 @@ export function renderPanel(
 	props: Partial<{
 		userId: string;
 		isModerator: boolean;
-		minigameState: MinigameState | null;
 	}> = {},
 ) {
 	const snap = snapshot(over);
@@ -76,7 +74,6 @@ export function renderPanel(
 				props.isModerator ?? snap.moderatorId === (props.userId ?? "m-1")
 			}
 			rating={null}
-			minigameState={props.minigameState ?? null}
 		/>,
 	);
 }

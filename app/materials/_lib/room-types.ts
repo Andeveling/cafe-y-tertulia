@@ -138,10 +138,7 @@ export type RoomAssignment = {
 };
 
 /** Snapshot del cierre — solo presente cuando roomStage = 'cierre'. */
-export type RoomCierreSnapshot = {
-	openTrivia: number;
-	openTakes: number;
-};
+export type RoomCierreSnapshot = Record<string, never>;
 
 export type RoomSnapshot = {
 	sessionId: string;

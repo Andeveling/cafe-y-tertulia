@@ -41,22 +41,6 @@ const row = {
 			},
 		},
 	],
-	trivia_rounds: [
-		{
-			id: "round-1",
-			title: "Cap. 1",
-			status: "board",
-			items: [{ member_id: "m-1", display_name: "Ana", hits: 3 }],
-		},
-	],
-	takes: [
-		{
-			id: "take-1",
-			prompt: "El final justifica…",
-			status: "closed",
-			counts: { agree: 2, disagree: 1, neutral: 0 },
-		},
-	],
 	awards: [
 		{
 			id: "aw-1",
@@ -144,7 +128,6 @@ describe("decodeSessionHistory", () => {
 			id: 1,
 			participants: "no-array",
 			questions: [{ id: "q-1" }],
-			takes: [{ id: "t-1", counts: null }],
 		});
 		expect(history).toMatchObject({
 			id: "",
@@ -155,7 +138,6 @@ describe("decodeSessionHistory", () => {
 			rating_avg: null,
 			rating_count: 0,
 			participants: [],
-			trivia_rounds: [],
 			awards: [],
 		});
 		expect(history!.questions).toEqual([
@@ -164,14 +146,6 @@ describe("decodeSessionHistory", () => {
 				text: "",
 				author: "",
 				created_at: "",
-			},
-		]);
-		expect(history!.takes).toEqual([
-			{
-				id: "t-1",
-				prompt: "",
-				status: "",
-				counts: { agree: 0, disagree: 0, neutral: 0 },
 			},
 		]);
 	});
@@ -212,6 +186,20 @@ describe("decodeSessionHistory", () => {
 				},
 			},
 		]);
+	});
+
+	it("el Histórico no expone rondas de trivia ni takes", () => {
+		const decoded = decodeSessionHistory(row);
+		expect(decoded).not.toHaveProperty("trivia_rounds");
+		expect(decoded).not.toHaveProperty("takes");
+		// Un payload legado con esas ramas se ignora sin romper.
+		const legacy = decodeSessionHistory({
+			...row,
+			trivia_rounds: [{ id: "round-1" }],
+			takes: [{ id: "take-1" }],
+		});
+		expect(legacy).not.toHaveProperty("trivia_rounds");
+		expect(legacy).not.toHaveProperty("takes");
 	});
 
 	it("devuelve null ante Json no-objeto", () => {

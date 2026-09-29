@@ -1,10 +1,6 @@
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { RoomSessionView } from "@/app/materials/_components/room-session-view";
-import {
-	getMinigameState,
-	getTriviaRoundSnapshot,
-} from "@/app/materials/_lib/minigames";
 import { getRatingProgress } from "@/app/materials/_lib/rating";
 import { getRoomSnapshot } from "@/app/materials/_lib/room";
 import {
@@ -73,23 +69,11 @@ export default async function RoomPage({
 			? await getRatingProgress(supabase, sessionId).catch(() => null)
 			: null;
 
-	const minigameState =
-		surface === "open" && snapshot.roomStage === "debate"
-			? await getMinigameState(supabase, sessionId).catch(() => null)
-			: null;
-	const roundId =
-		minigameState?.liveRoundId ?? minigameState?.lastBoardRoundId ?? null;
-	const round = roundId
-		? await getTriviaRoundSnapshot(supabase, roundId).catch(() => null)
-		: null;
-
 	return (
 		<RoomSessionView
 			snapshot={snapshot}
 			rating={rating}
 			userId={user.id}
-			minigameState={minigameState}
-			round={round}
 			rosterMembers={rosterMembers}
 			pendingIds={pendingIds}
 		/>

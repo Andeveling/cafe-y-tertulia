@@ -1,14 +1,9 @@
 "use client";
 
 import { CierreStage } from "@/app/materials/_components/cierre-stage";
-import { DebateToolsTray } from "@/app/materials/_components/debate-tools-tray";
 import { DrawCeremony } from "@/app/materials/_components/draw-ceremony";
 import { StagePanel } from "@/app/materials/_components/stage-panel";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
-import type {
-	MinigameState,
-	TriviaRoundSnapshot,
-} from "@/app/materials/_lib/minigames";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import { advanceToDraw } from "@/app/materials/_lib/room-actions";
 
@@ -22,8 +17,6 @@ export function StageContent({
 	userId,
 	isModerator,
 	rating,
-	minigameState,
-	round,
 	rosterMembers = [],
 	pendingIds = [],
 	questionsAdvanceFor,
@@ -35,8 +28,6 @@ export function StageContent({
 	) => void;
 	isModerator: boolean;
 	rating: RatingProgress | null;
-	minigameState?: MinigameState | null;
-	round?: TriviaRoundSnapshot | null;
 }) {
 	const { pending, run } = useRoomMutation();
 
@@ -94,24 +85,14 @@ export function StageContent({
 						empty={view.empty}
 						warnings={view.warnings}
 					/>
-					{minigameState && (
-						<DebateToolsTray
-							sessionId={snapshot.sessionId}
-							state={minigameState}
-							round={round ?? null}
-							isModerator={isModerator}
-						/>
-					)}
 				</div>
 			);
 		}
 		case "cierre":
-			if (!snapshot.cierre) return null;
 			return (
 				<CierreStage
 					sessionId={snapshot.sessionId}
 					rating={rating}
-					cierre={snapshot.cierre}
 					isModerator={isModerator}
 					hasMaterial={snapshot.materialId !== null}
 				/>

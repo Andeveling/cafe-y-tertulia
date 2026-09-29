@@ -61,10 +61,6 @@ vi.mock("@/app/materials/_components/stage-panel", () => ({
 	StagePanel: () => <p>Escenario del debate</p>,
 }));
 
-vi.mock("@/app/materials/_components/debate-tools-tray", () => ({
-	DebateToolsTray: () => <p>Bandeja de la tertulia</p>,
-}));
-
 vi.mock("@/app/materials/_components/cierre-stage", () => ({
 	CierreStage: () => <p>Cierre de la tertulia</p>,
 }));
@@ -257,64 +253,51 @@ describe("RoomPanel", () => {
 		});
 	});
 
-	it("en Debate compone el escenario y la bandeja, y confirma el regreso", async () => {
+	it("en Debate compone el escenario sin minijuegos, y confirma el regreso", async () => {
 		const user = userEvent.setup();
-		renderPanel(
-			{
-				roomStage: "debate",
-				draw: { done: true, status: "revealed", createdAt: "2026-01-02" },
-				assignments: [
-					{
-						assignmentId: "a-1",
-						questionId: "q-1",
-						authorId: "m-1",
-						assigneeId: "m-2",
-						authorName: "Ana",
-						assigneeName: "Luis",
-						authorAvatar: null,
-						assigneeAvatar: null,
-						state: "exposition",
-						revealOrder: 0,
-						questionText: "¿Qué?",
-						questionVisible: true,
-						aprecioExpositionAvg: null,
-						aprecioExpositionCount: 0,
-						aprecioComplementAvg: null,
-						aprecioComplementCount: 0,
-					},
-				],
-				debate: {
-					mode: "active",
+		renderPanel({
+			roomStage: "debate",
+			draw: { done: true, status: "revealed", createdAt: "2026-01-02" },
+			assignments: [
+				{
 					assignmentId: "a-1",
-					state: "exposition",
-					questionText: "¿Qué?",
-					assigneeName: "Luis",
+					questionId: "q-1",
+					authorId: "m-1",
 					assigneeId: "m-2",
-					assigneeAvatar: null,
 					authorName: "Ana",
+					assigneeName: "Luis",
 					authorAvatar: null,
+					assigneeAvatar: null,
+					state: "exposition",
 					revealOrder: 0,
-					myNotes: null,
-					phaseStartedAt: "2026-01-03",
-					hearts: null,
-					remainingHidden: 0,
+					questionText: "¿Qué?",
+					questionVisible: true,
+					aprecioExpositionAvg: null,
+					aprecioExpositionCount: 0,
+					aprecioComplementAvg: null,
+					aprecioComplementCount: 0,
 				},
+			],
+			debate: {
+				mode: "active",
+				assignmentId: "a-1",
+				state: "exposition",
+				questionText: "¿Qué?",
+				assigneeName: "Luis",
+				assigneeId: "m-2",
+				assigneeAvatar: null,
+				authorName: "Ana",
+				authorAvatar: null,
+				revealOrder: 0,
+				myNotes: null,
+				phaseStartedAt: "2026-01-03",
+				hearts: null,
+				remainingHidden: 0,
 			},
-			{
-				minigameState: {
-					liveRoundId: null,
-					lastBoardRoundId: null,
-					openTakeId: null,
-					bank: [],
-					takes: [],
-					triviaRoundCount: 0,
-					takeCount: 0,
-				},
-			},
-		);
+		});
 
 		expect(screen.getByText("Escenario del debate")).toBeTruthy();
-		expect(screen.getByText("Bandeja de la tertulia")).toBeTruthy();
+		expect(screen.queryByText("Bandeja de la tertulia")).toBeNull();
 
 		await user.click(screen.getByRole("button", { name: "Volver a Sorteo" }));
 		expect(
@@ -400,7 +383,7 @@ describe("RoomPanel", () => {
 			<RoomPanel
 				snapshot={snapshot({
 					roomStage: "cierre",
-					cierre: { openTrivia: 0, openTakes: 0 },
+					cierre: {},
 					debate: null,
 				})}
 				userId="m-1"

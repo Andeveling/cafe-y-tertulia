@@ -1,6 +1,6 @@
 # Café y Tertulias
 
-Plataforma que aloja grupos de lectura y conversación. Aplicación web que acompaña y organiza las sesiones de cada grupo: antes de la reunión recoge las preguntas, durante la tertulia organiza la dinámica (sorteo, debate, minijuegos) y después conserva la memoria de lo discutido. La conversación está primero; la aplicación acompaña, no dirige.
+Plataforma que aloja grupos de lectura y conversación. Aplicación web que acompaña y organiza las sesiones de cada grupo: antes de la reunión recoge las preguntas, durante la tertulia organiza la dinámica (sorteo y debate) y después conserva la memoria de lo discutido. La conversación está primero; la aplicación acompaña, no dirige.
 
 ## Language
 
@@ -53,7 +53,7 @@ Encuentro del Grupo (presencial o por videollamada) con sus fases, estados y dat
 _Avoid_: Tertulia (como término de modelo), reunión, meet
 
 **Estado de la sesión**:
-Ciclo de vida técnico de una Sesión: `preparación` (Sesión programada aún sin Sala), `lobby` (Sala abierta: el moderador confirma participantes y ejecuta el Sorteo), `en_curso` (el debate; internamente lleva un punto de revelación y el estado de la intervención actual), `cerrada` (datos consolidados al cerrar — rating congelado y minijuegos finalizados; solo editable por el moderador de la sesión para correcciones puntuales: rango, fecha programada, notas de respuesta y agregado de rating vía `clear_session_rating`; nunca votos individuales, participantes, asignaciones, sorteo ni resultados de minijuegos) e `histórico` (solo lectura, permanente e inmutable; corresponde al valor técnico `archived`). `cerrada → histórico` es manual inmediato con archivado automático a las 48h. Los minijuegos son acciones dentro de `en_curso`, no estados propios. Las Etapas visibles de la Sala se apoyan en estos estados.
+Ciclo de vida técnico de una Sesión: `preparación` (Sesión programada aún sin Sala), `lobby` (Sala abierta: el moderador confirma participantes y ejecuta el Sorteo), `en_curso` (el debate; internamente lleva un punto de revelación y el estado de la intervención actual), `cerrada` (datos consolidados al cerrar — rating congelado; solo editable por el moderador de la sesión para correcciones puntuales: rango, fecha programada, notas de respuesta y agregado de rating vía `clear_session_rating`; nunca votos individuales, participantes, asignaciones ni sorteo) e `histórico` (solo lectura, permanente e inmutable; corresponde al valor técnico `archived`). `cerrada → histórico` es manual inmediato con archivado automático a las 48h. Las Etapas visibles de la Sala se apoyan en estos estados.
 _Avoid_: Fase, status, archivado (como término de dominio; usar `histórico`)
 
 **Material**:
@@ -108,26 +108,6 @@ _Avoid_: No participar, opt-out
 Marcado que el Moderador aplica a una Pregunta del pool para excluirla del Sorteo (duplicada o fuera de contexto).
 _Avoid_: Descartada, descualificada
 
-**Trivia**:
-Minijuego de preguntas de opción múltiple sobre el Material, que recompensa memoria y atención. Se crea colaborativamente antes de la Sesión. Requiere que la Sesión tenga Material.
-_Avoid_: Quiz, juego de preguntas
-
-**Ronda de trivia**:
-Grupo de 3-5 preguntas de Trivia que se juegan de una vez dentro de `en_curso`. Cada acierto suma +1 punto interno, sin penalización por error; todos responden en su dispositivo a la vez y los resultados se muestran agregados en la pantalla del moderador, sin exponer errores individuales por pregunta.
-_Avoid_: Quiz, partida, nivel
-
-**Marcador**:
-Conteo de aciertos por participante dentro de una Trivia, visible al final del juego. Es la capa visible del minijuego; alimenta la acumulación de Puntos.
-_Avoid_: Score, puntuación del juego, ranking del juego
-
-**Take**:
-Disparador corto de conversación (frase para completar, votación o miniargumentación) que el moderador puede lanzar durante la Sesión. En el MVP, solo la variante de frase disparadora con votación rápida.
-_Avoid_: Prompt, disparador, gancho
-
-**Posición**:
-Postura de un participante ante un Take: de acuerdo, en desacuerdo o neutral. Se recoge por votación rápida y solo se muestra agregada (conteo por postura); las posiciones individuales nunca se exponen.
-_Avoid_: Voto del take, respuesta, postura individual
-
 **Insignia**:
 Logro visible individual que recompensa participación dentro de un Grupo. Los logros colectivos del Grupo son Hitos.
 _Avoid_: Badge, medalla, trofeo
@@ -141,11 +121,11 @@ Acto del Moderador de llamar a un Miembro del Grupo a su Sesión con Sala abiert
 _Avoid_: Invitación (a la sesión), invite, ping
 
 **Punto**:
-Unidad interna acumulable por acciones (preparar pregunta, participar, ganar trivia, asistencia). Base para calcular insignias y logros; no es la capa visible. En el MVP entra como concepto (regla documentada), no como tabla: cada acción registra un Conteo.
+Unidad interna acumulable por acciones (preparar pregunta, participar, asistencia). Base para calcular insignias y logros; no es la capa visible. En el MVP entra como concepto (regla documentada), no como tabla: cada acción registra un Conteo.
 _Avoid_: Score, ranking
 
 **Conteo**:
-Contador de eventos que alimenta Puntos e Insignias: preguntas creadas, sesiones asistidas, trivias ganadas, exposiciones, etc. Es la capa de cálculo del MVP; los valores de punto se definen cuando exista un consumidor que los use.
+Contador de eventos que alimenta Puntos e Insignias: preguntas creadas, sesiones asistidas, exposiciones, etc. Es la capa de cálculo del MVP; los valores de punto se definen cuando exista un consumidor que los use.
 _Avoid_: Evento, métrica, ledger
 
 **Logro**:
@@ -185,5 +165,5 @@ Agregado de Corazones por Intervención y fase: promedio (1 decimal) y conteo. A
 _Avoid_: Rating, promedio de persona, ranking
 
 **Histórico**:
-Modo de ver la memoria de una Sesión: Preguntas, Notas, minijuegos, Logros y, si hay Material, Rating. Se lee desde la propia Sesión y, cuando hay Material, también desde la página de ese Material. No es una entidad con datos propios.
+Modo de ver la memoria de una Sesión: Preguntas, Notas, Logros y, si hay Material, Rating. Se lee desde la propia Sesión y, cuando hay Material, también desde la página de ese Material. No es una entidad con datos propios.
 _Avoid_: Archivo, registro, timeline

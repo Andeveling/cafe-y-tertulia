@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
  * [multi-grupo] 04 Migrate RLS lote B (#73, PRD #69).
  *
  * Sesión viva y gamificación aisladas por grupo: miembro de A no lee ni
- * escribe preguntas, presentes, trivias, takes ni gamificación de B.
+ * escribe preguntas, presentes ni gamificación de B.
  * Salir del grupo revoca el acceso.
  *
  * Patrón tests/membership.test.ts: service-role para preparar y afirmar,
@@ -242,12 +242,10 @@ describe.skipIf(!hasEnv)(
 			}
 		});
 
-		it("quien no es miembro no ve preguntas ni trivias", async () => {
+		it("quien no es miembro no ve preguntas", async () => {
 			const client = await anonFor(testUsers.out!.email, TEST_PASSWORD);
 			const { data: questions } = await client.from("questions").select("id");
 			expect(questions ?? []).toHaveLength(0);
-			const { data: trivias } = await client.from("trivias").select("id");
-			expect(trivias ?? []).toHaveLength(0);
 		});
 
 		it("salir del grupo revoca preguntas y presentes", async () => {

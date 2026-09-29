@@ -5,7 +5,6 @@ import { RatingPanel } from "@/app/materials/_components/rating-panel";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import { closeSession } from "@/app/materials/_lib/room-actions";
-import type { RoomCierreSnapshot } from "@/app/materials/_lib/room-types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +29,6 @@ type Props = {
 	sessionId: string;
 	/** Progreso del rating (RPC rating_progress) — null si falló la carga. */
 	rating: RatingProgress | null;
-	cierre: RoomCierreSnapshot;
 	isModerator: boolean;
 	/** false cuando la sesión no tiene material: no hay votación. */
 	hasMaterial: boolean;
@@ -44,26 +42,18 @@ type Props = {
 export function CierreStage({
 	sessionId,
 	rating,
-	cierre,
 	isModerator,
 	hasMaterial,
 }: Props) {
 	const router = useRouter();
 	const ratingFailed = hasMaterial && !rating;
 	const blocked =
-		ratingFailed ||
-		(hasMaterial && (rating?.ratingOpen ?? false)) ||
-		cierre.openTrivia > 0 ||
-		cierre.openTakes > 0;
+		ratingFailed || (hasMaterial && (rating?.ratingOpen ?? false));
 	const blockReason = ratingFailed
 		? "No se pudo cargar el rating. Reintenta antes de cerrar."
 		: hasMaterial && rating?.ratingOpen
 			? "Cierra la votación del rating antes de cerrar."
-			: cierre.openTrivia > 0
-				? "Cierra la trivia en curso antes de cerrar."
-				: cierre.openTakes > 0
-					? "Cierra los takes abiertos antes de cerrar."
-					: null;
+			: null;
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -122,8 +112,6 @@ export function CierreStage({
 						ratingOpen={rating?.ratingOpen ?? false}
 						ratingFailed={ratingFailed}
 						showRating={hasMaterial}
-						openTrivia={cierre.openTrivia}
-						openTakes={cierre.openTakes}
 					/>
 					<CloseSessionDialog
 						sessionId={sessionId}
@@ -147,14 +135,10 @@ function PendingChecklist({
 	ratingOpen,
 	ratingFailed,
 	showRating,
-	openTrivia,
-	openTakes,
 }: {
 	ratingOpen: boolean;
 	ratingFailed: boolean;
 	showRating: boolean;
-	openTrivia: number;
-	openTakes: number;
 }) {
 	const items: PendingItem[] = [
 		...(showRating
@@ -167,15 +151,6 @@ function PendingChecklist({
 					},
 				]
 			: []),
-		{
-			label:
-				openTrivia > 0 ? `Trivia en curso (${openTrivia})` : "Trivia en curso",
-			pending: openTrivia > 0,
-		},
-		{
-			label: openTakes > 0 ? `Takes abiertos (${openTakes})` : "Takes abiertos",
-			pending: openTakes > 0,
-		},
 	];
 	const allClear = items.every((i) => !i.pending);
 

@@ -2,7 +2,7 @@
 -- UUIDs prefixed 36000000- to avoid collisions with shared local DB.
 
 begin;
-select plan(19);
+select plan(18);
 
 -- ============================================================
 -- Fixtures
@@ -38,11 +38,11 @@ insert into public.sessions (id, material_id, range, status, moderator_id) value
 insert into public.draws (id, session_id, status) values
 	('36000000-0000-0000-0000-000000000041', '36000000-0000-0000-0000-000000000040', 'revealed');
 
--- Session with material for start_trivia_round / open_session_rating tests
+-- Session sin material para open_session_rating / close_session tests
 insert into public.sessions (id, material_id, range, status, moderator_id) values
 	('36000000-0000-0000-0000-000000000050', null, null, 'in_progress', '36000000-0000-0000-0000-000000000001');
 
--- Session with material for close_session bug fix test (in_progress, no draws/trivias/takes)
+-- Session sin material para close_session bug fix test (in_progress, sin draws)
 insert into public.sessions (id, material_id, range, status, moderator_id) values
 	('36000000-0000-0000-0000-000000000060', null, null, 'in_progress', '36000000-0000-0000-0000-000000000001');
 
@@ -182,33 +182,23 @@ select lives_ok(
 	'8. insert question sin material como miembro autenticado'
 );
 
--- 9. start_trivia_round without material throws domain error
-set local role authenticated;
-set local request.jwt.claim.sub = '36000000-0000-0000-0000-000000000001';
-
-select throws_ok(
-	$$ select public.start_trivia_round('36000000-0000-0000-0000-000000000050', '36000000-0000-0000-0000-000000000001') $$,
-	'La sesión no tiene material para Trivia',
-	'9. start_trivia_round sin material lanza error de dominio'
-);
-
--- 10. open_session_rating without material throws domain error
+-- 9. open_session_rating without material throws domain error
 select throws_ok(
 	$$ select public.open_session_rating('36000000-0000-0000-0000-000000000050') $$,
 	'La sesión no tiene material para Rating',
-	'10. open_session_rating sin material lanza error de dominio'
+	'9. open_session_rating sin material lanza error de dominio'
 );
 
--- 11. close_session without material works (bug fix)
+-- 10. close_session without material works (bug fix)
 select lives_ok(
 	$$ select public.close_session('36000000-0000-0000-0000-000000000060') $$,
-	'11. close_session sin material funciona (bug fix)'
+	'10. close_session sin material funciona (bug fix)'
 );
 
 select is(
 	(select status from public.sessions where id = '36000000-0000-0000-0000-000000000060'),
 	'closed'::public.session_status,
-	'11b. Sesión sin material queda closed tras close_session'
+	'10b. Sesión sin material queda closed tras close_session'
 );
 
 select * from finish();

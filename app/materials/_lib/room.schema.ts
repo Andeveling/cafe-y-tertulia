@@ -200,14 +200,7 @@ const DebateSchema = z
 	.catch(null) as unknown as z.ZodType<RoomDebateSnapshot | null>;
 
 const CierreSchema = z
-	.object({
-		open_trivia: jNumber,
-		open_takes: jNumber,
-	})
-	.transform((r) => ({
-		openTrivia: r.open_trivia,
-		openTakes: r.open_takes,
-	}))
+	.object({})
 	.nullable()
 	.catch(null) as unknown as z.ZodType<RoomCierreSnapshot | null>;
 

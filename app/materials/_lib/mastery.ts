@@ -1,6 +1,6 @@
 // Maestría: cálculo derivado por Categoría (issues #59/#61).
 // Sin tabla propia: 1 punto por participar en una Sesión de la categoría
-// + 1 por aportar en ella (pregunta, exposición/complemento o trivia).
+// + 1 por aportar en ella (pregunta o exposición/complemento).
 // Umbrales 3/8/15. Pura: la usan servidor y cliente.
 
 export const MASTERY_LEVELS = [

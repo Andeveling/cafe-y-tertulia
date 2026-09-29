@@ -51,22 +51,6 @@ export type SessionHistory = {
 			aprecio_complement_count: number;
 		};
 	}[];
-	trivia_rounds: {
-		id: string;
-		title: string;
-		status: string;
-		items: {
-			member_id: string;
-			display_name: string;
-			hits: number;
-		}[];
-	}[];
-	takes: {
-		id: string;
-		prompt: string;
-		status: string;
-		counts: { agree: number; disagree: number; neutral: number };
-	}[];
 	awards: {
 		id: string;
 		trigger: string;
@@ -131,34 +115,6 @@ const QuestionSchema = z
 		...(q.assignment ? { assignment: q.assignment } : {}),
 	}));
 
-const TriviaHitSchema = z.object({
-	member_id: jString,
-	display_name: jString,
-	hits: jNumber,
-});
-
-const TriviaRoundSchema = z.object({
-	id: jString,
-	title: jString,
-	status: jString,
-	items: jArray(TriviaHitSchema),
-});
-
-const TakeCountsSchema = z
-	.object({
-		agree: jNumber,
-		disagree: jNumber,
-		neutral: jNumber,
-	})
-	.catch({ agree: 0, disagree: 0, neutral: 0 });
-
-const TakeSchema = z.object({
-	id: jString,
-	prompt: jString,
-	status: jString,
-	counts: TakeCountsSchema,
-});
-
 const AwardSchema = z.object({
 	id: jString,
 	trigger: jString,
@@ -180,8 +136,6 @@ export const SessionHistorySchema = z.object({
 	material: MaterialSchema,
 	participants: jArray(ParticipantSchema),
 	questions: jArray(QuestionSchema),
-	trivia_rounds: jArray(TriviaRoundSchema),
-	takes: jArray(TakeSchema),
 	awards: jArray(AwardSchema),
 }) as unknown as z.ZodType<SessionHistory>;
 

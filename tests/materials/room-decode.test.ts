@@ -56,7 +56,7 @@ const fullRow = {
 		phaseStartedAt: "2026-01-03",
 		remainingHidden: 1,
 	},
-	cierre: { open_trivia: 0, open_takes: 1 },
+	cierre: {},
 };
 
 describe("decodeRoomSnapshot", () => {
@@ -72,7 +72,7 @@ describe("decodeRoomSnapshot", () => {
 			roomStage: "debate",
 			readiness: { total: 2, ready: 1, allReady: false },
 			draw: { done: true, status: "revealed", createdAt: "2026-01-02" },
-			cierre: { openTrivia: 0, openTakes: 1 },
+			cierre: {},
 		});
 		expect(snap!.participants).toEqual([
 			{
@@ -186,6 +186,14 @@ describe("decodeRoomSnapshot", () => {
 		]);
 		expect(snap!.debate).toBeNull();
 		expect(snap!.cierre).toBeNull();
+	});
+
+	it("el Cierre ya no expone trivia ni takes", () => {
+		const snap = decodeRoomSnapshot({
+			...fullRow,
+			cierre: { open_trivia: 2, open_takes: 1 },
+		});
+		expect(snap!.cierre).toEqual({});
 	});
 
 	it("devuelve null ante Json no-objeto", () => {

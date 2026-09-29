@@ -22,8 +22,8 @@ describe("room realtime subscribe contract", () => {
 		expect(ROOM_PARTICIPANT_TABLES).toContain("votes");
 	});
 
-	it("listens to minigames so trivia and takes land in realtime during Debate", () => {
-		expect(ROOM_PARTICIPANT_TABLES).toContain("trivia_rounds");
-		expect(ROOM_PARTICIPANT_TABLES).toContain("takes");
+	it("no longer subscribes to minigames: realtime solo sincroniza debate", () => {
+		expect(ROOM_PARTICIPANT_TABLES).not.toContain("trivia_rounds");
+		expect(ROOM_PARTICIPANT_TABLES).not.toContain("takes");
 	});
 });
