@@ -46,6 +46,21 @@ export function shouldSeatOnRoomLoad(input: {
 	return true;
 }
 
+/** El puesto está vacío y esta persona ya está sentada en Preguntas. */
+export function shouldClaimModerator(input: {
+	status: string;
+	roomStage: string;
+	seated: boolean;
+	moderatorId: string | null;
+}): boolean {
+	return (
+		input.seated &&
+		input.moderatorId == null &&
+		input.status === "lobby" &&
+		input.roomStage === "questions"
+	);
+}
+
 export function markLeftRoom(sessionId: string) {
 	document.cookie = `${LEFT_ROOM_COOKIE}=${leftRoomMarker(sessionId)}; path=/; max-age=30; samesite=lax`;
 }

@@ -38,7 +38,9 @@ export function SessionRow({ session }: { session: BoardSession }) {
 					</h3>
 					<CardDescription>
 						{subtitle ? `${subtitle} · ` : ""}
-						Modera {session.moderator_name ?? "—"}
+						{session.moderator_name
+							? `Modera ${session.moderator_name}`
+							: "Aún no hay moderador"}
 					</CardDescription>
 					{sessionHasBoardCta(session) ? (
 						<CardAction>

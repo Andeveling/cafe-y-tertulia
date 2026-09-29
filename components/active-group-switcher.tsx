@@ -83,7 +83,7 @@ export function ActiveGroupSwitcher({
 							className="min-w-0 flex-1"
 							render={<Link href={hrefForGroup(activeGroup.slug, section)} />}
 						>
-							<GroupLabel title={activeGroup.name} />
+							<GroupLabel title={activeGroup.name} welcome />
 						</SidebarMenuButton>
 					</div>
 				</SidebarMenuItem>
@@ -108,7 +108,7 @@ export function ActiveGroupSwitcher({
 								/>
 							}
 						>
-							<GroupLabel title={title} />
+							<GroupLabel title={title} welcome={activeGroup !== null} />
 							<HugeiconsIcon
 								icon={ArrowDown01Icon}
 								className="ml-auto size-4 opacity-60 group-data-[collapsible=icon]:hidden"
@@ -150,10 +150,22 @@ export function ActiveGroupSwitcher({
 	);
 }
 
-function GroupLabel({ title }: { title: string }) {
+function GroupLabel({
+	title,
+	welcome = false,
+}: {
+	title: string;
+	welcome?: boolean;
+}) {
+	const headline = welcome ? `Bienvenido a ${title}` : title;
 	return (
-		<span className="min-w-0 flex-1 truncate text-left font-semibold text-sm tracking-tight group-data-[collapsible=icon]:hidden">
-			{title}
+		<span className="min-w-0 flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
+			<span className="block truncate text-[11px] font-medium text-muted-foreground">
+				Café y Tertulias
+			</span>
+			<span className="block truncate font-semibold text-sm tracking-tight">
+				{headline}
+			</span>
 		</span>
 	);
 }

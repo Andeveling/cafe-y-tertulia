@@ -106,8 +106,8 @@ select is(
 
 select is(
 	(select moderator_id from public.sessions where id = (select id from t36 where k = 'now')),
-	'36000000-0000-0000-0000-000000000001'::uuid,
-	'3b. create_session sin scheduled_at → moderator = auth.uid()'
+	null,
+	'3b. create_session sin scheduled_at → moderator null hasta que alguien se siente'
 );
 
 -- 4. create_session future scheduled_at → preparation, no moderator

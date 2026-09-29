@@ -89,17 +89,23 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 			</CardHeader>
 			<CardContent className="relative flex flex-col gap-6">
 				<p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-					<span>
-						Modera{" "}
-						<span className="font-medium text-foreground">
-							{session.moderator_name ?? "—"}
-						</span>
-					</span>
-					<MemberAvatar
-						name={session.moderator_name ?? "Moderador"}
-						avatar={session.moderator_avatar}
-						size="sm"
-					/>
+					{session.moderator_name ? (
+						<>
+							<span>
+								Modera{" "}
+								<span className="font-medium text-foreground">
+									{session.moderator_name}
+								</span>
+							</span>
+							<MemberAvatar
+								name={session.moderator_name}
+								avatar={session.moderator_avatar}
+								size="sm"
+							/>
+						</>
+					) : (
+						<span>Aún no hay moderador</span>
+					)}
 				</p>
 				<div className="flex flex-col gap-3">
 					{days ? (
@@ -162,7 +168,9 @@ export function HeroSessionCard({ session }: { session: BoardSession }) {
 										</Badge>
 										<SheetTitle>{title}</SheetTitle>
 										<SheetDescription>
-											Modera {session.moderator_name ?? "—"}
+											{session.moderator_name
+												? `Modera ${session.moderator_name}`
+												: "Aún no hay moderador"}
 											{when && !meta.live ? ` · ${when}` : ""}
 										</SheetDescription>
 									</SheetHeader>

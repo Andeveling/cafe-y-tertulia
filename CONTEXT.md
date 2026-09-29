@@ -45,11 +45,11 @@ Condición de un Participante que no es Espectador, está presente y tiene al me
 _Avoid_: Ready, confirmado, completo
 
 **Moderador**:
-Estado temporal que un Miembro asume al iniciar o conducir una Sesión. Lo asume quien abre la Sesión, puede cederlo a otro Participante en el lobby antes del Sorteo y no se transfiere durante la Sesión; cualquier miembro puede serlo — no existe un moderador permanente.
+Estado temporal que un Miembro asume al sentarse primero en la Sala (lobby, Preguntas). Abrir la Sala no lo nombra. Puede cederlo a otro Participante en el lobby antes del Sorteo y no se transfiere durante la Sesión; si se desconecta, el rol sigue siendo suyo. Cualquier miembro puede serlo — no existe un moderador permanente.
 _Avoid_: Host, anfitrión, admin de sesión
 
 **Sesión**:
-Encuentro del Grupo (presencial o por videollamada) con sus fases, estados y datos asociados. Puede nacer con o sin un único Material — objeto opcional, no padre —. Nace *ahora* (`lobby`, Sala abierta) o *programada* (`preparación` hasta que el Moderador abre la Sala). El Material se ata o se suelta solo antes del Sorteo. Sin Material se nombra por Moderador y fecha, o por una etiqueta opcional. Puede haber varias Salas abiertas a la vez.
+Encuentro del Grupo (presencial o por videollamada) con sus fases, estados y datos asociados. Puede nacer con o sin un único Material — objeto opcional, no padre —. Nace *ahora* (`lobby`, Sala abierta, sin moderador hasta que alguien se sienta) o *programada* (`preparación` hasta que un miembro abre la Sala; abrir no nombra moderador). El Material se ata o se suelta solo antes del Sorteo. Sin Material se nombra por Moderador y fecha, o por una etiqueta opcional. Puede haber varias Salas abiertas a la vez.
 _Avoid_: Tertulia (como término de modelo), reunión, meet
 
 **Estado de la sesión**:
@@ -127,6 +127,10 @@ _Avoid_: Prompt, disparador, gancho
 **Posición**:
 Postura de un participante ante un Take: de acuerdo, en desacuerdo o neutral. Se recoge por votación rápida y solo se muestra agregada (conteo por postura); las posiciones individuales nunca se exponen.
 _Avoid_: Voto del take, respuesta, postura individual
+
+**Minijuegos**:
+Trivia y Takes: juego opcional dentro de `en_curso`, fuera del debate. No incluye Sorteo, Rating ni Aprecio.
+_Avoid_: juego, dinámica, sorteo (como minijuego)
 
 **Insignia**:
 Logro visible individual que recompensa participación dentro de un Grupo. Los logros colectivos del Grupo son Hitos.

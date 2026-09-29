@@ -34,3 +34,24 @@ export async function seatIfAbsent(
 	if (error.code === "23505") return { seated: false };
 	return { seated: false, error: error.message };
 }
+
+/**
+ * Primer asiento en lobby / Preguntas. El UPDATE con moderator_id null
+ * es el que gana si dos entran a la vez; el trigger rechaza el resto.
+ */
+export async function claimModeratorIfAbsent(
+	supabase: SupabaseClient<Database>,
+	sessionId: string,
+	userId: string,
+): Promise<{ claimed: boolean }> {
+	const { data, error } = await supabase
+		.from("sessions")
+		.update({ moderator_id: userId })
+		.eq("id", sessionId)
+		.is("moderator_id", null)
+		.eq("status", "lobby")
+		.eq("room_stage", "questions")
+		.select("id");
+	if (error) return { claimed: false };
+	return { claimed: (data?.length ?? 0) > 0 };
+}

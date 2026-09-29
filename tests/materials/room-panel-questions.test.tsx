@@ -85,6 +85,22 @@ beforeEach(() => {
 });
 
 describe("RoomPanel", () => {
+	it("en Preguntas el moderador ve que conduce", () => {
+		renderPanel(
+			{ status: "lobby", roomStage: "questions" },
+			{ userId: "m-1", isModerator: true },
+		);
+		expect(screen.getByText("Moderas esta tertulia")).toBeTruthy();
+	});
+
+	it("quien no modera no ve esa línea", () => {
+		renderPanel(
+			{ status: "lobby", roomStage: "questions", moderatorId: "m-2" },
+			{ userId: "m-1", isModerator: false },
+		);
+		expect(screen.queryByText("Moderas esta tertulia")).toBeNull();
+	});
+
 	it("muestra En vivo cuando el canal de la sala está suscrito", () => {
 		renderPanel();
 		expect(screen.getByRole("status").textContent).toContain("En vivo");

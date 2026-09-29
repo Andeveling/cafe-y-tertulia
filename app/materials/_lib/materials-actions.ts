@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { type ActionResult, runServerAction } from "@/lib/server-action";
-import type { MaterialKind, SessionStatus } from "./constants";
+import type { MaterialKind } from "./constants";
 import { SESSION_NEXT_STATUS } from "./constants";
 import { isValidMaterialUrl, toNullableUrl } from "./material-urls";
 
@@ -264,17 +264,9 @@ export async function advanceSession(input: {
 
 			if (!nextStatus) return;
 
-			const patch: {
-				status: SessionStatus;
-				moderator_id?: string;
-			} = { status: nextStatus };
-			if (data.status === "preparation" && user) {
-				patch.moderator_id = user.id;
-			}
-
 			const { error: updateError } = await supabase
 				.from("sessions")
-				.update(patch)
+				.update({ status: nextStatus })
 				.eq("id", input.sessionId);
 
 			if (updateError) {

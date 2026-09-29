@@ -24,8 +24,8 @@ type Props = {
 };
 
 /**
- * Un clic: preparation abre la Sala y entra; lobby/en curso solo entra.
- * No hay segunda "Abrir sala" en el camino desde Inicio.
+ * Preparación abre la Sala y se queda en el tablero. Entrar es otro clic:
+ * el primero que se sienta en el room toma la moderación.
  */
 export function BoardSessionAction({
 	session,
@@ -80,7 +80,8 @@ export function BoardSessionAction({
 						toast.error(result.error);
 						return;
 					}
-					router.push(sessionHref(session));
+					toast.success("Sala abierta");
+					router.refresh();
 				})
 			}
 		>

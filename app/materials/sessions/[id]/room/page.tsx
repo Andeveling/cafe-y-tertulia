@@ -11,9 +11,13 @@ import {
 	getPendingConvocatoriaIds,
 	getRoomRosterMembers,
 } from "@/app/materials/_lib/room-roster";
-import { seatIfAbsent } from "@/app/materials/_lib/room-seat";
+import {
+	claimModeratorIfAbsent,
+	seatIfAbsent,
+} from "@/app/materials/_lib/room-seat";
 import {
 	LEFT_ROOM_COOKIE,
+	shouldClaimModerator,
 	shouldSeatOnRoomLoad,
 } from "@/app/materials/_lib/room-seat-gate";
 import { roomSurface } from "@/app/materials/_lib/room-sync";
@@ -41,18 +45,32 @@ export default async function RoomPage({
 	// mesa vacía se leía como "todos tienen pregunta". Un refresh justo
 	// después de Salir no cuenta: volvería a sentar a quien se fue.
 	const leftMarker = (await cookies()).get(LEFT_ROOM_COOKIE)?.value ?? null;
-	if (
-		shouldSeatOnRoomLoad({
-			status: snapshot.status,
-			roomStage: snapshot.roomStage,
-			seated: snapshot.participants.some((p) => p.memberId === user.id),
-			leftMarker,
-			sessionId,
-		})
-	) {
-		await seatIfAbsent(supabase, sessionId, user.id);
-		const seated = await getRoomSnapshot(supabase, sessionId);
-		if (seated) snapshot = seated;
+	const alreadySeated = snapshot.participants.some(
+		(p) => p.memberId === user.id,
+	);
+	const seatOnLoad = shouldSeatOnRoomLoad({
+		status: snapshot.status,
+		roomStage: snapshot.roomStage,
+		seated: alreadySeated,
+		leftMarker,
+		sessionId,
+	});
+	let seated = alreadySeated;
+	if (seatOnLoad) {
+		const seat = await seatIfAbsent(supabase, sessionId, user.id);
+		// Sin error: fila nueva o ya estaba. Las dos cuentan como sentado.
+		if (!seat.error) seated = true;
+	}
+	const claim = shouldClaimModerator({
+		status: snapshot.status,
+		roomStage: snapshot.roomStage,
+		seated,
+		moderatorId: snapshot.moderatorId,
+	});
+	if (claim) await claimModeratorIfAbsent(supabase, sessionId, user.id);
+	if (seatOnLoad || claim) {
+		const next = await getRoomSnapshot(supabase, sessionId);
+		if (next) snapshot = next;
 	}
 
 	const isModerator = snapshot.moderatorId === user.id;

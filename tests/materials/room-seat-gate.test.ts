@@ -3,6 +3,7 @@ import {
 	LEFT_ROOM_WINDOW_MS,
 	leftRoomMarker,
 	leftRoomRecently,
+	shouldClaimModerator,
 	shouldSeatOnRoomLoad,
 } from "@/app/materials/_lib/room-seat-gate";
 
@@ -47,6 +48,44 @@ describe("shouldSeatOnRoomLoad", () => {
 				now: NOW,
 			}),
 		).toBe(true);
+	});
+
+	it("el primero sentado en Preguntas toma el puesto vacío", () => {
+		expect(
+			shouldClaimModerator({
+				status: "lobby",
+				roomStage: "questions",
+				seated: true,
+				moderatorId: null,
+			}),
+		).toBe(true);
+	});
+
+	it("no toma el puesto si ya hay moderador, no está sentado o la sala no está en Preguntas", () => {
+		expect(
+			shouldClaimModerator({
+				status: "lobby",
+				roomStage: "questions",
+				seated: true,
+				moderatorId: "alguien",
+			}),
+		).toBe(false);
+		expect(
+			shouldClaimModerator({
+				status: "lobby",
+				roomStage: "questions",
+				seated: false,
+				moderatorId: null,
+			}),
+		).toBe(false);
+		expect(
+			shouldClaimModerator({
+				status: "preparation",
+				roomStage: "questions",
+				seated: true,
+				moderatorId: null,
+			}),
+		).toBe(false);
 	});
 
 	it("no trata el salir de otra sesión como el de esta", () => {

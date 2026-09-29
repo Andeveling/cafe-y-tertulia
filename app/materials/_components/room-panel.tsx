@@ -66,6 +66,9 @@ export function RoomPanel({
 				<StageBar current={snapshot.roomStage} />
 				<RoomConnectionStatus live={live} />
 			</div>
+			{isModerator && snapshot.roomStage === "questions" ? (
+				<p className="text-sm text-muted-foreground">Moderas esta tertulia</p>
+			) : null}
 
 			<StageContent
 				snapshot={snapshot}

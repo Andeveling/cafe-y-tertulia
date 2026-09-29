@@ -16,7 +16,7 @@ Vocabulario canónico en [`CONTEXT.md`](../../CONTEXT.md) — leerlo es obligato
 |---|---|
 | **Miembro** | Persona del club con acceso; ciclo `invitado → activo → baja`. Única entidad de persona. |
 | **Participante** | Miembro confirmado presente en una Sesión. Término de contexto de sesión, no entidad. |
-| **Moderador** | Estado temporal que asume quien abre la Sesión; cedible en el lobby, no transferible en `en_curso`. |
+| **Moderador** | Estado temporal del primero que se sienta en lobby / Preguntas. Abrir la Sala no lo nombra. Cedible en el lobby, no transferible en `en_curso`. |
 | **Sesión** | Encuentro del club con fases y estados. |
 | **Material** | Contenido sobre el que se conversa (libro/podcast/video/artículo); pipeline `propuesto → seleccionado → en curso → terminado`. |
 | **Pregunta** | Aporte abierto de un Miembro para una Sesión; tiene autor y asignado. |
@@ -71,7 +71,7 @@ Entidades y relaciones. Todo acceso filtrado por RLS (membresía, ADR 0005).
 | `material_id` | uuid FK → materials | |
 | `range` | text | ej. "Capítulos 1-3" |
 | `status` | enum | `preparation` \| `lobby` \| `in_progress` \| `closed` \| `archived` |
-| `moderator_id` | uuid FK → members | asume quien abre; cedible en lobby |
+| `moderator_id` | uuid FK → members | null hasta el primer asiento en lobby / Preguntas; cedible en lobby |
 | `scheduled_at` | timestamptz | null en `preparation` |
 | `rating_avg` | numeric | congelado al cerrar (1 decimal) |
 | `rating_count` | int | |
