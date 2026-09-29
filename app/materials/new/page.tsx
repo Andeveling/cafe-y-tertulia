@@ -12,5 +12,5 @@ export default async function NewMaterialPage() {
 	const cookieStore = await cookies();
 	const slugs = groups.map((group) => group.slug);
 	const lastSlug = cookieStore.get(LAST_GROUP_COOKIE)?.value;
-	redirect(landingPath(slugs, lastSlug, "materiales"));
+	redirect(landingPath(slugs, lastSlug, "materials"));
 }

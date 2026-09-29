@@ -48,7 +48,7 @@ export default async function GroupHomePage({
 				<p className="text-sm text-muted-foreground">
 					Administras este grupo.{" "}
 					<a
-						href={`/g/${group.slug}/ajustes`}
+						href={`/g/${group.slug}/settings`}
 						className="underline underline-offset-2"
 					>
 						Abrir ajustes

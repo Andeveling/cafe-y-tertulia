@@ -5,7 +5,7 @@ import { RegisterForm } from "./_components/register-form";
 
 /**
  * Registro abierto (ADR-0014): cualquiera crea su cuenta de Miembro sin
- * padrino. El `next` conserva el retorno (p. ej. /g/unirse?token=…) a
+ * padrino. El `next` conserva el retorno (p. ej. /g/join?token=…) a
  * través del alta para canjear en un solo gesto.
  */
 export default async function RegisterPage({

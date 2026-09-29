@@ -14,7 +14,7 @@ export default async function MaterialsPage() {
 		landingPath(
 			groups.map((group) => group.slug),
 			cookieStore.get(LAST_GROUP_COOKIE)?.value,
-			"materiales",
+			"materials",
 		),
 	);
 }

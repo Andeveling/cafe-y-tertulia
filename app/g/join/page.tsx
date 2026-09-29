@@ -6,7 +6,7 @@ import { getCurrentMember } from "@/lib/current-member";
 export const metadata = { title: "Unirse al grupo · Café y Tertulias" };
 
 /**
- * /g/unirse?token=… — canje del enlace de Invitación a un Grupo privado.
+ * /g/join?token=… — canje del enlace de Invitación a un Grupo privado.
  * Sin cuenta va a registro con retorno: registrarse mete al Grupo en un
  * solo gesto (el token sobrevive vía `next`). Re-canjear siendo ya
  * Miembro del Grupo es idempotente: entra sin error ni duplicado.
@@ -19,7 +19,7 @@ export default async function JoinGroupPage({
 	const { token } = await searchParams;
 	if (!token) redirect("/g");
 
-	const next = `/g/unirse?token=${token}`;
+	const next = `/g/join?token=${token}`;
 	const registerWithReturn = `/auth/register?next=${encodeURIComponent(next)}`;
 
 	const { member } = await getCurrentMember();

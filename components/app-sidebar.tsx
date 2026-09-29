@@ -32,8 +32,8 @@ import {
 import { resolveActiveGroup } from "@/lib/groups/active-group";
 
 const navClub = [
-	{ title: "Sesiones", section: "sesiones" as const, icon: Home01Icon },
-	{ title: "Materiales", section: "materiales" as const, icon: Book01Icon },
+	{ title: "Sesiones", section: "sessions" as const, icon: Home01Icon },
+	{ title: "Materiales", section: "materials" as const, icon: Book01Icon },
 ];
 
 const navCuenta = [
@@ -102,9 +102,9 @@ export function AppSidebar({
 										<SidebarMenuButton
 											tooltip="Invitar"
 											isActive={pathname.startsWith(
-												`/g/${activeGroup.slug}/ajustes`,
+												`/g/${activeGroup.slug}/settings`,
 											)}
-											render={<Link href={`/g/${activeGroup.slug}/ajustes`} />}
+											render={<Link href={`/g/${activeGroup.slug}/settings`} />}
 											className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground"
 										>
 											<HugeiconsIcon icon={UserAdd01Icon} />

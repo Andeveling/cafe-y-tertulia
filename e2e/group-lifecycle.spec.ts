@@ -94,10 +94,10 @@ test("grupo privado: invitación por enlace une", async ({ page, browser }) => {
 	await page.getByText(name).first().click();
 	await page.getByRole("link", { name: /ajustes/i }).click();
 	await page.getByRole("button", { name: /generar enlace/i }).click();
-	const link = page.locator("text=/\\/g\\/unirse\\?token=/").first();
+	const link = page.locator("text=/\\/g\\/join\\?token=/").first();
 	await expect(link).toBeVisible();
 	const url = (await link.textContent())?.trim() ?? "";
-	expect(url).toContain("/g/unirse?token=");
+	expect(url).toContain("/g/join?token=");
 
 	await page2.goto(url);
 	await expect(page2).toHaveURL(/\/g\/.+/);

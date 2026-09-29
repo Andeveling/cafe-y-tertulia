@@ -11,5 +11,5 @@ export default async function NewGroupMaterialPage({
 	params: Promise<{ slug: string }>;
 }) {
 	const { slug } = await params;
-	redirect(`/g/${slug}/materiales`);
+	redirect(`/g/${slug}/materials`);
 }

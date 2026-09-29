@@ -22,7 +22,7 @@ vi.mock("@/app/g/_lib/group-invite", () => ({
 	signGroupInviteToken: vi.fn().mockResolvedValue("signed-token"),
 	hashGroupInviteToken: vi.fn((t: string) => `hash:${t}`),
 	verifyGroupInviteToken: vi.fn(),
-	groupInviteUrl: (token: string) => `https://app.test/g/unirse?token=${token}`,
+	groupInviteUrl: (token: string) => `https://app.test/g/join?token=${token}`,
 }));
 
 const userId = "11111111-1111-1111-1111-111111111111";
@@ -96,7 +96,7 @@ describe("createInviteLink", () => {
 		});
 		const result = await createInviteLink(groupId);
 		expect(result.ok).toBe(true);
-		if (result.ok) expect(result.url).toContain("/g/unirse?token=");
+		if (result.ok) expect(result.url).toContain("/g/join?token=");
 		expect(rpc).toHaveBeenCalledWith("invite_to_group", {
 			p_group_id: groupId,
 		});

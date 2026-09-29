@@ -22,7 +22,7 @@ export async function nominateBibliotecaAction(input: {
 				return { ok: false, error: error.message };
 			}
 		},
-		revalidate: () => [`/g/${input.slug}/materiales`, "/profile"],
+		revalidate: () => [`/g/${input.slug}/materials`, "/profile"],
 	});
 }
 
@@ -41,6 +41,6 @@ export async function withdrawPostulacionAction(input: {
 				return { ok: false, error: error.message };
 			}
 		},
-		revalidate: () => [`/g/${input.slug}/materiales`, "/profile"],
+		revalidate: () => [`/g/${input.slug}/materials`, "/profile"],
 	});
 }

@@ -8,19 +8,17 @@ import {
 } from "@/lib/groups/active-group";
 
 describe("slugFromGroupPath", () => {
-	it("lee el slug y deja fuera unirse", () => {
-		expect(slugFromGroupPath("/g/familia/sesiones")).toBe("familia");
-		expect(slugFromGroupPath("/g/unirse")).toBeNull();
+	it("lee el slug y deja fuera join", () => {
+		expect(slugFromGroupPath("/g/familia/sessions")).toBe("familia");
+		expect(slugFromGroupPath("/g/join")).toBeNull();
 		expect(slugFromGroupPath("/profile")).toBeNull();
 	});
 });
 
 describe("sectionFromGroupPath", () => {
 	it("un formulario vuelve a la lista al cambiar de grupo", () => {
-		expect(sectionFromGroupPath("/g/familia/materiales/nuevo")).toBe(
-			"materiales",
-		);
-		expect(sectionFromGroupPath("/g/familia/sesiones")).toBe("sesiones");
+		expect(sectionFromGroupPath("/g/familia/materials/new")).toBe("materials");
+		expect(sectionFromGroupPath("/g/familia/sessions")).toBe("sessions");
 		expect(sectionFromGroupPath("/g/familia")).toBe("home");
 	});
 });
@@ -29,16 +27,16 @@ describe("landingPath", () => {
 	it("no inventa un default cuando hay varios y no hay memoria", () => {
 		expect(landingPath(["familia", "trabajo"], undefined)).toBe("/g");
 		expect(landingPath(["familia", "trabajo"], "trabajo")).toBe(
-			"/g/trabajo/sesiones",
+			"/g/trabajo/sessions",
 		);
-		expect(landingPath(["familia"], undefined)).toBe("/g/familia/sesiones");
+		expect(landingPath(["familia"], undefined)).toBe("/g/familia/sessions");
 		expect(landingPath([], "familia")).toBe("/g");
 	});
 });
 
 describe("hrefForGroup", () => {
 	it("conserva la sección", () => {
-		expect(hrefForGroup("trabajo", "materiales")).toBe("/g/trabajo/materiales");
+		expect(hrefForGroup("trabajo", "materials")).toBe("/g/trabajo/materials");
 	});
 });
 
@@ -47,7 +45,7 @@ describe("resolveActiveGroup", () => {
 
 	it("la URL manda sobre la memoria", () => {
 		expect(
-			resolveActiveGroup(groups, "/g/trabajo/sesiones", "familia"),
+			resolveActiveGroup(groups, "/g/trabajo/sessions", "familia"),
 		).toEqual({
 			slug: "trabajo",
 		});
@@ -60,7 +58,7 @@ describe("resolveActiveGroup", () => {
 	});
 
 	it("en una ruta de grupo desconocida no finge un activo", () => {
-		expect(resolveActiveGroup(groups, "/g/unirse", "familia")).toBeNull();
+		expect(resolveActiveGroup(groups, "/g/join", "familia")).toBeNull();
 		expect(resolveActiveGroup(groups, "/g/ajeno", "familia")).toBeNull();
 	});
 

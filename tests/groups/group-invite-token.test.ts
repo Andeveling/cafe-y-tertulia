@@ -28,13 +28,13 @@ describe("group invite token (patrón ADR-0011)", () => {
 		expect(await verifyGroupInviteToken("basura")).toBeNull();
 	});
 
-	it("la URL apunta al canje /g/unirse", async () => {
+	it("la URL apunta al canje /g/join", async () => {
 		const token = await signGroupInviteToken({
 			inviteId: "inv-1",
 			groupId: "g-1",
 		});
 		expect(groupInviteUrl(token)).toBe(
-			`https://app.test/g/unirse?token=${encodeURIComponent(token)}`,
+			`https://app.test/g/join?token=${encodeURIComponent(token)}`,
 		);
 	});
 });

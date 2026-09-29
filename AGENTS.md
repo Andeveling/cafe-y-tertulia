@@ -19,7 +19,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Human first: explicit over clever, early returns, full names, no abbreviations.
 - Self-documenting names: verb + context (`createTertulia`, `isSeatTaken`).
-- Language: identifiers and top-level routes in English, keeping `CONTEXT.md` domain terms as-is (`createTertulia`, `listBiblioteca`); Spanish lives in UI text and under `/g/[slug]/` routes (`materiales`, `sesiones`).
+- Language: identifiers, top-level routes and group sub-routes in English, keeping `CONTEXT.md` domain terms as-is (`createTertulia`, `listBiblioteca`); Spanish lives in UI text only (`materiales`, `sesiones` as visible words, never as path segments).
 - Comments explain why: decision, tradeoff, or gotcha the code cannot show; never restate what the code does.
 - One file = one module: one public export, helpers stay private; split when the file answers two jobs.
 - Small interface, deep implementation: few exports, simple params, complexity hidden inside.

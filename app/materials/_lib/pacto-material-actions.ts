@@ -41,7 +41,7 @@ type PactRpcRow = {
 };
 
 function materialsPath(slug: string): string {
-	return `/g/${slug}/materiales`;
+	return `/g/${slug}/materials`;
 }
 
 const DEFAULT_PACT_RANGE = "Por definir";

@@ -15,7 +15,7 @@ export type RegisterState = {
  * Registro abierto (ADR-0014): cualquiera crea su cuenta de Miembro sin
  * padrino. Crea la identidad auth + la fila de Miembro en estado `activo`
  * con nombre visible, inicia sesión y vuelve al `next` (p. ej. el canje
- * /g/unirse?token=…), que gana siempre a la memoria.
+ * /g/join?token=…), que gana siempre a la memoria.
  */
 export async function signUp(
 	_prev: RegisterState,

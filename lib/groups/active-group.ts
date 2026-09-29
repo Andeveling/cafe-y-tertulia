@@ -1,9 +1,9 @@
 /** Cookie del último Grupo visitado. No es un grupo por defecto. */
 export const LAST_GROUP_COOKIE = "last_group_slug";
 
-const RESERVED_SLUGS = new Set(["unirse"]);
+const RESERVED_SLUGS = new Set(["join"]);
 
-export type GroupSection = "home" | "sesiones" | "materiales" | "ajustes";
+export type GroupSection = "home" | "sessions" | "materials" | "settings";
 
 /** Slug de `/g/{slug}/…`, o null si la ruta no es un Grupo. */
 export function slugFromGroupPath(pathname: string): string | null {
@@ -16,16 +16,16 @@ export function slugFromGroupPath(pathname: string): string | null {
 
 /** Sección para conservar al cambiar de Grupo. Un formulario vuelve a la lista. */
 export function sectionFromGroupPath(pathname: string): GroupSection {
-	if (/^\/g\/[^/]+\/materiales(?:\/|$)/.test(pathname)) return "materiales";
-	if (/^\/g\/[^/]+\/sesiones(?:\/|$)/.test(pathname)) return "sesiones";
-	if (/^\/g\/[^/]+\/ajustes(?:\/|$)/.test(pathname)) return "ajustes";
+	if (/^\/g\/[^/]+\/materials(?:\/|$)/.test(pathname)) return "materials";
+	if (/^\/g\/[^/]+\/sessions(?:\/|$)/.test(pathname)) return "sessions";
+	if (/^\/g\/[^/]+\/settings(?:\/|$)/.test(pathname)) return "settings";
 	return "home";
 }
 
 export function hrefForGroup(slug: string, section: GroupSection): string {
-	if (section === "materiales") return `/g/${slug}/materiales`;
-	if (section === "sesiones") return `/g/${slug}/sesiones`;
-	if (section === "ajustes") return `/g/${slug}/ajustes`;
+	if (section === "materials") return `/g/${slug}/materials`;
+	if (section === "sessions") return `/g/${slug}/sessions`;
+	if (section === "settings") return `/g/${slug}/settings`;
 	return `/g/${slug}`;
 }
 
@@ -36,7 +36,7 @@ export function hrefForGroup(slug: string, section: GroupSection): string {
 export function landingPath(
 	slugs: string[],
 	remembered: string | undefined,
-	section: GroupSection = "sesiones",
+	section: GroupSection = "sessions",
 ): string {
 	const slug =
 		slugs.length === 1
@@ -52,7 +52,7 @@ export type ResolvableGroup = { slug: string };
 
 /**
  * El Grupo activo para el cromo. La URL manda; fuera de un Grupo se usa
- * la memoria. Dentro de una ruta de Grupo que no reconozco (unirse,
+ * la memoria. Dentro de una ruta de Grupo que no reconozco (join,
  * Grupo ajeno) no finjo un activo: devuelvo null aunque haya memoria.
  */
 export function resolveActiveGroup<T extends ResolvableGroup>(

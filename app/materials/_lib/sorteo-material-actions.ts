@@ -36,7 +36,7 @@ const INCOMPLETE_DRAW_ERROR =
 	"No se pudo resolver el sorteo: respuesta incompleta.";
 
 function materialsPath(slug: string): string {
-	return `/g/${slug}/materiales`;
+	return `/g/${slug}/materials`;
 }
 
 function normalizeMaterialRange(range?: string | null): string {

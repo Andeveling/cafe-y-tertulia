@@ -4,7 +4,7 @@ import { requireGroupPage } from "@/lib/groups/page-gate";
 import { getGroupBySlug, getGroupSettingsMembers } from "@/lib/groups/queries";
 
 /**
- * /g/{slug}/ajustes — gestión del grupo, solo admin. Los miembros ven
+ * /g/{slug}/settings — gestión del grupo, solo admin. Los miembros ven
  * solo la lista (sin controles de gestión).
  */
 export default async function GroupSettingsPage({

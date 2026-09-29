@@ -53,5 +53,5 @@ export async function verifyGroupInviteToken(
 
 /** URL compartible de canje (válida por cualquier canal). */
 export function groupInviteUrl(token: string): string {
-	return `${siteUrl()}/g/unirse?token=${encodeURIComponent(token)}`;
+	return `${siteUrl()}/g/join?token=${encodeURIComponent(token)}`;
 }

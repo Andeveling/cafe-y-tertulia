@@ -35,8 +35,8 @@ describe("registro abierto", () => {
 });
 
 describe("retorno next", () => {
-	it("preserva el canje /g/unirse?token=…", () => {
-		expect(memberRedirect("/g/unirse?token=abc")).toBe("/g/unirse?token=abc");
+	it("preserva el canje /g/join?token=…", () => {
+		expect(memberRedirect("/g/join?token=abc")).toBe("/g/join?token=abc");
 	});
 
 	it("rechaza URLs externas o sin barra", () => {
@@ -75,8 +75,8 @@ describe("retorno withNext", () => {
 	});
 
 	it("preserva el destino interno", () => {
-		expect(withNext("/auth/register", "/g/unirse?token=abc")).toBe(
-			"/auth/register?next=%2Fg%2Funirse%3Ftoken%3Dabc",
+		expect(withNext("/auth/register", "/g/join?token=abc")).toBe(
+			"/auth/register?next=%2Fg%2Fjoin%3Ftoken%3Dabc",
 		);
 	});
 

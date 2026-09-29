@@ -8,8 +8,8 @@ const root = join(here, "..", "..");
 
 const ACTIONS_SOURCE = "app/materials/_lib/materials-actions.ts";
 const DIALOG_SOURCE = "app/_components/session-create-dialog.tsx";
-const SHELF_SOURCE = "app/g/[slug]/materiales/page.tsx";
-const NEW_ROUTE_SOURCE = "app/g/[slug]/materiales/nuevo/page.tsx";
+const SHELF_SOURCE = "app/g/[slug]/materials/page.tsx";
+const NEW_ROUTE_SOURCE = "app/g/[slug]/materials/new/page.tsx";
 
 function readSource(rel: string): string {
 	try {
@@ -44,7 +44,7 @@ describe("sin propuesta directa a estantería (#91)", () => {
 	it("la estantería del grupo no ofrece proponer directo", () => {
 		const page = readSource(SHELF_SOURCE);
 		expect(page).not.toContain("Proponer material");
-		expect(page).not.toContain("materiales/nuevo");
+		expect(page).not.toContain("materials/new");
 		expect(page).toContain("getMaterials");
 	});
 
