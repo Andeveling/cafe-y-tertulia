@@ -55,33 +55,38 @@ export function MaterialsGrid({
 	materials: MaterialWithSessionsCount[];
 }) {
 	return (
-		<ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+		<ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{materials.map((m) => (
 				<li key={m.id}>
 					<Link href={`/materials/${m.id}`} className="block group h-full">
-						<Card className="h-full overflow-hidden py-0 gap-0 hover:shadow-md transition-all hover:-translate-y-0.5">
-							<div className="relative h-28 overflow-hidden bg-gradient-to-br from-secondary via-secondary/60 to-accent/60">
+						<Card className="h-full overflow-hidden py-0 gap-0 transition-shadow hover:ring-foreground/25">
+							<div className="relative h-28 overflow-hidden bg-muted/40">
 								<div className="absolute inset-0">
 									<MaterialCover
 										src={m.image_url}
 										alt=""
 										fallback={
-											<div className="flex h-full w-full items-start p-4">
+											<div className="relative h-full w-full overflow-hidden">
+												<span className="absolute top-4 left-4 text-label-sm font-semibold uppercase tracking-widest text-muted-foreground">
+													{MATERIAL_KIND_LABELS[m.kind] ?? "Material"}
+												</span>
 												<HugeiconsIcon
 													icon={KIND_ICON[m.kind] ?? Book01Icon}
-													className="size-10 text-primary/40"
+													className="absolute -bottom-4 right-3 size-24 text-primary/25"
 													aria-hidden="true"
 												/>
 											</div>
 										}
 									/>
 								</div>
-								<Badge
-									variant={m.status === "in_progress" ? "default" : "secondary"}
-									className="absolute top-4 right-4 text-xs"
-								>
-									{MATERIAL_STATUS_LABELS[m.status]}
-								</Badge>
+								{m.status !== "proposed" ? (
+									<Badge
+										variant={m.status === "in_progress" ? "default" : "secondary"}
+										className="absolute top-4 right-4 text-xs"
+									>
+										{MATERIAL_STATUS_LABELS[m.status]}
+									</Badge>
+								) : null}
 							</div>
 							<CardContent className="flex flex-1 flex-col gap-2 px-4 py-4">
 								<p className="line-clamp-2 font-medium leading-tight group-hover:text-primary transition-colors">
