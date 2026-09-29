@@ -46,8 +46,6 @@ function clubHeading(
 ): { title: string; as: "h1" | "p" } | null {
 	if (pathname === "/") return { title: "Sesiones", as: "h1" };
 	if (pathname === "/materials") return { title: "Materiales", as: "h1" };
-	if (pathname === "/materials/new")
-		return { title: "Proponer material", as: "h1" };
 	if (/^\/materials\/sessions\/[^/]+$/.test(pathname))
 		return { title: "Histórico", as: "p" };
 	if (/^\/materials\/[^/]+$/.test(pathname))

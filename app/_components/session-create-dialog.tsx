@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -28,31 +27,11 @@ import {
 	NativeSelect,
 	NativeSelectOption,
 } from "@/components/ui/native-select";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-
-const KINDS = ["book", "podcast", "video", "article"] as const;
-const KIND_LABELS: Record<(typeof KINDS)[number], string> = {
-	book: "Libro",
-	podcast: "Podcast",
-	video: "Video",
-	article: "Artículo",
-};
 
 const schema = z
 	.object({
 		label: z.string().optional(),
 		materialMode: z.string(),
-		existingMaterialId: z.string().optional(),
-		newTitle: z.string().optional(),
-		newAuthor: z.string().optional(),
-		newKind: z.enum(KINDS).optional(),
 		range: z.string().optional(),
 		mode: z.enum(["now", "scheduled"]),
 		scheduledAt: z.date().optional(),
@@ -60,15 +39,7 @@ const schema = z
 	.refine((d) => d.mode !== "scheduled" || d.scheduledAt !== undefined, {
 		message: "La fecha es obligatoria.",
 		path: ["scheduledAt"],
-	})
-	.refine(
-		(d) =>
-			d.materialMode !== "new" || (d.newTitle?.trim() && d.newAuthor?.trim()),
-		{
-			message: "Título y autor son obligatorios.",
-			path: ["newTitle"],
-		},
-	);
+	});
 
 type Values = z.infer<typeof schema>;
 
@@ -94,9 +65,6 @@ export function SessionCreateDialog({
 		label: `${uid}-label`,
 		materialMode: `${uid}-materialMode`,
 		range: `${uid}-range`,
-		newTitle: `${uid}-newTitle`,
-		newAuthor: `${uid}-newAuthor`,
-		newKind: `${uid}-newKind`,
 		scheduledAt: `${uid}-scheduledAt`,
 	};
 
@@ -105,16 +73,17 @@ export function SessionCreateDialog({
 		defaultValues: {
 			label: "",
 			materialMode: "none",
-			existingMaterialId: "",
-			newTitle: "",
-			newAuthor: "",
-			newKind: "book",
 			range: "",
 			mode: initialMode,
 		},
 	});
 	const materialMode = form.watch("materialMode");
-	const materialError = form.formState.errors.newTitle;
+	const hasMaterial = materialMode !== "none";
+
+	function selectMode(next: "now" | "scheduled") {
+		setMode(next);
+		form.setValue("mode", next);
+	}
 
 	function onSubmit(data: Values) {
 		startTransition(async () => {
@@ -126,15 +95,8 @@ export function SessionCreateDialog({
 						? data.scheduledAt.toISOString()
 						: undefined,
 			};
-			if (data.materialMode !== "none" && data.materialMode !== "new") {
+			if (data.materialMode !== "none") {
 				payload.materialId = data.materialMode;
-				payload.range = data.range?.trim() || undefined;
-			} else if (data.materialMode === "new") {
-				payload.material = {
-					title: data.newTitle!.trim(),
-					author: data.newAuthor!.trim(),
-					kind: data.newKind ?? "book",
-				};
 				payload.range = data.range?.trim() || undefined;
 			}
 			const result = await createSession(payload);
@@ -200,109 +162,21 @@ export function SessionCreateDialog({
 												{m.title}
 											</NativeSelectOption>
 										))}
-										<NativeSelectOption value="new">Nuevo</NativeSelectOption>
 									</NativeSelect>
 								</Field>
 							)}
 						/>
-						{materialMode !== "none" && materialMode !== "new" && (
-							<>
-								<input
-									type="hidden"
-									{...form.register("existingMaterialId")}
-									value={materialMode}
-								/>
-								<Controller
-									name="range"
-									control={form.control}
-									render={({ field }) => (
-										<Field>
-											<FieldLabel htmlFor={ids.range}>Rango</FieldLabel>
-											<Input {...field} id={ids.range} placeholder="Cap. 1–5" />
-										</Field>
-									)}
-								/>
-							</>
-						)}
-						{materialMode === "new" && (
-							<>
-								<Controller
-									name="newTitle"
-									control={form.control}
-									render={({ field, fieldState }) => (
-										<Field data-invalid={fieldState.invalid}>
-											<FieldLabel htmlFor={ids.newTitle}>Título</FieldLabel>
-											<Input
-												{...field}
-												id={ids.newTitle}
-												placeholder="El Quijote"
-												aria-invalid={fieldState.invalid}
-											/>
-											{fieldState.invalid && (
-												<FieldError errors={[fieldState.error]} />
-											)}
-										</Field>
-									)}
-								/>
-								<Controller
-									name="newAuthor"
-									control={form.control}
-									render={({ field }) => (
-										<Field>
-											<FieldLabel htmlFor={ids.newAuthor}>Autor</FieldLabel>
-											<Input
-												{...field}
-												id={ids.newAuthor}
-												placeholder="Miguel de Cervantes"
-												aria-invalid={materialError ? true : undefined}
-											/>
-										</Field>
-									)}
-								/>
-								<Controller
-									name="newKind"
-									control={form.control}
-									render={({ field }) => (
-										<Field>
-											<FieldLabel htmlFor={ids.newKind}>Tipo</FieldLabel>
-											<Select
-												name={field.name}
-												value={field.value}
-												onValueChange={field.onChange}
-											>
-												<SelectTrigger id={ids.newKind} className="w-full">
-													<SelectValue placeholder="Tipo">
-														{(v: string | null) =>
-															v
-																? KIND_LABELS[v as (typeof KINDS)[number]]
-																: null
-														}
-													</SelectValue>
-												</SelectTrigger>
-												<SelectContent alignItemWithTrigger={false}>
-													<SelectGroup>
-														{KINDS.map((o) => (
-															<SelectItem key={o} value={o}>
-																{KIND_LABELS[o]}
-															</SelectItem>
-														))}
-													</SelectGroup>
-												</SelectContent>
-											</Select>
-										</Field>
-									)}
-								/>
-								<Controller
-									name="range"
-									control={form.control}
-									render={({ field }) => (
-										<Field>
-											<FieldLabel htmlFor={ids.range}>Rango</FieldLabel>
-											<Input {...field} id={ids.range} placeholder="Cap. 1–5" />
-										</Field>
-									)}
-								/>
-							</>
+						{hasMaterial && (
+							<Controller
+								name="range"
+								control={form.control}
+								render={({ field }) => (
+									<Field>
+										<FieldLabel htmlFor={ids.range}>Rango</FieldLabel>
+										<Input {...field} id={ids.range} placeholder="Cap. 1–5" />
+									</Field>
+								)}
+							/>
 						)}
 					</FieldGroup>
 					<div className="flex items-end gap-3">
@@ -312,10 +186,7 @@ export function SessionCreateDialog({
 								variant={mode === "now" ? "default" : "outline"}
 								size="sm"
 								aria-pressed={mode === "now"}
-								onClick={() => {
-									setMode("now");
-									form.setValue("mode", "now");
-								}}
+								onClick={() => selectMode("now")}
 							>
 								Ahora
 							</Button>
@@ -324,10 +195,7 @@ export function SessionCreateDialog({
 								variant={mode === "scheduled" ? "default" : "outline"}
 								size="sm"
 								aria-pressed={mode === "scheduled"}
-								onClick={() => {
-									setMode("scheduled");
-									form.setValue("mode", "scheduled");
-								}}
+								onClick={() => selectMode("scheduled")}
 							>
 								Programar
 							</Button>

@@ -612,6 +612,45 @@ export type Database = {
 					},
 				];
 			};
+			library_items: {
+				Row: {
+					author: string;
+					created_at: string;
+					id: string;
+					image_url: string | null;
+					kind: Database["public"]["Enums"]["material_kind"];
+					motive: string | null;
+					owner_id: string;
+					shared_once: boolean;
+					source_url: string | null;
+					title: string;
+				};
+				Insert: {
+					author: string;
+					created_at?: string;
+					id?: string;
+					image_url?: string | null;
+					kind: Database["public"]["Enums"]["material_kind"];
+					motive?: string | null;
+					owner_id: string;
+					shared_once?: boolean;
+					source_url?: string | null;
+					title: string;
+				};
+				Update: {
+					author?: string;
+					created_at?: string;
+					id?: string;
+					image_url?: string | null;
+					kind?: Database["public"]["Enums"]["material_kind"];
+					motive?: string | null;
+					owner_id?: string;
+					shared_once?: boolean;
+					source_url?: string | null;
+					title?: string;
+				};
+				Relationships: [];
+			};
 			material_categories: {
 				Row: {
 					category_id: string;
@@ -654,6 +693,150 @@ export type Database = {
 						referencedColumns: ["id"];
 					},
 				];
+			};
+			material_draws: {
+				Row: {
+					candidate_ids: string[];
+					created_at: string;
+					created_by: string | null;
+					group_id: string;
+					id: string;
+					kind: Database["public"]["Enums"]["material_kind"];
+					material_id: string | null;
+					origin: Database["public"]["Enums"]["material_draw_origin"];
+					session_id: string | null;
+					winner_nomination_id: string | null;
+				};
+				Insert: {
+					candidate_ids?: string[];
+					created_at?: string;
+					created_by?: string | null;
+					group_id: string;
+					id?: string;
+					kind: Database["public"]["Enums"]["material_kind"];
+					material_id?: string | null;
+					origin: Database["public"]["Enums"]["material_draw_origin"];
+					session_id?: string | null;
+					winner_nomination_id?: string | null;
+				};
+				Update: {
+					candidate_ids?: string[];
+					created_at?: string;
+					created_by?: string | null;
+					group_id?: string;
+					id?: string;
+					kind?: Database["public"]["Enums"]["material_kind"];
+					material_id?: string | null;
+					origin?: Database["public"]["Enums"]["material_draw_origin"];
+					session_id?: string | null;
+					winner_nomination_id?: string | null;
+				};
+				Relationships: [];
+			};
+			material_nominations: {
+				Row: {
+					author: string;
+					created_at: string;
+					decided_at: string | null;
+					group_id: string;
+					id: string;
+					image_url: string | null;
+					kind: Database["public"]["Enums"]["material_kind"];
+					library_item_id: string | null;
+					proposed_by: string;
+					source_url: string | null;
+					status: Database["public"]["Enums"]["nomination_status"];
+					title: string;
+				};
+				Insert: {
+					author: string;
+					created_at?: string;
+					decided_at?: string | null;
+					group_id: string;
+					id?: string;
+					image_url?: string | null;
+					kind: Database["public"]["Enums"]["material_kind"];
+					library_item_id?: string | null;
+					proposed_by: string;
+					source_url?: string | null;
+					status?: Database["public"]["Enums"]["nomination_status"];
+					title: string;
+				};
+				Update: {
+					author?: string;
+					created_at?: string;
+					decided_at?: string | null;
+					group_id?: string;
+					id?: string;
+					image_url?: string | null;
+					kind?: Database["public"]["Enums"]["material_kind"];
+					library_item_id?: string | null;
+					proposed_by?: string;
+					source_url?: string | null;
+					status?: Database["public"]["Enums"]["nomination_status"];
+					title?: string;
+				};
+				Relationships: [];
+			};
+			material_pact_approvals: {
+				Row: {
+					approver: string;
+					created_at: string;
+					pact_id: string;
+				};
+				Insert: {
+					approver: string;
+					created_at?: string;
+					pact_id: string;
+				};
+				Update: {
+					approver?: string;
+					created_at?: string;
+					pact_id?: string;
+				};
+				Relationships: [];
+			};
+			material_pacts: {
+				Row: {
+					created_at: string;
+					decided_at: string | null;
+					expires_at: string | null;
+					group_id: string;
+					id: string;
+					material_id: string | null;
+					mode: Database["public"]["Enums"]["pact_mode"];
+					nomination_id: string;
+					proposed_by: string;
+					session_id: string | null;
+					status: Database["public"]["Enums"]["pact_status"];
+				};
+				Insert: {
+					created_at?: string;
+					decided_at?: string | null;
+					expires_at?: string | null;
+					group_id: string;
+					id?: string;
+					material_id?: string | null;
+					mode: Database["public"]["Enums"]["pact_mode"];
+					nomination_id: string;
+					proposed_by: string;
+					session_id?: string | null;
+					status?: Database["public"]["Enums"]["pact_status"];
+				};
+				Update: {
+					created_at?: string;
+					decided_at?: string | null;
+					expires_at?: string | null;
+					group_id?: string;
+					id?: string;
+					material_id?: string | null;
+					mode?: Database["public"]["Enums"]["pact_mode"];
+					nomination_id?: string;
+					proposed_by?: string;
+					session_id?: string | null;
+					status?: Database["public"]["Enums"]["pact_status"];
+				};
+				Relationships: [];
 			};
 			materials: {
 				Row: {
@@ -1304,6 +1487,45 @@ export type Database = {
 					isSetofReturn: true;
 				};
 			};
+			nominate_from_library: {
+				Args: { p_group_id: string; p_library_item_id: string };
+				Returns: string;
+			};
+			approve_material_pact: {
+				Args: { p_pact_id: string };
+				Returns: Json;
+			};
+			expire_material_pacts: { Args: Record<string, never>; Returns: Json };
+			propose_material_pact: {
+				Args: { p_nomination_id: string };
+				Returns: string;
+			};
+			resolve_material_draw: {
+				Args: {
+					p_group_id: string;
+					p_kind: Database["public"]["Enums"]["material_kind"];
+					p_present_ids: string[];
+					p_range?: string;
+					p_scheduled_at?: string | null;
+				};
+				Returns: Json;
+			};
+			resolve_nomination_as_pact: {
+				Args: {
+					p_nomination_id: string;
+					p_range?: string;
+					p_scheduled_at?: string | null;
+				};
+				Returns: Json;
+			};
+			resolve_room_pact: {
+				Args: {
+					p_nomination_id: string;
+					p_range?: string;
+					p_scheduled_at?: string | null;
+				};
+				Returns: Json;
+			};
 			room_snapshot: { Args: { target_session_id: string }; Returns: Json };
 			set_spectator: {
 				Args: {
@@ -1326,6 +1548,10 @@ export type Database = {
 				};
 				Returns: undefined;
 			};
+			withdraw_nomination: {
+				Args: { p_nomination_id: string };
+				Returns: undefined;
+			};
 		};
 		Enums: {
 			assignment_state: "hidden" | "exposition" | "complement" | "complete";
@@ -1341,9 +1567,13 @@ export type Database = {
 			group_member_role: "admin" | "member";
 			group_visibility: "public" | "private";
 			invitation_status: "pending" | "accepted" | "expired";
+			material_draw_origin: "draw" | "pact";
 			material_kind: "book" | "podcast" | "video" | "article";
 			material_status: "proposed" | "selected" | "in_progress" | "finished";
 			member_status: "invited" | "active" | "left";
+			nomination_status: "active" | "withdrawn" | "won";
+			pact_mode: "room" | "async";
+			pact_status: "pending" | "agreed" | "expired" | "cancelled";
 			participant_role: "member" | "spectator";
 			recognition_category:
 				| "trivia_master"

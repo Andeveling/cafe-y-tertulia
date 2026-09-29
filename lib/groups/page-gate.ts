@@ -38,7 +38,7 @@ export async function requireGroupPage(
 
 /**
  * Puerta de Miembro activo sin Grupo: para las páginas que solo orientan
- * (/, /materials, /materials/new) antes de redirigir al Grupo activo.
+ * (/, /materials) antes de redirigir al Grupo activo.
  */
 export async function requireActiveMemberPage(): Promise<{
 	supabase: Awaited<ReturnType<typeof getCurrentMember>>["supabase"];

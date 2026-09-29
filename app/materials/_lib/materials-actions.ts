@@ -1,87 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { type ActionResult, runServerAction } from "@/lib/server-action";
-import type { MaterialKind } from "./constants";
 import { SESSION_NEXT_STATUS } from "./constants";
-import { isValidMaterialUrl, toNullableUrl } from "./material-urls";
-
-export type MaterialInput = {
-	title: string;
-	kind: MaterialKind;
-	author: string;
-	imageUrl?: string | null;
-	sourceUrl?: string | null;
-};
-
-function materialUrlsOrError(input: MaterialInput): ActionResult | null {
-	if (!isValidMaterialUrl(input.imageUrl)) {
-		return { ok: false, error: "La imagen debe empezar por https://" };
-	}
-	if (!isValidMaterialUrl(input.sourceUrl)) {
-		return { ok: false, error: "La fuente debe empezar por https://" };
-	}
-	return null;
-}
-
-export async function createMaterial(
-	input: MaterialInput & {
-		groupId: string;
-		slug: string;
-		categoryIds?: string[];
-	},
-): Promise<ActionResult> {
-	return runServerAction({
-		requireAuth: true,
-		run: async ({ supabase, user }) => {
-			const urlError = materialUrlsOrError(input);
-			if (urlError) return urlError;
-			const { data: material, error } = await supabase
-				.from("materials")
-				.insert({
-					title: input.title.trim(),
-					kind: input.kind,
-					author: input.author.trim(),
-					image_url: toNullableUrl(input.imageUrl),
-					source_url: toNullableUrl(input.sourceUrl),
-					created_by: user!.id,
-					group_id: input.groupId,
-				})
-				.select("id")
-				.single();
-
-			if (error || !material) {
-				return {
-					ok: false,
-					error: `No se pudo crear el material: ${error?.message ?? ""}`,
-				};
-			}
-
-			if (input.categoryIds && input.categoryIds.length > 0) {
-				const unique = [...new Set(input.categoryIds)];
-				const { error: catError } = await supabase
-					.from("material_categories")
-					.insert(
-						unique.map((category_id) => ({
-							material_id: material.id,
-							category_id,
-							group_id: input.groupId,
-						})),
-					);
-				if (catError) {
-					return {
-						ok: false,
-						error: `No se pudieron asignar categorías: ${catError.message}`,
-					};
-				}
-			}
-
-			revalidatePath(`/g/${input.slug}/materiales`);
-			redirect(`/g/${input.slug}/materiales`);
-		},
-	});
-}
 
 /**
  * Avanza el pipeline en un solo sentido: propuesto → seleccionado → en curso → terminado.
@@ -127,49 +48,26 @@ export async function advanceMaterial(id: string): Promise<ActionResult> {
 	});
 }
 
+/**
+ * Crea una Sesión sobre un Material existente (o sin Material).
+ * La estantería solo crece por sorteo o pacto (#91): esta acción ya no
+ * acepta material inline, solo ata un Material que ya está en el Grupo.
+ */
 export async function createSession(input: {
 	groupId?: string;
 	materialId?: string | null;
 	range?: string | null;
 	scheduledAt?: string | null;
-	material?: MaterialInput;
 }): Promise<ActionResult | { ok: true; sessionId: string }> {
 	return runServerAction({
 		requireAuth: true,
-		run: async ({ supabase, user }) => {
-			let materialId = input.materialId ?? null;
-			if (input.material) {
-				if (!input.groupId) {
-					return { ok: false, error: "Grupo requerido." };
-				}
-				const groupId = input.groupId;
-				const urlError = materialUrlsOrError(input.material);
-				if (urlError) return urlError;
-				const { data, error } = await supabase
-					.from("materials")
-					.insert({
-						title: input.material.title.trim(),
-						kind: input.material.kind,
-						author: input.material.author.trim(),
-						image_url: toNullableUrl(input.material.imageUrl),
-						source_url: toNullableUrl(input.material.sourceUrl),
-						created_by: user!.id,
-						group_id: groupId,
-					})
-					.select("id")
-					.single();
-				if (error || !data) {
-					return {
-						ok: false,
-						error: `No se pudo crear el material: ${error?.message ?? ""}`,
-					};
-				}
-				materialId = data.id;
-			}
+		run: async ({ supabase }) => {
+			const materialId = input.materialId ?? undefined;
+			const range = input.range?.trim() || undefined;
 
 			const { data: sessionId, error } = await supabase.rpc("create_session", {
-				p_material_id: materialId ?? undefined,
-				p_range: input.range?.trim() || undefined,
+				p_material_id: materialId,
+				p_range: range,
 				p_scheduled_at: input.scheduledAt ?? undefined,
 				p_group_id: input.groupId,
 			});
@@ -186,6 +84,7 @@ export async function createSession(input: {
 			if (materialId) revalidatePath(`/materials/${materialId}`);
 			return { ok: true, sessionId };
 		},
+		// runServerAction solo tipa ActionResult: el cast conserva sessionId.
 	}) as Promise<ActionResult | { ok: true; sessionId: string }>;
 }
 

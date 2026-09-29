@@ -1,53 +1,15 @@
-import { ArrowLeftIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { MaterialForm } from "@/app/materials/_components/material-form";
-import { listCategories } from "@/app/materials/_lib/categories";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { requireGroupPage } from "@/lib/groups/page-gate";
-import { getGroupBySlug } from "@/lib/groups/queries";
+import { redirect } from "next/navigation";
 
-export const metadata = { title: "Proponer material · Café y Tertulias" };
-
+/**
+ * La propuesta directa a la estantería ya no existe (#91): toda entrada
+ * nueva nace de una ganadora (sorteo o pacto). Esta ruta solo redirige
+ * a la estantería para no romper enlaces guardados.
+ */
 export default async function NewGroupMaterialPage({
 	params,
 }: {
 	params: Promise<{ slug: string }>;
 }) {
 	const { slug } = await params;
-	const { supabase, group } = await requireGroupPage(slug);
-
-	const categories = await listCategories(supabase, group.id).catch(() => []);
-
-	return (
-		<div className="flex w-full max-w-xl flex-col gap-6">
-			<Button
-				variant="ghost"
-				size="sm"
-				nativeButton={false}
-				render={<Link href={`/g/${slug}/materiales`} />}
-				className="w-fit"
-			>
-				<HugeiconsIcon icon={ArrowLeftIcon} data-icon="inline-start" />
-				Volver a materiales
-			</Button>
-
-			<Card>
-				<CardHeader>
-					<p className="text-sm text-muted-foreground">
-						Entra como propuesto en {group.name}.
-					</p>
-				</CardHeader>
-				<CardContent>
-					<MaterialForm
-						groupId={group.id}
-						slug={slug}
-						categories={categories}
-					/>
-				</CardContent>
-			</Card>
-		</div>
-	);
+	redirect(`/g/${slug}/materiales`);
 }
