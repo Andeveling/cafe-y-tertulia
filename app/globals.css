@@ -79,6 +79,14 @@
 	--control-height-lg: 2.75rem;
 	/* DESIGN.md container-max — pozo del club, no el inset de shadcn. */
 	--max-width-container: 1200px;
+	/* Giro del loading. Lineal: un ease haría que la taza se frene en cada vuelta. */
+	--animate-cup-turn: cup-turn 3.2s linear infinite;
+}
+
+@keyframes cup-turn {
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* DESIGN.md label-sm — micro-labels uppercase del sistema (11px). */
