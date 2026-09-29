@@ -3,21 +3,11 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { MaterialKind } from "./constants";
-import type { MaterialDrawOrigin, NominationStatus } from "./sorteo-material";
+import type { Postulacion } from "./postulacion-store";
+import type { MaterialDrawOrigin } from "./sorteo-material";
 
-export type NominationRow = {
-	id: string;
-	group_id: string;
-	library_item_id: string | null;
-	proposed_by: string;
-	kind: MaterialKind;
-	title: string;
-	author: string;
-	image_url: string | null;
-	source_url: string | null;
-	status: NominationStatus;
-	created_at: string;
-};
+/** Fila de postulación para la urna: misma forma que el Grupo ve. */
+export type NominationRow = Postulacion;
 
 export type MaterialDrawRow = {
 	id: string;

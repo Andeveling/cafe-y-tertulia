@@ -35,9 +35,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-const bibliotecaFormSchema = bibliotecaInputSchema;
-
-type BibliotecaFormValues = z.infer<typeof bibliotecaFormSchema>;
+type BibliotecaFormValues = z.infer<typeof bibliotecaInputSchema>;
 
 /**
  * Formulario de Biblioteca personal (#88): crea o edita un candidato
@@ -53,7 +51,7 @@ export function BibliotecaForm({
 }) {
 	const [isPending, startTransition] = useTransition();
 	const form = useForm<BibliotecaFormValues>({
-		resolver: zodResolver(bibliotecaFormSchema),
+		resolver: zodResolver(bibliotecaInputSchema),
 		defaultValues: {
 			title: item?.title ?? "",
 			author: item?.author ?? "",

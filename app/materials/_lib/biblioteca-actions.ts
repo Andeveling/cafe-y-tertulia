@@ -42,11 +42,12 @@ export async function createBibliotecaAction(
 	return runServerAction({
 		requireAuth: true,
 		run: async ({ supabase, user }) => {
+			if (!user) return { ok: false, error: "Debes iniciar sesión." };
 			const validated = validateBibliotecaInput(input);
 			if ("error" in validated) return validated.error;
 			const { error } = await supabase.from("library_items").insert({
 				...validated.data,
-				owner_id: user!.id,
+				owner_id: user.id,
 			});
 			if (error) {
 				return { ok: false, error: `No se pudo guardar: ${error.message}` };

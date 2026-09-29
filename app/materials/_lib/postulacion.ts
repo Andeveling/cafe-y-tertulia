@@ -8,6 +8,8 @@ export type NominationCandidate = {
 	proposedBy: string;
 };
 
+export type NominationCheck = { ok: true } | { ok: false; error: string };
+
 /**
  * Postulación 1×formato (#88, PRD #86).
  *
@@ -21,7 +23,7 @@ export function canNominate(
 	active: NominationCandidate[],
 	kind: MaterialKind,
 	proposedBy: string,
-): { ok: true } | { ok: false; error: string } {
+): NominationCheck {
 	const clash = active.some(
 		(n) =>
 			n.status === "active" && n.kind === kind && n.proposedBy === proposedBy,

@@ -1,17 +1,20 @@
 import type { MaterialKind } from "./constants";
+import {
+	type NominationCandidate as BaseNominationCandidate,
+	canNominate,
+	type NominationCheck,
+	type NominationStatus,
+} from "./postulacion";
 
-export type NominationStatus = "active" | "withdrawn" | "won";
+export type { NominationCheck, NominationStatus };
+export { canNominate };
 
 export type MaterialDrawOrigin = "draw" | "pact";
 
-export type NominationCandidate = {
+/** Candidata del sorteo: la regla 1×formato más su identidad para la urna. */
+export type NominationCandidate = BaseNominationCandidate & {
 	id: string;
-	kind: MaterialKind;
-	status: NominationStatus;
-	proposedBy: string;
 };
-
-export type NominationCheck = { ok: true } | { ok: false; error: string };
 
 /**
  * Sorteo de Material intra-formato (#89, PRD #86).
@@ -20,33 +23,12 @@ export type NominationCheck = { ok: true } | { ok: false; error: string };
  * podcast), mínimo 2 postulados del formato declarado, tope 1 por presente,
  * ausentes/espectadores fuera (el caller pasa los presentes), bloqueo al
  * abrir (la urna se congela en candidate_ids) y perdedores que siguen
- * activos. La persistencia (índice parcial + RPC atómico resolve) replica
- * estas reglas en la base como defensa en profundidad.
+ * activos. La regla 1×formato vive en `./postulacion` (única fuente);
+ * la persistencia (índice parcial + RPC atómico resolve) la replica
+ * en la base como defensa en profundidad.
  */
 
-/** Máximo 1 postulación activa por formato, por Miembro y Grupo. */
-export function canNominate(
-	candidates: NominationCandidate[],
-	kind: MaterialKind,
-	proposedBy: string,
-): NominationCheck {
-	const hasActiveInKind = candidates.some(
-		(candidate) =>
-			candidate.status === "active" &&
-			candidate.kind === kind &&
-			candidate.proposedBy === proposedBy,
-	);
-	if (hasActiveInKind) {
-		return {
-			ok: false,
-			error: "Ya tienes una postulación activa en este formato.",
-		};
-	}
-	return { ok: true };
-}
-
-/**
- * Urna del formato declarado: solo activas de ese formato, solo presentes,
+/** Urna del formato declarado: solo activas de ese formato, solo presentes,
  * tope 1 por presente (la primera por orden de llegada gana el cupo).
  */
 export function buildDrawPool(

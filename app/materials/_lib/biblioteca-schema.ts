@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { MaterialKind } from "./constants";
-import { optionalHttpsUrl } from "./material-urls";
+import { optionalHttpsUrl, toNullableUrl } from "./material-urls";
 
 export const BIBLIOTECA_KINDS = [
 	"book",
@@ -45,11 +45,6 @@ export type NormalizedBibliotecaInput = {
 	motive: string | null;
 };
 
-function toNullableText(value?: string | null): string | null {
-	const trimmed = (value ?? "").trim();
-	return trimmed === "" ? null : trimmed;
-}
-
 /** Recorta y convierte vacíos en null. La DB nunca ve ''. */
 export function normalizeBibliotecaInput(
 	input: BibliotecaInput,
@@ -58,8 +53,8 @@ export function normalizeBibliotecaInput(
 		title: input.title.trim(),
 		author: input.author.trim(),
 		kind: input.kind,
-		image_url: toNullableText(input.imageUrl),
-		source_url: toNullableText(input.sourceUrl),
-		motive: toNullableText(input.motive),
+		image_url: toNullableUrl(input.imageUrl),
+		source_url: toNullableUrl(input.sourceUrl),
+		motive: toNullableUrl(input.motive),
 	};
 }

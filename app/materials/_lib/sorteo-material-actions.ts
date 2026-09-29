@@ -1,6 +1,6 @@
 "use server";
 
-import { type ActionResult, runServerAction } from "@/lib/server-action";
+import { runServerAction } from "@/lib/server-action";
 import type { MaterialKind } from "./constants";
 
 export type ResolveMaterialDrawResult = {
@@ -16,17 +16,6 @@ export type ResolveMaterialDrawInput = {
 	presentIds: string[];
 	range?: string | null;
 	scheduledAt?: string | null;
-	slug: string;
-};
-
-export type NominateFromLibraryInput = {
-	libraryItemId: string;
-	groupId: string;
-	slug: string;
-};
-
-export type WithdrawNominationInput = {
-	nominationId: string;
 	slug: string;
 };
 
@@ -71,9 +60,8 @@ function isCompleteDrawRow(row: ResolveMaterialDrawRpcRow): boolean {
 export async function resolveMaterialDraw(
 	input: ResolveMaterialDrawInput,
 ): Promise<ResolveMaterialDrawOutcome> {
-	// Holder (no `let` plano): la asignación ocurre dentro del closure de
-	// `run` y TypeScript estrecharía un `let` a `null`. El objeto const
-	// conserva la unión declarada al leerlo tras el `await`.
+	// Holder en objeto: la asignación ocurre dentro del closure de `run`
+	// y TypeScript no la propaga a un `let` externo.
 	const holder: { draw: ResolveMaterialDrawResult | null } = { draw: null };
 
 	const outcome = await runServerAction({
@@ -111,39 +99,4 @@ export async function resolveMaterialDraw(
 		return { ok: false, error: INCOMPLETE_DRAW_ERROR };
 	}
 	return { ok: true, ...holder.draw };
-}
-
-export async function nominateFromLibrary(
-	input: NominateFromLibraryInput,
-): Promise<ActionResult> {
-	return runServerAction({
-		requireAuth: true,
-		run: async ({ supabase }) => {
-			const { error } = await supabase.rpc("nominate_from_library", {
-				p_library_item_id: input.libraryItemId,
-				p_group_id: input.groupId,
-			});
-			if (error) {
-				return { ok: false, error: error.message };
-			}
-		},
-		revalidate: () => [materialsPath(input.slug)],
-	});
-}
-
-export async function withdrawNomination(
-	input: WithdrawNominationInput,
-): Promise<ActionResult> {
-	return runServerAction({
-		requireAuth: true,
-		run: async ({ supabase }) => {
-			const { error } = await supabase.rpc("withdraw_nomination", {
-				p_nomination_id: input.nominationId,
-			});
-			if (error) {
-				return { ok: false, error: error.message };
-			}
-		},
-		revalidate: () => [materialsPath(input.slug)],
-	});
 }

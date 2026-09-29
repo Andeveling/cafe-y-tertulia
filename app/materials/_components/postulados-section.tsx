@@ -36,11 +36,11 @@ async function PostularDesdeBiblioteca({
 		listPostulaciones(groupId),
 	]);
 	const candidates = postulaciones
-		.filter((p) => p.proposed_by === memberId)
-		.map((p) => ({
-			kind: p.kind,
-			status: p.status,
-			proposedBy: p.proposed_by,
+		.filter((postulacion) => postulacion.proposed_by === memberId)
+		.map((postulacion) => ({
+			kind: postulacion.kind,
+			status: postulacion.status,
+			proposedBy: postulacion.proposed_by,
 		}));
 
 	if (biblioteca.length === 0) {
@@ -58,7 +58,8 @@ async function PostularDesdeBiblioteca({
 	return (
 		<ul className="flex flex-col gap-3">
 			{biblioteca.map((item) => {
-				const check = canNominate(candidates, item.kind, memberId);
+				const quota = canNominate(candidates, item.kind, memberId);
+				const blockReason = quota.ok ? undefined : quota.error;
 				return (
 					<li
 						key={item.id}
@@ -69,16 +70,16 @@ async function PostularDesdeBiblioteca({
 							<p className="text-xs text-muted-foreground">
 								{item.author} · {MATERIAL_KIND_LABELS[item.kind]}
 							</p>
-							{!check.ok && (
-								<p className="text-xs text-muted-foreground">{check.error}</p>
+							{blockReason && (
+								<p className="text-xs text-muted-foreground">{blockReason}</p>
 							)}
 						</div>
 						<PostularButton
 							libraryItemId={item.id}
 							groupId={groupId}
 							slug={slug}
-							disabled={!check.ok}
-							disabledReason={!check.ok ? check.error : undefined}
+							disabled={!quota.ok}
+							disabledReason={blockReason}
 						/>
 					</li>
 				);
@@ -116,19 +117,23 @@ export async function PostuladosSection({
 					</p>
 				) : (
 					<ul className="flex flex-col gap-3">
-						{postulaciones.map((p) => (
+						{postulaciones.map((postulacion) => (
 							<li
-								key={p.id}
+								key={postulacion.id}
 								className="flex items-start justify-between gap-4 rounded-lg border p-3"
 							>
 								<div className="flex min-w-0 flex-col gap-1">
-									<p className="truncate font-medium">{p.title}</p>
+									<p className="truncate font-medium">{postulacion.title}</p>
 									<p className="text-xs text-muted-foreground">
-										{p.author} · {MATERIAL_KIND_LABELS[p.kind]}
+										{postulacion.author} ·{" "}
+										{MATERIAL_KIND_LABELS[postulacion.kind]}
 									</p>
 								</div>
-								{p.proposed_by === memberId && (
-									<RetirarPostulacionButton nominationId={p.id} slug={slug} />
+								{postulacion.proposed_by === memberId && (
+									<RetirarPostulacionButton
+										nominationId={postulacion.id}
+										slug={slug}
+									/>
 								)}
 							</li>
 						))}
