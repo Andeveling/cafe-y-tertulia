@@ -27,8 +27,6 @@ export const ROOM_PARTICIPANT_TABLES = [
 	"questions",
 	"draws",
 	"assignments",
-	"trivia_rounds",
-	"takes",
 	"votes",
 	"hearts",
 ] as const;

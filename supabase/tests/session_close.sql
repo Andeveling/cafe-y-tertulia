@@ -3,7 +3,7 @@
 -- inmutabilidad en `archived` y `clear_session_rating`/`correct_assignment_notes`.
 
 begin;
-select plan(27);
+select plan(24);
 
 -- ============================================================
 -- Fixtures: membresía + material + sesiones en cada estado
@@ -26,8 +26,8 @@ insert into public.materials (id, title, kind, author, created_by) values
 -- Sesiones de prueba
 insert into public.sessions (id, material_id, range, status, moderator_id, scheduled_at) values
 	('c1000000-0000-0000-0000-000000000001', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '1', 'in_progress', '11111111-1111-1111-1111-111111111111', null),
-	('c1000000-0000-0000-0000-000000000002', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2', 'in_progress', '11111111-1111-1111-1111-111111111111', null), -- trivia live
-	('c1000000-0000-0000-0000-000000000003', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '3', 'in_progress', '11111111-1111-1111-1111-111111111111', null), -- take abierto
+	('c1000000-0000-0000-0000-000000000002', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '2', 'in_progress', '11111111-1111-1111-1111-111111111111', null),
+	('c1000000-0000-0000-0000-000000000003', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '3', 'in_progress', '11111111-1111-1111-1111-111111111111', null),
 	('c1000000-0000-0000-0000-000000000004', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '4', 'in_progress', '11111111-1111-1111-1111-111111111111', null), -- draw no revelado
 	('c1000000-0000-0000-0000-000000000005', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '5', 'in_progress', '11111111-1111-1111-1111-111111111111', null), -- rating abierto
 	-- La sesión 6 nace in_progress: los guards congelan a las tablas hijas en
@@ -36,13 +36,7 @@ insert into public.sessions (id, material_id, range, status, moderator_id, sched
 	('c1000000-0000-0000-0000-000000000006', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '6', 'in_progress', '11111111-1111-1111-1111-111111111111', '2026-08-01 10:00:00+00'),
 	('c1000000-0000-0000-0000-000000000007', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '7', 'archived',  '11111111-1111-1111-1111-111111111111', null);
 
--- Fixtures de minijuegos/draw para las sesiones que bloquean el cierre
-insert into public.trivias (id, material_id, author_id, title) values
-	('d1000000-0000-0000-0000-000000000001', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Trivia A');
-insert into public.trivia_rounds (id, session_id, trivia_id, status) values
-	('d1000000-0000-0000-0000-000000000002', 'c1000000-0000-0000-0000-000000000002', 'd1000000-0000-0000-0000-000000000001', 'live');
-insert into public.takes (id, session_id, prompt, status, created_by) values
-	('d1000000-0000-0000-0000-000000000003', 'c1000000-0000-0000-0000-000000000003', '¿Take?', 'open', '11111111-1111-1111-1111-111111111111');
+-- Fixture de sorteo para la sesión que bloquea el cierre
 insert into public.draws (id, session_id, status) values
 	('d1000000-0000-0000-0000-000000000004', 'c1000000-0000-0000-0000-000000000004', 'pending');
 
@@ -112,24 +106,23 @@ select throws_ok(
 	'4. Un invitado no puede cerrar la sesión'
 );
 
--- 5. El cierre bloquea si queda una trivia en curso.
+-- 5. El cierre ya no bloquea por minijuegos: sin trivia ni takes, la sesión
+--    en curso cierra cuando el Sorteo no la frena.
 set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
-select throws_ok(
+select lives_ok(
 	$$ select public.close_session('c1000000-0000-0000-0000-000000000002') $$,
-	'Cierra primero la trivia en curso',
-	'5. El cierre bloquea con una trivia en curso'
+	'5. El cierre no bloquea por juego abierto (retiro de minijuegos)'
 );
 select is(
 	(select status from public.sessions where id = 'c1000000-0000-0000-0000-000000000002'),
-	'in_progress'::public.session_status,
-	'5b. La sesión con trivia en curso sigue abierta'
+	'closed'::public.session_status,
+	'5b. La sesión sin minijuegos queda cerrada'
 );
 
--- 6. El cierre bloquea si queda una votación (take) abierta.
-select throws_ok(
+-- 6. El cierre tampoco bloquea por votación abierta: misma sesión 3 cierra.
+select lives_ok(
 	$$ select public.close_session('c1000000-0000-0000-0000-000000000003') $$,
-	'Cierra primero la votación abierta',
-	'6. El cierre bloquea con una votación abierta'
+	'6. El cierre no bloquea por votación abierta (retiro de minijuegos)'
 );
 
 -- 7. El cierre bloquea si el Sorteo no está revelado.
@@ -222,7 +215,7 @@ select throws_ok(
 -- 15. Un no-moderador no puede cerrar saltándose el RPC con un UPDATE directo.
 set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
 select throws_ok(
-	$$ update public.sessions set status = 'closed' where id = 'c1000000-0000-0000-0000-000000000002' $$,
+	$$ update public.sessions set status = 'closed' where id = 'c1000000-0000-0000-0000-000000000004' $$,
 	'Solo el moderador puede cerrar la sesión',
 	'15. Un no-moderador no puede cerrar con un UPDATE directo (AC3)'
 );

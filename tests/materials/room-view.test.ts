@@ -309,7 +309,7 @@ describe("deriveSalaView", () => {
 			...base,
 			roomStage: "cierre",
 			debate: null,
-			cierre: { openTrivia: 0, openTakes: 0 },
+			cierre: {},
 		});
 		expect(cierre.next).toBeNull();
 		expect(cierre.prev).toBe("debate");

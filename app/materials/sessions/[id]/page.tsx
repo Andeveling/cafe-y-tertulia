@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation";
 import { HistoryAwards } from "@/app/materials/_components/history-awards";
-import { HistoryMinigames } from "@/app/materials/_components/history-minigames";
 import { HistoryParticipants } from "@/app/materials/_components/history-participants";
 import { HistoryQuestions } from "@/app/materials/_components/history-questions";
 import { RatingDisplay } from "@/app/materials/_components/rating-display";
@@ -52,10 +51,6 @@ export default async function SessionHistoryPage({
 
 			<HistoryParticipants participants={session.participants} />
 			<HistoryQuestions questions={session.questions} />
-			<HistoryMinigames
-				triviaRounds={session.trivia_rounds}
-				takes={session.takes}
-			/>
 			<HistoryAwards awards={session.awards} />
 		</div>
 	);

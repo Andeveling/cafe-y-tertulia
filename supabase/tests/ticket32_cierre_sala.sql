@@ -6,7 +6,7 @@
 -- el rating.
 
 begin;
-select plan(17);
+select plan(15);
 
 -- ============================================================
 -- Fixtures: membresía + material + sesiones en cada etapa
@@ -64,13 +64,7 @@ insert into public.assignments (id, session_id, question_id, assignee_id, draw_i
 	('32000000-0000-0000-0000-00000000a042', '32000000-0000-0000-0000-000000000004', '32000000-0000-0000-0000-000000000b02', '11111111-1111-1111-1111-111111111111', '32000000-0000-0000-0000-0000000000d4', 2, 'exposition'),
 	('32000000-0000-0000-0000-00000000a043', '32000000-0000-0000-0000-000000000004', '32000000-0000-0000-0000-000000000b02', '44444444-4444-4444-4444-444444444444', '32000000-0000-0000-0000-0000000000d4', 3, 'hidden'); -- S4 sigue con pendiente tras el avance intermedio
 
--- Minijuegos abiertos en S5 (checklist pendiente)
-insert into public.trivias (id, material_id, author_id, title) values
-	('32000000-0000-0000-0000-000000000c01', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Trivia S5');
-insert into public.trivia_rounds (id, session_id, trivia_id, status) values
-	('32000000-0000-0000-0000-000000000d01', '32000000-0000-0000-0000-000000000005', '32000000-0000-0000-0000-000000000c01', 'live');
-insert into public.takes (id, session_id, prompt, status, created_by) values
-	('32000000-0000-0000-0000-000000000e01', '32000000-0000-0000-0000-000000000005', '¿Take?', 'open', '11111111-1111-1111-1111-111111111111');
+-- S5: etapa Cierre — rating y cierre consolidado (sin minijuegos)
 
 -- ============================================================
 -- advance_room_stage: guards y avance lineal
@@ -139,21 +133,21 @@ select is(
 );
 
 -- ============================================================
--- room_snapshot: checklist de pendientes en Cierre
+-- room_snapshot: Cierre sin pendientes de minijuegos
 -- ============================================================
 
 set local request.jwt.claim.sub = '22222222-2222-2222-2222-222222222222';
 
 select is(
-	((select public.room_snapshot('32000000-0000-0000-0000-000000000005'))->'cierre'->>'open_trivia')::int,
-	1,
-	'10. El snapshot expone la trivia en curso como pendiente'
+	(select public.room_snapshot('32000000-0000-0000-0000-000000000005')->'cierre'),
+	'{}'::json,
+	'10. El snapshot de Cierre no expone trivia ni takes'
 );
 
 select is(
-	((select public.room_snapshot('32000000-0000-0000-0000-000000000005'))->'cierre'->>'open_takes')::int,
-	1,
-	'11. El snapshot expone el take abierto como pendiente'
+	((select public.room_snapshot('32000000-0000-0000-0000-000000000005')->'cierre') ? 'open_trivia'),
+	false,
+	'11. El snapshot de Cierre no trae open_trivia'
 );
 
 -- ============================================================
@@ -192,9 +186,6 @@ select throws_ok(
 -- ============================================================
 
 reset role;
-
-delete from public.takes where id = '32000000-0000-0000-0000-000000000e01';
-delete from public.trivia_rounds where id = '32000000-0000-0000-0000-000000000d01';
 
 set local request.jwt.claim.sub = '11111111-1111-1111-1111-111111111111';
 

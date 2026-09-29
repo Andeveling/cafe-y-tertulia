@@ -7,10 +7,6 @@ import { StageContent } from "@/app/materials/_components/room/stage-content";
 import { StageBar } from "@/app/materials/_components/stage-bar";
 import { useRoomMutation } from "@/app/materials/_hooks/use-room-mutation";
 import { useRoomRealtime } from "@/app/materials/_hooks/use-room-realtime";
-import type {
-	MinigameState,
-	TriviaRoundSnapshot,
-} from "@/app/materials/_lib/minigames";
 import type { InviteRosterMember } from "@/app/materials/_lib/presence-invite";
 
 import type { RatingProgress } from "@/app/materials/_lib/rating";
@@ -28,8 +24,6 @@ type Props = {
 	isModerator: boolean;
 	/** Progreso del rating — presente cuando la Sala está en Cierre. */
 	rating: RatingProgress | null;
-	minigameState?: MinigameState | null;
-	round?: TriviaRoundSnapshot | null;
 	rosterMembers?: InviteRosterMember[];
 	pendingIds?: string[];
 };
@@ -39,8 +33,6 @@ export function RoomPanel({
 	userId,
 	isModerator,
 	rating,
-	minigameState = null,
-	round = null,
 	rosterMembers = [],
 	pendingIds = [],
 }: Props) {
@@ -76,8 +68,6 @@ export function RoomPanel({
 				userId={userId}
 				isModerator={isModerator}
 				rating={rating}
-				minigameState={minigameState}
-				round={round}
 				rosterMembers={rosterMembers}
 				pendingIds={pendingIds}
 				questionsAdvanceFor={advanceFor}

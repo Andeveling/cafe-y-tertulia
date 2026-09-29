@@ -37,20 +37,20 @@ insert into public.materials (id, group_id, title, kind, author, created_by) val
 	('d0000000-0000-0000-0000-000000000001', (select id from public.groups where name = 'Grupo Contract A'), 'Material A', 'book', 'Autora A', 'd1111111-1111-1111-1111-111111111111'),
 	('d0000000-0000-0000-0000-000000000002', (select id from public.groups where name = 'Grupo Contract B'), 'Material B', 'book', 'Autora B', 'd3333333-3333-3333-3333-333333333333');
 
--- 1. group_id NOT NULL en las 20 tablas scopeadas.
+-- 1. group_id NOT NULL en las 17 tablas scopeadas (minijuegos retirados en #85).
 select is(
 	(select count(*) from information_schema.columns
 	 where table_schema = 'public' and column_name = 'group_id' and is_nullable = 'NO'
 	 and table_name in ('materials', 'sessions', 'categories', 'material_categories',
 		'session_categories', 'seasons', 'badges', 'awards', 'counts',
-		'season_recognitions', 'trivias', 'questions', 'draws', 'assignments',
-		'session_participants', 'takes', 'trivia_rounds', 'votes', 'hearts',
+		'season_recognitions', 'questions', 'draws', 'assignments',
+		'session_participants', 'votes', 'hearts',
 		'convocatorias')),
-	20::bigint,
-	'1. group_id es NOT NULL en las 20 tablas'
+	17::bigint,
+	'1. group_id es NOT NULL en las 17 tablas'
 );
 
--- 2. FKs group_id → groups(id) con ON DELETE CASCADE.
+-- 2. FKs group_id → groups(id) con ON DELETE CASCADE (17 tablas).
 select is(
 	(select count(*) from information_schema.table_constraints tc
 	 join information_schema.key_column_usage kcu
@@ -66,11 +66,11 @@ select is(
 	 and rc.delete_rule = 'CASCADE'
 	 and tc.table_name in ('materials', 'sessions', 'categories', 'material_categories',
 		'session_categories', 'seasons', 'badges', 'awards', 'counts',
-		'season_recognitions', 'trivias', 'questions', 'draws', 'assignments',
-		'session_participants', 'takes', 'trivia_rounds', 'votes', 'hearts',
+		'season_recognitions', 'questions', 'draws', 'assignments',
+		'session_participants', 'votes', 'hearts',
 		'convocatorias')),
-	20::bigint,
-	'2. Las 20 FKs a groups(id) son ON DELETE CASCADE'
+	17::bigint,
+	'2. Las 17 FKs a groups(id) son ON DELETE CASCADE'
 );
 
 -- 3. Sin is_member() en políticas de contenido (solo plataforma).
@@ -79,8 +79,8 @@ select is(
 	 where schemaname = 'public'
 	 and tablename in ('materials', 'sessions', 'categories', 'material_categories',
 		'session_categories', 'seasons', 'badges', 'awards', 'counts',
-		'season_recognitions', 'trivias', 'questions', 'draws', 'assignments',
-		'session_participants', 'takes', 'trivia_rounds', 'votes', 'hearts',
+		'season_recognitions', 'questions', 'draws', 'assignments',
+		'session_participants', 'votes', 'hearts',
 		'convocatorias')
 	 and definition ilike '%is_member()%'),
 	0::bigint,
@@ -93,9 +93,9 @@ select is(
 	 where schemaname = 'public'
 	 and tablename in ('materials', 'sessions', 'categories', 'material_categories',
 		'session_categories', 'seasons', 'badges', 'awards', 'counts',
-		'season_recognitions', 'trivias', 'questions', 'draws', 'assignments',
-		'session_participants', 'takes', 'trivia_rounds', 'votes', 'hearts',
-		'convocatorias', 'trivia_items', 'trivia_answers', 'trivia_hits', 'take_votes')
+		'season_recognitions', 'questions', 'draws', 'assignments',
+		'session_participants', 'votes', 'hearts',
+		'convocatorias')
 	 and roles::text ilike '%anon%'),
 	0::bigint,
 	'4. Ninguna política de contenido permite a anon'

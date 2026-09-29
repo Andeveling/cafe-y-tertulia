@@ -21,10 +21,8 @@ import { NewSessionDialog } from "@/app/materials/_components/new-session-dialog
 import { RatingDisplay } from "@/app/materials/_components/rating-display";
 import { SessionScheduler } from "@/app/materials/_components/session-scheduler";
 import { StepIndicator } from "@/app/materials/_components/step-indicator";
-import { TriviaBank } from "@/app/materials/_components/trivia-bank";
 import { getMaterialCategories } from "@/app/materials/_lib/categories";
 import { isActiveMember } from "@/app/materials/_lib/members";
-import { listMaterialTrivias } from "@/app/materials/_lib/minigames";
 import {
 	getSessionPools,
 	type QuestionWithAuthor,
@@ -115,9 +113,8 @@ export default async function MaterialDetailPage({
 }) {
 	const { id } = await params;
 	const supabase = await createClient();
-	const [material, bank, milestones, authData] = await Promise.all([
+	const [material, milestones, authData] = await Promise.all([
 		getMaterial(id),
-		listMaterialTrivias(supabase, id).catch(() => []),
 		getClubMilestones(supabase).catch(() => []),
 		supabase.auth.getUser().then(({ data }) => data.user),
 	]);
@@ -137,9 +134,6 @@ export default async function MaterialDetailPage({
 			: Promise.resolve([]),
 	]);
 
-	const showTriviaBank = material.sessions.some(
-		(s) => s.status === "preparation",
-	);
 	const prepIds = material.sessions
 		.filter((s) => s.status === "preparation")
 		.map((s) => s.id);
@@ -408,12 +402,6 @@ export default async function MaterialDetailPage({
 																Escenario
 															</Link>
 															<Link
-																href={`/materials/sessions/${session.id}/minigames`}
-																className={sessionActionClassName}
-															>
-																Minijuegos
-															</Link>
-															<Link
 																href={`/materials/sessions/${session.id}/rating`}
 																className={sessionActionClassName}
 															>
@@ -461,8 +449,6 @@ export default async function MaterialDetailPage({
 					)}
 				</div>
 			</div>
-
-			{showTriviaBank && <TriviaBank materialId={material.id} bank={bank} />}
 		</div>
 	);
 }

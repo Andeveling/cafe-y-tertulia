@@ -29,17 +29,18 @@ select is(
 	'1. El grupo "nojau" existe y es privado'
 );
 
--- 2. group_id nullable en las 20 tablas de contenido (expand, sin NOT NULL aún).
+-- 2. group_id nullable en las 17 tablas de contenido (expand, sin NOT NULL aún).
+-- (Minijuegos retirados en #85: sin trivias, takes ni trivia_rounds.)
 select is(
 	(select count(*) from information_schema.columns
 	 where table_schema = 'public' and column_name = 'group_id'
 	 and table_name in ('materials', 'sessions', 'categories', 'material_categories',
 		'session_categories', 'seasons', 'badges', 'awards', 'counts',
-		'season_recognitions', 'trivias', 'questions', 'draws', 'assignments',
-		'session_participants', 'takes', 'trivia_rounds', 'votes', 'hearts',
+		'season_recognitions', 'questions', 'draws', 'assignments',
+		'session_participants', 'votes', 'hearts',
 		'convocatorias')),
-	20::bigint,
-	'2. group_id existe en las 20 tablas de contenido'
+	17::bigint,
+	'2. group_id existe en las 17 tablas de contenido'
 );
 
 -- A crea un grupo público.

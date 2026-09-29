@@ -4,10 +4,6 @@ import { AdvanceButton } from "@/app/materials/_components/advance-button";
 import { RoomClosedView } from "@/app/materials/_components/room-closed-view";
 import { RoomPanel } from "@/app/materials/_components/room-panel";
 import { useLatestSnapshot } from "@/app/materials/_hooks/use-room-realtime";
-import type {
-	MinigameState,
-	TriviaRoundSnapshot,
-} from "@/app/materials/_lib/minigames";
 import type { InviteRosterMember } from "@/app/materials/_lib/presence-invite";
 import type { RatingProgress } from "@/app/materials/_lib/rating";
 import { roomSurface } from "@/app/materials/_lib/room-sync";
@@ -17,8 +13,6 @@ type Props = {
 	snapshot: RoomSnapshot;
 	rating: RatingProgress | null;
 	userId: string;
-	minigameState?: MinigameState | null;
-	round?: TriviaRoundSnapshot | null;
 	rosterMembers?: InviteRosterMember[];
 	pendingIds?: string[];
 };
@@ -32,8 +26,6 @@ export function RoomSessionView({
 	snapshot,
 	rating,
 	userId,
-	minigameState = null,
-	round = null,
 	rosterMembers = [],
 	pendingIds = [],
 }: Props) {
@@ -41,8 +33,6 @@ export function RoomSessionView({
 		asOf: snapshot.asOf,
 		snapshot,
 		rating,
-		minigameState,
-		round,
 	});
 	const view = frame.snapshot;
 	const surface = roomSurface(view.status);
@@ -113,8 +103,6 @@ export function RoomSessionView({
 				userId={userId}
 				isModerator={view.moderatorId === userId}
 				rating={frame.rating}
-				minigameState={frame.minigameState ?? null}
-				round={frame.round ?? null}
 				rosterMembers={rosterMembers}
 				pendingIds={pendingIds}
 			/>

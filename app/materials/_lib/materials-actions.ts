@@ -286,9 +286,9 @@ export async function advanceSession(input: {
 
 /**
  * Cierre atómico `en_curso → cerrada` vía el RPC `close_session`: consolida
- * participantes, minijuegos y rating (congela promedio + conteo y descarta los
- * votos individuales, ADR 0003). Solo el moderador; falla si queda una trivia,
- * una votación o el Sorteo sin terminar.
+ * participantes y rating (congela promedio + conteo y descarta los
+ * votos individuales, ADR 0003). Solo el moderador; falla si el Sorteo
+ * sigue sin revelar.
  */
 export async function closeSessionAction(input: {
 	materialId: string | null;

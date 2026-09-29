@@ -1,11 +1,13 @@
-# Retiro de minijuegos (trivia + takes)
+# Retiro definitivo de minijuegos (Trivia + Takes)
 
-Las sesiones son para debatir y por tiempo no encaja un juego adicional; trivia y takes llevan sin uso con tablas vacías. Decidimos borrado definitivo en DB + código (tablas, RPCs, policies, triggers, realtime y ramas de histórico/hitos/maestría), con DROP directo sin export.
+Las Sesiones existen para debatir en la Sala. Los Minijuegos (Trivia + Takes) quedaron sin uso porque por tiempo no encaja un juego adicional al debate, pero sus tablas, RPCs, políticas, triggers, publicación realtime y UI seguían vivos y había que mantenerlos aunque estuvieran vacíos.
+
+## Status: accepted
+
+Se retiran Trivia y Takes de la base y del código en un solo corte (issue #85): siete tablas y tres enums eliminados, RPCs de ciclo y lectura eliminados, ramas de Histórico, Hitos y Maestría retiradas, Cierre simplificado (ya no bloquea por trivia en curso ni takes abiertos; mantiene Sorteo revelado y el gate de Rating en la UI). Sorteo, Rating y Aprecio quedan intactos. DROP directo sin exportación: cero filas en la nube vinculada.
 
 ## Considered Options
 
-- Pausa reversible (ocultar UI, mantener tablas): se descartó porque guards, coherencia por grupo, realtime e histórico seguirían costando aunque vacíos.
-
-## Consequences
-
-- Salen `trivias, trivia_items, trivia_rounds, trivia_answers, trivia_hits, takes, take_votes`, premio `elephant_memory` / conteo `trivia_won` e UI `debate-tools-tray, trivia-bank, history-minigames` de trivia/takes. Sorteo, rating y aprecio quedan intactos.
+- **Pausa reversible (feature flag)**: mantiene guards, políticas, realtime y UI sin uso. Se descarta por coste de mantenimiento.
+- **Retiro parcial (solo UI)**: deja RPCs huérfanos y tablas vacías con RLS. Se descarta: el corte es DB + código a la vez.
+- **Reversión futura**: si algún día vuelven los juegos, será propuesta nueva con su ADR, no reversión parcial.

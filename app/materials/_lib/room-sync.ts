@@ -53,7 +53,7 @@ export function roomSurface(status: string): RoomSurface {
  * Único camino de mutación de la Sala: tanto la mutación directa
  * (`() => Promise<ActionResult>`, p. ej. guardar Pregunta o avanzar de
  * Etapa) como la acción con formulario (`RoomFormAction` + campos, p. ej.
- * trivia y takes) resuelven por aquí. El realtime cubre al resto de
+ * rating) resuelven por aquí. El realtime cubre al resto de
  * dispositivos; este refresh cubre al que actúa.
  */
 function applyRoomMutationResult(
@@ -127,7 +127,7 @@ export function createSalaSync(deps: {
 
 /**
  * Acción de servidor con campos sueltos: recibe un resultado dummy y un
- * FormData (trivia, takes, rating). Misma forma que `ServerActionFn`.
+ * FormData (p. ej. rating). Misma forma que `ServerActionFn`.
  */
 export type RoomFormAction = (
 	prev: RoomActionResult,

@@ -32,12 +32,7 @@ export type MaterialDetail = {
 	rating_count: number;
 	sessions: (Omit<
 		SessionHistory,
-		| "material"
-		| "questions"
-		| "participants"
-		| "trivia_rounds"
-		| "takes"
-		| "awards"
+		"material" | "questions" | "participants" | "awards"
 	> & { moderator_id: string | null })[];
 };
 
