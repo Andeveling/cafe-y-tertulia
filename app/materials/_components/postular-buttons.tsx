@@ -49,6 +49,7 @@ export function PostularButton({
 			type="button"
 			variant="outline"
 			size="sm"
+			className="min-h-11 w-full sm:w-auto"
 			disabled={disabled || isPending}
 			title={disabledReason}
 			onClick={onNominate}
@@ -83,6 +84,7 @@ export function RetirarPostulacionButton({
 			type="button"
 			variant="ghost"
 			size="sm"
+			className="min-h-11 w-full sm:w-auto"
 			disabled={isPending}
 			onClick={onWithdraw}
 		>

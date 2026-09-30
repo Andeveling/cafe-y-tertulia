@@ -1,9 +1,9 @@
-import { Book01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { MaterialsGrid } from "@/app/materials/_components/materials-grid";
-import { PostuladosSection } from "@/app/materials/_components/postulados-section";
-import { getMaterials } from "@/app/materials/_lib/materials";
-import { Card, CardContent } from "@/components/ui/card";
+import { GroupShelfView } from "@/app/g/[slug]/materials/_components/shelf-view";
+import {
+	getBiblioteca,
+	getMaterials,
+	getPostulaciones,
+} from "@/app/materials/_lib/materials";
 import { requireGroupPage } from "@/lib/groups/page-gate";
 
 export const metadata = { title: "Materiales · Café y Tertulias" };
@@ -15,32 +15,21 @@ export default async function GroupMaterialsPage({
 }) {
 	const { slug } = await params;
 	const { group, member } = await requireGroupPage(slug);
-
-	const materials = await getMaterials(group.id);
+	const [materials, postulaciones, biblioteca] = await Promise.all([
+		getMaterials(group.id),
+		getPostulaciones(group.id),
+		getBiblioteca(),
+	]);
 
 	return (
-		<div className="flex flex-col gap-6">
-			<p className="text-sm text-muted-foreground">
-				La estantería de {group.name} solo crece por sorteo o pacto.
-			</p>
-
-			{materials.length === 0 ? (
-				<Card>
-					<CardContent className="flex flex-col items-center gap-3 py-8 text-center">
-						<HugeiconsIcon
-							icon={Book01Icon}
-							className="text-muted-foreground"
-						/>
-						<p className="text-sm text-muted-foreground">
-							Todavía no hay materiales en {group.name}.
-						</p>
-					</CardContent>
-				</Card>
-			) : (
-				<MaterialsGrid materials={materials} />
-			)}
-
-			<PostuladosSection groupId={group.id} slug={slug} memberId={member.id} />
-		</div>
+		<GroupShelfView
+			groupName={group.name}
+			groupId={group.id}
+			slug={slug}
+			memberId={member.id}
+			materials={materials}
+			postulaciones={postulaciones}
+			biblioteca={biblioteca}
+		/>
 	);
 }
