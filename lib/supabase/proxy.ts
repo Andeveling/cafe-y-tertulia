@@ -41,6 +41,12 @@ export async function updateSession(request: NextRequest) {
 	const { data } = await supabase.auth.getClaims();
 	const user = data?.claims;
 
+	// Las llamadas solo-Bearer bajo /api/* (MCP) traen Authorization, no cookies:
+	// redirigirlas al login HTML rompería el protocolo. Cada ruta dueña su 401.
+	if (request.nextUrl.pathname.startsWith("/api/")) {
+		return supabaseResponse;
+	}
+
 	if (
 		!user &&
 		!request.nextUrl.pathname.startsWith("/login") &&
