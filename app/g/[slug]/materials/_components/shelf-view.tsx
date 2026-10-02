@@ -1,4 +1,4 @@
-import { MaterialsGrid } from "@/app/materials/_components/materials-grid";
+import { ShelfCatalog } from "@/app/g/[slug]/materials/_components/shelf-catalog";
 import { PostuladosLists } from "@/app/materials/_components/postulados-section";
 import { PostularBibliotecaDialog } from "@/app/materials/_components/postular-biblioteca-dialog";
 import type { BibliotecaItem } from "@/app/materials/_lib/biblioteca-store";
@@ -7,6 +7,7 @@ import type {
 	MaterialStatus,
 } from "@/app/materials/_lib/constants";
 import type { Postulacion } from "@/app/materials/_lib/postulacion-store";
+import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 
 export type ShelfMaterial = {
 	id: string;
@@ -56,19 +57,13 @@ export function GroupShelfView({
 
 			<section aria-label="Materiales" className="mt-8">
 				{materials.length === 0 ? (
-					<div className="rounded-xl border border-dashed border-border/70 px-4 py-8 text-center">
-						<p className="text-sm text-muted-foreground">
-							Todavía no hay materiales en este grupo.
-						</p>
-					</div>
+					<Empty className="border-border/70 px-4 py-8">
+						<EmptyHeader>
+							<EmptyTitle>Todavía no hay materiales en este grupo.</EmptyTitle>
+						</EmptyHeader>
+					</Empty>
 				) : (
-					<MaterialsGrid
-						materials={materials.map((item) => ({
-							...item,
-							created_at: "",
-							source_url: null,
-						}))}
-					/>
+					<ShelfCatalog materials={materials} />
 				)}
 			</section>
 

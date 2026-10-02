@@ -110,8 +110,9 @@ describe("GroupShelfView (cards del catálogo)", () => {
 		expect(
 			within(catalog).getByRole("link", { name: /el arte de conversar/i }),
 		).toHaveAttribute("href", "/materials/done-1");
-		expect(within(catalog).getByText("Terminado")).toBeInTheDocument();
-		expect(within(catalog).getByText("En curso")).toBeInTheDocument();
+		const cards = within(catalog).getAllByRole("link");
+		expect(within(cards[1]).getByText("Terminado")).toBeInTheDocument();
+		expect(within(cards[0]).getByText("En curso")).toBeInTheDocument();
 		expect(screen.queryByText(/proponer material/i)).not.toBeInTheDocument();
 	});
 
